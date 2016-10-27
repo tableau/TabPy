@@ -53,7 +53,9 @@ A persisted endpoint is backed by a Python method. For example:
 
 ```python
 
-def add(x,y):    import numpy as np    return np.add(x, y).tolist()
+def add(x,y):
+    import numpy as np
+    return np.add(x, y).tolist()
 
 client.deploy('add', add, 'Adds two numbers x and y')
 
@@ -98,7 +100,6 @@ Below is an excerpt from the training stage of a hypothetical model that predict
 ```python
 
 from sklearn.ensemble import GradientBoostingClassifier
-from sklearn.externals import joblib
 
 predictors = [x for x in train.columns if x not in [target, RowID]]
 gbm = GradientBoostingClassifier(learning_rate=0.01, n_estimators=600,max_depth=9,
