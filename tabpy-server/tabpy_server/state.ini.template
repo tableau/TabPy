@@ -1,0 +1,12 @@
+[Service Info]
+Name = my-server
+Description =
+Creation Time = 0
+CORS Origin = *
+
+[Query Objects Service Versions]
+
+[Query Objects Docstrings]
+
+[Meta]
+Revision Number = 1
