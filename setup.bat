@@ -3,8 +3,10 @@ set port=9004
 ) ELSE (
 set port=%1
 )
+@SET CurrentPath="%~dp0"
 @ECHO Server will be initialized using port: %port%
-@set CONDA_ENVIRONMENT=Tableau-Python-Server
+@SET CONDA_ENVIRONMENT=Tableau-Python-Server
+@REG Query "HKLM\Hardware\Description\System\CentralProcessor\0" | find /i "x86" > NUL && set OS=32BIT || set OS=64BIT
 @ECHO.
 @ECHO ~~~~~~~~~~~~~~~~  Looking for existing Anaconda installation  ~~~~~~~~~~~~~~~~~
 @ECHO.
@@ -17,6 +19,7 @@ SET ANACONAREGKEY=Anaconda_*
 @IF %CONDACMD%=="" FOR /f %%z in ('REG Query HKU /k /s /f %ANACONAREGKEY%') DO IF %%z NEQ End SET ACMD=%%z
 @IF %CONDACMD%=="" IF NOT %ACMD%=="" SET ACMD=%ACMD:HKEY_USERS=HKU%\InstallPath
 @IF %CONDACMD%=="" IF NOT %ACMD%=="" FOR /f "tokens=1,3" %%a in ('REG Query %ACMD%') DO IF %%a==(Default) SET CONDACMD=%%b\Scripts
+SET CONDACMD=%CONDACMD:\anaconda.bat=%
 @IF EXIST %CONDACMD%\anaconda.bat (
 @ECHO Existing Anaconda installation found.
 ) ELSE (
@@ -32,19 +35,18 @@ IF EXIST "%~dp0\Anaconda-Installer.exe" (
 @ECHO ~~~~~~~~~~~~~~~~~~~~  Downloading and installing Anaconda  ~~~~~~~~~~~~~~~~~~~~
 @ECHO                           This may take a few minutes
 @ECHO.
-@powershell -Command "Import-Module BitsTransfer; Start-BitsTransfer https://repo.continuum.io/archive/Anaconda-2.3.0-Windows-x86_64.exe $PWD\Anaconda-Installer.exe"
+@IF %OS%==64BIT powershell -Command "Import-Module BitsTransfer; Start-BitsTransfer https://repo.continuum.io/archive/Anaconda-2.3.0-Windows-x86_64.exe $PWD\Anaconda-Installer.exe"
+@IF %OS%==32BIT powershell -Command "Import-Module BitsTransfer; Start-BitsTransfer https://repo.continuum.io/archive/Anaconda-2.3.0-Windows-x86.exe $PWD\Anaconda-Installer.exe"
 @ECHO Download completed.
 )
 @ECHO Installing Anaconda...
 @start /wait "" Anaconda-Installer.exe /InstallationType=JustMe /RegisterPython=0 /S /D=%UserProfile%\Anaconda
-@REM Anaconda-Installer.exe /passive
 IF %CONDACMD%=="" SET CONDACMD=%UserProfile%\Anaconda\Scripts
 )
 @ECHO.
 @ECHO ~~~~~~~~~~~~~~~~~~~~~~~~  Activating the environment  ~~~~~~~~~~~~~~~~~~~~~~~~~
 @ECHO.
 @IF NOT EXIST %CONDACMD%\conda.exe (
-@SET CurrentPath=%CD%
 @CD %CONDACMD%
 @CD ..\..\..
 @SET CONDACMD=%CD%\Scripts
@@ -56,16 +58,35 @@ IF %CONDACMD%=="" SET CONDACMD=%UserProfile%\Anaconda\Scripts
 @conda create --yes --name %CONDA_ENVIRONMENT% --clone root
  ) ELSE (
 @ECHO Found existing %CONDA_ENVIRONMENT% environment.
+@ECHO %CONDACMD:Scripts=envs%\%CONDA_ENVIRONMENT%
  )
-@CALL activate %CONDA_ENVIRONMENT%
+@CALL %CONDACMD%\activate %CONDA_ENVIRONMENT%
 @SET PYTHONPATH=%PYTHONPATH%;%CONDACMD:Scripts=envs%\%CONDA_ENVIRONMENT%\Scripts
 @ECHO.
 @ECHO ~~~~~~~~~~~~~~~~~~~~~~~~~~  Installing dependencies  ~~~~~~~~~~~~~~~~~~~~~~~~~~
 @ECHO.
+@CD %CurrentPath%
 pip install -r ./tabpy-server/requirements.txt
 pip install ./tabpy-client
 pip install ./tabpy-server
+@SET STARTUPBAT=%CONDACMD:Scripts=envs%\%CONDA_ENVIRONMENT%\Lib\site-packages\tabpy_server\startup.bat
+@IF EXIST %STARTUPBAT% (
 @ECHO. 
 @ECHO ~~~~~~~~~~~~~~~~~~~~~~~~~~~  Installation complete  ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 @ECHO.
-@ECHO From now on, you can start the server by running %CONDACMD:Scripts=envs%\%CONDA_ENVIRONMENT%\Lib\site-packages\tabpy_server\startup.bat
+@ECHO.
+@ECHO From now on, you can start the server by running %STARTUPBAT%
+@ECHO.
+@ECHO.
+@CD %CONDACMD:Scripts=envs%\%CONDA_ENVIRONMENT%\Lib\site-packages\tabpy_server
+@ECHO Starting the server for the first time...
+@ECHO.
+@ECHO.
+@IF NOT EXIST state.ini @copy state.ini.template state.ini
+@set PYTHONPATH=%PYTHONPATH%;%CD%
+@python tabpy.py --port %port%
+) ELSE (
+@ECHO. 
+@ECHO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Installation failed  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+@ECHO.
+)
