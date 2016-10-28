@@ -83,7 +83,8 @@ if [ -z `which conda` ] ; then
     echo "Anaconda installed already."
 fi
 
-
+# step out of any other environment that is currently active to root
+source activate root
 CONDAFOLDER="$( dirname "$(which conda)" )"
 cd "$CONDAFOLDER"
 cd ".."
@@ -113,7 +114,15 @@ pip install -r "$SCRIPT_DIR"/tabpy-server/requirements.txt
 pip install "$SCRIPT_DIR"/tabpy-client
 pip install "$SCRIPT_DIR"/tabpy-server
 
-
-echo "~~~~~~~~~~~~~~~  Installation completed  ~~~~~~~~~~~~~~~"
-
-echo "From now on, you can start the server by running $PWD/envs/$CONDA_ENVIRONMENT/lib/python2.7/site-packages/tabpy_server/startup.sh"
+STARTUPPATH="$PWD/envs/$CONDA_ENVIRONMENT/lib/python2.7/site-packages/tabpy_server"
+if [ ! -f "$STARTUPPATH/startup.sh" ]; then
+  echo "~~~~~~~~~~~~~~~~~  Installation failed  ~~~~~~~~~~~~~~~~"
+else
+  echo "~~~~~~~~~~~~~~~  Installation completed  ~~~~~~~~~~~~~~~"
+  echo
+  echo "From now on, you can start the server by running $STARTUPPATH/startup.sh"
+  echo
+  echo
+  echo "Starting the server for the first time..."
+  bash "$STARTUPPATH/startup.sh" $PORT
+fi
