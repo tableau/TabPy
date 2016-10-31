@@ -83,7 +83,8 @@ pip install ./tabpy-server
 @ECHO.
 @ECHO.
 @IF NOT EXIST state.ini @copy state.ini.template state.ini
-@set PYTHONPATH=%PYTHONPATH%;%CD%
+@SET PYTHONPATH=%PYTHONPATH%;%CD%
+@SET TABPY_STATE_PATH=%CD%
 @python tabpy.py --port %port%
 ) ELSE (
 @ECHO. 
