@@ -79,13 +79,13 @@ pip install ./tabpy-server
 @ECHO.
 @ECHO.
 @CD %CONDACMD:Scripts=envs%\%CONDA_ENVIRONMENT%\Lib\site-packages\tabpy_server
+@SET TABPY_STATE_PATH=envs%\%CONDA_ENVIRONMENT%\Lib\site-packages\tabpy_server
 @ECHO Starting the server for the first time...
 @ECHO.
 @ECHO.
-@IF NOT EXIST state.ini @copy state.ini.template state.ini
-@SET PYTHONPATH=%PYTHONPATH%;%CD%
-@SET TABPY_STATE_PATH=%CD%
-@python tabpy.py --port %port%
+@IF NOT EXIST  %TABPY_STATE_PATH%\state.ini @copy  %TABPY_STATE_PATH%\state.ini.template  %TABPY_STATE_PATH%\state.ini
+@SET PYTHONPATH=%PYTHONPATH%;%TABPY_STATE_PATH%
+@python %TABPY_STATE_PATH%\tabpy.py --port %port%
 ) ELSE (
 @ECHO. 
 @ECHO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Installation failed  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
