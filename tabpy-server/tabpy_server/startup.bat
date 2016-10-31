@@ -5,7 +5,7 @@ set port=%1
 )
 @SET CONDA_ENVIRONMENT=Tableau-Python-Server
 @SET SETUP_PATH="%~dp0"
-@CD ..\..\..
+@CD ..\..\..\..\..\
 @CD Scripts
 @CALL activate %CONDA_ENVIRONMENT%
 @CD %SETUP_PATH%
