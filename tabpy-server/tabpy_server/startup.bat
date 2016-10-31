@@ -9,6 +9,7 @@ set port=%1
 @CD Scripts
 @CALL activate %CONDA_ENVIRONMENT%
 @CD %SETUP_PATH%
+SET TABPY_STATE_PATH=%CD%
 @IF NOT EXIST state.ini (
 @copy state.ini.template state.ini
 )
