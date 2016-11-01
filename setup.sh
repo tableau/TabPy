@@ -1,20 +1,12 @@
-# This will be created or re-used if exist:
 CONDA_ENVIRONMENT=Tableau-Python-Server
-
-# This is needed to find dependent files that are in the same folder as the script
 SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 CONDACMD="$(which conda)"
-
-
-# this is needed by the server process (hence export)
-export TABPY_STATE_PATH=$PWD
 
 if [ "$#" -ne 1 ] ; then
   PORT=9004
 else
   PORT=$1
 fi
-
 
 function download_file {
   # detect wget
@@ -42,14 +34,10 @@ function download_file {
   fi
 } # end of download file
 
-
-
 echo "~~~~~~~~~~~~~~~  Downloading and installing Anaconda  ~~~~~~~~~~~~~~~"
-
 
 # install anaconda if not already available
 if [ -z `which conda` ] ; then
-  if [[ ! -e anaconda ]]; then
     conda_download=""
     if [[ $OSTYPE == linux* ]]; then
             echo "Linux detected"
@@ -73,17 +61,19 @@ if [ -z `which conda` ] ; then
               echo "Unable to download anaconda installation"
               exit 1
       fi
+    else 
+      echo "Existing Anaconda installer found. Installing…"
+    fi
       bash anaconda.sh -p $HOME/anaconda -b
       CONDACMD=$HOME/anaconda/bin/conda
-    else
-      echo "Anaconda installed already."
-    fi
-  fi
+      CONDAFOLDER="$( dirname "$CONDACMD" )"
+      export PATH=$CONDACMD:$PATH
   else
     echo "Anaconda installed already."
 fi
 
-# step out of any other environment that is currently active to root
+# Make sure we're using conda in root environment since we assume that directory structure  
+cd "$CONDAFOLDER"
 source activate root
 CONDAFOLDER="$( dirname "$(which conda)" )"
 cd "$CONDAFOLDER"
@@ -115,6 +105,7 @@ pip install "$SCRIPT_DIR"/tabpy-client
 pip install "$SCRIPT_DIR"/tabpy-server
 
 STARTUPPATH="$PWD/envs/$CONDA_ENVIRONMENT/lib/python2.7/site-packages/tabpy_server"
+
 if [ ! -f "$STARTUPPATH/startup.sh" ]; then
   echo "~~~~~~~~~~~~~~~~~  Installation failed  ~~~~~~~~~~~~~~~~"
 else
