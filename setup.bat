@@ -46,10 +46,10 @@ IF %CONDACMD%=="" SET CONDACMD=%UserProfile%\Anaconda\Scripts
 @ECHO.
 @ECHO ~~~~~~~~~~~~~~~~~~~~~~~~  Activating the environment  ~~~~~~~~~~~~~~~~~~~~~~~~~
 @ECHO.
-@IF NOT EXIST %CONDACMD%\conda.exe (
-@CD %CONDACMD%
+@IF NOT EXIST "%CONDACMD%\conda.exe" (
+@CD "%CONDACMD%"
 @CD ..\..\..
-@SET CONDACMD=%CD%\Scripts
+@SET "CONDACMD=%CD%\Scripts"
 @CD %CurrentPath%
 )
 @SET PATH=%PATH%;%CONDACMD%
@@ -70,6 +70,7 @@ pip install -r ./tabpy-server/requirements.txt
 pip install ./tabpy-client
 pip install ./tabpy-server
 @SET STARTUPBAT=%CONDACMD:Scripts=envs%\%CONDA_ENVIRONMENT%\Lib\site-packages\tabpy_server\startup.bat
+@SET TABPY_STATE_PATH=%CONDACMD:Scripts=envs%\%CONDA_ENVIRONMENT%\Lib\site-packages\tabpy_server
 @IF EXIST %STARTUPBAT% (
 @ECHO. 
 @ECHO ~~~~~~~~~~~~~~~~~~~~~~~~~~~  Installation complete  ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -78,15 +79,15 @@ pip install ./tabpy-server
 @ECHO From now on, you can start the server by running %STARTUPBAT%
 @ECHO.
 @ECHO.
-@CD %CONDACMD:Scripts=envs%\%CONDA_ENVIRONMENT%\Lib\site-packages\tabpy_server
-@SET TABPY_STATE_PATH=envs%\%CONDA_ENVIRONMENT%\Lib\site-packages\tabpy_server
+@CD %TABPY_STATE_PATH%
 @ECHO Starting the server for the first time...
 @ECHO.
 @ECHO.
-@IF NOT EXIST  %TABPY_STATE_PATH%\state.ini @copy  %TABPY_STATE_PATH%\state.ini.template  %TABPY_STATE_PATH%\state.ini
+@IF NOT EXIST "%TABPY_STATE_PATH%\state.ini" @copy "%TABPY_STATE_PATH%\state.ini.template"  "%TABPY_STATE_PATH%\state.ini"
 @SET PYTHONPATH=%PYTHONPATH%;%TABPY_STATE_PATH%
-@python %TABPY_STATE_PATH%\tabpy.py --port %port%
-) ELSE (
+@python "%TABPY_STATE_PATH%\tabpy.py" --port %port%
+)
+IF NOT EXIST %STARTUPBAT% (
 @ECHO. 
 @ECHO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Installation failed  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 @ECHO.
