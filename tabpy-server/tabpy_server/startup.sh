@@ -2,6 +2,7 @@ CONDA_ENVIRONMENT=Tableau-Python-Server
 SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 CONDA_DEFAULT_ENV=$CONDA_ENVIRONMENT
 export TABPY_STATE_PATH=$SCRIPT_DIR
+cd "$TABPY_STATE_PATH"
 cd "../../../../"
 export PATH="$PWD"/bin:$PATH
 export PYTHONPATH=$PYTHONPATH:"$PWD"/lib/python2.7
