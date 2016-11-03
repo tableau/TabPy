@@ -25,7 +25,6 @@ setup(
         'python-dateutil',
         'requests',
         'genson',
-        'jsonschema',
-        'tabpy_client'
+        'jsonschema'
     ],
 )
