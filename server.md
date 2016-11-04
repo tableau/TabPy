@@ -4,7 +4,7 @@ TabPy server is the server component of Tableau's Python integration. It is a Py
 
 ##Setup on Linux/MacOS
 
-On a Linux-based system you can use the script `setup.sh` to install TabPy from scratch.
+On a Linux-based system you can use the script `setup.sh` to install TabPy from scratch. Simply navigate to the folder you downloaded from Github in a Terminal window and type `./setup.sh`.
 
 The script does the following:
 
