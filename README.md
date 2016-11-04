@@ -18,7 +18,7 @@ It is not necessary to install TabPy on the Tableau Server or Desktop computer-a
 
 <p align="center"><img alt="Screenshot of Configuration on Tableau Desktop" src="external-service-configuration.png"></p>
 
-Once the configuration is done, you can use Python in calculated fields in Tableau.
+Once the configuration is done, you can use Python in calculated fields in Tableau. You can learn more about authoring Python calculations in Tableau [HERE](TableauConfiguration.md).
 
 <p align="center"><img alt="Screenshot of a Python calculated field on Tableau Desktop" src="python-calculated-field.png"></p>
 
