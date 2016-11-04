@@ -26,7 +26,7 @@ In this simple example, there is only one input but you can pass as many argumen
 Tableau expects the SCRIPT to return a single column that has either a single row or the same number of rows as it passed to TabPy. The example above sends 18 rows of data to TabPy and receives 18 rows back.
 
 In the example below Tableau passes multiple columns to TabPy and gets a single value (correlation coefficient) back. SUM(Sales) and SUM(Profit) are used as argument 1 and 2 respectively and highlighted in matching colors.
-In this case the function `corrcoef` returns a matrix from which the correlation coefficient extracted so a single column can be returned.
+In this case the function `corrcoef` returns a matrix from which the correlation coefficient is extracted such that a single column is returned.
 
 <p align="center"><img alt="Using Partitioning settings with calculations" src="Example2-MultipleFunctionCalls.png"></p>
 
@@ -42,7 +42,9 @@ In all of these examples the data structure being returned by the function can b
 <p align="center"><img alt="Converting to list to make the results JSON serializable" src="python-calculated-field.png"></p>
 
 ## Using Deployed Functions
-[TabPy client documentation](client.md) covers in detail how functions could be deployed as endpoints. You can invoke such endpoints using `tabpy.query` option. A SCRIPT calculated field in Tableau using the [add endpoint](client.md#deploying-a-function) defined in [TabPy client documentation](client.md) could look like the following: 
+[TabPy client documentation](client.md) covers in detail how functions could be deployed as endpoints. You can invoke such endpoints using `tabpy.query` option by specifying the endpoint name and arguments and retrieving the `response` object. 
+
+A SCRIPT calculated field in Tableau using the [add endpoint](client.md#deploying-a-function) defined in [TabPy client documentation](client.md) could look like the following: 
 
 ```
 SCRIPT_REAL("
