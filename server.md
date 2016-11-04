@@ -11,9 +11,9 @@ The script does the following:
   - Downloads and installs Anaconda, unless Anaconda is in the PATH or a folder `Anaconda` is found in the current folder. Anaconda provides an exhaustive set of Python packages, including ML-related libraries that can be used by Python code executed by the server.
   - Creates a Python environment named `Tableau-Python-Server` if one doesn't already exist. The script then activates the environment and adds the server folder to the PYTHONPATH (which is necessary for the server script to find its Python dependencies in the same folder).
   - Installs required Python packages into the new environment, as well as the client package, as it contains common functionality that the server depends on.
-  - Displays the install location and instructions on how to start the server.
+  - Initializes the server, displays the install location and instructions on how to start the server next time.
 
-When you run `startup.sh` per the instructions, you should see an output like this:
+After setup completes or when you run `startup.sh` per the instructions to start the server, you should see an output like this:
 
 ```bash
 
@@ -38,9 +38,9 @@ The script carries out the following steps:
   - Downloads and installs Anaconda, under the current user account for example `C:\users\yourUserName\` unless Anaconda is in the PATH or has a registry entry. Anaconda provides an exhaustive set of Python packages, including ML-related libraries that can be used by Python code executed by the server.
   - Creates a Python environment named `Tableau-Python-Server` if one doesn't already exist. The script then activates the environment.
   - Installs the required Python packages into the new environment, as well as the client package, as it contains common functionality that the server depends on.
-  - Displays the install location and instructions on how to start the server.
+  - Initializes the server, displays the install location and instructions on how to start the server next time.
 
-When you run `startup.bat` per the instructions, you should see an output like this:
+After setup completes or when you run `startup.bat` per the instructions to start the server, you should see an output like this:
 
 ```bash
 
