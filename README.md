@@ -1,5 +1,5 @@
 
-# Tableau Python Server - Alpha
+# Tableau Python Server - Beta
 
 Tableau Python Server (TabPy) is part of Tableau's expanding range of extensibility options. These include [R execution](http://onlinehelp.tableau.com/current/pro/desktop/en-us/help.html#r_connection_manage.html) via the calculation editor interface, along with the web data connector SDK, the JavaScript API, the REST API, the Tableau Data Extract API, and Tableau Document API. For details, see the [Tableau Developer Portal](https://community.tableau.com/community/developers).
 
@@ -21,3 +21,13 @@ It is not necessary to install TabPy on the Tableau Server or Desktop computer-a
 Once the configuration is done, you can use Python in calculated fields in Tableau.
 
 <p align="center"><img alt="Screenshot of a Python calculated field on Tableau Desktop" src="python-calculated-field.png"></p>
+
+## Security Considerations
+The following security issues should be kept in mind as you use TabPy with Tableau:
+  - The data channel between Tableau and TabPy is currently not encrypted.
+  - TabPy currently does not use authentication.
+  - Python scripts can contain code which can harm security on the server where the TabPy is running. For example:
+    - Access file system (read/write)
+    - Install new Python packages which can contain binary code
+    - Execute operating system commands
+    - Open network connections to other servers and download files
