@@ -6,6 +6,9 @@ TabPy server is the server component of Tableau's Python integration. It is a Py
 
 On a Linux-based system you can use the script `setup.sh` to install TabPy from scratch. Simply navigate to the folder you downloaded from Github in a Terminal window and type `./setup.sh`.
 
+On MacOSX Sierra you may need to also give permissions to the file by typing the following:
+```chmod +x setup.sh```
+
 The script does the following:
 
   - Downloads and installs Anaconda, unless Anaconda is in the PATH or a folder `Anaconda` is found in the current folder. Anaconda provides an exhaustive set of Python packages, including ML-related libraries that can be used by Python code executed by the server.
