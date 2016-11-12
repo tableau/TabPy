@@ -64,7 +64,7 @@ It is recommended to create a new Conda environment for this project:
 
 ```Batchfile
 
-conda create --name Tableau-Python-Server python=2.7
+conda create --name Tableau-Python-Server python=2.7 anaconda
 
 ```
 
