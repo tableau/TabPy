@@ -2,7 +2,7 @@
 Name = my-server
 Description =
 Creation Time = 0
-CORS Origin = *
+CORS Origin = 
 
 [Query Objects Service Versions]
 

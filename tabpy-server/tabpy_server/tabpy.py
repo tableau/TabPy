@@ -115,8 +115,7 @@ class BaseHandler(tornado.web.RequestHandler):
         Add CORS header if the TabPy has attribute _cors_origin
         and _cors_origin is not an empty string.
         """
-        if hasattr(self.tabpy, '_cors_origin') and \
-                len(self.tabpy.get_cors_origin()) > 0:
+        if len(self.tabpy.get_cors_origin()) > 0:
             self.set_header("Access-Control-Allow-Origin",
                             self.tabpy.get_cors_origin())
             self.set_header("Access-Control-Allow-Headers",

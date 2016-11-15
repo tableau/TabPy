@@ -470,6 +470,17 @@ class TabPyState(object):
             log_error("Unable to get revision number: %s" % e)
         return rev
 
+    def get_cors_origin(self):
+        '''
+        Returns the CORS origin of this TabPy service.
+        '''
+        _cors_origin = ''
+        try:
+            _cors_origin = self._get_config_value('Service Info', 'CORS Origin')
+        except Exception as e:
+            pass
+        return _cors_origin
+
     def _set_revision_number(self, revision_number):
         '''
         Set the revision number of this TabPy service.
