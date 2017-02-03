@@ -156,7 +156,7 @@ class ManagementHandler(MainHandler):
         if not _name_checker.match(name):
             raise gen.Return('endpoint name can only contain: a-z, A-Z, 0-9,'
             ' underscore, hyphens and spaces.')
-        
+
         if self.settings.get('add_or_updating_endpoint'):
             raise RuntimeError("Another endpoint update is already in progress, "
                                 "please wait a while and try again")
@@ -296,7 +296,7 @@ class EndpointsHandler(ManagementHandler):
                 self.finish()
                 return
 
-            name = request_data['name']          
+            name = request_data['name']
 
             # check if endpoint already exist
             if name in self.tabpy.get_endpoints():
@@ -355,7 +355,7 @@ class EndpointHandler(ManagementHandler):
                                "endpoint %s does not exist." % name)
                 self.finish()
                 return
-            
+
             new_version = int(endpoints[name]['version']) + 1
             log_info('Endpoint info: %s' % request_data)
             err_msg = yield self._add_or_update_endpoint('update', name, new_version, request_data)
@@ -457,7 +457,7 @@ class EvaluationPlaneHandler(BaseHandler):
                     else:
                         self.error_out(400, 'Variables names should follow the format _arg1, _arg2, _argN')
                         return
-                        
+
 
             function_to_evaluate = 'def _user_script(tabpy' + arguments_str + '):\n'
             for u in user_code.splitlines():
@@ -703,18 +703,23 @@ def main():
 
     executor = concurrent.futures.ThreadPoolExecutor(max_workers=multiprocessing.cpu_count())
 
+    # Set subdirectory from config if applicable
+    subdirectory = ""
+    if config.has_option("Service Info", "Subdirectory"):
+        subdirectory = "/" + config.get("Service Info", "Subdirectory")
+
     # initialize Tornado application
     application = tornado.web.Application([
         # skip MainHandler to use StaticFileHandler .* page requests and default to index.html
         # (r"/", MainHandler),
-        (r'/query/([^/]+)', QueryPlaneHandler),
-        (r'/status', StatusHandler),
-        (r'/info', ServiceInfoHandler),
-        (r'/endpoints', EndpointsHandler),
-        (r'/endpoints/([^/]+)?', EndpointHandler),
-        (r'/evaluate', EvaluationPlaneHandler, dict(executor=executor)),
-        (r'/configurations/endpoint_upload_destination', UploadDestinationHandler),
-        (r'/(.*)', tornado.web.StaticFileHandler,dict(path=settings['static_path'],default_filename="index.html")),
+        (subdirectory + r'/query/([^/]+)', QueryPlaneHandler),
+        (subdirectory + r'/status', StatusHandler),
+        (subdirectory + r'/info', ServiceInfoHandler),
+        (subdirectory + r'/endpoints', EndpointsHandler),
+        (subdirectory + r'/endpoints/([^/]+)?', EndpointHandler),
+        (subdirectory + r'/evaluate', EvaluationPlaneHandler, dict(executor=executor)),
+        (subdirectory + r'/configurations/endpoint_upload_destination', UploadDestinationHandler),
+        (subdirectory + r'/(.*)', tornado.web.StaticFileHandler,dict(path=settings['static_path'],default_filename="index.html")),
     ], debug=False, **settings)
 
     settings = application.settings
