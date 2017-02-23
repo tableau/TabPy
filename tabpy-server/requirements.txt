@@ -1,7 +1,0 @@
-awscli == 1.6.2
-futures==2.2.0
-requests == 2.3.0
-simplejson==3.8.2
-Tornado-JSON==1.2.0
-tornado==4.3
-cloudpickle

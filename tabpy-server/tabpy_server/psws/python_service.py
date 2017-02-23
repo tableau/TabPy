@@ -21,9 +21,12 @@ from common.tabpy_logging import (
 )
 
 import logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.ERROR)
 logger = logging.getLogger(__name__)
 PYLogging.initialize(logger)
+
+if sys.version_info.major == 3:
+    unicode = str
 
 class PythonServiceHandler:
     """
@@ -164,7 +167,7 @@ class PythonService(object):
     def count_objects(self):
         """Count the number of Loaded QueryObjects stored in memory"""
         count = 0
-        for uri, po in self.query_objects.iteritems():
+        for uri, po in (self.query_objects.items() if sys.version_info > (3, 0) else self.query_objects.iteritems()):
             if po['endpoint_obj'] is not None:
                 count += 1
         return ObjectCount(count)
@@ -173,7 +176,7 @@ class PythonService(object):
         """List the objects as (URI, version) pairs"""
 
         objects = {}
-        for (uri, obj_info) in self.query_objects.iteritems():
+        for (uri, obj_info) in (self.query_objects.items() if sys.version_info > (3, 0) else self.query_objects.iteritems()):
             objects[uri] = {'version': obj_info['version'],
                             'type': obj_info['type'],
                             'status': obj_info['status'],

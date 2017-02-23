@@ -100,7 +100,6 @@ fi
 
 echo "~~~~~~~~~~~~~~~  Installing dependencies  ~~~~~~~~~~~~~~~"
 
-pip install -r "$SCRIPT_DIR"/tabpy-server/requirements.txt
 pip install "$SCRIPT_DIR"/tabpy-client
 pip install "$SCRIPT_DIR"/tabpy-server
 

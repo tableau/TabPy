@@ -5,7 +5,7 @@ except ImportError:
 
 setup(
     name='tabpy-client',
-    version='0.1',
+    version='0.2',
     description='Python client library to manage Tableau Python Server.',
     url='https://github.com/tableau/TabPy',
     author='Tableau',
@@ -14,6 +14,7 @@ setup(
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.5',
         "Topic :: Scientific/Engineering",
         "Topic :: Scientific/Engineering :: Information Analysis",
     ],

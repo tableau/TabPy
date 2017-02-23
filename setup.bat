@@ -66,7 +66,6 @@ IF %CONDACMD%=="" SET CONDACMD=%UserProfile%\Anaconda\Scripts
 @ECHO ~~~~~~~~~~~~~~~~~~~~~~~~~~  Installing dependencies  ~~~~~~~~~~~~~~~~~~~~~~~~~~
 @ECHO.
 @CD %CurrentPath%
-pip install -r ./tabpy-server/requirements.txt
 pip install ./tabpy-client
 pip install ./tabpy-server
 @SET STARTUPBAT=%CONDACMD:Scripts=envs%\%CONDA_ENVIRONMENT%\Lib\site-packages\tabpy_server\startup.bat

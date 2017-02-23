@@ -1,5 +1,6 @@
 from re import compile as _compile
 import time as _time
+import sys
 
 import requests
 
@@ -26,11 +27,14 @@ _logger = _logging.getLogger(__name__)
 
 _name_checker = _compile('^[a-zA-Z0-9-_\ ]+$')
 
+if sys.version_info.major == 3:
+    unicode = str
+
 
 def _check_endpoint_name(name):
     """Checks that the endpoint name is valid by comparing it with an RE and
     checking that it is not reserved."""
-    if not isinstance(name, basestring):
+    if not isinstance(name, (str,unicode)):
         raise TypeError("Endpoint name must be a string or unicode")
 
     if name == '':
@@ -378,7 +382,7 @@ class Client(object):
         _check_endpoint_name(name)
 
         if description is None:
-            if isinstance(obj.__doc__, basestring):
+            if isinstance(obj.__doc__, str):
                 # extract doc string
                 description = obj.__doc__.strip() or ''
             else:

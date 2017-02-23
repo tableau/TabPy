@@ -1,4 +1,5 @@
 import os
+import sys
 import simplejson
 import multiprocessing
 import time
@@ -42,6 +43,9 @@ PYLogging.initialize(logger)
 
 STAGING_THREAD = concurrent.futures.ThreadPoolExecutor(max_workers=3)
 _QUERY_OBJECT_STAGING_FOLDER = 'staging'
+
+if sys.version_info.major == 3:
+    unicode = str
 
 def parse_arguments():
     '''
@@ -100,7 +104,7 @@ class BaseHandler(tornado.web.RequestHandler):
 
     def error_out(self, code, log_message, info=None):
         self.set_status(code)
-        print info
+        print(info)
         self.write(simplejson.dumps({'message': log_message, 'info': info or {}}))
         log_error(log_message, info = info)
         self.finish()
@@ -150,7 +154,7 @@ class ManagementHandler(MainHandler):
         Add or update an endpoint
         '''
         _name_checker = _compile('^[a-zA-Z0-9-_\ ]+$')
-        if not isinstance(name, basestring):
+        if not isinstance(name, (str,unicode)):
             raise TypeError("Endpoint name must be a string or unicode")
 
         if not _name_checker.match(name):
@@ -165,7 +169,13 @@ class ManagementHandler(MainHandler):
         self.settings['add_or_updating_endpoint'] = request_uuid
         try:
             description = request_data['description'] if 'description' in request_data else None
-            docstring = request_data['docstring'] if 'docstring' in request_data else None
+            if 'docstring' in request_data:
+                if sys.version_info > (3, 0):
+                    docstring = str(bytes(request_data['docstring'], "utf-8").decode('unicode_escape'))
+                else:
+                    docstring = request_data['docstring'].decode('string_escape')
+            else:
+                docstring=None
             endpoint_type = request_data['type'] if 'type' in request_data else None
             methods = request_data['methods'] if 'methods' in request_data else []
             dependencies = request_data['dependencies'] if 'dependencies' in request_data else None
@@ -177,7 +187,7 @@ class ManagementHandler(MainHandler):
             _path_checker = _compile('^[\\a-zA-Z0-9-_\ /]+$')
             # copy from staging
             if src_path:
-                if not isinstance(request_data['src_path'], basestring):
+                if not isinstance(request_data['src_path'], (str,unicode)):
                     raise gen.Return("src_path must be a string.")
                 if not _path_checker.match(src_path):
                     raise gen.Return('Endpoint name can only contain: a-z, A-Z, 0-9,underscore, hyphens and spaces.')
@@ -464,6 +474,8 @@ class EvaluationPlaneHandler(BaseHandler):
                 function_to_evaluate += ' ' + u + '\n'
 
             log_info("function to evaluate=%s" % function_to_evaluate)
+
+
             result = yield self.call_subprocess(function_to_evaluate, arguments)
             if result is None:
                 self.error_out(400, 'Error running script. No return value')
@@ -472,14 +484,24 @@ class EvaluationPlaneHandler(BaseHandler):
                 self.finish()
 
         except Exception as e:
-            err_msg = format_exception(e, 'POST /evaluate')
-            self.error_out(500, 'Error processing script', info = err_msg)
+            err_msg = "%s : " % e.__class__.__name__
+            err_msg += "%s" % str(e)
+            if err_msg!="KeyError : 'response'":
+                err_msg = format_exception(e, 'POST /evaluate')
+                self.error_out(500, 'Error processing script', info = err_msg)
+            else:
+                self.error_out(404, 'Error processing script',
+                       info="The endpoint you're trying to query did not respond. Please make sure the endpoint exists and the correct set of arguments are provided.")
+
 
     @gen.coroutine
     def call_subprocess(self, function_to_evaluate, arguments):
         restricted_tabpy = RestrictedTabPy(self.port)
         # Exec does not run the function, so it does not block.
-        exec(function_to_evaluate)
+        if sys.version_info > (3, 0):
+            exec(function_to_evaluate,globals())
+        else:
+            exec(function_to_evaluate)
 
         if arguments is None:
             future = self.executor.submit(_user_script, restricted_tabpy)
@@ -487,6 +509,7 @@ class EvaluationPlaneHandler(BaseHandler):
             future = self.executor.submit(_user_script, restricted_tabpy, **arguments)
         ret = yield future
         raise gen.Return(ret)
+
 
 class RestrictedTabPy:
     def __init__(self, port):
@@ -536,7 +559,7 @@ class QueryPlaneHandler(BaseHandler):
 
         if isinstance(response, QuerySuccessful):
             response_json = response.to_json()
-            self.set_header("Etag", '"%s"' % md5(response_json).hexdigest())
+            self.set_header("Etag", '"%s"' % md5(response_json.encode('utf-8')).hexdigest())
             return (QuerySuccessful, response.for_json(), gls_time)
         else:
             log_error("Failed query", response=response)
@@ -600,16 +623,14 @@ class QueryPlaneHandler(BaseHandler):
             ## po_name is None if self.py_handler.ps.query_objects.get(endpoint_name) is None
             if not po_name:
                 log_error("UnknownURI", endpoint_name = endpoint_name)
-                self.error_out(404, 'UnknownURI',
-                       info="Endpoint '%s' does not exist" % endpoint_name)
+                self.error_out(404, 'UnknownURI', info="Endpoint '%s' does not exist" % endpoint_name)
                 return
 
             po_obj = self.py_handler.ps.query_objects.get(po_name)
 
             if not po_obj:
                 log_error("UnknownURI", endpoint_name = po_name)
-                self.error_out(404, 'UnknownURI',
-                       info="Endpoint '%s' does not exist" % po_name)
+                self.error_out(404, 'UnknownURI',info="Endpoint '%s' does not exist" % po_name)
                 return
 
             if po_name != endpoint_name:
@@ -660,14 +681,20 @@ class QueryPlaneHandler(BaseHandler):
     @tornado.web.asynchronous
     def get(self, endpoint_name):
         start = time.time()
-        endpoint_name = urllib.unquote(endpoint_name)
+        if sys.version_info > (3, 0):
+            endpoint_name = urllib.parse.unquote(endpoint_name)
+        else:
+            endpoint_name = urllib.unquote(endpoint_name)
         log_debug("GET /query", endpoint_name=endpoint_name)
         self._process_query(endpoint_name, start)
 
     @tornado.web.asynchronous
     def post(self, endpoint_name):
         start = time.time()
-        endpoint_name = urllib.unquote(endpoint_name)
+        if sys.version_info > (3, 0):
+            endpoint_name = urllib.parse.unquote(endpoint_name)
+        else:
+            endpoint_name = urllib.unquote(endpoint_name)
         log_debug("POST /query", endpoint_name=endpoint_name)
         self._process_query(endpoint_name, start)
 
@@ -697,9 +724,9 @@ def main():
         "state_file_path": state_file_path,
         "static_path": os.path.join(os.path.dirname(__file__), "static")}
 
-    log_info('Initializing TabPy...')
+    print('Initializing TabPy...')
     tornado.ioloop.IOLoop.instance().run_sync(lambda: init_ps_server(settings))
-    log_info('Done initializing TabPy.')
+    print('Done initializing TabPy.')
 
     executor = concurrent.futures.ThreadPoolExecutor(max_workers=multiprocessing.cpu_count())
 
@@ -727,7 +754,7 @@ def main():
     init_model_evaluator(settings)
 
     application.listen(port)
-    log_info('Web service listening on port ' + str(port))
+    print('Web service listening on port ' + str(port))
     tornado.ioloop.IOLoop.instance().start()
 
 if __name__ == '__main__':

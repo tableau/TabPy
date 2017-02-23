@@ -1,17 +1,27 @@
-from ConfigParser import ConfigParser
-from StringIO import StringIO
+try:
+    from ConfigParser import ConfigParser
+except ImportError:
+    from configparser import ConfigParser
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 import simplejson
 from threading import Lock
 from time import time
+import sys
 
 from management.util import write_state_config, load_state_from_config_file
 
 from common.tabpy_logging import PYLogging, log_error, log_info, log_debug, log_warning
 
 import logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.ERROR)
 logger = logging.getLogger(__name__)
 PYLogging.initialize(logger)
+
+if sys.version_info.major == 3:
+    unicode = str
 
 # State File Config Section Names
 _DEPLOYMENT_SECTION_NAME = 'Query Objects Service Versions'
@@ -156,7 +166,10 @@ class TabPyState(object):
         if name:
             endpoint_info = simplejson.loads(endpoint_names)
             docstring = self._get_config_value(_QUERY_OBJECT_DOCSTRING, name)
-            endpoint_info['docstring'] = docstring.decode('string_escape')
+            if sys.version_info > (3,0):
+                endpoint_info['docstring'] = str(bytes(docstring,"utf-8").decode('unicode_escape'))
+            else:
+                endpoint_info['docstring'] = docstring.decode('string_escape')
             endpoints = {name: endpoint_info}
         else:
             for endpoint_name in endpoint_names:
@@ -165,7 +178,10 @@ class TabPyState(object):
                                             endpoint_name))
                 docstring = self._get_config_value(_QUERY_OBJECT_DOCSTRING,
                                               endpoint_name, True, '')
-                endpoint_info['docstring'] = docstring.decode('string_escape')
+                if sys.version_info > (3, 0):
+                    endpoint_info['docstring'] = str(bytes(docstring, "utf-8").decode('unicode_escape'))
+                else:
+                    endpoint_info['docstring'] = docstring.decode('string_escape')
                 endpoints[endpoint_name] = endpoint_info
         return endpoints
 
@@ -197,25 +213,25 @@ class TabPyState(object):
         '''
         try:
             endpoints = self.get_endpoints()
-            if name is None or not isinstance(name, basestring) or len(name) == 0:
+            if name is None or not isinstance(name, (str, unicode)) or len(name) == 0:
                 raise ValueError("name of the endpoint must be a valid string.")
             elif name in endpoints:
                 raise ValueError("endpoint %s already exists." % name)
-            if description and not isinstance(description, basestring):
+            if description and not isinstance(description, (str, unicode)):
                 raise ValueError("description must be a string.")
             elif not description:
                 description = ''
-            if docstring and not isinstance(docstring, basestring):
+            if docstring and not isinstance(docstring, (str, unicode)):
                 raise ValueError("docstring must be a string.")
             elif not docstring:
                 docstring = '-- no docstring found in query function --'
-            if not endpoint_type or not isinstance(endpoint_type, basestring):
+            if not endpoint_type or not isinstance(endpoint_type, (str, unicode)):
                 raise ValueError("endpoint type must be a string.")
             if dependencies and not isinstance(dependencies, list):
                 raise ValueError("dependencies must be a list.")
             elif not dependencies:
                 dependencies = []
-            if target and not isinstance(target, basestring):
+            if target and not isinstance(target, (str, unicode)):
                 raise ValueError("target must be a string.")
             elif target and target not in endpoints:
                 raise ValueError("target endpoint is not valid.")
@@ -238,12 +254,17 @@ class TabPyState(object):
 
     def _add_update_endpoints_config(self, endpoints):
         # save the endpoint info to config
+        dstring=''
         for endpoint_name in endpoints:
             try:
                 info = endpoints[endpoint_name]
+                if sys.version_info > (3, 0):
+                    dstring = str(bytes(info['docstring'], "utf-8").decode('unicode_escape'))
+                else:
+                    dstring = info['docstring'].decode('string_escape')
                 self._set_config_value(_QUERY_OBJECT_DOCSTRING,
                                        endpoint_name,
-                                       info['docstring'].encode('unicode_escape'),
+                                       dstring,
                                        _update_revision=False)
                 del info['docstring']
                 self._set_config_value(_DEPLOYMENT_SECTION_NAME,
@@ -285,22 +306,22 @@ class TabPyState(object):
         '''
         try:
             endpoints = self.get_endpoints()
-            if not name or not isinstance(name, basestring):
+            if not name or not isinstance(name, (str, unicode)):
                 raise ValueError("name of the endpoint must be string.")
             elif name not in endpoints:
                 raise ValueError("endpoint %s does not exist." % name)
 
             endpoint_info = endpoints[name]
 
-            if description and not isinstance(description, basestring):
+            if description and not isinstance(description, (str, unicode)):
                 raise ValueError("description must be a string.")
             elif not description:
                 description = endpoint_info['description']
-            if docstring and not isinstance(docstring, basestring):
+            if docstring and not isinstance(docstring, (str, unicode)):
                 raise ValueError("docstring must be a string.")
             elif not docstring:
                 docstring = endpoint_info['docstring']
-            if endpoint_type and not isinstance(endpoint_type, basestring):
+            if endpoint_type and not isinstance(endpoint_type, (str, unicode)):
                 raise ValueError("endpoint type must be a string.")
             elif not endpoint_type:
                 endpoint_type = endpoint_info['type']
@@ -315,7 +336,7 @@ class TabPyState(object):
                     dependencies = endpoint_info['dependencies']
                 else:
                     dependencies = []
-            if target and not isinstance(target, basestring):
+            if target and not isinstance(target, (str, unicode)):
                 raise ValueError("target must be a string.")
             elif target and target not in endpoints:
                 raise ValueError("target endpoint is not valid.")
@@ -424,7 +445,7 @@ class TabPyState(object):
         name : str
             Name of TabPy service.
         '''
-        if not isinstance(name, basestring):
+        if not isinstance(name, (str, unicode)):
             raise ValueError("name must be a string.")
         try:
             self._set_config_value(_SERVICE_INFO_SECTION_NAME, 'Name', name)
@@ -452,7 +473,7 @@ class TabPyState(object):
         description : str
             Description of TabPy service.
         '''
-        if not isinstance(description, basestring):
+        if not isinstance(description, (str, unicode)):
             raise ValueError("Description must be a string.")
         try:
             self._set_config_value(_SERVICE_INFO_SECTION_NAME, 'Description', description)

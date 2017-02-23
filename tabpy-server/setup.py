@@ -3,11 +3,9 @@ try:
 except ImportError:
     from distutils.core import setup
 import sys
-if sys.version_info > (3,0):
-    sys.exit('Python 3 is not supported')
 setup(
     name='tabpy-server',
-    version='0.1',
+    version='0.2',
     description='Web server Tableau uses to run Python scripts.',
     url='https://github.com/tableau/TabPy',
     author='Tableau',
@@ -16,6 +14,7 @@ setup(
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.5',
         "Topic :: Scientific/Engineering",
         "Topic :: Scientific/Engineering :: Information Analysis",
     ],
@@ -28,12 +27,18 @@ setup(
                 'tabpy_server':['startup.*','state.ini.template']},
     license='MIT',
     install_requires=[
+        'future',
+        'futures',
+        'requests',
+        'simplejson',
+        'Tornado-JSON',
+        'tornado',
         'cloudpickle',
         'decorator',
         'python-dateutil',
-        'requests',
         'genson',
         'jsonschema',
-        'tabpy_client'
+        'tabpy_client',
+        'numpy'
     ]
 )

@@ -5,8 +5,9 @@ export TABPY_STATE_PATH=$SCRIPT_DIR
 cd "$TABPY_STATE_PATH"
 cd "../../../../"
 export PATH="$PWD"/bin:$PATH
-export PYTHONPATH=$PYTHONPATH:"$PWD"/lib/python2.7
-source activate $CONDA_ENVIRONMENT
+if [ -e "$PWD"/bin/activate ]; then
+  source activate $CONDA_ENVIRONMENT
+fi
 if [ "$#" -ne 1 ] ; then
   PORT=9004
 else

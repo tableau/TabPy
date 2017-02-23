@@ -1,4 +1,5 @@
 import logging as _logging
+from future.utils import with_metaclass
 import requests
 _logger = _logging.getLogger(__name__)
 
@@ -233,7 +234,7 @@ class _RESTMetaclass(type(_MutableMapping)):
                 self.__rest__.add(k)
 
 
-class RESTObject(_MutableMapping):
+class RESTObject(with_metaclass(_RESTMetaclass,_MutableMapping)):
     """A base class that has methods generally useful for interacting with
     REST objects. The attributes are accessible either as dict keys or as
     attributes. The object also behaves like a dict, even replicating the
@@ -248,7 +249,7 @@ class RESTObject(_MutableMapping):
         addition RESTProperty.
 
     """
-    __metaclass__ = _RESTMetaclass
+    """ __metaclass__ = _RESTMetaclass"""
 
     def __init__(self, **kwargs):
         """Creates a new instance of the RESTObject.

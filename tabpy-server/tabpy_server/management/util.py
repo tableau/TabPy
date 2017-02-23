@@ -2,15 +2,21 @@ import concurrent.futures
 import os
 import tempfile
 import shutil
-from ConfigParser import ConfigParser as _ConfigParser
-from StringIO import StringIO as _StringIO
+try:
+    from ConfigParser import ConfigParser as _ConfigParser
+except ImportError:
+    from configparser import ConfigParser as _ConfigParser
+try:
+    from StringIO import StringIO as _StringIO
+except ImportError:
+    from io import StringIO as _StringIO
 from dateutil import parser
 from datetime import datetime, timedelta, tzinfo
 from time import mktime
 
 from common.tabpy_logging import PYLogging, log_error, log_info, log_debug, log_warning
 import logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.ERROR)
 logger = logging.getLogger(__name__)
 PYLogging.initialize(logger)
 

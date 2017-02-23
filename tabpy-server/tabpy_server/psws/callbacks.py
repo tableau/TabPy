@@ -1,4 +1,5 @@
 import os
+import sys
 import base64
 from time import sleep
 from tornado import gen
@@ -17,7 +18,7 @@ from management import util
 from common.tabpy_logging import PYLogging, log_error, log_info, log_debug, log_warning
 
 import logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.ERROR)
 logger = logging.getLogger(__name__)
 PYLogging.initialize(logger)
 
@@ -32,12 +33,12 @@ def wait_for_endpoint_loaded(py_handler, object_uri):
         if not isinstance(list_object_msg, ObjectList):
             log_error("Error loading endpoint %s: %s" % (object_uri, list_object_msg))
             return
-
-        for (uri, info) in list_object_msg.objects.iteritems():
+        for (uri, info) in (list_object_msg.objects.items() if sys.version_info > (3,0) else list_object_msg.objects.iteritems()):
             if uri == object_uri:
                 if info['status'] != 'LoadInProgress':
                     log_info("Object load status: %s" % info['status'])
                     return
+
 
         sleep(0.1)
 
@@ -45,7 +46,7 @@ def wait_for_endpoint_loaded(py_handler, object_uri):
 def init_ps_server(settings):
     tabpy = settings['tabpy']
     existing_pos = tabpy.get_endpoints()
-    for (object_name, obj_info) in existing_pos.iteritems():
+    for (object_name, obj_info) in (existing_pos.items() if sys.version_info > (3,0) else existing_pos.iteritems()):
         try:
             object_version = obj_info['version']
             object_type = obj_info['type']
@@ -67,7 +68,8 @@ def init_model_evaluator(settings):
         py_handler = settings['py_handler']
 
         existing_pos = tabpy.get_endpoints()
-        for (object_name, obj_info) in existing_pos.iteritems():
+        
+        for (object_name, obj_info) in (existing_pos.items() if sys.version_info > (3,0) else existing_pos.iteritems()):
             object_version = obj_info['version']
             object_type = obj_info['type']
             object_path = get_query_object_path(

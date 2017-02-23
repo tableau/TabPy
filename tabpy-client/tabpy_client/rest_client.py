@@ -70,7 +70,9 @@ class Endpoint(RESTObject):
             'model': ModelEndpoint,
         }[kwargs['type']]
 
-        return object.__new__(cls, **kwargs)
+        """return object.__new__(cls, **kwargs)"""
+        """ modified for Python 3"""
+        return object.__new__(cls)
 
     def __eq__(self, other):
         return self.name == other.name and \

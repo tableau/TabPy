@@ -13,12 +13,12 @@ import sys
 import shutil
 import time
 from re import compile as _compile
-from config import TABPY_QUERY_OBJECT_PATH
+from .config import TABPY_QUERY_OBJECT_PATH
 
 from common.tabpy_logging import PYLogging, log_error, log_info, log_debug, log_warning
 
 import logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.ERROR)
 logger = logging.getLogger(__name__)
 PYLogging.initialize(logger)
 
@@ -30,7 +30,7 @@ _name_checker = _compile('^[a-zA-Z0-9-_\ ]+$')
 def _check_endpoint_name(name):
     """Checks that the endpoint name is valid by comparing it with an RE and
     checking that it is not reserved."""
-    if not isinstance(name, basestring):
+    if not isinstance(name, str):
         raise TypeError("Endpoint name must be a string or unicode")
 
     if name == '':
