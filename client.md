@@ -3,7 +3,7 @@ TabPy client is the Python package for managing the published Python functions o
 
 ##Installation
 
-The client comes in the form of a pip package that can be installed from the project folder directly. Installing the package using `setup.sh` or `setup.bat` in TabPy folder will automatically install TabPy Client.
+The client comes in the form of a pip package that can be installed from the project folder directly. Installing the package using `setup.sh` or `setup.bat` in TabPy folder or doing `pip install` of taby-server will automatically install TabPy Client.
 
 If you prefer manual install, Tableau recommends that you install it within a Python environment. You can create such an environment with conda or virtualenv, To activate the environment run the following command:
 
@@ -23,11 +23,11 @@ On Windows:
 
 ```
 
-In order to install the client package, run this command in TabPy folder:
+In order to install the client package, run this command:
 
 ```bash
 
-pip install ./tabpy-client
+pip install tabpy-client
 
 ```
 
@@ -114,7 +114,6 @@ When the trained model (named `gbm` in this case) is used in a function being de
 ```python
 
 def LoanDefaultClassifier(Loan_Amount, Loan_Tenure, Monthly_Income, Age):
-    from sklearn.externals import joblib
     import pandas as pd
     data=pd.concat([Loan_Amount,Loan_Tenure,Monthly_Income,Age],axis=1)
     return gbm.predict(data)
@@ -124,6 +123,8 @@ client.deploy('WillItDefault',
               'Returns whether a loan application is likely to default.')
 
 ```
+You can find a detailed working example with a downloadable sample Tableau workbook and an accompanying Jupyter workbook that walks through model fitting, evaluation and publishing steps on [our blog](https://www.tableau.com/about/blog/2017/1/building-advanced-analytics-applications-tabpy-64916).
+
 The endpoints that are no longer needed can be removed the following way:
 
 ```python
@@ -140,8 +141,7 @@ As soon as you share your deployed functions, you also need to share metadata ab
   - Input parameter names, data types, and their meaning
   - Return data type and description
 
-This data goes beyond the single string that we used above when deploying the function `add`. You can use an optional parameter to `deploy` to provide such a structured description, which can then be retrieved by other users connected to the same server. The schema is interpreted as a [Json Schema](<http://json-schema.org/documentation.html>) object, which you can either manually create or generate using a utility method provided
-in this client package:
+This data goes beyond the single string that we used above when deploying the function `add`. You can use an optional parameter to `deploy` to provide such a structured description, which can then be retrieved by other users connected to the same server. The schema is interpreted as a [Json Schema](<http://json-schema.org/documentation.html>) object, which you can either manually create or generate using a utility method provided in this client package:
 
 ```python
 
