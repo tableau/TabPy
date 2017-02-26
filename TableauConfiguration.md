@@ -41,6 +41,8 @@ In all of these examples the data structure being returned by the function can b
 
 <p align="center"><img alt="Converting to list to make the results JSON serializable" src="python-calculated-field.png"></p>
 
+You can find two detailed working examples with downloadable sample Tableau workbooks on [our blog](https://www.tableau.com/about/blog/2017/1/building-advanced-analytics-applications-tabpy-64916).
+
 ## Using Deployed Functions
 [TabPy client documentation](client.md) covers in detail how functions could be deployed as endpoints. You can invoke such endpoints using `tabpy.query` option by specifying the endpoint name and arguments and retrieving the `response` object. 
 
@@ -51,3 +53,4 @@ SCRIPT_REAL("
 return tabpy.query('add',_arg1,_arg2)['response']",
 -SUM([Discount]),SUM([Price]))
 ```
+You can find a detailed working example with a downloadable sample Tableau workbook showing how to publish models and use the published models in calculated fields on [our blog](https://www.tableau.com/about/blog/2017/1/building-advanced-analytics-applications-tabpy-64916).
