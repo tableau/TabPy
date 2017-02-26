@@ -63,9 +63,9 @@ You can stop the server simply by terminating the python2.7 process which can be
 
 ##Manual Installation
 
-If you are familiar with Python environments and have already set one up, and just want to start the server process, you can skip the setup script, install the dependencies and run the process directly from the command line. The manual  installation instructions assume both Conda and Python are defined as part of PATH.
+If you are familiar with Python environments and have already set one up or prefer not to use Anaconda and just want to start the server process, you can skip the setup script, install the dependencies and run the process directly from the command line. The manual  installation instructions assume either Conda or Python are defined as part of PATH.
 
-It is recommended to create a new Conda environment for this project:
+It is optional but recommended you create a new Conda environment for this project:
 
 ```Batchfile
 
@@ -73,7 +73,7 @@ conda create --name Tableau-Python-Server python=2.7 anaconda
 
 ```
 
-Tableau Python Server is only supported on Python 2.7. You can download the Python 3.5 flavor of the distributions above, but you will need to create a Python 2.7 environment.
+The example above creates a Python 2.7 environment but Tableau Python Server is supported on both Python 2.7+ and Python 3.5+.
 
 Now activate the newly created environment.
 
@@ -93,14 +93,12 @@ activate Tableau-Python-Server
 
 ```
 
-In the TabPy folder run the following commands to install TabPy client and server as well as package dependencies.
+Since TabPy is available on [PyPI](https://pypi.python.org/pypi/tabpy-server) you can install by simply running the following command.
 
 
 ```Batchfile
 
-pip install -r ./tabpy-server/requirements.txt
-pip install ./tabpy-client
-pip install ./tabpy-server
+pip install tabpy-server
 
 ```
 
@@ -117,12 +115,12 @@ pip install --upgrade tabpy-server
 
 ```
 
-For this to be successful, Tableau-Python-Server environment should be active. 
+For this to be successful, if you installed TabPy in a Conda environment, make sure that it is active. 
 
 
 ##Extending the Environment
 
-If your functionality depends on Python packages that are not included in the Anaconda distribution, you need to install them into the environment Tableau-Python-Server to make them available to the server process. 
+If your functionality depends on Python packages that are not included, you need to install them into your Python environment to make them available to the server process. 
 
 The following code snippet assumes you have already run `setup.sh` or `setup.bat`, which created a Conda environment and started the server process in that environment. 
 
@@ -141,6 +139,13 @@ On Windows:
 ```Batchfile
 
 /Anaconda/Scripts/activate Tableau-Python-Server
+pip install _names_of_packages_here_
+
+```
+If you installed TabPy without Anaconda in your default Python framework you can achieve the same by doing:
+
+```Batchfile
+
 pip install _names_of_packages_here_
 
 ```
