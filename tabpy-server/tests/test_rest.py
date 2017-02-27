@@ -1,5 +1,6 @@
 import unittest
 import json
+import sys
 
 try:
     from unittest.mock import Mock
@@ -48,6 +49,24 @@ class TestRequestsNetworkWrapper(unittest.TestCase):
             params=data,
             timeout=None)
 
+    def test_GET_InvalidData(self):
+        url = 'abc'
+        data = {'cat'}
+        try:
+            self.assertEqual(self.rnw.GET(url, data), 'json')
+        except:
+            e=sys.exc_info()[0]
+            self.assertEquals(e,TypeError)
+
+    def test_GET_InvalidURL(self):
+        url = ''
+        data = {'foo':'bar'}
+        try:
+            self.assertEqual(self.rnw.GET(url, data), 'json')
+        except:
+            e=sys.exc_info()[0]
+            self.assertEquals(e,TypeError)
+
     def test_POST(self):
         url = 'abc'
         data = {'foo':'bar'}
@@ -56,6 +75,24 @@ class TestRequestsNetworkWrapper(unittest.TestCase):
             data=json.dumps(data),
             headers={'content-type':'application/json'},
             timeout=None)
+
+    def test_POST_InvalidURL(self):
+        url = ''
+        data = {'foo':'bar'}
+        try:
+            self.assertEqual(self.rnw.POST(url, data), 'json')
+        except:
+            e=sys.exc_info()[0]
+            self.assertEquals(e,TypeError)
+
+    def test_POST_InvalidData(self):
+        url = 'url'
+        data = {'cat'}
+        try:
+            self.assertEqual(self.rnw.POST(url, data), 'json')
+        except:
+            e=sys.exc_info()[0]
+            self.assertEquals(e,TypeError)
 
     def test_PUT(self):
         url = 'abc'
@@ -66,6 +103,24 @@ class TestRequestsNetworkWrapper(unittest.TestCase):
             headers={'content-type':'application/json'},
             timeout=None)
 
+    def test_PUT_InvalidData(self):
+        url = 'url'
+        data = {'cat'}
+        try:
+            self.assertEqual(self.rnw.PUT(url, data), 'json')
+        except:
+            e=sys.exc_info()[0]
+            self.assertEquals(e,TypeError)
+
+    def test_PUT_InvalidURL(self):
+        url = ''
+        data = {'foo:bar'}
+        try:
+            self.assertEqual(self.rnw.PUT(url, data), 'json')
+        except:
+            e=sys.exc_info()[0]
+            self.assertEquals(e,TypeError)
+
     def test_DELETE(self):
         url = 'abc'
         data = {'foo':'bar'}
@@ -74,6 +129,23 @@ class TestRequestsNetworkWrapper(unittest.TestCase):
             data=json.dumps(data),
             timeout=None)
 
+    def test_DELETE_InvalidData(self):
+        url = 'abc'
+        data = {'cat'}
+        try:
+            self.assertEqual(self.rnw.DELETE(url, data), 'json')
+        except:
+            e=sys.exc_info()[0]
+            self.assertEquals(e,TypeError)
+
+    def test_DELETE_InvalidURL(self):
+        url = ''
+        data = {'foo:bar'}
+        try:
+            self.assertEqual(self.rnw.DELETE(url, data), 'json')
+        except:
+            e=sys.exc_info()[0]
+            self.assertEquals(e,TypeError)
 
 
 class TestServiceClient(unittest.TestCase):

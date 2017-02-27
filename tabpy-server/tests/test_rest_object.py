@@ -1,4 +1,5 @@
 import unittest
+import sys
 
 from tabpy_client.rest import RESTObject, RESTProperty, enum
 
@@ -17,7 +18,6 @@ class TestRESTObject(unittest.TestCase):
         self.assertEqual(f.i, 3)
         self.assertEqual(f.s, "hello!")
 
-
         with self.assertRaises(AttributeError):
             f.e
 
@@ -27,6 +27,10 @@ class TestRESTObject(unittest.TestCase):
 
         with self.assertRaises(KeyError):
             f['e']
+        with self.assertRaises(KeyError):
+            f['cat']
+        with self.assertRaises(KeyError):
+            f['cat']=5
 
         self.assertEqual(len(f), 3)
         self.assertEqual(set(f), set(['f', 'i', 's']))
@@ -36,9 +40,19 @@ class TestRESTObject(unittest.TestCase):
 
         f.e = "a"
         self.assertEqual(f.e, "a")
+        self.assertEqual(f['e'], "a")
+        f['e']='b'
+        self.assertEqual(f.e, "b")
 
         with self.assertRaises(ValueError):
             f.e = 'fubar'
+
+        f.f = sys.float_info.max
+        self.assertEquals(f.f,sys.float_info.max)
+        f.f = float("inf")
+        self.assertEquals(f.f, float("inf"))
+        f.f = None
+        self.assertEquals(f.f, None)
 
         class BarObject(FooObject):
             x = RESTProperty(str)

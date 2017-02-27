@@ -29,12 +29,22 @@ class TestClient(unittest.TestCase):
 
         client = Client(
             endpoint="endpoint",
-            query_timeout=10.0,
+            query_timeout=-10.0,
             verify_certificate=False)
 
         self.assertEqual(client._endpoint, "endpoint")
         self.assertEqual(client._verify_certificate, False)
+        self.assertEqual(client.query_timeout,0.0)
 
+        #valid name tests
+        with self.assertRaises(ValueError):
+            c = Client('')
+        with self.assertRaises(TypeError):
+            c = Client(1.0)
+        with self.assertRaises(ValueError):
+            c = Client("*#")
+        with self.assertRaises(TypeError):
+            c = Client()
 
     def test_get_status(self):
         self.client._service.get_status.return_value = "asdf"
@@ -70,9 +80,3 @@ class TestClient(unittest.TestCase):
             {"path":"foo"}
         
         self.assertEqual(self.client._get_endpoint_upload_destination(), "foo")
-        
-
-
-
-        
-        
