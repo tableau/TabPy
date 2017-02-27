@@ -39,6 +39,7 @@ setup(
         'genson',
         'jsonschema',
         'tabpy_client',
-        'numpy'
+        'numpy',
+		'mock'
     ]
 )
