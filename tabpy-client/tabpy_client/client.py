@@ -85,7 +85,10 @@ class Client(object):
         service_client = _ServiceClient(self._endpoint, network_wrapper)
 
         self._service =  _RESTServiceClient(service_client)
-        self.query_timeout = query_timeout
+        if query_timeout is not None and query_timeout > 0:
+            self.query_timeout = query_timeout
+        else:
+            self.query_timeout = 0.0
 
     def __repr__(self):
         return (
