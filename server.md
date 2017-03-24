@@ -1,8 +1,8 @@
-#TabPy Server
+# TabPy Server
 
 TabPy server is the server component of Tableau's Python integration. It is a Python process built on Tornado and other Python libraries.
 
-##Setup on Linux/MacOS
+## Setup on Linux/MacOS
 
 On a Linux-based system you can use the script `setup.sh` to install TabPy from scratch. 
 
@@ -33,7 +33,7 @@ At this point the server is ready to execute Python code remotely, or to deploy 
 You can stop the server simply by terminating the process (for example, with CTRL-C).
 
 
-##Setup on Windows
+## Setup on Windows
 On Windows you can use the script `setup.bat` to install TabPy from scratch. 
 
 Start by clicking on the green **clone or download** button in the upper right corner on TabPy repository landing page and downloading the zip file. After unzipping, navigate to the folder containing `setup.bat` using Windows command line and type `setup.bat`. 
@@ -61,7 +61,7 @@ At this point the server is ready to execute Python code remotely, or to deploy 
 You can stop the server simply by terminating the python2.7 process which can be seen in Windows Task Manager. (Press Ctrl+Shift+Esc to access Task Manager)
 
 
-##Manual Installation
+## Manual Installation
 
 If you are familiar with Python environments and have already set one up or prefer not to use Anaconda and just want to start the server process, you can skip the setup script, install the dependencies and run the process directly from the command line. The manual  installation instructions assume either Conda or Python are defined as part of PATH.
 
@@ -106,7 +106,7 @@ As the packages are installed, you will see the install locations listed in the 
 
 Navigate to the tabpy_server folder under `site-packages` and run `startup.bat` or `startup.sh` on Windows and Linux/MacOS respectively. You can specify a custom port number as an argument e.g. `startup.bat 9001`. 
 
-##Updating TabPy
+## Updating TabPy
 You can update to a newer version by using the `-—upgrade` option in `pip`. 
 
 ```Batchfile
@@ -118,7 +118,7 @@ pip install --upgrade tabpy-server
 For this to be successful, if you installed TabPy in a Conda environment, make sure that it is active. 
 
 
-##Extending the Environment
+## Extending the Environment
 
 If your functionality depends on Python packages that are not included, you need to install them into your Python environment to make them available to the server process. 
 
@@ -153,12 +153,12 @@ pip install _names_of_packages_here_
 You can do this in a separate terminal while the server process is running-no need to restart.
 
 
-##REST Interfaces
+## REST Interfaces
 
 The server process exposes several REST APIs to get status and to execute Python code and query deployed methods.
 
 
-###http:get:: /info
+### http:get:: /info
 
 Get static information about the server.
 
@@ -201,7 +201,7 @@ Using curl:
 
 ```
 
-###http:get:: /status
+### http:get:: /status
 
 Gets runtime status of deployed endpoints. If no endpoints are deployed in the server, the returned data is an empty JSON object.
 
@@ -245,7 +245,7 @@ Using curl:
 ```
 
 
-###http:get:: /endpoints
+### http:get:: /endpoints
 
 Gets a list of deployed endpoints and their static information. If no endpoints are deployed in the server, the returned data is an empty JSON object.
 
@@ -298,7 +298,7 @@ Using curl:
 
 
 
-###http:get:: /endpoints/:endpoint
+### http:get:: /endpoints/:endpoint
 
 Gets the description of a specific deployed endpoint. The endpoint must first be deployed in the server (see the [client documentation](client.md)).
 
@@ -334,7 +334,7 @@ Using curl:
 ```
 
 
-###http:post:: /evaluate
+### http:post:: /evaluate
 
 Executes a block of Python code, replacing named parameters with their provided values.
 
@@ -405,7 +405,7 @@ The next example shows how to call `evaluate` from a terminal using curl; this c
 ```
 
 
-###http:post:: /query/:endpoint
+### http:post:: /query/:endpoint
 
 Executes a function at the specified endpoint. The function must first be deployed (see the [client documentation](client.md)).
 
