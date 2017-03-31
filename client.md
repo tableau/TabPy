@@ -1,7 +1,7 @@
-#TabPy Client
+# TabPy Client
 TabPy client is the Python package for managing the published Python functions on TabPy server.
 
-##Installation
+## Installation
 
 The client comes in the form of a pip package that can be installed from the project folder directly. Installing the package using `setup.sh` or `setup.bat` in TabPy folder or doing `pip install` of taby-server will automatically install TabPy Client.
 
@@ -32,7 +32,7 @@ pip install tabpy-client
 ```
 
 
-##Connecting to TabPy
+## Connecting to TabPy
 
 The client library uses the notion of connecting to a service, to avoid having to specify the service location for all subsequent operations:
 
@@ -47,7 +47,7 @@ client = tabpy_client.Client('http://localhost:9004/')
 The URL and port are where the Tableau-Python-Server process has been started - more info can be found in the [server section](server.md) of the documentation.
 
 
-##Deploying a Function
+## Deploying a Function
 
 A persisted endpoint is backed by a Python method. For example:
 
@@ -133,7 +133,7 @@ client.remove('WillItDefault')
 
 ```
 
-##Providing Schema Metadata
+## Providing Schema Metadata
 
 As soon as you share your deployed functions, you also need to share metadata about the function. The consumer of an endpoint needs to know the details of how to use the endpoint, such as:
 
@@ -189,7 +189,7 @@ client.get_endpoints()['add']['schema']
 ```
 
 
-##Querying an Endpoint
+## Querying an Endpoint
 
 Once a Python function has been deployed to the server process, you can use the client's `query` method to query it (assumes you’re already connected to the service):
 
@@ -213,7 +213,7 @@ Response:
 
 ```
 
-##Evaluating Arbitrary Python Scripts
+## Evaluating Arbitrary Python Scripts
 
 The other core functionality besides deploying and querying methods as endpoints is the ad-hoc execution of Python code, called `evaluate`. Evaluate does not have a Python API in `tabpy-client`, only a raw [REST interface](server.md#httppost-evaluate) that other client bindings can easily implement. Tableau connects to TabPy using REST `Evaluate`.
 
