@@ -24,8 +24,9 @@ Once the configuration is done, you can use Python in calculated fields in Table
 
 <p align="center"><img alt="Screenshot of a Python calculated field on Tableau Desktop" src="python-calculated-field.png"></p>
 
-## Samples & Tutorials
+## Useful Resources
   - [Building advanced analytics applications with TabPy](https://www.tableau.com/about/blog/2017/1/building-advanced-analytics-applications-tabpy-64916)
+  - [Running TabPy in Docker containers](https://hub.docker.com/r/emhemh/tabpy/)
 
 ## Security Considerations
 The following security issues should be kept in mind as you use TabPy with Tableau:
