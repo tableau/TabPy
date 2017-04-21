@@ -16,6 +16,15 @@ To run Python code in your Tableau calculated fields, enter the address and port
 
 On Tableau Server, use the [tabadmin](https://onlinehelp.tableau.com/current/server/en-us/tabadmin.htm) command line utility to configure a TabPy connection.
 
+
+```
+tabadmin stop
+tabadmin set vizqlserver.extsvc.host <ip address or host name of the machine hosting TabPy>
+tabadmin set vizqlserver.extsvc.port <port for TabPy>
+tabadmin configure
+tabadmin start
+```
+
 It is not necessary to install TabPy on the Tableau Server or Desktop computer-all that is required is a pointer to a TabPy server instance.
 
 <p align="center"><img alt="Screenshot of Configuration on Tableau Desktop" src="external-service-configuration.png"></p>
