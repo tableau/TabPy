@@ -14,6 +14,8 @@ You can find detailed **installation instructions** for TabPy server [HERE](serv
 
 To run Python code in your Tableau calculated fields, enter the address and port number for a TabPy server instance in Tableau.
 
+<p align="center"><img alt="Screenshot of Configuration on Tableau Desktop" src="external-service-configuration.png"></p>
+
 On Tableau Server, use the [tabadmin](https://onlinehelp.tableau.com/current/server/en-us/tabadmin.htm) command line utility to configure a TabPy connection.
 
 
@@ -27,15 +29,16 @@ tabadmin start
 
 It is not necessary to install TabPy on the Tableau Server or Desktop computer-all that is required is a pointer to a TabPy server instance.
 
-<p align="center"><img alt="Screenshot of Configuration on Tableau Desktop" src="external-service-configuration.png"></p>
-
 Once the configuration is done, you can use Python in calculated fields in Tableau. You can learn more about authoring Python calculations in Tableau [HERE](TableauConfiguration.md).
 
+
 <p align="center"><img alt="Screenshot of a Python calculated field on Tableau Desktop" src="python-calculated-field.png"></p>
+
 
 ## Useful Resources
   - [Building advanced analytics applications with TabPy](https://www.tableau.com/about/blog/2017/1/building-advanced-analytics-applications-tabpy-64916)
   - [Running TabPy in Docker containers](https://hub.docker.com/r/emhemh/tabpy/)
+
 
 ## Security Considerations
 The following security issues should be kept in mind as you use TabPy with Tableau:
