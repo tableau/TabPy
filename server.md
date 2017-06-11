@@ -2,7 +2,13 @@
 
 TabPy server is the server component of Tableau's Python integration. It is a Python process built on Tornado and other Python libraries.
 
-## Setup on Linux/MacOS
+There are two ways to install TabPy. 
+- [First option](#using-the-setup-script) is using the setup script which will install Anaconda, create a new Python environment and install TabPy for you. This would be the recommended option if you don't have an existing Python setup on your computer. 
+- If you are familiar with Python environments and have already set one up on your machine or prefer not to use Anaconda, you can use the [second option](#manual-installation) which will install TabPy into your active Python environment.
+
+## Using the Setup Script
+
+### Setup on Linux/MacOS
 
 On a Linux-based system you can use the script `setup.sh` to install TabPy from scratch. 
 
@@ -33,7 +39,7 @@ At this point the server is ready to execute Python code remotely, or to deploy 
 You can stop the server simply by terminating the process (for example, with CTRL-C).
 
 
-## Setup on Windows
+### Setup on Windows
 On Windows you can use the script `setup.bat` to install TabPy from scratch. 
 
 Start by clicking on the green **clone or download** button in the upper right corner on TabPy repository landing page and downloading the zip file. After unzipping, navigate to the folder containing `setup.bat` using Windows command line and type `setup.bat`. 
