@@ -69,17 +69,18 @@ You can stop the server simply by terminating the python2.7 process which can be
 
 ## Manual Installation
 
-If you are familiar with Python environments and have already set one up or prefer not to use Anaconda and just want to start the server process, you can skip the setup script, install the dependencies and run the process directly from the command line. The manual  installation instructions assume either Conda or Python are defined as part of PATH.
+If you are familiar with Python environments and have already set one up or prefer not to use Anaconda, you can skip the setup script, install just TabPy directly from the command line. 
 
-It is optional but recommended you create a new Conda environment for this project:
+### Setting up an Anaconda Environment
+
+If you have Anaconda, it is optional but recommended you create a new Conda environment for this project. If you don't want to use Anaconda or create a new Conda environment for TabPy, you can directly jump to the [installation step](installing-tabpy).
 
 ```Batchfile
 
 conda create --name Tableau-Python-Server python=2.7 anaconda
 
 ```
-
-The example above creates a Python 2.7 environment but Tableau Python Server is supported on both Python 2.7+ and Python 3.5+.
+The example above assumes Conda is defined as part of PATH and creates a Python 2.7 environment but Tableau Python Server is supported on both Python 2.7+ and Python 3.5+.
 
 Now activate the newly created environment.
 
@@ -98,6 +99,7 @@ On Windows:
 activate Tableau-Python-Server
 
 ```
+### Installing TabPy
 
 Since TabPy is available on [PyPI](https://pypi.python.org/pypi/tabpy-server) you can install by simply running the following command.
 
@@ -107,8 +109,9 @@ Since TabPy is available on [PyPI](https://pypi.python.org/pypi/tabpy-server) yo
 pip install tabpy-server
 
 ```
+This will install TabPy into your active Python environment regardless of whether it uses Anaconda or not. 
 
-As the packages are installed, you will see the install locations listed in the command line. These might look like `/Users/username/anaconda/envs/Tableau-Python-Server/lib/python2.7/site-packages` or `\Users\username\anaconda\envs\Tableau-Python-Server\lib\site-packages` depending on your environment.
+As the packages are installed, you will see the install locations listed in the command line. These might look like `/Users/username/anaconda/envs/Tableau-Python-Server/lib/python2.7/site-packages` or `\Users\username\anaconda\envs\Tableau-Python-Server\lib\site-packages` or `/Library/Frameworks/Python.framework/Versions/3.6/lib/python3.6/site-packages` depending on your setup.
 
 Navigate to the tabpy_server folder under `site-packages` and run `startup.bat` or `startup.sh` on Windows and Linux/MacOS respectively. You can specify a custom port number as an argument e.g. `startup.bat 9001`. 
 
