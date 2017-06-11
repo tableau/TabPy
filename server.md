@@ -73,7 +73,7 @@ If you are familiar with Python environments and have already set one up or pref
 
 ### Setting up an Anaconda Environment
 
-If you have Anaconda, it is optional but recommended you create a new Conda environment for this project. If you don't want to use Anaconda or create a new Conda environment for TabPy, you can directly jump to the [installation step](installing-tabpy).
+If you have Anaconda, it is optional but recommended you create a new Conda environment for this project. If you don't want to use Anaconda or create a new Conda environment for TabPy, you can directly jump to the [installation step](#installing-tabpy).
 
 ```Batchfile
 
