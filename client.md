@@ -108,7 +108,7 @@ modelfit(gbm, train, test, predictors)
 
 ```
 
-When the trained model (named `gbm` in this case) is used in a function being deployed, Tableau will automatically save its definition using `pickle` along with the definition of the function.
+When the trained model (named `gbm` in this case) is used in a function being deployed (as in `gbm.predict(...)` below), Tableau will automatically save its definition using `cloudpickle` along with the definition of the function. The model will also be kept in memory on the server to achieve fast response times. If you persist your model manually to disk and read as part of your scoring function code however, you will notice that response times are noticeably longer as every time a client hits an endpoint, the code (including model loading) will get executed. In order to get the best performance, we recommended following the methodology outlined in this example.
 
 
 ```python
