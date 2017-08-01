@@ -37,6 +37,7 @@ Once the configuration is done, you can use Python in calculated fields in Table
 
 ## Useful Resources
   - [Building advanced analytics applications with TabPy](https://www.tableau.com/about/blog/2017/1/building-advanced-analytics-applications-tabpy-64916)
+  - [TabPy Tutorial on TabWiki](https://community.tableau.com/docs/DOC-10856)
   - [Running TabPy in Docker containers](https://hub.docker.com/r/emhemh/tabpy/)
 
 
