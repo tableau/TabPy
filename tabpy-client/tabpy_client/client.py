@@ -31,14 +31,27 @@ if sys.version_info.major == 3:
     unicode = str
 
 
-def _check_endpoint_name(name):
-    """Checks that the endpoint name is valid by comparing it with an RE and
-    checking that it is not reserved."""
-    if not isinstance(name, (str,unicode)):
+def _check_endpoint_type(name):
+    if not isinstance(name, (str, unicode)):
         raise TypeError("Endpoint name must be a string or unicode")
 
     if name == '':
         raise ValueError("Endpoint name cannot be empty")
+
+
+def _check_hostname(name):
+    _check_endpoint_type(name)
+    hostname_checker = _compile('^http(s)?://[a-zA-Z0-9-_\.]+(:[0-9]+)?$')
+
+    if not hostname_checker.match(name):
+        raise ValueError('endpoint name {} should be in http(s)://<hostname>[:<port>] and hostname may consist only of:'
+                         ' a-z, A-Z, 0-9, underscore and hyphens.'.format(name))
+
+
+def _check_endpoint_name(name):
+    """Checks that the endpoint name is valid by comparing it with an RE and
+    checking that it is not reserved."""
+    _check_endpoint_type(name)
 
     if not _name_checker.match(name):
         raise ValueError('endpoint name %r can only contain: a-z, A-Z, 0-9,'
@@ -74,6 +87,8 @@ class Client(object):
             True.
 
         """
+        _check_hostname(endpoint)
+
         self._endpoint = endpoint
         self._verify_certificate = verify_certificate
 
@@ -88,7 +103,7 @@ class Client(object):
         if query_timeout is not None and query_timeout > 0:
             self.query_timeout = query_timeout
         else:
-            self.query_timeout = None
+            self.query_timeout = 0.0
 
     def __repr__(self):
         return (
