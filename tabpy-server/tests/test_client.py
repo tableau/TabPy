@@ -13,26 +13,26 @@ import requests
 class TestClient(unittest.TestCase):
 
     def setUp(self):
-        self.client = Client("endpoint")
+        self.client = Client("http://example.com")
         self.client._service = Mock()
 
     def test_init(self):
-        client = Client("endpoint")
+        client = Client("http://example.com:9004")
 
-        self.assertEqual(client._endpoint, "endpoint")
+        self.assertEqual(client._endpoint, "http://example.com:9004")
         self.assertEqual(client._verify_certificate, True)
 
-        client = Client("endpoint", 10.0, False)
+        client = Client("http://example.com", 10.0, False)
 
-        self.assertEqual(client._endpoint, "endpoint")
+        self.assertEqual(client._endpoint, "http://example.com")
         self.assertEqual(client._verify_certificate, False)
 
         client = Client(
-            endpoint="endpoint",
+            endpoint="https://example.com",
             query_timeout=-10.0,
             verify_certificate=False)
 
-        self.assertEqual(client._endpoint, "endpoint")
+        self.assertEqual(client._endpoint, "https://example.com")
         self.assertEqual(client._verify_certificate, False)
         self.assertEqual(client.query_timeout,0.0)
 
@@ -45,6 +45,10 @@ class TestClient(unittest.TestCase):
             c = Client("*#")
         with self.assertRaises(TypeError):
             c = Client()
+        with self.assertRaises(ValueError):
+            c = Client("http:/www.example.com")
+        with self.assertRaises(ValueError):
+            c = Client("httpx://www.example.com/:9004")
 
     def test_get_status(self):
         self.client._service.get_status.return_value = "asdf"
