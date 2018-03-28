@@ -26,7 +26,6 @@ from psws.python_service import PythonService
 from psws.python_service import PythonServiceHandler
 
 from common.util import format_exception
-from common.config import (DEFAULT_TABPY_PORT, TABPY_QUERY_OBJECT_PATH, SERVER_VERSION)
 from common.tabpy_logging import PYLogging, log_error, log_info, log_debug
 from common.messages import *
 from psws.callbacks import (init_ps_server, init_model_evaluator, on_state_change)
@@ -251,7 +250,7 @@ class ServiceInfoHandler(ManagementHandler):
         info['state_path'] = self.settings['state_file_path']
         info['name'] = self.tabpy.name
         info['description'] = self.tabpy.get_description()
-        info['server_version'] = SERVER_VERSION
+        info['server_version'] = self.settings['server_version']
         info['creation_time'] = self.tabpy.creation_time
         self.write(simplejson.dumps(info))
 
@@ -698,42 +697,90 @@ class QueryPlaneHandler(BaseHandler):
         log_debug("POST /query", endpoint_name=endpoint_name)
         self._process_query(endpoint_name, start)
 
-def main():
-    args = parse_arguments()
-    port = args.port
-    if not port:
-        port = DEFAULT_TABPY_PORT
+
+def get_config():
+    """Provide consistent mechanism for pulling in configuration.
+
+    Attempt to retain backward compatibility for existing implementations by grabbing port setting from CLI first.
+    Take settings in the following order:
+
+    1. CLI arguments, if present - port only - may be able to deprecate
+    2. common.config file, and
+    3. OS environment variables (for ease of setting defaults if not present)
+    4. current defaults if a setting is not present in any location
+
+    Additionally provide similar configuration capabilities in between common.config and environment variables.
+    For consistency use the same variable name in the config file as in the os environment.
+    For naming standards use all capitals and start with 'TABPY_'
+    """
+
+    if os.path.isfile('./common/config.py'):
+        import common.config as config
+    else:
+        config = None
+
+    settings = {}
+
+    cli_args = parse_arguments()
+
+    if cli_args.port is not None:
+        settings['port'] = cli_args.port
+    else:
+        try:
+            settings['port'] = config.TABPY_PORT
+        except AttributeError:
+            settings['port'] = os.getenv('TABPY_PORT', 9004)
+
+    try:
+        settings['server_version'] = config.TABPY_SERVER_VERSION
+    except AttributeError:
+        settings['server_version'] = os.getenv('TABPY_SERVER_VERSION', 'Alpha')
+
+    try:
+        settings['upload_dir'] = config.TABPY_QUERY_OBJECT_PATH
+    except AttributeError:
+        settings['upload_dir'] = os.getenv('TABPY_QUERY_OBJECT_PATH', '/tmp/query_objects')
+
+    if not os.path.exists(settings['upload_dir']):
+        os.makedirs(settings['upload_dir'])
+
+    try:
+        _state_file_path = config.TABPY_STATE_PATH
+    except AttributeError:
+        _state_file_path = os.getenv('TABPY_STATE_PATH', './')
+    settings['state_file_path'] = os.path.realpath(
+                                    os.path.normpath(
+                                      os.path.expanduser(_state_file_path)))
+
+    # if state.ini does not exist try and create it - remove last dependence on batch/shell script
+    if not os.path.isfile('{}/state.ini'.format(settings['state_file_path'])):
+        shutil.copy('./state.ini.template', '{}/state.ini'.format(settings['state_file_path']))
+
     log_info("Loading state from state file")
-    state_file_path = os.environ['TABPY_STATE_PATH']
-    config = _get_state_from_file(state_file_path)
-    tabpy = TabPyState(config=config)
+    tabpy_state = _get_state_from_file(settings['state_file_path'])
+    settings['tabpy'] = TabPyState(config=tabpy_state)
 
-    python_service_handler = PythonServiceHandler(PythonService())
+    settings['py_handler'] = PythonServiceHandler(PythonService())
+    settings['compress_response'] = True if TORNADO_MAJOR >= 4 else "gzip"
+    settings['static_path'] = os.path.join(os.path.dirname(__file__), "static")
 
-    state_file_path = os.path.realpath(
-        os.path.normpath(
-            os.path.expanduser(
-                os.environ.get('TABPY_STATE_PATH', './state'))))
+    # Set subdirectory from config if applicable
+    subdirectory = ""
+    if tabpy_state.has_option("Service Info", "Subdirectory"):
+        subdirectory = "/" + tabpy_state.get("Service Info", "Subdirectory")
 
-    # initialize settings for application handlers
-    settings = {
-        "compress_response" if TORNADO_MAJOR >= 4 else "gzip": True,
-        "tabpy": tabpy,
-        "py_handler": python_service_handler,
-        "port": port,
-        "state_file_path": state_file_path,
-        "static_path": os.path.join(os.path.dirname(__file__), "static")}
+    return settings, subdirectory
+
+
+def main():
+
+    settings, subdirectory = get_config()
 
     print('Initializing TabPy...')
     tornado.ioloop.IOLoop.instance().run_sync(lambda: init_ps_server(settings))
     print('Done initializing TabPy.')
 
     executor = concurrent.futures.ThreadPoolExecutor(max_workers=multiprocessing.cpu_count())
-
-    # Set subdirectory from config if applicable
-    subdirectory = ""
-    if config.has_option("Service Info", "Subdirectory"):
-        subdirectory = "/" + config.get("Service Info", "Subdirectory")
 
     # initialize Tornado application
     application = tornado.web.Application([
@@ -753,8 +800,8 @@ def main():
 
     init_model_evaluator(settings)
 
-    application.listen(port)
-    print('Web service listening on port ' + str(port))
+    application.listen(settings['port'])
+    print('Web service listening on port ' + str(settings['port']))
     tornado.ioloop.IOLoop.instance().start()
 
 if __name__ == '__main__':

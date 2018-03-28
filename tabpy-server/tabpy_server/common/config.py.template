@@ -1,0 +1,4 @@
+TABPY_QUERY_OBJECT_PATH = '/tmp/query_objects'
+TABPY_PORT = 9004
+TABPY_SERVER_VERSION = 'Alpha'
+TABPY_STATE_PATH = './'

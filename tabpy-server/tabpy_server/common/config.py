@@ -1,3 +1,0 @@
-TABPY_QUERY_OBJECT_PATH = '/tmp/query_objects'
-DEFAULT_TABPY_PORT = 9004
-SERVER_VERSION = 'Alpha'
