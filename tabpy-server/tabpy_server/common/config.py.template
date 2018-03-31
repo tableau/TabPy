@@ -3,3 +3,7 @@ TABPY_PORT = 9004
 TABPY_SERVER_VERSION = 'Alpha'
 TABPY_STATE_PATH = './'
 TABPY_BIND_IP = '0.0.0.0'
+TABPY_DISABLE_EVALUATE = False
+TABPY_ENABLE_EVALUATE_WHITELIST = False
+TABPY_EVALUATE_WHITELIST = 'numpy, scipy'   # Defaults to no allowed imports if TABPY_ENABLE_EVALUATE_WHITELIST is true
+                                            # and TABPY_EVALUATE_WHITELIST if not defined
