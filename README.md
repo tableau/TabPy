@@ -4,7 +4,7 @@
 
 Tableau Python Server (TabPy) is part of Tableau's expanding range of extensibility options. These include [R execution](http://onlinehelp.tableau.com/current/pro/desktop/en-us/help.html#r_connection_manage.html) via the calculation editor interface, along with the web data connector SDK, the JavaScript API, the REST API, the Tableau Data Extract API, and Tableau Document API. For details, see the [Tableau Developer Portal](https://community.tableau.com/community/developers).
 
-For all questions not related to the TabPy code (installation, deployment, connections, Python issues, etc.) and requests use [Server & Online Administration Forum](https://community.tableau.com/community/forums/server-administration) on [Tableau COmmutity](https://community.tableau.com).
+For all questions not related to the TabPy code (installation, deployment, connections, Python issues, etc.) and requests use [Server & Online Administration Forum](https://community.tableau.com/community/forums/server-administration) on [Tableau Community](https://community.tableau.com).
 
 TabPy framework allows Tableau to remotely execute Python code. It has two components:
 
