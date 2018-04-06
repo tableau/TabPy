@@ -13,7 +13,6 @@ import sys
 import shutil
 import time
 from re import compile as _compile
-from .config import TABPY_QUERY_OBJECT_PATH
 
 from common.tabpy_logging import PYLogging, log_error, log_info, log_debug, log_warning
 
@@ -21,9 +20,6 @@ import logging
 logging.basicConfig(level=logging.ERROR)
 logger = logging.getLogger(__name__)
 PYLogging.initialize(logger)
-
-if not os.path.exists(TABPY_QUERY_OBJECT_PATH):
-    os.makedirs(TABPY_QUERY_OBJECT_PATH)
 
 _name_checker = _compile('^[a-zA-Z0-9-_\ ]+$')
 
@@ -57,12 +53,12 @@ def grab_files(directory):
             elif os.path.isfile(full_path):
                 yield full_path
 
-def get_local_endpoint_file_path(name, version):
+def get_local_endpoint_file_path(name, version, query_path):
     _check_endpoint_name(name)
-    return os.path.join(TABPY_QUERY_OBJECT_PATH, name, str(version))
+    return os.path.join(query_path, name, str(version))
 
 
-def cleanup_endpoint_files(name, retain_versions = None):
+def cleanup_endpoint_files(name, query_path, retain_versions = None):
     '''
     Cleanup the disk space a certain endpiont uses.
 
@@ -76,7 +72,7 @@ def cleanup_endpoint_files(name, retain_versions = None):
         for the given version, otherwise, all files for that endpoint are removed.
     '''
     _check_endpoint_name(name)
-    local_dir = os.path.join(TABPY_QUERY_OBJECT_PATH, name)
+    local_dir = os.path.join(query_path, name)
 
     # nothing to clean, this is true for state file path where we load
     # Query Object directly from the state path instead of downloading
