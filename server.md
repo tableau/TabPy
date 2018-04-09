@@ -117,7 +117,17 @@ Navigate to the tabpy_server folder under `site-packages` and run `startup.bat` 
 
 If you are not running Anaconda, do not have the same virtual environment name as specified above, or do not have TabPy installed in the same directory structure as Anaconda expects it, you may just start tabpy.py from the commandline (e.g. 'python tabpy.py' or python3 tabpy.py').
 
-Default settings may be found in tabpy_server/common/config.py.template file. If you wish or need to change any of the variables, you may copy the template file to tabpy_server/common/config.py. Any of the variables listed in the template file may also be set by environment variables instead. If a variable is defined in both the config.py file and as an environment variable, the config.py value will be used.
+## TabPy Configuration
+
+Default settings for TabPy may be viewed in the tabpy_server/common/config.py.template file.
+
+Change settings by:
+1. Adding an environment variables.
+    - set the environment variable as required by your Operating System. When creating environment variables, use the same name as is in the config file as an environment variable. The files tabpy_server/startup.sh and startup.bat have examples of how to set environment variables in both Linux and Windows respectively and then start the application.
+2. Creating a config.py file
+    - copy the template file from tabpy_server/common/config.py.template to tabpy_server/common/config.py and edit the settings that need changing.
+
+The template file is not used by the application but is used for documenting which settings may be modified and what the defaults are if no config file or environment variables are set.
 
 ## Updating TabPy
 You can update to a newer version by using the `-—upgrade` option in `pip`. 
@@ -202,9 +212,10 @@ Example response:
 
   - `description` is a string that is hardcoded in the `state.ini` file and can be edited there.
   - `creation_time` is the creation time in seconds since 1970-01-01, hardcoded in the `state.ini` file, where it can be edited.
- - `state_path` is the state file path of the server (the value of the environment variable TABPY_STATE_PATH at the time the server was started).
-  - `server_version` is a string provided by the server and is defined by the variable TABPY_SERVER_VERSION in either `server/common/config.py` or as an environment variable. Clients can use this information for compatibility checks.
+  - `state_path` is the state file path of the server (the value of the TABPY_STATE_PATH at the time the server was started).
+  - `server_version` is a string provided by the server and is defined by the variable TABPY_SERVER_VERSION. Clients can use this information for compatibility checks.
 
+See [TabPy Configuration](#tabpy-configuration) section for more information on modifying the settings.
 
 Using curl:
 

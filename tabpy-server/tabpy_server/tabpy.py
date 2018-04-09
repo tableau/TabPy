@@ -737,6 +737,11 @@ def get_config():
         settings['server_version'] = os.getenv('TABPY_SERVER_VERSION', 'Alpha')
 
     try:
+        settings['bind_ip'] = config.TABPY_BIND_IP
+    except AttributeError:
+        settings['bind_ip'] = os.getenv('TABPY_BIND_IP', '0.0.0.0')
+
+    try:
         settings['upload_dir'] = config.TABPY_QUERY_OBJECT_PATH
     except AttributeError:
         settings['upload_dir'] = os.getenv('TABPY_QUERY_OBJECT_PATH', '/tmp/query_objects')
@@ -800,8 +805,8 @@ def main():
 
     init_model_evaluator(settings)
 
-    application.listen(settings['port'])
-    print('Web service listening on port ' + str(settings['port']))
+    application.listen(settings['port'], address=settings['bind_ip'])
+    print('Web service listening on {} port {}'.format(settings['bind_ip'], str(settings['port'])))
     tornado.ioloop.IOLoop.instance().start()
 
 if __name__ == '__main__':
