@@ -14,7 +14,7 @@ On a Linux-based system you can use the script `setup.sh` to install TabPy from 
 
 Start by clicking on the green **clone or download** button in the upper right corner on [TabPy repository landing page](https://github.com/tableau/TabPy) and downloading the zip file. After unzipping, navigate to the folder containing `setup.sh` in a Terminal window and type `./setup.sh`.
 
-On MacOSX you may need to also give permissions to the file by typing the following: `chmod +x setup.sh`
+If you get a "Permission denied" error you may need to also give permissions to the file by typing the following: `chmod +x setup.sh`
 
 The script does the following:
 
