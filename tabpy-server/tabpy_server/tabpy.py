@@ -131,6 +131,51 @@ class BaseHandler(tornado.web.RequestHandler):
         for key in keys:
             data.pop(key, None)
 
+    def check_disallowed_module(self, script):
+        """Parse script to determine if Python modules are being imported. If there are modules being imported, then
+        check them against the safelist to see if they are allowed
+        Expected Arguments:
+        * script : str - the Python code to check
+        Returns:
+        * list containing disallowed modules - will be empty if there are no disallowed modules.
+        """
+        disallowed_modules = []
+
+        wrapped_line = ""
+        module_list = []
+        for line in [x.strip() for x in script.splitlines()]:
+            # Get a wrapped line all into a single string
+            if len(wrapped_line) > 0:
+                line = wrapped_line + " " + line
+                wrapped_line = ""
+            if line.endswith('\\'):
+                wrapped_line = line[:-1]
+                continue
+
+            import_checker = _compile("__import__[('\"]+([\w]+)['\")]+")
+            result = import_checker.match(line)
+            if result:
+                module_list.append(result.group(1))
+
+            # Will incorrectly id a multi-line docstring where one of the lines starts with from or import
+            # Expect that to be a very unlikely event if script is coming from the evaluation handler
+            found = line.strip().startswith("from ")
+            if found:
+                module_list.append(line[4:line.find("import")].strip())
+            else:
+                found = line.strip().startswith("import ")
+                if found:
+                    module_list.extend([x for x in line[6:].split(",")])
+
+        for import_module in module_list:
+            if " as " in import_module:
+                import_module = import_module.strip().split(' ')[0]
+            if import_module.strip() not in self.settings['module_safelist']:
+                disallowed_modules.append(import_module.strip())
+
+        return disallowed_modules
+
+
 class MainHandler(BaseHandler):
     def initialize(self):
         super(MainHandler, self).initialize()
@@ -440,6 +485,9 @@ class EvaluationPlaneHandler(BaseHandler):
     @tornado.web.asynchronous
     @gen.coroutine
     def post(self):
+        if self.settings['disable_evaluate']:
+            self.error_out(403, 'The evaluate function is not allowed by your TabPy administrator')
+            return
         try:
             body = simplejson.loads(self.request.body.decode('utf-8'))
             if 'script' not in body:
@@ -467,13 +515,18 @@ class EvaluationPlaneHandler(BaseHandler):
                         self.error_out(400, 'Variables names should follow the format _arg1, _arg2, _argN')
                         return
 
+            if self.settings['enable_safelist']:
+                modules_not_allowed = self.check_disallowed_module(user_code)
+
+                if len(modules_not_allowed) > 0:
+                    self.error_out(403, 'The following modules are not allowed: {0}'.format(modules_not_allowed))
+                    return
 
             function_to_evaluate = 'def _user_script(tabpy' + arguments_str + '):\n'
             for u in user_code.splitlines():
                 function_to_evaluate += ' ' + u + '\n'
 
             log_info("function to evaluate=%s" % function_to_evaluate)
-
 
             result = yield self.call_subprocess(function_to_evaluate, arguments)
             if result is None:
@@ -491,7 +544,6 @@ class EvaluationPlaneHandler(BaseHandler):
             else:
                 self.error_out(404, 'Error processing script',
                        info="The endpoint you're trying to query did not respond. Please make sure the endpoint exists and the correct set of arguments are provided.")
-
 
     @gen.coroutine
     def call_subprocess(self, function_to_evaluate, arguments):
@@ -698,6 +750,15 @@ class QueryPlaneHandler(BaseHandler):
         self._process_query(endpoint_name, start)
 
 
+def get_tf_environ_var(environ, default):
+    value = os.getenv(environ, default)
+    if value == 'True':
+        value = True
+    elif value == 'False':
+        value = False
+    return value
+
+
 def get_config():
     """Provide consistent mechanism for pulling in configuration.
 
@@ -768,6 +829,28 @@ def get_config():
     settings['py_handler'] = PythonServiceHandler(PythonService())
     settings['compress_response'] = True if TORNADO_MAJOR >= 4 else "gzip"
     settings['static_path'] = os.path.join(os.path.dirname(__file__), "static")
+
+    try:
+        settings['disable_evaluate'] = config.TABPY_DISABLE_EVALUATE
+    except AttributeError:
+        settings['disable_evaluate'] = get_tf_environ_var('TABPY_DISABLE_EVALUATE', False)
+
+    if not settings['disable_evaluate']:
+        try:
+            settings['enable_safelist'] = config.TABPY_ENABLE_SAFELIST
+        except AttributeError:
+            settings['enable_safelist'] = get_tf_environ_var('TABPY_ENABLE_SAFELIST', False)
+
+        if settings['enable_safelist']:
+            try:
+                module_safelist = config.TABPY_SAFELIST
+            except AttributeError:
+                module_safelist = os.getenv('TABPY_SAFELIST', '')
+
+            settings['module_safelist'] = []
+            if isinstance(module_safelist, str):
+                for mod in module_safelist.split(','):
+                    settings['module_safelist'].append(mod.strip())
 
     # Set subdirectory from config if applicable
     subdirectory = ""
