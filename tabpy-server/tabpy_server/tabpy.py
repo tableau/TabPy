@@ -133,7 +133,7 @@ class BaseHandler(tornado.web.RequestHandler):
 
     def check_disallowed_module(self, script):
         """Parse script to determine if Python modules are being imported. If there are modules being imported, then
-        check them against the whitelist to see if they are allowed
+        check them against the safelist to see if they are allowed
         Expected Arguments:
         * script : str - the Python code to check
         Returns:
@@ -170,7 +170,7 @@ class BaseHandler(tornado.web.RequestHandler):
         for import_module in module_list:
             if " as " in import_module:
                 import_module = import_module.strip().split(' ')[0]
-            if import_module.strip() not in self.settings['module_whitelist']:
+            if import_module.strip() not in self.settings['module_safelist']:
                 disallowed_modules.append(import_module.strip())
 
         return disallowed_modules
@@ -515,7 +515,7 @@ class EvaluationPlaneHandler(BaseHandler):
                         self.error_out(400, 'Variables names should follow the format _arg1, _arg2, _argN')
                         return
 
-            if self.settings['enable_evaluate_whitelist']:
+            if self.settings['enable_safelist']:
                 modules_not_allowed = self.check_disallowed_module(user_code)
 
                 if len(modules_not_allowed) > 0:
@@ -837,20 +837,20 @@ def get_config():
 
     if not settings['disable_evaluate']:
         try:
-            settings['enable_evaluate_whitelist'] = config.TABPY_EVALUATE_WHITELIST
+            settings['enable_safelist'] = config.TABPY_ENABLE_SAFELIST
         except AttributeError:
-            settings['enable_evaluate_whitelist'] = get_tf_environ_var('TABPY_EVALUATE_WHITELIST', False)
+            settings['enable_safelist'] = get_tf_environ_var('TABPY_ENABLE_SAFELIST', False)
 
-        if settings['enable_evaluate_whitelist']:
+        if settings['enable_safelist']:
             try:
-                module_whitelist = config.TABPY_EVALUATE_WHITELIST
+                module_safelist = config.TABPY_SAFELIST
             except AttributeError:
-                module_whitelist = os.getenv('TABPY_EVALUATE_WHITELIST', '')
+                module_safelist = os.getenv('TABPY_SAFELIST', '')
 
-            settings['module_whitelist'] = []
-            if isinstance(module_whitelist, str):
-                for mod in module_whitelist.split(','):
-                    settings['module_whitelist'].append(mod.strip())
+            settings['module_safelist'] = []
+            if isinstance(module_safelist, str):
+                for mod in module_safelist.split(','):
+                    settings['module_safelist'].append(mod.strip())
 
     # Set subdirectory from config if applicable
     subdirectory = ""

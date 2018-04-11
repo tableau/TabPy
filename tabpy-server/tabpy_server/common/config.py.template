@@ -3,7 +3,10 @@ TABPY_PORT = 9004
 TABPY_SERVER_VERSION = 'Alpha'
 TABPY_STATE_PATH = './'
 TABPY_BIND_IP = '0.0.0.0'
-TABPY_DISABLE_EVALUATE = False
-TABPY_ENABLE_EVALUATE_WHITELIST = False
-TABPY_EVALUATE_WHITELIST = 'numpy, scipy'   # Defaults to no allowed imports if TABPY_ENABLE_EVALUATE_WHITELIST is true
-                                            # and TABPY_EVALUATE_WHITELIST if not defined
+TABPY_DISABLE_EVALUATE = False      # When set to True, does not allow any use of the evaluate method of TabPy
+TABPY_ENABLE_SAFELIST = False       # When set to True, only allows the Python modules listed in TABPY_SAFELIST to be
+                                    # imported when a client uses the evaluate method (e.g. sends code to TabPy which
+                                    # has not been previously published for reuse). This safelist is not yet applied to
+                                    # Python code which is being published to TabPy for reuse
+TABPY_SAFELIST = 'numpy, scipy'     # Defaults to not allowing any imports if TABPY_ENABLE_SAFELIST is true and
+                                    # TABPY_SAFELIST is not defined

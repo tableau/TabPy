@@ -13,7 +13,7 @@ class TestWhitelistNotEnabled(testing.AsyncHTTPTestCase):
             "state_file_path": "",
             "static_path": "",
             "disable_evaluate": False,
-            "enable_evaluate_whitelist": False
+            "enable_safelist": False
         }
         application = web.Application([
             (r'/', tabpy.EvaluationPlaneHandler, dict(executor=None))], **settings)
@@ -50,8 +50,8 @@ class TestWhitelistEmptyList(testing.AsyncHTTPTestCase):
             "state_file_path": "",
             "static_path": "",
             "disable_evaluate": False,
-            "enable_evaluate_whitelist": True,
-            "module_whitelist": []
+            "enable_safelist": True,
+            "module_safelist": []
         }
         application = web.Application([
             (r'/', tabpy.EvaluationPlaneHandler, dict(executor=None))], **settings)
@@ -102,8 +102,8 @@ class TestPopulatedWhitelist(testing.AsyncHTTPTestCase):
             "state_file_path": "",
             "static_path": "",
             "disable_evaluate": False,
-            "enable_evaluate_whitelist": True,
-            "module_whitelist": ["numpy", "scipy", "scikit-learn"]
+            "enable_safelist": True,
+            "module_safelist": ["numpy", "scipy", "sklearn"]
         }
         application = web.Application([
             (r'/', tabpy.EvaluationPlaneHandler, dict(executor=None))], **settings)
