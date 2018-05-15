@@ -21,8 +21,8 @@ from common.tabpy_logging import (
 )
 
 import logging
-logging.basicConfig(level=logging.ERROR)
 logger = logging.getLogger(__name__)
+
 PYLogging.initialize(logger)
 
 if sys.version_info.major == 3:

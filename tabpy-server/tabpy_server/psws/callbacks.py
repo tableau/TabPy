@@ -17,7 +17,6 @@ from management import util
 from common.tabpy_logging import PYLogging, log_error, log_info, log_debug, log_warning
 
 import logging
-logging.basicConfig(level=logging.ERROR)
 logger = logging.getLogger(__name__)
 PYLogging.initialize(logger)
 

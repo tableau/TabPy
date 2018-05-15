@@ -1,4 +1,4 @@
-import simplejson
+import json as simplejson
 import abc
 from abc import ABCMeta
 from collections import namedtuple

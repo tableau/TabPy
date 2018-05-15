@@ -7,6 +7,15 @@ from collections import MutableMapping as _MutableMapping
 
 import json as json
 
+from common.tabpy_logging import (
+    PYLogging,
+    log_error,
+    log_info,
+    log_debug,
+    log_warning,
+)
+PYLogging.initialize(_logger)
+
 class ResponseError(Exception):
     """Raised when we get an unexpected response."""
 
