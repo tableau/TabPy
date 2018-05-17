@@ -19,19 +19,14 @@ class PYLogging(object):
         # create formatter
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         temp_dir = tempfile.gettempdir()
-        fh_info = handlers.RotatingFileHandler(filename=os.path.join(temp_dir, "tabpy_info.log",),
-                                               maxBytes=10000000, backupCount=5)
-        fh_info.setLevel(logging.INFO)
-        fh_info.setFormatter(formatter)
 
-        fh_debug = handlers.RotatingFileHandler(filename=os.path.join(temp_dir, "tabpy_debug.log"),
+        fh = handlers.RotatingFileHandler(filename=os.path.join(temp_dir, "tabpy_log.log"),
                                                 maxBytes=10000000, backupCount=5)
-        fh_debug.setLevel(logging.DEBUG)
-        fh_debug.setFormatter(formatter)
+        fh.setLevel(LOG_LEVEL)
+        fh.setFormatter(formatter)
 
         # add fh to logger
-        logger.addHandler(fh_info)
-        logger.addHandler(fh_debug)
+        logger.addHandler(fh)
     
 
 def log_error(msg, **kwargs):
