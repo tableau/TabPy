@@ -61,7 +61,7 @@ IF %CONDACMD%=="" SET CONDACMD=%UserProfile%\Anaconda\Scripts
 @ECHO %CONDACMD:Scripts=envs%\%CONDA_ENVIRONMENT%
  )
 @CALL %CONDACMD%\activate %CONDA_ENVIRONMENT%
-@SET PYTHONPATH=%PYTHONPATH%;%CONDACMD:Scripts=envs%\%CONDA_ENVIRONMENT%\Scripts
+@SET PYTHONPATH="%PYTHONPATH%";%CONDACMD:Scripts=envs%\%CONDA_ENVIRONMENT%\Scripts
 @ECHO.
 @ECHO ~~~~~~~~~~~~~~~~~~~~~~~~~~  Installing dependencies  ~~~~~~~~~~~~~~~~~~~~~~~~~~
 @ECHO.
@@ -83,7 +83,7 @@ pip install ./tabpy-server
 @ECHO.
 @ECHO.
 @IF NOT EXIST "%TABPY_STATE_PATH%\state.ini" @copy "%TABPY_STATE_PATH%\state.ini.template"  "%TABPY_STATE_PATH%\state.ini"
-@SET PYTHONPATH=%PYTHONPATH%;%TABPY_STATE_PATH%
+@SET PYTHONPATH="%PYTHONPATH%";%TABPY_STATE_PATH%
 @python "%TABPY_STATE_PATH%\tabpy.py" --port %port%
 )
 IF NOT EXIST %STARTUPBAT% (
