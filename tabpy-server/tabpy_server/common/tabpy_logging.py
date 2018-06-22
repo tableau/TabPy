@@ -1,8 +1,32 @@
-import simplejson
-class PYLogging(object): 
+import json as simplejson
+import logging
+from logging import handlers
+import tempfile
+import os
+
+if os.path.isfile('./common/config.py'):
+    import common.config as config
+    LOG_LEVEL = config.TABPY_LOG_LEVEL
+else:
+    LOG_LEVEL = "INFO"
+
+class PYLogging(object):
     @classmethod
     def initialize(cls, logger):
         cls.logger = logger
+        cls.logger.setLevel = logging.getLevelName(LOG_LEVEL)
+
+        # create formatter
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        temp_dir = tempfile.gettempdir()
+
+        fh = handlers.RotatingFileHandler(filename=os.path.join(temp_dir, "tabpy_log.log"),
+                                                maxBytes=10000000, backupCount=5)
+        fh.setLevel(LOG_LEVEL)
+        fh.setFormatter(formatter)
+
+        # add fh to logger
+        logger.addHandler(fh)
     
 
 def log_error(msg, **kwargs):
