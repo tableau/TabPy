@@ -1,37 +1,6 @@
 # TabPy Client
 TabPy client is the Python package for managing the published Python functions on TabPy server.
 
-## Installation
-
-The client comes in the form of a pip package that can be installed from the project folder directly. Installing the package using `setup.sh` or `setup.bat` in TabPy folder or doing `pip install` of taby-server will automatically install TabPy Client.
-
-If you prefer manual install, Tableau recommends that you install it within a Python environment. You can create such an environment with conda or virtualenv, To activate the environment run the following command:
-
-On Linux/MacOS:
-
-```bash
-
-/Anaconda/bin/source activate Tableau-Python-Server
-
-```
-
-On Windows:
-
-```Batchfile
-
-\Anaconda\scripts\activate Tableau-Python-Server
-
-```
-
-In order to install the client package, run this command:
-
-```bash
-
-pip install tabpy-client
-
-```
-
-
 ## Connecting to TabPy
 
 The client library uses the notion of connecting to a service, to avoid having to specify the service location for all subsequent operations:
