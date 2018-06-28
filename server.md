@@ -14,6 +14,18 @@ Change settings by:
 
 The template file is not used by the application but is used for documenting which settings may be modified and what the defaults are if no config file or environment variables are set.
 
+## Starting the Server
+
+If you have installed a pre-built distribution from PyPy you will need to navigate to the source code contained in _site\\_packages_ and go subsequently into the tabpy-server/tabpy-server directory. From there run:
+
+```sh
+python tabpy.py
+```
+
+to start up a server.
+
+If working with the source code refer to the instructions located in the [Contributing Guide](CONTRIBUTING.md).
+
 ## REST Interfaces
 
 The server process exposes several REST APIs to get status and to execute Python code and query deployed methods.

@@ -8,8 +8,18 @@ TabPy suggests using [Pipenv](https://docs.pipenv.org) to configure and manage y
 pipenv install -dev
 ```
 
-This will create a dedicated virtual environment containing all of the development requirements, which you can subsequently activate to get started:
+This will create a dedicated virtual environment containing all of the development requirements.
+
+## Starting the Server
+
+From the project root, activate the virtual environment you created above via:
 
 ```sh
 pipenv shell
+```
+
+Thereafter, simply navigate to tabpy-server/tabpy-server and run:
+
+```sh
+python tabpy.py
 ```
