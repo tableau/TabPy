@@ -2,13 +2,13 @@
 
 ## Environment Setup
 
-TabPy suggests using [Pipenv](https://docs.pipenv.org) to configure and manage your development environment out of the box and provides facilities to enable this out of the box. To start, clone the source code and from the project root run:
+TabPy suggests using [Pipenv](https://docs.pipenv.org) to configure and manage your development environment and provides facilities to enable this out of the box. To start, clone the source code and from the project root run:
 
 ```sh
 pipenv install -dev
 ```
 
-This will create a dedicated virtual environment containing all of the development requirements.
+This will create a dedicated virtual environment containing all of the required packages.
 
 ## Starting the Server
 
