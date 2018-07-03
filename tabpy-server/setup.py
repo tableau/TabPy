@@ -2,7 +2,8 @@ try:
     from setuptools import setup
 except ImportError:
     from distutils.core import setup
-import sys
+
+
 setup(
     name='tabpy-server',
     version='0.2',
@@ -23,8 +24,8 @@ setup(
               'tabpy_server.management',
               'tabpy_server.psws',
               'tabpy_server.static'],
-    package_data={'tabpy_server.static':['*.*'],
-                'tabpy_server':['startup.*','state.ini.template']},
+    package_data={'tabpy_server.static': ['*.*'],
+                  'tabpy_server': ['startup.*', 'state.ini.template']},
     license='MIT',
     install_requires=[
         'future',

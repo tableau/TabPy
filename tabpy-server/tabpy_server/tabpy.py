@@ -1,16 +1,15 @@
+import logging
 import os
 import sys
 import simplejson
 import multiprocessing
 import time
-from time import sleep
 from uuid import uuid4 as random_uuid
 import shutil
 from re import compile as _compile
 
 import uuid
 import urllib
-import functools
 import requests
 import tornado
 import tornado.options
@@ -27,24 +26,27 @@ from psws.python_service import PythonServiceHandler
 
 from common.util import format_exception
 from common.tabpy_logging import PYLogging, log_error, log_info, log_debug
-from common.messages import *
-from psws.callbacks import (init_ps_server, init_model_evaluator, on_state_change)
+from common.messages import Query, QuerySuccessful, QueryError, UnknownURI
+from psws.callbacks import (init_ps_server, init_model_evaluator,
+                            on_state_change)
 
 from management.util import _get_state_from_file
 from management.state import TabPyState, get_query_object_path
 import concurrent.futures
 
 
-import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 PYLogging.initialize(logger)
 
+
 STAGING_THREAD = concurrent.futures.ThreadPoolExecutor(max_workers=3)
 _QUERY_OBJECT_STAGING_FOLDER = 'staging'
 
+
 if sys.version_info.major == 3:
     unicode = str
+
 
 def parse_arguments():
     '''
@@ -52,10 +54,12 @@ def parse_arguments():
     * --port : int
     '''
     parser = ArgumentParser(description='Run Python27 Service.')
-    parser.add_argument('--port', type=int, help='Listening port for this service.')
+    parser.add_argument('--port', type=int,
+                        help='Listening port for this service.')
     return parser.parse_args()
 
-def copy_from_local(localpath, remotepath, is_dir = False):
+
+def copy_from_local(localpath, remotepath, is_dir=False):
     if is_dir:
         if not os.path.exists(remotepath):
             # remote folder does not exist
@@ -67,8 +71,7 @@ def copy_from_local(localpath, remotepath, is_dir = False):
                 full_file_name = os.path.join(localpath, file_name)
                 if os.path.isdir(full_file_name):
                     # copy folder recursively
-                    full_remote_path = os.path.join(remotepath,
-                                                        file_name)
+                    full_remote_path = os.path.join(remotepath, file_name)
                     shutil.copytree(full_file_name, full_remote_path)
                 else:
                     # copy each file
@@ -76,20 +79,24 @@ def copy_from_local(localpath, remotepath, is_dir = False):
     else:
         shutil.copy(localpath, remotepath)
 
+
 def _sanitize_request_data(data):
     if not isinstance(data, dict):
         raise RuntimeError("Expect input data to be a dictionary")
 
     if "method" in data:
-        return {"data":data.get("data"), "method":data.get("method")}
+        return {"data": data.get("data"), "method": data.get("method")}
     elif "data" in data:
         return data.get("data")
     else:
-        raise RuntimeError("Expect input data is a dictionary with at least a key called 'data'")
+        raise RuntimeError("Expect input data is a dictionary with at least a "
+                           "key called 'data'")
+
 
 def _get_uuid():
     """Generate a unique identifier string"""
     return str(uuid.uuid4())
+
 
 class BaseHandler(tornado.web.RequestHandler):
     KEYS_TO_SANITIZE = ("api key", "api_key", "admin key", "admin_key")
@@ -104,8 +111,9 @@ class BaseHandler(tornado.web.RequestHandler):
     def error_out(self, code, log_message, info=None):
         self.set_status(code)
         print(info)
-        self.write(simplejson.dumps({'message': log_message, 'info': info or {}}))
-        log_error(log_message, info = info)
+        self.write(simplejson.dumps(
+            {'message': log_message, 'info': info or {}}))
+        log_error(log_message, info=info)
         self.finish()
 
     def options(self):
@@ -122,14 +130,16 @@ class BaseHandler(tornado.web.RequestHandler):
             self.set_header("Access-Control-Allow-Origin",
                             self.tabpy.get_cors_origin())
             self.set_header("Access-Control-Allow-Headers",
-                            "Origin, X-Requested-With, Content-Type, Accept, Authorization")
+                            "Origin, X-Requested-With, Content-Type, "
+                            "Accept, Authorization")
             self.set_header("Access-Control-Allow-Methods",
                             "OPTIONS, POST, GET")
 
-    def _sanitize_request_data(self, data, keys = KEYS_TO_SANITIZE):
+    def _sanitize_request_data(self, data, keys=KEYS_TO_SANITIZE):
         """Remove keys so that we can log safely"""
         for key in keys:
             data.pop(key, None)
+
 
 class MainHandler(BaseHandler):
     def initialize(self):
@@ -138,6 +148,7 @@ class MainHandler(BaseHandler):
     def get(self):
         self._add_CORS_header()
         self.render('/static/index.html')
+
 
 class ManagementHandler(MainHandler):
     def initialize(self):
@@ -153,47 +164,59 @@ class ManagementHandler(MainHandler):
         Add or update an endpoint
         '''
         _name_checker = _compile('^[a-zA-Z0-9-_\ ]+$')
-        if not isinstance(name, (str,unicode)):
+        if not isinstance(name, (str, unicode)):
             raise TypeError("Endpoint name must be a string or unicode")
 
         if not _name_checker.match(name):
             raise gen.Return('endpoint name can only contain: a-z, A-Z, 0-9,'
-            ' underscore, hyphens and spaces.')
+                             ' underscore, hyphens and spaces.')
 
         if self.settings.get('add_or_updating_endpoint'):
-            raise RuntimeError("Another endpoint update is already in progress, "
-                                "please wait a while and try again")
+            raise RuntimeError("Another endpoint update is already in progress"
+                               ", please wait a while and try again")
 
         request_uuid = random_uuid()
         self.settings['add_or_updating_endpoint'] = request_uuid
         try:
-            description = request_data['description'] if 'description' in request_data else None
+            description = (request_data['description'] if 'description' in
+                           request_data else None)
             if 'docstring' in request_data:
                 if sys.version_info > (3, 0):
-                    docstring = str(bytes(request_data['docstring'], "utf-8").decode('unicode_escape'))
+                    docstring = str(bytes(request_data['docstring'],
+                                          "utf-8").decode('unicode_escape'))
                 else:
-                    docstring = request_data['docstring'].decode('string_escape')
+                    docstring = request_data['docstring'].decode(
+                        'string_escape')
             else:
-                docstring=None
-            endpoint_type = request_data['type'] if 'type' in request_data else None
-            methods = request_data['methods'] if 'methods' in request_data else []
-            dependencies = request_data['dependencies'] if 'dependencies' in request_data else None
-            target = request_data['target'] if 'target' in request_data else None
-            schema = request_data['schema'] if 'schema' in request_data else None
+                docstring = None
+            endpoint_type = (request_data['type'] if 'type' in request_data
+                             else None)
+            methods = (request_data['methods'] if 'methods' in request_data
+                       else [])
+            dependencies = (request_data['dependencies'] if 'dependencies' in
+                            request_data else None)
+            target = (request_data['target'] if 'target' in request_data
+                      else None)
+            schema = (request_data['schema'] if 'schema' in request_data
+                      else None)
 
-            src_path = request_data['src_path'] if 'src_path' in request_data else None
-            target_path = get_query_object_path(self.settings['state_file_path'], name, version)
+            src_path = (request_data['src_path'] if 'src_path' in request_data
+                        else None)
+            target_path = get_query_object_path(
+                self.settings['state_file_path'], name, version)
             _path_checker = _compile('^[\\a-zA-Z0-9-_\ /]+$')
             # copy from staging
             if src_path:
-                if not isinstance(request_data['src_path'], (str,unicode)):
+                if not isinstance(request_data['src_path'], (str, unicode)):
                     raise gen.Return("src_path must be a string.")
                 if not _path_checker.match(src_path):
-                    raise gen.Return('Endpoint name can only contain: a-z, A-Z, 0-9,underscore, hyphens and spaces.')
+                    raise gen.Return('Endpoint name can only contain: a-z, A-'
+                                     'Z, 0-9,underscore, hyphens and spaces.')
 
                 yield self._copy_po_future(src_path, target_path)
             elif endpoint_type != 'alias':
-                    raise gen.Return("src_path is required to add/update an endpoint.")
+                    raise gen.Return("src_path is required to add/update an "
+                                     "endpoint.")
 
             # alias special logic:
             if endpoint_type == 'alias':
@@ -233,10 +256,10 @@ class ManagementHandler(MainHandler):
         finally:
             self.settings['add_or_updating_endpoint'] = None
 
-
     @gen.coroutine
     def _copy_po_future(self, src_path, target_path):
-        future = STAGING_THREAD.submit(copy_from_local, src_path, target_path, is_dir=True)
+        future = STAGING_THREAD.submit(copy_from_local, src_path,
+                                       target_path, is_dir=True)
         ret = yield future
         raise gen.Return(ret)
 
@@ -254,6 +277,7 @@ class ServiceInfoHandler(ManagementHandler):
         info['creation_time'] = self.tabpy.creation_time
         self.write(simplejson.dumps(info))
 
+
 class StatusHandler(BaseHandler):
     def initialize(self):
         super(StatusHandler, self).initialize()
@@ -262,8 +286,13 @@ class StatusHandler(BaseHandler):
         self._add_CORS_header()
         status_dict = {}
         for k, v in self.py_handler.ps.query_objects.items():
-            status_dict[k] = {'version':v['version'], 'type':v['type'], 'status':v['status'], 'last_error':v['last_error']}
+            status_dict[k] = {
+                'version': v['version'],
+                'type': v['type'],
+                'status': v['status'],
+                'last_error': v['last_error']}
         self.write(simplejson.dumps(status_dict))
+
 
 class UploadDestinationHandler(ManagementHandler):
     def initialize(self):
@@ -293,7 +322,8 @@ class EndpointsHandler(ManagementHandler):
                 return
 
             try:
-                request_data = simplejson.loads(self.request.body.decode('utf-8'))
+                request_data = simplejson.loads(
+                    self.request.body.decode('utf-8'))
             except:
                 self.error_out(400, "Failed to decode input body")
                 self.finish()
@@ -313,7 +343,8 @@ class EndpointsHandler(ManagementHandler):
                 self.finish()
                 return
 
-            err_msg = yield self._add_or_update_endpoint('add', name, 1, request_data)
+            err_msg = yield self._add_or_update_endpoint('add', name, 1,
+                                                         request_data)
             if err_msg:
                 self.error_out(400, err_msg)
             else:
@@ -327,6 +358,7 @@ class EndpointsHandler(ManagementHandler):
             self.finish()
             return
 
+
 class EndpointHandler(ManagementHandler):
     def initialize(self):
         super(EndpointHandler, self).initialize()
@@ -337,7 +369,8 @@ class EndpointHandler(ManagementHandler):
             self.write(simplejson.dumps(self.tabpy.get_endpoints()))
         else:
             if endpoint_name in self.tabpy.get_endpoints():
-                self.write(simplejson.dumps(self.tabpy.get_endpoints()[endpoint_name]))
+                self.write(simplejson.dumps(
+                    self.tabpy.get_endpoints()[endpoint_name]))
             else:
                 self.error_out(404, 'Unknown endpoint',
                                info='Endpoint %s is not found' % endpoint_name)
@@ -351,7 +384,8 @@ class EndpointHandler(ManagementHandler):
                 self.finish()
                 return
             try:
-                request_data = simplejson.loads(self.request.body.decode('utf-8'))
+                request_data = simplejson.loads(
+                    self.request.body.decode('utf-8'))
             except:
                 self.error_out(400, "Failed to decode input body")
                 self.finish()
@@ -367,7 +401,8 @@ class EndpointHandler(ManagementHandler):
 
             new_version = int(endpoints[name]['version']) + 1
             log_info('Endpoint info: %s' % request_data)
-            err_msg = yield self._add_or_update_endpoint('update', name, new_version, request_data)
+            err_msg = yield self._add_or_update_endpoint(
+                'update', name, new_version, request_data)
             if err_msg:
                 self.error_out(400, err_msg)
                 self.finish()
@@ -402,7 +437,8 @@ class EndpointHandler(ManagementHandler):
 
             # delete files
             if endpoint_info['type'] != 'alias':
-                delete_path = get_query_object_path(self.settings['state_file_path'], name, None)
+                delete_path = get_query_object_path(
+                    self.settings['state_file_path'], name, None)
                 try:
                     yield self._delete_po_future(delete_path)
                 except Exception as e:
@@ -455,27 +491,29 @@ class EvaluationPlaneHandler(BaseHandler):
 
             if arguments is not None:
                 if not isinstance(arguments, dict):
-                    self.error_out(400, 'Script parameters need to be provided as a dictionary.')
+                    self.error_out(400, 'Script parameters need to be '
+                                   'provided as a dictionary.')
                     return
                 else:
                     arguments_expected = []
                     for i in range(1, len(arguments.keys())+1):
                         arguments_expected.append('_arg'+str(i))
-                    if sorted(arguments_expected)==sorted(arguments.keys()):
+                    if sorted(arguments_expected) == sorted(arguments.keys()):
                         arguments_str = ', ' + ', '.join(arguments.keys())
                     else:
-                        self.error_out(400, 'Variables names should follow the format _arg1, _arg2, _argN')
+                        self.error_out(400, 'Variables names should follow '
+                                       'the format _arg1, _arg2, _argN')
                         return
 
-
-            function_to_evaluate = 'def _user_script(tabpy' + arguments_str + '):\n'
+            function_to_evaluate = ('def _user_script(tabpy'
+                                    + arguments_str + '):\n')
             for u in user_code.splitlines():
                 function_to_evaluate += ' ' + u + '\n'
 
             log_info("function to evaluate=%s" % function_to_evaluate)
 
-
-            result = yield self.call_subprocess(function_to_evaluate, arguments)
+            result = yield self.call_subprocess(function_to_evaluate,
+                                                arguments)
             if result is None:
                 self.error_out(400, 'Error running script. No return value')
             else:
@@ -485,27 +523,30 @@ class EvaluationPlaneHandler(BaseHandler):
         except Exception as e:
             err_msg = "%s : " % e.__class__.__name__
             err_msg += "%s" % str(e)
-            if err_msg!="KeyError : 'response'":
+            if err_msg != "KeyError : 'response'":
                 err_msg = format_exception(e, 'POST /evaluate')
-                self.error_out(500, 'Error processing script', info = err_msg)
+                self.error_out(500, 'Error processing script', info=err_msg)
             else:
-                self.error_out(404, 'Error processing script',
-                       info="The endpoint you're trying to query did not respond. Please make sure the endpoint exists and the correct set of arguments are provided.")
-
+                self.error_out(
+                    404, 'Error processing script', info="The endpoint you're "
+                    "trying to query did not respond. Please make sure the "
+                    "endpoint exists and the correct set of arguments are "
+                    "provided.")
 
     @gen.coroutine
     def call_subprocess(self, function_to_evaluate, arguments):
         restricted_tabpy = RestrictedTabPy(self.port)
         # Exec does not run the function, so it does not block.
         if sys.version_info > (3, 0):
-            exec(function_to_evaluate,globals())
+            exec(function_to_evaluate, globals())
         else:
             exec(function_to_evaluate)
 
         if arguments is None:
             future = self.executor.submit(_user_script, restricted_tabpy)
         else:
-            future = self.executor.submit(_user_script, restricted_tabpy, **arguments)
+            future = self.executor.submit(_user_script, restricted_tabpy,
+                                          **arguments)
         ret = yield future
         raise gen.Return(ret)
 
@@ -519,10 +560,11 @@ class RestrictedTabPy:
         internal_data = {'data': args or kwargs}
         data = simplejson.dumps(internal_data)
         headers = {'content-type': 'application/json'}
-        response = requests.post(url = url, data=data, headers=headers,\
-                                timeout=30)
+        response = requests.post(url=url, data=data, headers=headers,
+                                 timeout=30)
 
         return response.json()
+
 
 class QueryPlaneHandler(BaseHandler):
     def initialize(self):
@@ -558,7 +600,8 @@ class QueryPlaneHandler(BaseHandler):
 
         if isinstance(response, QuerySuccessful):
             response_json = response.to_json()
-            self.set_header("Etag", '"%s"' % md5(response_json.encode('utf-8')).hexdigest())
+            self.set_header("Etag", '"%s"' % md5(response_json.encode(
+                'utf-8')).hexdigest())
             return (QuerySuccessful, response.for_json(), gls_time)
         else:
             log_error("Failed query", response=response)
@@ -590,7 +633,7 @@ class QueryPlaneHandler(BaseHandler):
         else:
             if response_type == UnknownURI:
                 self.error_out(404, 'UnknownURI',
-                               info="No query object has been registered" \
+                               info="No query object has been registered"
                                " with the name '%s'" % po_name)
             elif response_type == QueryError:
                 self.error_out(400, 'QueryError', info=response)
@@ -617,23 +660,28 @@ class QueryPlaneHandler(BaseHandler):
             return
 
         try:
-            (po_name, all_endpoint_names) = self._get_actual_model(endpoint_name)
+            (po_name, all_endpoint_names) = self._get_actual_model(
+                endpoint_name)
 
-            ## po_name is None if self.py_handler.ps.query_objects.get(endpoint_name) is None
+            # po_name is None if self.py_handler.ps.query_objects.get(
+            # endpoint_name) is None
             if not po_name:
-                log_error("UnknownURI", endpoint_name = endpoint_name)
-                self.error_out(404, 'UnknownURI', info="Endpoint '%s' does not exist" % endpoint_name)
+                log_error("UnknownURI", endpoint_name=endpoint_name)
+                self.error_out(404, 'UnknownURI',
+                               info="Endpoint '%s' does not exist"
+                               % endpoint_name)
                 return
 
             po_obj = self.py_handler.ps.query_objects.get(po_name)
 
             if not po_obj:
-                log_error("UnknownURI", endpoint_name = po_name)
-                self.error_out(404, 'UnknownURI',info="Endpoint '%s' does not exist" % po_name)
+                log_error("UnknownURI", endpoint_name=po_name)
+                self.error_out(404, 'UnknownURI',
+                               info="Endpoint '%s' does not exist" % po_name)
                 return
 
             if po_name != endpoint_name:
-                log_info("Querying actual model", po_name = po_name)
+                log_info("Querying actual model", po_name=po_name)
 
             uid = _get_uuid()
 
@@ -649,7 +697,7 @@ class QueryPlaneHandler(BaseHandler):
 
         except Exception as e:
             err_msg = format_exception(e, 'process query')
-            self.error_out(500, 'Error processing query', info = err_msg)
+            self.error_out(500, 'Error processing query', info=err_msg)
             return
 
     def _get_actual_model(self, endpoint_name):
@@ -671,11 +719,11 @@ class QueryPlaneHandler(BaseHandler):
                 break
             else:
                 self.error_out(500, 'Unknown endpoint type',
-                       info="Endpoint type '%s' does not exist" % endpoint_type)
+                               info="Endpoint type '%s' does not exist"
+                               % endpoint_type)
                 return
 
         return (endpoint_name, all_endpoint_names)
-
 
     @tornado.web.asynchronous
     def get(self, endpoint_name):
@@ -701,7 +749,9 @@ class QueryPlaneHandler(BaseHandler):
 def get_config():
     """Provide consistent mechanism for pulling in configuration.
 
-    Attempt to retain backward compatibility for existing implementations by grabbing port setting from CLI first.
+    Attempt to retain backward compatibility for existing implementations by
+    grabbing port setting from CLI first.
+
     Take settings in the following order:
 
     1. CLI arguments, if present - port only - may be able to deprecate
@@ -709,8 +759,10 @@ def get_config():
     3. OS environment variables (for ease of setting defaults if not present)
     4. current defaults if a setting is not present in any location
 
-    Additionally provide similar configuration capabilities in between common.config and environment variables.
-    For consistency use the same variable name in the config file as in the os environment.
+    Additionally provide similar configuration capabilities in between
+    common.config and environment variables.
+    For consistency use the same variable name in the config file as in the os
+    environment.
     For naming standards use all capitals and start with 'TABPY_'
     """
 
@@ -744,7 +796,8 @@ def get_config():
     try:
         settings['upload_dir'] = config.TABPY_QUERY_OBJECT_PATH
     except AttributeError:
-        settings['upload_dir'] = os.getenv('TABPY_QUERY_OBJECT_PATH', '/tmp/query_objects')
+        settings['upload_dir'] = os.getenv('TABPY_QUERY_OBJECT_PATH',
+                                           '/tmp/query_objects')
 
     if not os.path.exists(settings['upload_dir']):
         os.makedirs(settings['upload_dir'])
@@ -757,9 +810,11 @@ def get_config():
                                     os.path.normpath(
                                       os.path.expanduser(_state_file_path)))
 
-    # if state.ini does not exist try and create it - remove last dependence on batch/shell script
+    # if state.ini does not exist try and create it - remove last dependence
+    # on batch/shell script
     if not os.path.isfile('{}/state.ini'.format(settings['state_file_path'])):
-        shutil.copy('./state.ini.template', '{}/state.ini'.format(settings['state_file_path']))
+        shutil.copy('./state.ini.template', '{}/state.ini'.format(
+            settings['state_file_path']))
 
     log_info("Loading state from state file")
     tabpy_state = _get_state_from_file(settings['state_file_path'])
@@ -785,20 +840,25 @@ def main():
     tornado.ioloop.IOLoop.instance().run_sync(lambda: init_ps_server(settings))
     print('Done initializing TabPy.')
 
-    executor = concurrent.futures.ThreadPoolExecutor(max_workers=multiprocessing.cpu_count())
+    executor = concurrent.futures.ThreadPoolExecutor(
+        max_workers=multiprocessing.cpu_count())
 
     # initialize Tornado application
     application = tornado.web.Application([
-        # skip MainHandler to use StaticFileHandler .* page requests and default to index.html
+        # skip MainHandler to use StaticFileHandler .* page requests and
+        # default to index.html
         # (r"/", MainHandler),
         (subdirectory + r'/query/([^/]+)', QueryPlaneHandler),
         (subdirectory + r'/status', StatusHandler),
         (subdirectory + r'/info', ServiceInfoHandler),
         (subdirectory + r'/endpoints', EndpointsHandler),
         (subdirectory + r'/endpoints/([^/]+)?', EndpointHandler),
-        (subdirectory + r'/evaluate', EvaluationPlaneHandler, dict(executor=executor)),
-        (subdirectory + r'/configurations/endpoint_upload_destination', UploadDestinationHandler),
-        (subdirectory + r'/(.*)', tornado.web.StaticFileHandler,dict(path=settings['static_path'],default_filename="index.html")),
+        (subdirectory + r'/evaluate', EvaluationPlaneHandler,
+         dict(executor=executor)),
+        (subdirectory + r'/configurations/endpoint_upload_destination',
+         UploadDestinationHandler),
+        (subdirectory + r'/(.*)', tornado.web.StaticFileHandler,
+         dict(path=settings['static_path'], default_filename="index.html")),
     ], debug=False, **settings)
 
     settings = application.settings
@@ -806,8 +866,10 @@ def main():
     init_model_evaluator(settings)
 
     application.listen(settings['port'], address=settings['bind_ip'])
-    print('Web service listening on {} port {}'.format(settings['bind_ip'], str(settings['port'])))
+    print('Web service listening on {} port {}'.format(settings['bind_ip'],
+                                                       str(settings['port'])))
     tornado.ioloop.IOLoop.instance().start()
+
 
 if __name__ == '__main__':
     main()
