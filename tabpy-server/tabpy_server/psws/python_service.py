@@ -1,32 +1,28 @@
-import os
-import sys
-import time
-import uuid
-import urllib
-import requests
-import functools
-import subprocess
 import concurrent.futures
+import logging
+import sys
+
 
 from tabpy_client.query_object import QueryObject
 from common.util import format_exception
-from common.messages import *
+from common.messages import (
+    LoadObject, DeleteObjects, FlushObjects, CountObjects, ListObjects,
+    UnknownMessage, LoadFailed, ObjectsDeleted, ObjectsFlushed, QueryFailed,
+    QuerySuccessful, UnknownURI, DownloadSkipped, LoadInProgress, ObjectCount,
+    ObjectList)
 
-from common.tabpy_logging import (
-    PYLogging,
-    log_error,
-    log_info,
-    log_debug,
-    log_warning,
-)
+from common.tabpy_logging import PYLogging, log_error, log_info, log_warning
 
-import logging
+
 logger = logging.getLogger(__name__)
+
 
 PYLogging.initialize(logger)
 
+
 if sys.version_info.major == 3:
     unicode = str
+
 
 class PythonServiceHandler:
     """
@@ -57,6 +53,7 @@ class PythonServiceHandler:
             log_error("Error processing request", error=e.message)
             return UnknownMessage(e.message)
 
+
 class PythonService(object):
     """
     This class is a simple wrapper maintaining loaded query objects from
@@ -78,11 +75,12 @@ class PythonService(object):
         self.EXECUTOR = concurrent.futures.ThreadPoolExecutor(max_workers=1)
         self.query_objects = query_objects or {}
 
-    def _load_object(self, object_uri, object_url, object_version, is_update, object_type):
+    def _load_object(self, object_uri, object_url, object_version, is_update,
+                     object_type):
         try:
             log_info(msg="Loading object",
-                uri=object_uri, url=object_url,
-                version=object_version, is_update=is_update)
+                     uri=object_uri, url=object_url,
+                     version=object_version, is_update=is_update)
             if object_type == 'model':
                 po = QueryObject.load(object_url)
             elif object_type == 'alias':
@@ -91,50 +89,61 @@ class PythonService(object):
                 raise RuntimeError('Unknown object type: %s' % object_type)
 
             self.query_objects[object_uri] = {'version': object_version,
-                                                   'type': object_type,
-                                                   'endpoint_obj': po,
-                                                   'status': 'LoadSuccessful',
-                                                   'last_error': None}
+                                              'type': object_type,
+                                              'endpoint_obj': po,
+                                              'status': 'LoadSuccessful',
+                                              'last_error': None}
         except Exception as e:
-            log_error("Unable to load QueryObject", path=object_url, error=str(e))
+            log_error("Unable to load QueryObject", path=object_url,
+                      error=str(e))
 
-            self.query_objects[object_uri] = {'version': object_version,
-                                                   'type': object_type,
-                                                   'endpoint_obj': None,
-                                                   'status': 'LoadFailed',
-                                                   'last_error': 'Load failed: %s' % str(e)}
+            self.query_objects[object_uri] = {
+                'version': object_version,
+                'type': object_type,
+                'endpoint_obj': None,
+                'status': 'LoadFailed',
+                'last_error': 'Load failed: %s' % str(e)}
 
-    def load_object(self, object_uri, object_url, object_version, is_update, object_type):
+    def load_object(self, object_uri, object_url, object_version, is_update,
+                    object_type):
             try:
                 obj_info = self.query_objects.get(object_uri)
-                if obj_info and obj_info['endpoint_obj'] and obj_info['version'] >= object_version:
+                if obj_info and obj_info['endpoint_obj'] and (
+                        obj_info['version'] >= object_version):
                     log_info("Received load message for object already loaded")
 
-                    return DownloadSkipped(object_uri, obj_info['version'], "Object with greater " \
-                                           "or equal version already loaded")
+                    return DownloadSkipped(
+                        object_uri, obj_info['version'], "Object with greater "
+                        "or equal version already loaded")
                 else:
                     if object_uri not in self.query_objects:
-                        self.query_objects[object_uri] = {'version': object_version,
-                                                               'type': object_type,
-                                                               'endpoint_obj': None,
-                                                               'status': 'LoadInProgress',
-                                                               'last_error': None}
+                        self.query_objects[object_uri] = {
+                            'version': object_version,
+                            'type': object_type,
+                            'endpoint_obj': None,
+                            'status': 'LoadInProgress',
+                            'last_error': None}
                     else:
-                        self.query_objects[object_uri]['status'] = 'LoadInProgress'
+                        self.query_objects[
+                            object_uri]['status'] = 'LoadInProgress'
 
-                    self.EXECUTOR.submit(self._load_object, object_uri, object_url,\
-                             object_version, is_update, object_type)
+                    self.EXECUTOR.submit(
+                        self._load_object, object_uri, object_url,
+                        object_version, is_update, object_type)
 
                     return LoadInProgress(
-                            object_uri, object_url, object_version, is_update, object_type)
+                        object_uri, object_url, object_version, is_update,
+                        object_type)
             except Exception as e:
-                log_error("Unable to load QueryObject", path=object_url, error=str(e))
+                log_error("Unable to load QueryObject", path=object_url,
+                          error=str(e))
 
-                self.query_objects[object_uri] = {'version': object_version,
-                                                       'type': object_type,
-                                                       'endpoint_obj': None,
-                                                       'status': 'LoadFailed',
-                                                       'last_error': str(e)}
+                self.query_objects[object_uri] = {
+                    'version': object_version,
+                    'type': object_type,
+                    'endpoint_obj': None,
+                    'status': 'LoadFailed',
+                    'last_error': str(e)}
 
                 return LoadFailed(object_uri, object_version, str(e))
 
@@ -150,12 +159,13 @@ class PythonService(object):
             if deleted_obj:
                 return ObjectsDeleted([object_uris])
             else:
-                log_warning("Received message to delete query object " \
+                log_warning("Received message to delete query object "
                             "that doesn't exist", object_uris=object_uris)
                 return ObjectsDeleted([])
         else:
             log_error("Unexpected input to delete objects", input=object_uris,
-                    info="Input should be list or str. Type: %s" % type(object_uris))
+                      info="Input should be list or str. Type: %s" % type(
+                          object_uris))
             return ObjectsDeleted([])
 
     def flush_objects(self):
@@ -167,7 +177,8 @@ class PythonService(object):
     def count_objects(self):
         """Count the number of Loaded QueryObjects stored in memory"""
         count = 0
-        for uri, po in (self.query_objects.items() if sys.version_info > (3, 0) else self.query_objects.iteritems()):
+        for uri, po in (self.query_objects.items() if sys.version_info > (3, 0)
+                        else self.query_objects.iteritems()):
             if po['endpoint_obj'] is not None:
                 count += 1
         return ObjectCount(count)
@@ -176,7 +187,9 @@ class PythonService(object):
         """List the objects as (URI, version) pairs"""
 
         objects = {}
-        for (uri, obj_info) in (self.query_objects.items() if sys.version_info > (3, 0) else self.query_objects.iteritems()):
+        for (uri, obj_info) in (
+                self.query_objects.items() if sys.version_info > (3, 0)
+                else self.query_objects.iteritems()):
             objects[uri] = {'version': obj_info['version'],
                             'type': obj_info['type'],
                             'status': obj_info['status'],
@@ -190,7 +203,8 @@ class PythonService(object):
             if not isinstance(params, dict) and not isinstance(params, list):
                 return QueryFailed(
                     uri=object_uri,
-                    error="Query parameter needs to be a dictionary or a list. Given value is of type %s." % type(params))
+                    error=("Query parameter needs to be a dictionary or a list"
+                           ". Given value is of type %s." % type(params)))
 
             obj_info = self.query_objects.get(object_uri)
             if obj_info:
@@ -198,8 +212,10 @@ class PythonService(object):
                 version = obj_info['version']
 
                 if not pred_obj:
-                    return QueryFailed(uri=object_uri,
-                        error= "There is no query object associated to the endpoint: %s" % object_uri)
+                    return QueryFailed(
+                        uri=object_uri,
+                        error=("There is no query object associated to the "
+                               "endpoint: %s" % object_uri))
 
                 if isinstance(params, dict):
                     result = pred_obj.query(**params)
