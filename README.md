@@ -6,14 +6,25 @@ Tableau Python Server (TabPy) is part of Tableau's expanding range of extensibil
 
 For all questions not related to the TabPy code (installation, deployment, connections, Python issues, etc.) and requests use [Server & Online Administration Forum](https://community.tableau.com/community/forums/server-administration) on [Tableau Community](https://community.tableau.com).
 
+## Installation
+
+TabPy is distributed as two separate packages, namely as _tabpy-client_ and _tabpy-server_. Both are available from PyPy and any combination of the packages can be installed via:
+
+```sh
+pip install tabpy-server
+pip install tabpy-client
+```
+
+Alternately, to work from the source code you should reference the [Contributing Guide](CONTRIBUTING.md) for instructions on how to configure your environment and install all dependencies.
+
+## About
+
 TabPy framework allows Tableau to remotely execute Python code. It has two components:
 
 1. A [server](server.md) process built on Tornado, which allows for the remote execution of Python code through a set of REST APIs. Code can either be immediately executed or persisted in the server process and exposed as a REST endpoint, to be called later.
 2. A [client library](client.md) that enables the deployment of such endpoints, based on Python functions.
 
 Tableau can connect to the TabPy server to execute Python code on the fly and display results in Tableau visualizations. Users can control data and parameters being sent to TabPy by interacting with their Tableau worksheets, dashboard or stories.
-
-You can find detailed **installation instructions** for TabPy server [HERE](server.md).
 
 To run Python code in your Tableau calculated fields, enter the address and port number for a TabPy server instance in Tableau.
 

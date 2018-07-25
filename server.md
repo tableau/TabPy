@@ -2,121 +2,6 @@
 
 TabPy server is the server component of Tableau's Python integration. It is a Python process built on Tornado and other Python libraries.
 
-There are two ways to install TabPy. 
-- [First option](#using-the-setup-script) is using the setup script which will install Anaconda, create a new Python environment and install TabPy for you. This would be the recommended option if you don't have an existing Python setup on your computer.
-- If you are familiar with Python environments and have already set one up on your machine or prefer not to use Anaconda, you can use the [second option](#manual-installation) which will install TabPy into your active Python environment.
-
-## Using the Setup Script
-
-### Setup on Linux/MacOS
-
-On a Linux-based system you can use the script `setup.sh` to install TabPy from scratch. 
-
-Start by clicking on the green **clone or download** button in the upper right corner on [TabPy repository landing page](https://github.com/tableau/TabPy) and downloading the zip file. After unzipping, navigate to the folder containing `setup.sh` in a Terminal window and type `./setup.sh`.
-
-If you get a "Permission denied" error you may need to also give permissions to the file by typing the following: `chmod +x setup.sh`
-
-The script does the following:
-
-  - Downloads and installs Anaconda, unless Anaconda is in the PATH or a folder `Anaconda` is found in the current folder. Anaconda provides an exhaustive set of Python packages, including ML-related libraries that can be used by Python code executed by the server.
-  - Creates a Python environment named `Tableau-Python-Server` if one doesn't already exist. The script then activates the environment and adds the server folder to the PYTHONPATH (which is necessary for the server script to find its Python dependencies in the same folder).
-  - Installs required Python packages into the new environment, as well as the client package, as it contains common functionality that the server depends on.
-  - Initializes the server, displays the install location and instructions on how to start the server next time.
-
-After setup completes or when you run `startup.sh` per the instructions to start the server, you should see an output like this:
-
-```bash
-
-INFO:__main__:{"INFO": "Loading state from state file"}
-INFO:__main__:{"INFO": "Initializing tabpy"}
-INFO:__main__:{"INFO": "Done initializing tabpy"}
-INFO:__main__:{"INFO": "Web service listening on port 9004"}
-
-```
-
-At this point the server is ready to execute Python code remotely, or to deploy Python functions. See the [client documentation](client.md) for instructions on how to deploy Python functions.
-
-You can stop the server simply by terminating the process (for example, with CTRL-C).
-
-
-### Setup on Windows
-On Windows you can use the script `setup.bat` to install TabPy from scratch. 
-
-Start by clicking on the green **clone or download** button in the upper right corner on [TabPy repository landing page](https://github.com/tableau/TabPy) and downloading the zip file. After unzipping, navigate to the folder containing `setup.bat` using Windows command line and type `setup.bat`. 
-
-The script carries out the following steps:
-
-  - Downloads and installs Anaconda, under the current user account for example `C:\users\yourUserName\` unless Anaconda is in the PATH or has a registry entry. Anaconda provides an exhaustive set of Python packages, including ML-related libraries that can be used by Python code executed by the server.
-  - Creates a Python environment named `Tableau-Python-Server` if one doesn't already exist. The script then activates the environment.
-  - Installs the required Python packages into the new environment, as well as the client package, as it contains common functionality that the server depends on.
-  - Initializes the server, displays the install location and instructions on how to start the server next time.
-
-After setup completes or when you run `startup.bat` per the instructions to start the server, you should see an output like this:
-
-```bash
-
-INFO:__main__:{"INFO": "Loading state from state file"}
-INFO:__main__:{"INFO": "Initializing tabpy"}
-INFO:__main__:{"INFO": "Done initializing tabpy"}
-INFO:__main__:{"INFO": "Web service listening on port 9004"}
-
-```
-
-At this point the server is ready to execute Python code remotely, or to deploy Python functions. See the [client documentation](client.md) for instructions on how to deploy Python functions.
-
-You can stop the server simply by terminating the python2.7 process which can be seen in Windows Task Manager. (Press Ctrl+Shift+Esc to access Task Manager)
-
-
-## Manual Installation
-
-If you are familiar with Python environments and have already set one up or prefer not to use Anaconda, you can skip the setup script, install just TabPy directly from the command line. 
-
-### Setting up an Anaconda Environment
-
-If you have Anaconda, it is optional but recommended you create a new Conda environment for this project. If you don't want to use Anaconda or create a new Conda environment for TabPy, you can directly jump to the [installation step](#installing-tabpy).
-
-```Batchfile
-
-conda create --name Tableau-Python-Server python=2.7 anaconda
-
-```
-The example above assumes Conda is defined as part of PATH and creates a Python 2.7 environment but Tableau Python Server is supported on both Python 2.7+ and Python 3.5+.
-
-Now activate the newly created environment.
-
-On Linux/MacOS:
-
-```bash
-
-source activate Tableau-Python-Server
-
-```
-
-On Windows:
-
-```Batchfile
-
-activate Tableau-Python-Server
-
-```
-### Installing TabPy
-
-Since TabPy is available on [PyPI](https://pypi.python.org/pypi/tabpy-server) you can install by simply running the following command.
-
-
-```Batchfile
-
-pip install tabpy-server
-
-```
-This will install TabPy into your active Python environment regardless of whether it uses Anaconda or not. 
-
-As the packages are installed, you will see the install locations listed in the command line. These might look like `/Users/username/anaconda/envs/Tableau-Python-Server/lib/python2.7/site-packages` or `\Users\username\anaconda\envs\Tableau-Python-Server\lib\site-packages` or `/Library/Frameworks/Python.framework/Versions/3.6/lib/python3.6/site-packages` depending on your setup.
-
-Navigate to the tabpy_server folder under `site-packages` and run `startup.bat` or `startup.sh` on Windows and Linux/MacOS respectively. You can specify a custom port number as an argument e.g. `startup.bat 9001`.
-
-If you are not running Anaconda, do not have the same virtual environment name as specified above, or do not have TabPy installed in the same directory structure as Anaconda expects it, you may just start tabpy.py from the commandline (e.g. 'python tabpy.py' or python3 tabpy.py').
-
 ## TabPy Configuration
 
 Default settings for TabPy may be viewed in the tabpy_server/common/config.py.template file.
@@ -129,52 +14,17 @@ Change settings by:
 
 The template file is not used by the application but is used for documenting which settings may be modified and what the defaults are if no config file or environment variables are set.
 
-## Updating TabPy
-You can update to a newer version by using the `-—upgrade` option in `pip`. 
+## Starting the Server
 
-```Batchfile
+If you have installed a pre-built distribution from PyPy you will need to navigate to the source code contained in _site\\_packages_ and go subsequently into the tabpy-server/tabpy-server directory. From there run:
 
-pip install --upgrade tabpy-server
-
+```sh
+python tabpy.py
 ```
 
-For this to be successful, if you installed TabPy in a Conda environment, make sure that it is active. 
+to start up a server.
 
-
-## Extending the Environment
-
-If your functionality depends on Python packages that are not included, you need to install them into your Python environment to make them available to the server process. 
-
-The following code snippet assumes you have already run `setup.sh` or `setup.bat`, which created a Conda environment and started the server process in that environment. 
-
-By adding the package _names_ to it, it becomes available for any Python code to be executed in the server:
-
-On Linux/MacOS:
-
-```bash
-
-/Anaconda/bin/source activate Tableau-Python-Server
-pip install _names_of_packages_here_
-
-```
-On Windows:
-
-```Batchfile
-
-/Anaconda/Scripts/activate Tableau-Python-Server
-pip install _names_of_packages_here_
-
-```
-If you installed TabPy without Anaconda in your default Python framework you can achieve the same by doing:
-
-```Batchfile
-
-pip install _names_of_packages_here_
-
-```
-
-You can do this in a separate terminal while the server process is running-no need to restart.
-
+If working with the source code refer to the instructions located in the [Contributing Guide](CONTRIBUTING.md).
 
 ## REST Interfaces
 
