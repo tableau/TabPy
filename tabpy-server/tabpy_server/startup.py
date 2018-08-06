@@ -10,7 +10,7 @@ if sys.platform == 'win32':
     else:
         subprocess.Popen(['startup.bat'], cwd=dir_path)
 
-elif sys.platform in ['darwin', 'linux2']:
+elif sys.platform in ['darwin', 'linux2', 'linux']:
     if len(sys.argv) >= 2:
         subprocess.Popen(['sh', './startup.sh', sys.argv[1]])
     else:
