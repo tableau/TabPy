@@ -23,3 +23,11 @@ Thereafter, simply navigate to tabpy-server/tabpy-server and run:
 ```sh
 python tabpy.py
 ```
+
+## Testing Your Changes
+
+After making any changes to either the client or the server you can run the regression test suite from the top level directory as follows:
+
+```sh
+python runtests.py
+```
