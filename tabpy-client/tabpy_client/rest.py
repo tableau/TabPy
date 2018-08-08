@@ -7,7 +7,7 @@ from collections import MutableMapping as _MutableMapping
 
 import json as json
 
-from common.tabpy_logging import (
+from tabpy_server.common.tabpy_logging import (
     PYLogging,
     log_error,
     log_info,

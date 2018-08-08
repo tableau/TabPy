@@ -8,7 +8,7 @@ from os.path import isfile
 from os import remove
 from sys import version_info
 
-from tabpy import get_config
+from tabpy_server.tabpy import get_config
 
 
 class TestConfigEnvironmentCalls(unittest.TestCase):
