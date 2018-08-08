@@ -768,9 +768,9 @@ def get_config():
     For naming standards use all capitals and start with 'TABPY_'
     """
 
-    if os.path.isfile('./common/config.py'):
-        import common.config as config
-    else:
+    try:
+        import tabpy_server.common.config as config
+    except ImportError:
         config = None
 
     settings = {}
