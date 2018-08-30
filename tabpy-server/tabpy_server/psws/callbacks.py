@@ -4,14 +4,16 @@ from time import sleep
 
 from tornado import gen
 
-from common.messages import LoadObject, DeleteObjects, ListObjects, ObjectList
-from common.endpoint_file_mgr import cleanup_endpoint_files
-from common.util import format_exception
-from management.state import TabPyState, get_query_object_path
+from tabpy_server.common.messages import (
+    LoadObject, DeleteObjects, ListObjects, ObjectList)
+from tabpy_server.common.endpoint_file_mgr import cleanup_endpoint_files
+from tabpy_server.common.util import format_exception
+from tabpy_server.management.state import TabPyState, get_query_object_path
 
-from management import util
+from tabpy_server.management import util
 
-from common.tabpy_logging import PYLogging, log_error, log_info, log_warning
+from tabpy_server.common.tabpy_logging import (
+    PYLogging, log_error, log_info, log_warning)
 
 
 logger = logging.getLogger(__name__)

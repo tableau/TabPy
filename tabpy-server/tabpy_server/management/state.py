@@ -11,9 +11,11 @@ from threading import Lock
 from time import time
 import sys
 
-from management.util import write_state_config, load_state_from_config_file
+from tabpy_server.management.util import (
+    write_state_config, load_state_from_config_file)
 
-from common.tabpy_logging import PYLogging, log_error, log_info, log_debug, log_warning
+from tabpy_server.common.tabpy_logging import (
+    PYLogging, log_error, log_info, log_debug, log_warning)
 
 import logging
 logger = logging.getLogger(__name__)

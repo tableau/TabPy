@@ -21,17 +21,19 @@ from tornado_json.constants import TORNADO_MAJOR
 from hashlib import md5
 from argparse import ArgumentParser
 
-from psws.python_service import PythonService
-from psws.python_service import PythonServiceHandler
+from tabpy_server.psws.python_service import PythonService
+from tabpy_server.psws.python_service import PythonServiceHandler
 
-from common.util import format_exception
-from common.tabpy_logging import PYLogging, log_error, log_info, log_debug
-from common.messages import Query, QuerySuccessful, QueryError, UnknownURI
-from psws.callbacks import (init_ps_server, init_model_evaluator,
-                            on_state_change)
+from tabpy_server.common.util import format_exception
+from tabpy_server.common.tabpy_logging import (
+    PYLogging, log_error, log_info, log_debug)
+from tabpy_server.common.messages import (
+    Query, QuerySuccessful, QueryError, UnknownURI)
+from tabpy_server.psws.callbacks import (
+    init_ps_server, init_model_evaluator, on_state_change)
 
-from management.util import _get_state_from_file
-from management.state import TabPyState, get_query_object_path
+from tabpy_server.management.util import _get_state_from_file
+from tabpy_server.management.state import TabPyState, get_query_object_path
 import concurrent.futures
 
 
@@ -766,9 +768,9 @@ def get_config():
     For naming standards use all capitals and start with 'TABPY_'
     """
 
-    if os.path.isfile('./common/config.py'):
-        import common.config as config
-    else:
+    try:
+        import tabpy_server.common.config as config
+    except ImportError:
         config = None
 
     settings = {}

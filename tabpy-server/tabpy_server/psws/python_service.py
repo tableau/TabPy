@@ -4,14 +4,15 @@ import sys
 
 
 from tabpy_client.query_object import QueryObject
-from common.util import format_exception
-from common.messages import (
+from tabpy_server.common.util import format_exception
+from tabpy_server.common.messages import (
     LoadObject, DeleteObjects, FlushObjects, CountObjects, ListObjects,
     UnknownMessage, LoadFailed, ObjectsDeleted, ObjectsFlushed, QueryFailed,
     QuerySuccessful, UnknownURI, DownloadSkipped, LoadInProgress, ObjectCount,
     ObjectList)
 
-from common.tabpy_logging import PYLogging, log_error, log_info, log_warning
+from tabpy_server.common.tabpy_logging import (
+    PYLogging, log_error, log_info, log_warning)
 
 
 logger = logging.getLogger(__name__)
