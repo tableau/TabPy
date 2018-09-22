@@ -45,8 +45,9 @@ if sys.version_info.major == 3:
 
 
 # Create application wide logging
-logger = logging.getLogger('tabpy.tabpy_server')
-logger.setLevel("INFO")
+# Could maybe move to a separate module
+app_logger = logging.getLogger('tabpy')
+app_logger.setLevel("INFO")
 temp_dir = tempfile.gettempdir()
 fh = logging.handlers.RotatingFileHandler(
     filename=os.path.join(temp_dir, "tabpy_log.log"),
@@ -54,7 +55,8 @@ fh = logging.handlers.RotatingFileHandler(
 formatter = logging.Formatter(
     '%(asctime)s - %(name)s - %(levelname)s - %(message)s')    
 fh.setFormatter(formatter)
-logger.addHandler(fh)
+app_logger.addHandler(fh)
+logger = logging.getLogger('tabpy.tabpy_server.tabpy')
 
 
 def parse_arguments():
