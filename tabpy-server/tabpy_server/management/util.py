@@ -1,4 +1,5 @@
 import concurrent.futures
+import logging
 import os
 import tempfile
 import shutil
@@ -14,23 +15,21 @@ from dateutil import parser
 from datetime import datetime, timedelta, tzinfo
 from time import mktime
 
-from tabpy_server.common.tabpy_logging import (
-    PYLogging, log_error, log_info, log_debug, log_warning)
-import logging
-logger = logging.getLogger(__name__)
-PYLogging.initialize(logger)
+
+logger = logging.getLogger('tabpy.tabpy_server.management.util')
+
 
 def load_state_from_config_file(ps_state):
     '''
     Fill initial TabPy state from state file path
     '''
     try:
-        log_info("Loading state from state file")
+        logger.info("Loading state from state file")
         state_file_path = os.environ['TABPY_STATE_PATH']
         config = util._get_state_from_file(state_file_path)
         ps_state.set_config(config)
     except Exception as e:
-        log_error("Unable to get state file:", str(e.message))
+        logger.error("Unable to get state file:", str(e.message))
 
 def write_state_config(state):
     state_path = os.environ['TABPY_STATE_PATH']

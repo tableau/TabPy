@@ -1,3 +1,4 @@
+import logging
 try:
     from ConfigParser import ConfigParser
 except ImportError:
@@ -14,12 +15,9 @@ import sys
 from tabpy_server.management.util import (
     write_state_config, load_state_from_config_file)
 
-from tabpy_server.common.tabpy_logging import (
-    PYLogging, log_error, log_info, log_debug, log_warning)
 
-import logging
-logger = logging.getLogger(__name__)
-PYLogging.initialize(logger)
+logger = logging.getLogger('tabpy.tabpy_server.management.state')
+
 
 if sys.version_info.major == 3:
     unicode = str
@@ -77,7 +75,7 @@ def save_state_to_str(config):
         config.write(string_f)
         value = string_f.getvalue()
     except:
-        log_error("Cannot convert config to string")
+        logger.error("Cannot convert config to string")
     finally:
         string_f.close()
     return value
@@ -161,7 +159,7 @@ class TabPyState(object):
         try:
             endpoint_names = self._get_config_value(_DEPLOYMENT_SECTION_NAME, name)
         except Exception as e:
-            log_error("error in get_endpoints: %s" % str(e))
+            logger.error("error in get_endpoints: %s" % str(e))
             return {}
 
         if name:
@@ -250,7 +248,7 @@ class TabPyState(object):
             endpoints[name] = endpoint_info
             self._add_update_endpoints_config(endpoints)
         except Exception as e:
-            log_error("Error in add_endpoint: %s" % e)
+            logger.error("Error in add_endpoint: %s" % e)
             raise
 
     def _add_update_endpoints_config(self, endpoints):
@@ -271,7 +269,7 @@ class TabPyState(object):
                 self._set_config_value(_DEPLOYMENT_SECTION_NAME,
                                        endpoint_name, simplejson.dumps(info))
             except Exception as e:
-                log_error("Unable to write endpoints config: %s" % e)
+                logger.error("Unable to write endpoints config: %s" % e)
                 raise
 
     @state_lock
@@ -356,7 +354,7 @@ class TabPyState(object):
             endpoints[name] = endpoint_info
             self._add_update_endpoints_config(endpoints)
         except Exception as e:
-            log_error("Error in update_endpoint: %s" % e)
+            logger.error("Error in update_endpoint: %s" % e)
             raise
 
     @state_lock
@@ -409,7 +407,7 @@ class TabPyState(object):
 
             return endpoint_to_delete
         except Exception as e:
-            log_error("Unable to delete endpoint %s" % e)
+            logger.error("Unable to delete endpoint %s" % e)
             raise ValueError("Unable to delete endpoint: %s" % e)
 
     @property
@@ -421,7 +419,7 @@ class TabPyState(object):
         try:
             name = self._get_config_value(_SERVICE_INFO_SECTION_NAME, 'Name')
         except Exception as e:
-            log_error("Unable to get name: %s" % e)
+            logger.error("Unable to get name: %s" % e)
         return name
 
     @property
@@ -433,7 +431,7 @@ class TabPyState(object):
         try:
             creation_time = self._get_config_value(_SERVICE_INFO_SECTION_NAME, 'Creation Time')
         except Exception as e:
-            log_error("Unable to get name: %s" % e)
+            logger.error("Unable to get name: %s" % e)
         return creation_time
 
     @state_lock
@@ -451,7 +449,7 @@ class TabPyState(object):
         try:
             self._set_config_value(_SERVICE_INFO_SECTION_NAME, 'Name', name)
         except Exception as e:
-            log_error("Unable to set name: %s" % e)
+            logger.error("Unable to set name: %s" % e)
 
     def get_description(self):
         '''
@@ -461,7 +459,7 @@ class TabPyState(object):
         try:
             description = self._get_config_value(_SERVICE_INFO_SECTION_NAME, 'Description')
         except Exception as e:
-            log_error("Unable to get description: %s" % e)
+            logger.error("Unable to get description: %s" % e)
         return description
 
     @state_lock
@@ -479,7 +477,7 @@ class TabPyState(object):
         try:
             self._set_config_value(_SERVICE_INFO_SECTION_NAME, 'Description', description)
         except Exception as e:
-            log_error("Unable to set description: %s" % e)
+            logger.error("Unable to set description: %s" % e)
 
     def get_revision_number(self):
         '''
@@ -489,7 +487,7 @@ class TabPyState(object):
         try:
             rev = int(self._get_config_value(_META_SECTION_NAME, 'Revision Number'))
         except Exception as e:
-            log_error("Unable to get revision number: %s" % e)
+            logger.error("Unable to get revision number: %s" % e)
         return rev
 
     def get_cors_origin(self):
@@ -513,7 +511,7 @@ class TabPyState(object):
             self._set_config_value(_META_SECTION_NAME,
                                    'Revision Number', revision_number)
         except Exception as e:
-            log_error("Unable to set revision number: %s" % e)
+            logger.error("Unable to set revision number: %s" % e)
 
     def _remove_config_option(self, section_name, option_name,
                               _update_revision=True):

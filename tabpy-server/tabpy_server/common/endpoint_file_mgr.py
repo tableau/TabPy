@@ -8,21 +8,19 @@ The local temporary files for TabPy will by default located at
     /tmp/query_objects
 
 '''
+import logging
 import os
 import sys
 import shutil
 import time
 from re import compile as _compile
 
-from tabpy_server.common.tabpy_logging import (
-    PYLogging, log_error, log_info, log_debug, log_warning)
 
-import logging
+logger = logging.getLogger('tabpy.tabpy_server.common.endpoint_file_mgr')
 
-logger = logging.getLogger(__name__)
-PYLogging.initialize(logger)
 
 _name_checker = _compile('^[a-zA-Z0-9-_\ ]+$')
+
 
 def _check_endpoint_name(name):
     """Checks that the endpoint name is valid by comparing it with an RE and
@@ -86,7 +84,7 @@ def cleanup_endpoint_files(name, query_path, retain_versions = None):
     else:
         retain_folders = [os.path.join(local_dir, str(version)) \
                                                 for version in retain_versions]
-        log_info("Retain folder: %s" % retain_folders)
+        logger.info("Retain folder: %s" % retain_folders)
 
         for file_or_dir in os.listdir(local_dir):
             candidate_dir = os.path.join(local_dir, file_or_dir)
