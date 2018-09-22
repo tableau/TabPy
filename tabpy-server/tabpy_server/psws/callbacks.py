@@ -13,7 +13,7 @@ from tabpy_server.management.state import TabPyState, get_query_object_path
 from tabpy_server.management import util
 
 
-logger = logging.getLogger('tabpy.tabpy_server.psws.callbacks')
+logger = logging.getLogger(__name__)
 
 
 def wait_for_endpoint_loaded(py_handler, object_uri):

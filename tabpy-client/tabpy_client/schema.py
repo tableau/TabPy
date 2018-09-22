@@ -1,9 +1,11 @@
-import logging as _logging
+import logging
 import genson as _genson
 
 from jsonschema import validate as _validate
 
-_logger = _logging.getLogger(__name__)
+
+logger = logging.getLogger(__name__)
+
 
 def _generate_schema_from_example_and_description(input, description):
     ''' With an example input, a schema is automatically generated that conforms
@@ -19,13 +21,13 @@ def _generate_schema_from_example_and_description(input, description):
             # Case for input = {'x':1}, input_description='not a dict'
             if not isinstance(description, dict):
                 raise Exception('%s and %s do not match', input, description)
-                _logger.error('%s and %s do not match', input, description)
+                logger.error('%s and %s do not match', input, description)
 
             for key in description:
                 # Case for input = {'x':1}, input_description={'x':'x value', 'y':'y value'}
                 if key not in input_schema['properties']:
                     raise Exception('%s not found in %s', key, input)
-                    _logger.error('%s not found in %s', key, input)
+                    logger.error('%s not found in %s', key, input)
                 else:
                     input_schema['properties'][key]['description'] = description[key]
         else:
@@ -38,7 +40,7 @@ def _generate_schema_from_example_and_description(input, description):
         # This should not fail unless there are bugs with either genson or jsonschema.
         _validate(input, input_schema)
     except Exception as e:
-        _logger.error('Internal error validating schema.')
+        logger.error('Internal error validating schema.')
         raise
 
     return input_schema

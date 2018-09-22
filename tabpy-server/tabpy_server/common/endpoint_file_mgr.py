@@ -16,7 +16,7 @@ import time
 from re import compile as _compile
 
 
-logger = logging.getLogger('tabpy.tabpy_server.common.endpoint_file_mgr')
+logger = logging.getLogger(__name__)
 
 
 _name_checker = _compile('^[a-zA-Z0-9-_\ ]+$')

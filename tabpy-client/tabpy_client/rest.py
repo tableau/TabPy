@@ -7,7 +7,7 @@ from collections import MutableMapping as _MutableMapping
 import json as json
 
 
-logger = logging.getLogger('tabpy.tabpy_client.rest')
+logger = logging.getLogger(__name__)
 
 
 class ResponseError(Exception):

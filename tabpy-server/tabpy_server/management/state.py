@@ -16,7 +16,7 @@ from tabpy_server.management.util import (
     write_state_config, load_state_from_config_file)
 
 
-logger = logging.getLogger('tabpy.tabpy_server.management.state')
+logger = logging.getLogger(__name__)
 
 
 if sys.version_info.major == 3:

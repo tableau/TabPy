@@ -11,7 +11,7 @@ from tabpy_server.common.messages import (
     ObjectList)
 
 
-logger = logging.getLogger('tabpy.tabpy_server.psws.python_service')
+logger = logging.getLogger(__name__)
 
 
 if sys.version_info.major == 3:

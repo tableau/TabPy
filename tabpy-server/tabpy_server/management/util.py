@@ -16,7 +16,7 @@ from datetime import datetime, timedelta, tzinfo
 from time import mktime
 
 
-logger = logging.getLogger('tabpy.tabpy_server.management.util')
+logger = logging.getLogger(__name__)
 
 
 def load_state_from_config_file(ps_state):
