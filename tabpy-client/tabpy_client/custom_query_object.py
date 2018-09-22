@@ -1,5 +1,4 @@
 import logging
-import types as _types
 from .query_object import QueryObject as _QueryObject
 
 
@@ -7,7 +6,7 @@ logger = logging.getLogger(__name__)
 
 
 class CustomQueryObject(_QueryObject):
-    def __init__(self, query, description = ''):
+    def __init__(self, query, description=''):
         '''Create a new CustomQueryObject.
 
         Parameters
@@ -52,13 +51,16 @@ class CustomQueryObject(_QueryObject):
         try:
             ret = self.custom_query(*args, **kwargs)
         except Exception as e:
-            logger.exception('Exception hit when running custom query, error: %s' % e.message)
+            logger.exception(
+                'Exception hit when running custom query, error: '
+                '%s' % e.message)
             raise
 
         try:
             return self._make_serializable(ret)
         except Exception as e:
-            logger.exception('Cannot properly serialize custom query result, error: %s' % e.message)
+            logger.exception('Cannot properly serialize custom query result, '
+                             'error: %s' % e.message)
             raise
 
     def get_doc_string(self):

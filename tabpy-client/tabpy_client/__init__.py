@@ -9,10 +9,6 @@ import logging.handlers
 import os
 import tempfile
 
-from .client import Client
-
-from .schema import generate_schema as generate_schema
-
 
 # Create application wide logging
 logger = logging.getLogger(__name__)
@@ -22,7 +18,6 @@ fh = logging.handlers.RotatingFileHandler(
     filename=os.path.join(temp_dir, "tabpy_log.log"),
     maxBytes=10000000, backupCount=5)
 formatter = logging.Formatter(
-    '%(asctime)s - %(name)s - %(levelname)s - %(message)s')    
+    '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 fh.setFormatter(formatter)
 logger.addHandler(fh)
-

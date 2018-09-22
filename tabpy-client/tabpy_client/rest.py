@@ -101,12 +101,10 @@ class RequestsNetworkWrapper(object):
         data = self._encode_request(data)
 
         logger.info("POST %s with %r", url, data)
-        response = self.session.post(url,
-                data=data,
-                headers={
-                    'content-type': 'application/json',
-                },
-                timeout=timeout)
+        response = self.session.post(
+            url, data=data, headers={
+                'content-type': 'application/json',
+            }, timeout=timeout)
         if response.status_code not in (200, 201):
             self.raise_error(response)
 
@@ -119,12 +117,10 @@ class RequestsNetworkWrapper(object):
 
         logger.info("PUT %s with %r", url, data)
 
-        response = self.session.put(url,
-                data=data,
-                headers={
-                    'content-type': 'application/json',
-                },
-                timeout=timeout)
+        response = self.session.put(
+            url, data=data, headers={
+                'content-type': 'application/json',
+            }, timeout=timeout)
         if response.status_code != 200:
             self.raise_error(response)
 
@@ -161,7 +157,8 @@ class ServiceClient(object):
         self.network_wrapper = network_wrapper
 
         if not endpoint.endswith('/'):
-            logger.warning("endpoint %s does not end with '/': appending.", endpoint)
+            logger.warning("endpoint %s does not end with '/': appending.",
+                           endpoint)
             endpoint = endpoint + '/'
 
         self.endpoint = endpoint
@@ -266,8 +263,7 @@ class RESTObject(with_metaclass(_RESTMetaclass,_MutableMapping)):
 
         """
         logger.info("Initializing %s from %r",
-            self.__class__.__name__,
-            kwargs)
+                    self.__class__.__name__, kwargs)
         for attr in self.__rest__:
             if attr in kwargs:
                 setattr(self, attr, kwargs.pop(attr))

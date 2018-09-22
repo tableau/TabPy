@@ -24,12 +24,14 @@ def _generate_schema_from_example_and_description(input, description):
                 logger.error('%s and %s do not match', input, description)
 
             for key in description:
-                # Case for input = {'x':1}, input_description={'x':'x value', 'y':'y value'}
+                # Case for input = {'x':1},
+                # input_description={'x':'x value', 'y':'y value'}
                 if key not in input_schema['properties']:
                     raise Exception('%s not found in %s', key, input)
                     logger.error('%s not found in %s', key, input)
                 else:
-                    input_schema['properties'][key]['description'] = description[key]
+                    input_schema['properties'][key][
+                        'description'] = description[key]
         else:
             if isinstance(description, dict):
                 raise Exception('%s and %s do not match', input, description)
@@ -37,7 +39,8 @@ def _generate_schema_from_example_and_description(input, description):
                 input_schema['description'] = description
 
     try:
-        # This should not fail unless there are bugs with either genson or jsonschema.
+        # This should not fail unless there are bugs with either genson or
+        # jsonschema.
         _validate(input, input_schema)
     except Exception as e:
         logger.error('Internal error validating schema.')
