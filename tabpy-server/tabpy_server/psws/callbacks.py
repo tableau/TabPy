@@ -78,7 +78,7 @@ def init_model_evaluator(settings):
             object_name, object_version)
 
         logger.info('Load endpoint: %s, version: %s, type: %s' %
-                 (object_name, object_version, object_type))
+                    (object_name, object_version, object_type))
         if object_type == 'alias':
             msg = LoadObject(object_name, obj_info['target'],
                              object_version, False, 'alias')

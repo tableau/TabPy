@@ -3,7 +3,6 @@ import os
 import sys
 import simplejson
 import multiprocessing
-import tempfile
 import time
 from uuid import uuid4 as random_uuid
 import shutil

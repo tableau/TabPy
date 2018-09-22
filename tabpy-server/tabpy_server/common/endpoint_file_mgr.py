@@ -10,9 +10,7 @@ The local temporary files for TabPy will by default located at
 '''
 import logging
 import os
-import sys
 import shutil
-import time
 from re import compile as _compile
 
 
@@ -82,8 +80,8 @@ def cleanup_endpoint_files(name, query_path, retain_versions = None):
     if not retain_versions:
         shutil.rmtree(local_dir)
     else:
-        retain_folders = [os.path.join(local_dir, str(version)) \
-                                                for version in retain_versions]
+        retain_folders = [os.path.join(local_dir, str(version))
+                          for version in retain_versions]
         logger.info("Retain folder: %s" % retain_folders)
 
         for file_or_dir in os.listdir(local_dir):

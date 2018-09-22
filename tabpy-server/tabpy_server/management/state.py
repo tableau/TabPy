@@ -12,8 +12,7 @@ from threading import Lock
 from time import time
 import sys
 
-from tabpy_server.management.util import (
-    write_state_config, load_state_from_config_file)
+from tabpy_server.management.util import write_state_config
 
 
 logger = logging.getLogger(__name__)
@@ -157,7 +156,8 @@ class TabPyState(object):
         '''
         endpoints = {}
         try:
-            endpoint_names = self._get_config_value(_DEPLOYMENT_SECTION_NAME, name)
+            endpoint_names = self._get_config_value(
+                _DEPLOYMENT_SECTION_NAME, name)
         except Exception as e:
             logger.error("error in get_endpoints: %s" % str(e))
             return {}
@@ -429,7 +429,8 @@ class TabPyState(object):
         '''
         creation_time = 0
         try:
-            creation_time = self._get_config_value(_SERVICE_INFO_SECTION_NAME, 'Creation Time')
+            creation_time = self._get_config_value(
+                _SERVICE_INFO_SECTION_NAME, 'Creation Time')
         except Exception as e:
             logger.error("Unable to get name: %s" % e)
         return creation_time
@@ -457,7 +458,8 @@ class TabPyState(object):
         '''
         description = None
         try:
-            description = self._get_config_value(_SERVICE_INFO_SECTION_NAME, 'Description')
+            description = self._get_config_value(
+                _SERVICE_INFO_SECTION_NAME, 'Description')
         except Exception as e:
             logger.error("Unable to get description: %s" % e)
         return description
@@ -475,7 +477,8 @@ class TabPyState(object):
         if not isinstance(description, (str, unicode)):
             raise ValueError("Description must be a string.")
         try:
-            self._set_config_value(_SERVICE_INFO_SECTION_NAME, 'Description', description)
+            self._set_config_value(
+                _SERVICE_INFO_SECTION_NAME, 'Description', description)
         except Exception as e:
             logger.error("Unable to set description: %s" % e)
 
@@ -485,7 +488,8 @@ class TabPyState(object):
         '''
         rev = -1
         try:
-            rev = int(self._get_config_value(_META_SECTION_NAME, 'Revision Number'))
+            rev = int(self._get_config_value(
+                _META_SECTION_NAME, 'Revision Number'))
         except Exception as e:
             logger.error("Unable to get revision number: %s" % e)
         return rev

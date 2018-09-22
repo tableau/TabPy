@@ -73,8 +73,8 @@ class PythonService(object):
                      object_type):
         try:
             logger.info(msg="Loading object",
-                     uri=object_uri, url=object_url,
-                     version=object_version, is_update=is_update)
+                        uri=object_uri, url=object_url,
+                        version=object_version, is_update=is_update)
             if object_type == 'model':
                 po = QueryObject.load(object_url)
             elif object_type == 'alias':
@@ -89,7 +89,7 @@ class PythonService(object):
                                               'last_error': None}
         except Exception as e:
             logger.error("Unable to load QueryObject", path=object_url,
-                      error=str(e))
+                         error=str(e))
 
             self.query_objects[object_uri] = {
                 'version': object_version,
@@ -104,7 +104,8 @@ class PythonService(object):
                 obj_info = self.query_objects.get(object_uri)
                 if obj_info and obj_info['endpoint_obj'] and (
                         obj_info['version'] >= object_version):
-                    logger.info("Received load message for object already loaded")
+                    logger.info(
+                        "Received load message for object already loaded")
 
                     return DownloadSkipped(
                         object_uri, obj_info['version'], "Object with greater "
@@ -157,7 +158,8 @@ class PythonService(object):
                                "that doesn't exist", object_uris=object_uris)
                 return ObjectsDeleted([])
         else:
-            logger.error("Unexpected input to delete objects", input=object_uris,
+            logger.error("Unexpected input to delete objects",
+                         input=object_uris,
                          info="Input should be list or str. Type: %s" % type(
                              object_uris))
             return ObjectsDeleted([])

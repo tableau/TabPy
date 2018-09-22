@@ -1,8 +1,5 @@
-import concurrent.futures
 import logging
 import os
-import tempfile
-import shutil
 try:
     from ConfigParser import ConfigParser as _ConfigParser
 except ImportError:
@@ -26,10 +23,14 @@ def load_state_from_config_file(ps_state):
     try:
         logger.info("Loading state from state file")
         state_file_path = os.environ['TABPY_STATE_PATH']
+
+        # TODO: the below is namespaced with util which isn't valid (?)
+        # check if this is dead code and remove accordingly
         config = util._get_state_from_file(state_file_path)
         ps_state.set_config(config)
     except Exception as e:
         logger.error("Unable to get state file:", str(e.message))
+
 
 def write_state_config(state):
     state_path = os.environ['TABPY_STATE_PATH']
