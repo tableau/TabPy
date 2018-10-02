@@ -8,7 +8,7 @@ For all questions not related to the TabPy code (installation, deployment, conne
 
 ## Installation
 
-TabPy is distributed as two separate packages, namely as _tabpy-client_ and _tabpy-server_. Both are available from PyPy and any combination of the packages can be installed via:
+TabPy is distributed as two separate packages, namely as _tabpy-client_ and _tabpy-server_. Both are available from PyPi and any combination of the packages can be installed via:
 
 ```sh
 pip install tabpy-server
