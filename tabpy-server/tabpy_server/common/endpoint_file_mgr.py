@@ -14,7 +14,7 @@ import shutil
 import time
 from re import compile as _compile
 
-from tabpy_server.common.tabpy_logging import (
+from tabpy_tools.tabpy_logging import (
     PYLogging, log_error, log_info, log_debug, log_warning)
 
 import logging

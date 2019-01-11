@@ -12,7 +12,7 @@ from tabpy_server.management.state import TabPyState, get_query_object_path
 
 from tabpy_server.management import util
 
-from tabpy_server.common.tabpy_logging import (
+from tabpy_tools.tabpy_logging import (
     PYLogging, log_error, log_info, log_warning)
 
 
@@ -145,7 +145,7 @@ def on_state_change(settings):
 
         log_info("Loading state from state file")
         config = util._get_state_from_file(settings['state_file_path'])
-        new_ps_state = TabPyState(config=config)
+        new_ps_state = TabPyState(config=config, settings=settings)
 
         (has_changes, changes) = _get_latest_service_state(settings,
                                                            new_ps_state)

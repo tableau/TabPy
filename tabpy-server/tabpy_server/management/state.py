@@ -11,10 +11,9 @@ from threading import Lock
 from time import time
 import sys
 
-from tabpy_server.management.util import (
-    write_state_config, load_state_from_config_file)
+from tabpy_server.management.util import (write_state_config)
 
-from tabpy_server.common.tabpy_logging import (
+from tabpy_tools.tabpy_logging import (
     PYLogging, log_error, log_info, log_debug, log_warning)
 
 import logging
@@ -119,7 +118,8 @@ class TabPyState(object):
     There is a config to any attribute.
 
     '''
-    def __init__(self, config=None):
+    def __init__(self, settings, config=None):
+        self.settings = settings
         self.set_config(config, _update=False)
 
     @state_lock
@@ -492,16 +492,38 @@ class TabPyState(object):
             log_error("Unable to get revision number: %s" % e)
         return rev
 
-    def get_cors_origin(self):
+    def get_access_control_allow_origin(self):
         '''
-        Returns the CORS origin of this TabPy service.
+        Returns Access-Control-Allow-Origin of this TabPy service.
         '''
         _cors_origin = ''
         try:
-            _cors_origin = self._get_config_value('Service Info', 'CORS Origin')
+            _cors_origin = self._get_config_value('Service Info', 'Access-Control-Allow-Origin')
         except Exception as e:
             pass
         return _cors_origin
+
+    def get_access_control_allow_headers(self):
+        '''
+        Returns Access-Control-Allow-Headers of this TabPy service.
+        '''
+        _cors_headers = ''
+        try:
+            _cors_headers = self._get_config_value('Service Info', 'Access-Control-Allow-Headers')
+        except Exception as e:
+            pass
+        return _cors_headers
+
+    def get_access_control_allow_methods(self):
+        '''
+        Returns Access-Control-Allow-Methods of this TabPy service.
+        '''
+        _cors_methods = ''
+        try:
+            _cors_methods = self._get_config_value('Service Info', 'Access-Control-Allow-Methods')
+        except Exception as e:
+            pass
+        return _cors_methods
 
     def _set_revision_number(self, revision_number):
         '''
@@ -543,6 +565,7 @@ class TabPyState(object):
             raise ValueError("State configuration not yet loaded.")
 
         if not self.config.has_section(section_name):
+            logger.debug("Adding config section {}".format(section_name))
             self.config.add_section(section_name)
 
         self.config.set(section_name, option_name, option_value)
@@ -576,4 +599,5 @@ class TabPyState(object):
         '''
         Write state (ConfigParser) to Consul
         '''
-        write_state_config(self.config)
+        logger.info("Writing state to config")
+        write_state_config(self.config, self.settings)
