@@ -15,4 +15,4 @@ display results in Tableau visualizations. Users can control data and parameters
 being sent to TabPy by interacting with their Tableau worksheets, dashboard or stories.
 
 For how to configure Tableau to connect to TabPy server follow steps in 
-[Tableau Configuratin Document](TableauConfiguration.md).
+[Tableau Configuration Document](TableauConfiguration.md).
