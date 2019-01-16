@@ -28,7 +28,6 @@ setup(
     package_data={'tabpy_server.static': ['*.*'],
                   'tabpy_server': ['startup.*', 'state.ini']},
     license='MIT',
-    # TODO Add tabpy_tools dependency when published on github
     install_requires=[
         'backports_abc',
         'cloudpickle',
