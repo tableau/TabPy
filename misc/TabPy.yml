@@ -1,0 +1,241 @@
+swagger: "2.0"
+info:
+  description: TabPy API Swagger
+  version: v0.3
+  title: TabPy REST API
+  termsOfService: https://github.com/tableau/TabPy/blob/master/LICENSE
+  contact:
+    email: github@tableau.com
+  license:
+    name: MIT
+    url: https://github.com/tableau/TabPy/blob/master/LICENSE
+host: localhost:9004
+basePath: "/"
+tags:
+- name: info
+  description: TabPy Server Info
+  externalDocs:
+    description: Find out more
+    url: https://gitlab.tableausoftware.com/tableau-advanced-analytics/TabPy-dev/blob/master/docs/server-rest.md
+- name: evaluate
+  description: Evaluate Python script
+  externalDocs:
+    description: Find out more
+    url: https://gitlab.tableausoftware.com/tableau-advanced-analytics/TabPy-dev/blob/master/docs/server-rest.md
+- name: models
+  description: TabPy Server Models
+  externalDocs:
+    description: Find out more
+    url: https://gitlab.tableausoftware.com/tableau-advanced-analytics/TabPy-dev/blob/master/docs/server-rest.md
+consumes:
+  - application/json
+produces:
+  - application/json
+schemes:
+- http
+paths:
+  /info:
+    get:
+      tags: 
+      - info
+      summary: Show server info
+      description: Get static information about TabPy Server.
+      operationId: info
+      responses:
+        200:
+          description: Successful operation
+          schema:
+            $ref: "#/definitions/Info"
+  /evaluate:
+    post:
+      tags:
+      - evaluate
+      summary: Evaluate Python script
+      description: Executes a block of Python code, replacing named parameters with their provided values.
+      operationId: evaluate
+      parameters:
+      - in: body
+        name: body
+        description: Script and data
+        required: true
+        schema:
+          type: object
+          properties:
+            data:
+              type: object
+              additionalProperties:
+                type: array
+                items:
+                  type: object
+          example: 
+            data:
+              _arg1: [1, 2, 3]
+              _arg2: [3, -1, 6]
+            script: |-
+              res=[]
+              for i in range(len(_arg1)):
+                res.append(_arg1[i] * _arg2[i])
+              return res
+      responses:
+        200:
+          description: Successful operation
+          schema:
+            type: array
+            items:
+              type: object
+            example: [1, 2, 3]
+        500:
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/ErrorEvaluateScript500'
+  /status:
+    get:
+      tags:
+      - models
+      summary: Runtime status of deployed models
+      description: Get runtime status of delployed endpoints. Returns empty result if no models are deployed.
+      operationId: status
+      responses:
+        200:
+          description: Successful operation
+          schema:
+            $ref: "#/definitions/Status"
+  /endpoints:
+    get:
+      tags:
+      - models
+      summary: List of deployed models
+      description: Gets a list of deployed endpoints and their static information. If no endpoints are deployed in the server, the returned data is an empty JSON object.
+      operationId: endpoints
+      responses:
+        200:
+          description: Successful operation
+          schema:
+            $ref: "#/definitions/Status"
+  /endpoints/{model}:
+    get:
+      tags:
+      - models
+      summary: Gets the description of a specific deployed endpoint. 
+      description: Gets the description of a specific deployed endpoint. 
+      operationId: model_description
+      parameters: 
+      - name: model
+        in: path
+        type: string
+        required: true
+      responses:
+        200:
+          description: Successful operation
+          schema:
+            $ref: "#/definitions/Status"
+  /query/{model}:
+    post:
+      tags: 
+      - models
+      summary: Executes a function at the specified endpoint.
+      description: Executes a function at the specified endpoint. The function must first be deployed.
+      operationId: model_query
+      parameters: 
+      - name: model
+        in: path
+        type: string
+        required: true
+      - name: body
+        in: body
+        description: Data for the model to execute against.
+        required: true
+        schema:
+          type: object
+          properties:
+            data: 
+              type: object
+              additionalProperties:
+                type: array
+                items:
+                  type: object
+          example: 
+            data:
+              x: [6.35, 6.40, 6.65, 8.60, 8.90, 9.00, 9.10]
+              y: [1.95, 1.95, 2.05, 3.05, 3.05, 3.10, 3.15]
+      responses:
+        200:
+          description: Successful operation
+          schema:
+            $ref: "#/definitions/ModelResponse"
+        500:
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/ErrorEvaluateScript500'
+
+definitions:
+  Info:
+    type: object
+    properties:
+      description:
+        type: string
+      creation_time:
+        type: string
+      state_path:
+        type: string
+      server_version:
+        type: string
+      name:
+        type: string
+  ErrorEvaluateScript500:
+    type: object
+    properties:
+      message:
+        type: string
+      info:
+        type: string
+  Status:
+    type: object
+    properties:
+      Model:
+        $ref: "#/definitions/Model"
+  Model:
+    type: object
+    properties:
+      status:
+        type: string
+      last_error:
+        type: string
+      version:
+        type: integer
+      dependencies:
+        type: array
+        items:
+          type: string
+      creation_time:
+        type: integer
+      last_modified_time:
+        type: integer
+      schema:
+        type: object
+      type:
+        type: string
+      target:
+        type: object
+      description:
+        type: string
+      docstring:
+        type: string
+  ModelResponse:
+    type: object
+    properties:
+      model:
+        type: string
+      version:
+        type: integer
+      uuid:
+        type: string
+        format: uuid
+      response:
+        type: array
+        items:
+          type: object
+      
+externalDocs:
+  description: Find out more about TabPy
+  url: https://github.com/tableau/TabPy

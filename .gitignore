@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
+*.pyc
 
 # C extensions
 *.so
@@ -103,5 +104,22 @@ venv.bak/
 # mypy
 .mypy_cache/
 
+# NodeJS files and folders
+node_modules/
+package.json
+package-lock.json
+
 # OS generated
 .DS_Store
+
+# PyCharm
+.idea/
+
+# TabPy server artifacts
+tabpy-server/install.log
+tabpy-server/tabpy_server/query_objects
+tabpy-server/tabpy_server/staging
+
+# etc
+setup.bat
+*~

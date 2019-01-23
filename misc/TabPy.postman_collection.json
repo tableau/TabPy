@@ -1,0 +1,151 @@
+{
+	"info": {
+		"_postman_id": "add0b83b-3c11-4c80-973a-0a5fbf803e58",
+		"name": "TabPy",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "{{endpoint}}/info",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{endpoint}}/info",
+					"host": [
+						"{{endpoint}}"
+					],
+					"path": [
+						"info"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{endpoint}}/evaluate",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"data\": \n\t{ \n\t\t\"_arg1\" : [1, 2, 3], \n\t\t\"_arg2\" : [3, -1, 5]\n\t},\n\t\"script\": \n\t\"res = []\\nfor i in range(len(_arg1)):\\n  res.append(_arg1[i] * _arg2[i])\\nreturn res\"\n}\n"
+				},
+				"url": {
+					"raw": "{{endpoint}}/evaluate",
+					"host": [
+						"{{endpoint}}"
+					],
+					"path": [
+						"evaluate"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{endpoint}}/status",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{endpoint}}/status",
+					"host": [
+						"{{endpoint}}"
+					],
+					"path": [
+						"status"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{endpoint}}/endpoints",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{endpoint}}/endpoints",
+					"host": [
+						"{{endpoint}}"
+					],
+					"path": [
+						"endpoints"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{endpoint}}/query/add",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"data\": {\r\n    \"x\": [\r\n      6.35,\r\n      6.4,\r\n      6.65,\r\n      8.6,\r\n      8.9,\r\n      9,\r\n      9.1\r\n    ],\r\n    \"y\": [\r\n      1.95,\r\n      1.95,\r\n      2.05,\r\n      3.05,\r\n      3.05,\r\n      3.1,\r\n      3.15\r\n    ]\r\n  }\r\n}"
+				},
+				"url": {
+					"raw": "{{endpoint}}/query/add",
+					"host": [
+						"{{endpoint}}"
+					],
+					"path": [
+						"query",
+						"add"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "{{endpoint}}/endpoints/add",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{endpoint}}/endpoints/add",
+					"host": [
+						"{{endpoint}}"
+					],
+					"path": [
+						"endpoints",
+						"add"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

@@ -1,20 +1,22 @@
+import versioneer
 try:
     from setuptools import setup
-except ImportError:
-    from distutils.core import setup
+except ImportError as err:
+    print("Missing Python module requirement: setuptools.")
+    raise err
 
 
 setup(
     name='tabpy-server',
-    version='0.2',
+    python-requires='>=3.7.2',
+    version=versioneer.get_version(),
     description='Web server Tableau uses to run Python scripts.',
     url='https://github.com/tableau/TabPy',
     author='Tableau',
     author_email='github@tableau.com',
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3.5',
         "Topic :: Scientific/Engineering",
         "Topic :: Scientific/Engineering :: Information Analysis",
@@ -25,21 +27,24 @@ setup(
               'tabpy_server.psws',
               'tabpy_server.static'],
     package_data={'tabpy_server.static': ['*.*'],
-                  'tabpy_server': ['startup.*', 'state.ini.template']},
+                  'tabpy_server': ['startup.*', 'state.ini']},
     license='MIT',
     install_requires=[
-        'future',
-        'futures',
-        'requests',
-        'simplejson',
-        'Tornado-JSON',
-        'tornado',
+        'backports_abc',
         'cloudpickle',
+        'configparser',
         'decorator',
-        'python-dateutil',
         'genson',
-        'jsonschema',
-        'tabpy_client',
-        'numpy'
-    ]
+        'jsonschema>=2.3.0',
+        'mock',
+        'numpy',
+        'python-dateutil',
+        'pyOpenSSL',
+        'requests',
+        'singledispatch',
+        'simplejson',
+        'tornado==5.1.1',
+        'Tornado-JSON'
+    ],
+    cmdclass=versioneer.get_cmdclass(),
 )
