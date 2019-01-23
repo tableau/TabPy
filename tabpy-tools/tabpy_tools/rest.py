@@ -1,9 +1,9 @@
-import logging as _logging
+import logging
 from future.utils import with_metaclass
 import requests
-from re import compile as _compile
+from re import compile
 
-_logger = _logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 
 from collections import MutableMapping as _MutableMapping
 
@@ -172,7 +172,7 @@ class ServiceClient(object):
 
         self.network_wrapper = network_wrapper
 
-        pattern = _compile('.*(:[0-9]+)$')
+        pattern = compile('.*(:[0-9]+)$')
         if not endpoint.endswith('/') and not pattern.match(endpoint):
             _logger.warning("endpoint %s does not end with '/': appending.", endpoint)
             endpoint = endpoint + '/'
@@ -329,7 +329,7 @@ class RESTObject(with_metaclass(_RESTMetaclass, _MutableMapping)):
 
     def __eq__(self, other):
         return (
-                type(self) == type(self)
+                type(self) == type(other)
                 and all((
             getattr(self, a) == getattr(other, a)
             for a in self.__rest__

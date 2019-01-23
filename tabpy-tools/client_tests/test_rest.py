@@ -1,14 +1,14 @@
-import unittest
+import json
+import requests
 import sys
+import unittest
 
 try:
     from unittest.mock import Mock
 except ImportError:
     from mock import Mock
 
-import requests
-
-from tabpy_tools.rest import *
+from tabpy_tools.rest import (RequestsNetworkWrapper, ServiceClient)
 
 
 class TestRequestsNetworkWrapper(unittest.TestCase):

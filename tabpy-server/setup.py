@@ -33,8 +33,6 @@ setup(
         'cloudpickle',
         'configparser',
         'decorator',
-        'future',
-        'futures',
         'genson',
         'jsonschema>=2.3.0',
         'mock',

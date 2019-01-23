@@ -6,7 +6,7 @@ try:
 except ImportError:
     from mock import Mock
 
-from tabpy_tools.client import *
+from tabpy_tools.client import Client
 
 import requests
 

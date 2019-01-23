@@ -214,10 +214,12 @@ client.query('clustering', x, y)
 Response:
 
 ```json
-{u'model': u'clustering',
- u'response': [0, 0, 0, 1, 1, 1, 1],
- u'uuid': u'1ca01e46-733c-4a77-b3da-3ded84dff4cd',
- u'version': 2}
+{
+  'model': 'clustering',
+  'response': [0, 0, 0, 1, 1, 1, 1],
+  'uuid': '1ca01e46-733c-4a77-b3da-3ded84dff4cd',
+  'version': 2
+}
 
 ```
 

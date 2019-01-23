@@ -40,21 +40,17 @@ be able to work on TabPy changes:
     ```sh
     git clone https://github.com/tableau/TabPy.git
     cd TabPy
-    set TABPY_ROOT=%cd%
-    set PYTHONPATH=%PYTHONPATH%;%TABPY_ROOT%\tabpy-server;%TABPY_ROOT%\tabpy-server\tabpy_server;%TABPY_ROOT%\tabpy-tools;%TABPY_ROOT%\tabpy-tools\tabpy_tools;%TABPY_ROOT%\tabpy-server\tabpy_server\psws
     ```
 
 To start a local TabPy instance:
 
 ```sh
-cd %TABPY_ROOT%
 startup.cmd
 ```
 
 To run the unit test suite:
 
 ```sh
-cd %TABPY_ROOT%
 python tests\runtests.py
 ```
 

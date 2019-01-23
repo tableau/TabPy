@@ -120,7 +120,6 @@ tabpy-server/tabpy_server/common/default.conf
 tabpy-server/install.log
 tabpy-server/tabpy_server/query_objects
 tabpy-server/tabpy_server/staging
-tabpy-server/tabpy_server/state.ini
 
 # etc
 setup.bat

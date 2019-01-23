@@ -1,30 +1,27 @@
-from re import compile as _compile
-import time as _time
+from re import compile
+import time
 import sys
-
 import requests
 
 from .rest import (
-    RequestsNetworkWrapper as _RequestsNetworkWrapper,
-    ServiceClient as _ServiceClient,
+    RequestsNetworkWrapper,
+    ServiceClient
 )
 
 from .rest_client import (
-    RESTServiceClient as _RESTServiceClient,
-    Endpoint as _Endpoint,
-    AliasEndpoint as _AliasEndpoint,
+    RESTServiceClient,
+    Endpoint,
+    AliasEndpoint
 )
 
-from .custom_query_object import CustomQueryObject as \
-    _CustomQueryObject
+from .custom_query_object import CustomQueryObject
 
-import os as _os
+import os
+import logging
 
-import logging as _logging
+_logger = logging.getLogger(__name__)
 
-_logger = _logging.getLogger(__name__)
-
-_name_checker = _compile('^[a-zA-Z0-9-_\ ]+$')
+_name_checker = compile('^[a-zA-Z0-9-_\ ]+$')
 
 if sys.version_info.major == 3:
     unicode = str
@@ -40,7 +37,7 @@ def _check_endpoint_type(name):
 
 def _check_hostname(name):
     _check_endpoint_type(name)
-    hostname_checker = _compile('^http(s)?://[a-zA-Z0-9-_\.]+(/)?(:[0-9]+)?(/)?$')
+    hostname_checker = compile('^http(s)?://[a-zA-Z0-9-_\.]+(/)?(:[0-9]+)?(/)?$')
 
     if not hostname_checker.match(name):
         raise ValueError('endpoint name {} should be in http(s)://<hostname>[:<port>] and hostname may consist only of:'
@@ -88,17 +85,17 @@ class Client(object):
         """
         _check_hostname(endpoint)
 
-        self._endpoint = endpoint
+        self.Endpoint = endpoint
         self._verify_certificate = verify_certificate
 
         session = requests.session()
         session.verify = self._verify_certificate
 
         # Setup the communications layer.
-        network_wrapper = _RequestsNetworkWrapper(session)
-        service_client = _ServiceClient(self._endpoint, network_wrapper)
+        network_wrapper = RequestsNetworkWrapper(session)
+        service_client = ServiceClient(self.Endpoint, network_wrapper)
 
-        self._service = _RESTServiceClient(service_client)
+        self._service = RESTServiceClient(service_client)
         if query_timeout is not None and query_timeout > 0:
             self.query_timeout = query_timeout
         else:
@@ -108,7 +105,7 @@ class Client(object):
         return (
                 "<" + self.__class__.__name__ +
                 ' object at ' + hex(id(self)) +
-                ' connected to ' + repr(self._endpoint) + ">")
+                ' connected to ' + repr(self.Endpoint) + ">")
 
     def get_info(self):
         """Returns a dict containing information about the service.
@@ -265,7 +262,7 @@ class Client(object):
 
         # Can only overwrite existing alias
         existing_endpoint = self.get_endpoints().get(alias)
-        endpoint = _AliasEndpoint(
+        endpoint = AliasEndpoint(
             name=alias,
             type='alias',
             description=description,
@@ -339,9 +336,9 @@ class Client(object):
         self._upload_endpoint(obj)
 
         if version == 1:
-            self._service.add_endpoint(_Endpoint(**obj))
+            self._service.add_endpoint(Endpoint(**obj))
         else:
-            self._service.set_endpoint(_Endpoint(**obj))
+            self._service.set_endpoint(Endpoint(**obj))
 
         self._wait_for_endpoint_deployment(obj['name'], obj['version'])
 
@@ -402,7 +399,7 @@ class Client(object):
             else:
                 description = ''
 
-        endpoint_object = _CustomQueryObject(
+        endpoint_object = CustomQueryObject(
             query=obj,
             description=description,
         )
@@ -427,7 +424,7 @@ class Client(object):
         dest_path = self._get_endpoint_upload_destination()
 
         # Upload the endpoint
-        obj['src_path'] = _os.path.join(
+        obj['src_path'] = os.path.join(
             dest_path,
             'endpoints',
             obj['name'],
@@ -449,7 +446,7 @@ class Client(object):
         _logger.info("Waiting for endpoint %r to deploy to version %r",
                      endpoint_name,
                      version)
-        start = _time.time()
+        start = time.time()
         while True:
             ep_status = self.get_status()
             try:
@@ -472,11 +469,11 @@ class Client(object):
                     else:
                         _logger.info("LoadSuccessful but wrong version")
 
-            if _time.time() - start > 10:
+            if time.time() - start > 10:
                 raise RuntimeError("Waited more then 10s for deployment")
 
             _logger.info("Sleeping %r", interval)
-            _time.sleep(interval)
+            time.sleep(interval)
 
     def remove(self, name):
         '''
@@ -501,7 +498,7 @@ class Client(object):
 
         # Wait for the endpoint to be removed
         while name in self.get_endpoints():
-            _time.sleep(1.0)
+            time.sleep(1.0)
 
     def get_endpoint_dependencies(self, endpoint_name=None):
         '''
