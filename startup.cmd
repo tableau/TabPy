@@ -4,18 +4,6 @@ SETLOCAL
 
 REM Set environment variables.
 SET TABPY_ROOT=%CD%
-SET PYTHONPATH=%PYTHONPATH%;%TABPY_ROOT%;%TABPY_ROOT%\tabpy-server;%TABPY_ROOT%\tabpy-server\tabpy_server;%TABPY_ROOT%\tabpy-tools;%TABPY_ROOT%\tabpy-tools\tabpy_tools
-
-
-REM Check for prerequisites
-REM     - Python 3.X
-REM     - Python modules : [ sys, subprocess, setuptools, os ]
-ECHO Checking for prerequisites...
-python tabpy-server\utils\checkPrereqs.py
-IF %ERRORLEVEL% NEQ 0 (
-    GOTO:ERROR
-)
-
 
 REM Install requirements using Python setup tools.
 ECHO Installing any missing dependencies...

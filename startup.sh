@@ -10,14 +10,6 @@ function check_status() {
 # Set environment variables
 echo Setting TABPY_ROOT to current working directory.
 export TABPY_ROOT=$PWD
-export PYTHONPATH="$PYTHONPATH:$TABPY_ROOT:$TABPY_ROOT/tabpy-server:$TABPY_ROOT/tabpy-server/tabpy_server:$TABPY_ROOT/tabpy-tools:$TABPY_ROOT/tabpy-tools/tabpy_tools"
-
-# Check for prerequisites
-#   - Python 3.X
-#   - Python modules: [sys, subprocess, setuptools, os ]
-echo Checking for prerequisites...
-python3 $TABPY_ROOT/tabpy-server/utils/checkPrereqs.py
-check_status
 
 # Check for dependencies, install them if they're not present.
 echo Installing TabPy-server requirements.
