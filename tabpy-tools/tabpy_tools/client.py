@@ -85,7 +85,7 @@ class Client(object):
         """
         _check_hostname(endpoint)
 
-        self.Endpoint = endpoint
+        self._endpoint = endpoint
         self._verify_certificate = verify_certificate
 
         session = requests.session()
@@ -93,7 +93,7 @@ class Client(object):
 
         # Setup the communications layer.
         network_wrapper = RequestsNetworkWrapper(session)
-        service_client = ServiceClient(self.Endpoint, network_wrapper)
+        service_client = ServiceClient(self._endpoint, network_wrapper)
 
         self._service = RESTServiceClient(service_client)
         if query_timeout is not None and query_timeout > 0:
@@ -105,7 +105,7 @@ class Client(object):
         return (
                 "<" + self.__class__.__name__ +
                 ' object at ' + hex(id(self)) +
-                ' connected to ' + repr(self.Endpoint) + ">")
+                ' connected to ' + repr(self._endpoint) + ">")
 
     def get_info(self):
         """Returns a dict containing information about the service.
