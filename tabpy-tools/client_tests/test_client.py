@@ -6,14 +6,15 @@ try:
 except ImportError:
     from mock import Mock
 
-from tabpy_client.client import *
+from tabpy_tools.client import Client
 
 import requests
+
 
 class TestClient(unittest.TestCase):
 
     def setUp(self):
-        self.client = Client("http://example.com")
+        self.client = Client("http://example.com/")
         self.client._service = Mock()
 
     def test_init(self):
@@ -22,21 +23,21 @@ class TestClient(unittest.TestCase):
         self.assertEqual(client._endpoint, "http://example.com:9004")
         self.assertEqual(client._verify_certificate, True)
 
-        client = Client("http://example.com", 10.0, False)
+        client = Client("http://example.com/", 10.0, False)
 
-        self.assertEqual(client._endpoint, "http://example.com")
+        self.assertEqual(client._endpoint, "http://example.com/")
         self.assertEqual(client._verify_certificate, False)
 
         client = Client(
-            endpoint="https://example.com",
+            endpoint="https://example.com/",
             query_timeout=-10.0,
             verify_certificate=False)
 
-        self.assertEqual(client._endpoint, "https://example.com")
+        self.assertEqual(client._endpoint, "https://example.com/")
         self.assertEqual(client._verify_certificate, False)
-        self.assertEqual(client.query_timeout,0.0)
+        self.assertEqual(client.query_timeout, 0.0)
 
-        #valid name tests
+        # valid name tests
         with self.assertRaises(ValueError):
             c = Client('')
         with self.assertRaises(TypeError):
@@ -46,9 +47,9 @@ class TestClient(unittest.TestCase):
         with self.assertRaises(TypeError):
             c = Client()
         with self.assertRaises(ValueError):
-            c = Client("http:/www.example.com")
+            c = Client("http:/www.example.com/")
         with self.assertRaises(ValueError):
-            c = Client("httpx://www.example.com/:9004")
+            c = Client("httpx://www.example.com:9004")
 
     def test_get_status(self):
         self.client._service.get_status.return_value = "asdf"
@@ -81,6 +82,6 @@ class TestClient(unittest.TestCase):
 
     def test_get_endpoint_upload_destination(self):
         self.client._service.get_endpoint_upload_destination.return_value = \
-            {"path":"foo"}
-        
+            {"path": "foo"}
+
         self.assertEqual(self.client._get_endpoint_upload_destination(), "foo")

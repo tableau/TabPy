@@ -1,6 +1,7 @@
 import logging
 from future.utils import with_metaclass
 import requests
+from re import compile
 
 from collections import MutableMapping as _MutableMapping
 
@@ -31,6 +32,7 @@ class ResponseError(Exception):
             self.status_code,
             self.message,
             self.info)
+
 
 class RequestsNetworkWrapper(object):
     """The NetworkWrapper wraps the underlying network connection to simplify
@@ -67,7 +69,7 @@ class RequestsNetworkWrapper(object):
 
     def _remove_nones(self, data):
         if isinstance(data, dict):
-            for k in [k for k,v in data.items() if v is None]:
+            for k in [k for k, v in data.items() if v is None]:
                 del data[k]
 
     def _encode_request(self, data):
@@ -101,10 +103,13 @@ class RequestsNetworkWrapper(object):
         data = self._encode_request(data)
 
         logger.info("POST %s with %r", url, data)
-        response = self.session.post(
-            url, data=data, headers={
-                'content-type': 'application/json',
-            }, timeout=timeout)
+        response = self.session.post(url,
+                                     data=data,
+                                     headers={
+                                         'content-type': 'application/json',
+                                     },
+                                     timeout=timeout)
+
         if response.status_code not in (200, 201):
             self.raise_error(response)
 
@@ -117,10 +122,12 @@ class RequestsNetworkWrapper(object):
 
         logger.info("PUT %s with %r", url, data)
 
-        response = self.session.put(
-            url, data=data, headers={
-                'content-type': 'application/json',
-            }, timeout=timeout)
+        response = self.session.put(url,
+                                    data=data,
+                                    headers={
+                                        'content-type': 'application/json',
+                                    },
+                                    timeout=timeout)
         if response.status_code != 200:
             self.raise_error(response)
 
@@ -142,6 +149,7 @@ class RequestsNetworkWrapper(object):
         if response.status_code not in (200, 201, 204):
             raise RuntimeError("Error with server response code: %s", response.status_code)
 
+
 class ServiceClient(object):
     """A generic service client.
 
@@ -156,7 +164,8 @@ class ServiceClient(object):
 
         self.network_wrapper = network_wrapper
 
-        if not endpoint.endswith('/'):
+        pattern = compile('.*(:[0-9]+)$')
+        if not endpoint.endswith('/') and not pattern.match(endpoint):
             logger.warning("endpoint %s does not end with '/': appending.",
                            endpoint)
             endpoint = endpoint + '/'
@@ -182,8 +191,9 @@ class ServiceClient(object):
 
 class RESTProperty(object):
     """A descriptor that will control the type of value stored."""
+
     def __init__(self, type, from_json=lambda x: x, to_json=lambda x: x,
-            doc=None):
+                 doc=None):
         self.__doc__ = doc
         self.type = type
         self.from_json = from_json
@@ -193,7 +203,7 @@ class RESTProperty(object):
         if instance:
             try:
                 return getattr(instance,
-                    self.name)
+                               self.name)
             except AttributeError:
                 raise AttributeError("%s has not been set yet." % (
                     self.name))
@@ -220,6 +230,7 @@ class _RESTMetaclass(type(_MutableMapping)):
     If the bases have __rest__, then it will add them to the __rest__ set as
     well.
     """
+
     def __init__(self, name, bases, dict):
         super(_RESTMetaclass, self).__init__(name, bases, dict)
 
@@ -227,14 +238,13 @@ class _RESTMetaclass(type(_MutableMapping)):
         for base in bases:
             self.__rest__.update(getattr(base, '__rest__', set()))
 
-
-        for k,v in dict.items():
+        for k, v in dict.items():
             if isinstance(v, RESTProperty):
-                v.__dict__['name'] = '_'+k
+                v.__dict__['name'] = '_' + k
                 self.__rest__.add(k)
 
 
-class RESTObject(with_metaclass(_RESTMetaclass,_MutableMapping)):
+class RESTObject(with_metaclass(_RESTMetaclass, _MutableMapping)):
     """A base class that has methods generally useful for interacting with
     REST objects. The attributes are accessible either as dict keys or as
     attributes. The object also behaves like a dict, even replicating the
@@ -270,12 +280,12 @@ class RESTObject(with_metaclass(_RESTMetaclass,_MutableMapping)):
 
     def __repr__(self):
         return (
-            "{"+
+                "{" +
                 ", ".join([
                     repr(k) + ": " + repr(v)
-                    for k,v in self.items()
-                ])+
-            "}"
+                    for k, v in self.items()
+                ]) +
+                "}"
         )
 
     @classmethod
@@ -291,7 +301,6 @@ class RESTObject(with_metaclass(_RESTMetaclass,_MutableMapping)):
                 prop = cls.__dict__[attr]
                 attrs[attr] = prop.from_json(value)
         return cls(**attrs)
-
 
     def to_json(self):
         """Returns a dict representing this object. This dict will be sent to
@@ -312,18 +321,17 @@ class RESTObject(with_metaclass(_RESTMetaclass,_MutableMapping)):
 
     def __eq__(self, other):
         return (
-            type(self) == type(self)
-            and all((
-                getattr(self, a) == getattr(other, a)
-                for a in self.__rest__
-            )))
+                type(self) == type(other)
+                and all((
+            getattr(self, a) == getattr(other, a)
+            for a in self.__rest__
+        )))
 
     def __len__(self):
-        return len([a for a in self.__rest__ if hasattr(self, '_'+a)])
+        return len([a for a in self.__rest__ if hasattr(self, '_' + a)])
 
     def __iter__(self):
-        return iter([a for a in self.__rest__ if hasattr(self, '_'+a)])
-
+        return iter([a for a in self.__rest__ if hasattr(self, '_' + a)])
 
     def __getitem__(self, item):
         if item not in self.__rest__:
@@ -342,7 +350,7 @@ class RESTObject(with_metaclass(_RESTMetaclass,_MutableMapping)):
         if item not in self.__rest__:
             raise KeyError(item)
         try:
-            delattr(self, '_'+item)
+            delattr(self, '_' + item)
         except AttributeError:
             raise KeyError(item)
 
@@ -394,8 +402,8 @@ def enum(*values, **kwargs):
         'Enum',
         (enum_type,),
         {
-            'values':values,
-            '__new__':__new__,
+            'values': values,
+            '__new__': __new__,
         })
 
     return enum

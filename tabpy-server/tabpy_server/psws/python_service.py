@@ -1,8 +1,10 @@
 import concurrent.futures
+import tabpy_tools
 import logging
 import sys
 
-from tabpy_client.query_object import QueryObject
+
+from tabpy_tools.query_object import QueryObject
 from tabpy_server.common.util import format_exception
 from tabpy_server.common.messages import (
     LoadObject, DeleteObjects, FlushObjects, CountObjects, ListObjects,

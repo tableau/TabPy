@@ -16,24 +16,13 @@ from time import mktime
 logger = logging.getLogger(__name__)
 
 
-def load_state_from_config_file(ps_state):
-    '''
-    Fill initial TabPy state from state file path
-    '''
-    try:
-        logger.info("Loading state from state file")
-        state_file_path = os.environ['TABPY_STATE_PATH']
-
-        # TODO: the below is namespaced with util which isn't valid (?)
-        # check if this is dead code and remove accordingly
-        config = util._get_state_from_file(state_file_path)
-        ps_state.set_config(config)
-    except Exception as e:
-        logger.error("Unable to get state file:", str(e.message))
-
-
-def write_state_config(state):
-    state_path = os.environ['TABPY_STATE_PATH']
+def write_state_config(state, settings):
+    if 'state_file_path' in settings:
+        state_path = settings['state_file_path']
+    else:
+        raise ValueError('TABPY_STATE_PATH is not set')
+    
+    logger.debug("State path is {}".format(state_path))
     state_key = os.path.join(state_path, 'state.ini')
     tmp_state_file = state_key
 

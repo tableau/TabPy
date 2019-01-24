@@ -72,7 +72,7 @@ def generate_schema(input, output, input_description=None, output_description=No
     ----------
     .. sourcecode:: python
         For just one input parameter, state the example directly.
-        >>> from tabpy_client.schema import generate_schema
+        >>> from tabpy_tools.schema import generate_schema
         >>> schema = generate_schema(
                               input = 5,
                               output = 25,

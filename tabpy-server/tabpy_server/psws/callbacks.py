@@ -139,7 +139,7 @@ def on_state_change(settings):
 
         logger.info("Loading state from state file")
         config = util._get_state_from_file(settings['state_file_path'])
-        new_ps_state = TabPyState(config=config)
+        new_ps_state = TabPyState(config=config, settings=settings)
 
         (has_changes, changes) = _get_latest_service_state(settings,
                                                            new_ps_state)

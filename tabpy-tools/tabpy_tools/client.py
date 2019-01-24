@@ -1,31 +1,27 @@
-from re import compile as _compile
-import time as _time
+from re import compile
+import time
 import sys
-
 import requests
 
 from .rest import (
-    RequestsNetworkWrapper as _RequestsNetworkWrapper,
-    ServiceClient as _ServiceClient,
+    RequestsNetworkWrapper,
+    ServiceClient
 )
 
 from .rest_client import (
-    RESTServiceClient as _RESTServiceClient,
-    Endpoint as _Endpoint,
-    AliasEndpoint as _AliasEndpoint,
+    RESTServiceClient,
+    Endpoint,
+    AliasEndpoint
 )
 
-from .custom_query_object import CustomQueryObject as \
-    _CustomQueryObject
+from .custom_query_object import CustomQueryObject
 
-import os as _os
+import os
+import logging
 
+_logger = logging.getLogger(__name__)
 
-import logging as _logging
-_logger = _logging.getLogger(__name__)
-
-
-_name_checker = _compile('^[a-zA-Z0-9-_\ ]+$')
+_name_checker = compile('^[a-zA-Z0-9-_\ ]+$')
 
 if sys.version_info.major == 3:
     unicode = str
@@ -41,7 +37,7 @@ def _check_endpoint_type(name):
 
 def _check_hostname(name):
     _check_endpoint_type(name)
-    hostname_checker = _compile('^http(s)?://[a-zA-Z0-9-_\.]+(:[0-9]+)?$')
+    hostname_checker = compile('^http(s)?://[a-zA-Z0-9-_\.]+(/)?(:[0-9]+)?(/)?$')
 
     if not hostname_checker.match(name):
         raise ValueError('endpoint name {} should be in http(s)://<hostname>[:<port>] and hostname may consist only of:'
@@ -55,15 +51,15 @@ def _check_endpoint_name(name):
 
     if not _name_checker.match(name):
         raise ValueError('endpoint name %r can only contain: a-z, A-Z, 0-9,'
-            ' underscore, hyphens and spaces.' % name)
+                         ' underscore, hyphens and spaces.' % name)
 
 
 class Client(object):
 
     def __init__(self,
-            endpoint,
-            query_timeout=None,
-            verify_certificate=True):
+                 endpoint,
+                 query_timeout=None,
+                 verify_certificate=True):
         """
         Connects to a running server.
 
@@ -96,10 +92,10 @@ class Client(object):
         session.verify = self._verify_certificate
 
         # Setup the communications layer.
-        network_wrapper = _RequestsNetworkWrapper(session)
-        service_client = _ServiceClient(self._endpoint, network_wrapper)
+        network_wrapper = RequestsNetworkWrapper(session)
+        service_client = ServiceClient(self._endpoint, network_wrapper)
 
-        self._service =  _RESTServiceClient(service_client)
+        self._service = RESTServiceClient(service_client)
         if query_timeout is not None and query_timeout > 0:
             self.query_timeout = query_timeout
         else:
@@ -107,9 +103,9 @@ class Client(object):
 
     def __repr__(self):
         return (
-            "<"+self.__class__.__name__+
-                ' object at '+hex(id(self))+
-                ' connected to '+repr(self._endpoint)+">")
+                "<" + self.__class__.__name__ +
+                ' object at ' + hex(id(self)) +
+                ' connected to ' + repr(self._endpoint) + ">")
 
     def get_info(self):
         """Returns a dict containing information about the service.
@@ -126,7 +122,6 @@ class Client(object):
             * state_path: Where the state file is stored.
         """
         return self._service.get_info()
-
 
     def get_status(self):
         '''
@@ -153,7 +148,6 @@ class Client(object):
 
         '''
         return self._service.get_status()
-
 
     #
     # Query
@@ -241,7 +235,7 @@ class Client(object):
         """Returns the endpoint upload destination."""
         return self._service.get_endpoint_upload_destination()['path']
 
-    def alias(self, alias, existing_endpoint_name, description = None):
+    def alias(self, alias, existing_endpoint_name, description=None):
         '''
         Create a new endpoint to redirect to an existing endpoint, or update an
         existing alias to point to a different existing endpoint.
@@ -268,14 +262,14 @@ class Client(object):
 
         # Can only overwrite existing alias
         existing_endpoint = self.get_endpoints().get(alias)
-        endpoint = _AliasEndpoint(
-                name          = alias,
-                type          = 'alias',
-                description   = description,
-                target        = existing_endpoint_name,
-                cache_state   = 'disabled',
-                version       = 1,
-                )
+        endpoint = AliasEndpoint(
+            name=alias,
+            type='alias',
+            description=description,
+            target=existing_endpoint_name,
+            cache_state='disabled',
+            version=1,
+        )
 
         if existing_endpoint:
             if existing_endpoint.type != 'alias':
@@ -289,10 +283,9 @@ class Client(object):
 
         self._wait_for_endpoint_deployment(alias, endpoint.version)
 
-
     def deploy(self,
-        name, obj, description='', schema=None,
-        override=False):
+               name, obj, description='', schema=None,
+               override=False):
         """Deploys a Python function as an endpoint in the server.
 
         Parameters
@@ -331,8 +324,8 @@ class Client(object):
         if endpoint:
             if not override:
                 raise RuntimeError("An endpoint with that name (%r) already"
-                    " exists. Use 'override = True' to force update "
-                    "an existing endpoint." % name)
+                                   " exists. Use 'override = True' to force update "
+                                   "an existing endpoint." % name)
 
             version = endpoint.version + 1
         else:
@@ -343,9 +336,9 @@ class Client(object):
         self._upload_endpoint(obj)
 
         if version == 1:
-            self._service.add_endpoint(_Endpoint(**obj))
+            self._service.add_endpoint(Endpoint(**obj))
         else:
-            self._service.set_endpoint(_Endpoint(**obj))
+            self._service.set_endpoint(Endpoint(**obj))
 
         self._wait_for_endpoint_deployment(obj['name'], obj['version'])
 
@@ -406,19 +399,19 @@ class Client(object):
             else:
                 description = ''
 
-        endpoint_object = _CustomQueryObject(
-                query=obj,
-                description=description,
-                )
+        endpoint_object = CustomQueryObject(
+            query=obj,
+            description=description,
+        )
 
         return {
-            'name'          : name,
-            'version'       : version,
-            'description'   : description,
-            'type'          : 'model',
-            'endpoint_obj'  : endpoint_object,
-            'dependencies'  : endpoint_object.get_dependencies(),
-            'methods'       : endpoint_object.get_methods(),
+            'name': name,
+            'version': version,
+            'description': description,
+            'type': 'model',
+            'endpoint_obj': endpoint_object,
+            'dependencies': endpoint_object.get_dependencies(),
+            'methods': endpoint_object.get_methods(),
             'required_files': [],
             'required_packages': [],
             'schema': schema
@@ -431,7 +424,7 @@ class Client(object):
         dest_path = self._get_endpoint_upload_destination()
 
         # Upload the endpoint
-        obj['src_path'] = _os.path.join(
+        obj['src_path'] = os.path.join(
             dest_path,
             'endpoints',
             obj['name'],
@@ -439,13 +432,11 @@ class Client(object):
 
         endpoint_obj.save(obj['src_path'])
 
-
-
     def _wait_for_endpoint_deployment(self,
-            endpoint_name,
-            version=1,
-            interval=1.0,
-        ):
+                                      endpoint_name,
+                                      version=1,
+                                      interval=1.0,
+                                      ):
         """
         Waits for the endpoint to be deployed by calling get_status() and
         checking the versions deployed of the endpoint against the expected
@@ -453,20 +444,20 @@ class Client(object):
         expected, then it will return. Uses time.sleep().
         """
         _logger.info("Waiting for endpoint %r to deploy to version %r",
-            endpoint_name,
-            version)
-        start = _time.time()
+                     endpoint_name,
+                     version)
+        start = time.time()
         while True:
             ep_status = self.get_status()
             try:
                 ep = ep_status[endpoint_name]
             except KeyError:
                 _logger.info("Endpoint %r doesn't exist in endpoints yet",
-                    endpoint_name)
+                             endpoint_name)
             else:
                 _logger.info("ep=%r", ep)
 
-                if ep['status']  == 'LoadFailed':
+                if ep['status'] == 'LoadFailed':
                     raise RuntimeError("LoadFailed: %r" % (
                         ep['last_error'],
                     ))
@@ -478,13 +469,11 @@ class Client(object):
                     else:
                         _logger.info("LoadSuccessful but wrong version")
 
-
-
-            if _time.time() - start > 10:
+            if time.time() - start > 10:
                 raise RuntimeError("Waited more then 10s for deployment")
 
             _logger.info("Sleeping %r", interval)
-            _time.sleep(interval)
+            time.sleep(interval)
 
     def remove(self, name):
         '''
@@ -509,9 +498,9 @@ class Client(object):
 
         # Wait for the endpoint to be removed
         while name in self.get_endpoints():
-            _time.sleep(1.0)
+            time.sleep(1.0)
 
-    def get_endpoint_dependencies(self, endpoint_name = None):
+    def get_endpoint_dependencies(self, endpoint_name=None):
         '''
         Get all endpoints that depend on the given endpoint. The only
         dependency that is recorded is aliases on the endpoint they refer to.
@@ -549,6 +538,6 @@ class Client(object):
 
         else:
             return {
-                endpoint : get_dependencies(endpoint)
+                endpoint: get_dependencies(endpoint)
                 for endpoint in endpoints
             }

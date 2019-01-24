@@ -1,0 +1,25 @@
+# TabPy Changelog
+
+This file list notable changes for TabPy project releases.
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+
+## v0.3
+
+### Breaking changes
+
+- The config file is now not just Python code but an actual config
+- Tornado config file has different setting for CORS
+- Setup scripts are deleted - setup (if needed) happens with startup script
+- tabpy-client is tabpy-tools now
+
+### Improvements
+
+- Documentation is improved with more examples added
+- Versioning is done with Versioneer and github release tags
+- Improved logging
+- Unit tests are passing now
+- Configurations for Postman and Swagger are awailable to use those against running TabPy
+
+## v0.2
+
+- Initial version

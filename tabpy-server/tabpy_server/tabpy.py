@@ -1,9 +1,10 @@
 import logging
 import os
 import sys
-import simplejson
 import multiprocessing
 import time
+import configparser
+import simplejson
 from uuid import uuid4 as random_uuid
 import shutil
 from re import compile as _compile
@@ -21,6 +22,10 @@ from tornado_json.constants import TORNADO_MAJOR
 from hashlib import md5
 from argparse import ArgumentParser
 
+from OpenSSL import crypto
+from datetime import datetime
+from io import StringIO
+
 from tabpy_server.psws.python_service import PythonService
 from tabpy_server.psws.python_service import PythonServiceHandler
 
@@ -34,10 +39,16 @@ from tabpy_server.management.util import _get_state_from_file
 from tabpy_server.management.state import TabPyState, get_query_object_path
 import concurrent.futures
 
+# The next lines are copied from __init.py__ where versioneer adds them to
+# tabpy_server is an app not a package so __init__.py is never executed
+# and this is why we need the lines here
+from tabpy_server._version import get_versions
+__version__ = get_versions()['version']
+del get_versions
+
 
 STAGING_THREAD = concurrent.futures.ThreadPoolExecutor(max_workers=3)
 _QUERY_OBJECT_STAGING_FOLDER = 'staging'
-
 
 if sys.version_info.major == 3:
     unicode = str
@@ -54,6 +65,7 @@ def parse_arguments():
     parser = ArgumentParser(description='Run Python27 Service.')
     parser.add_argument('--port', type=int,
                         help='Listening port for this service.')
+    parser.add_argument('--config', help='Path to a config file.')
     return parser.parse_args()
 
 
@@ -124,14 +136,17 @@ class BaseHandler(tornado.web.RequestHandler):
         Add CORS header if the TabPy has attribute _cors_origin
         and _cors_origin is not an empty string.
         """
-        if len(self.tabpy.get_cors_origin()) > 0:
+        if len(self.tabpy.get_access_control_allow_origin()) > 0:
             self.set_header("Access-Control-Allow-Origin",
-                            self.tabpy.get_cors_origin())
+                            self.tabpy.get_access_control_allow_origin())
+
+        if len(self.tabpy.get_access_control_allow_headers()) > 0:
             self.set_header("Access-Control-Allow-Headers",
-                            "Origin, X-Requested-With, Content-Type, "
-                            "Accept, Authorization")
+                            self.tabpy.get_access_control_allow_headers())
+
+        if len(self.tabpy.get_access_control_allow_methods()) > 0:
             self.set_header("Access-Control-Allow-Methods",
-                            "OPTIONS, POST, GET")
+                            self.tabpy.get_access_control_allow_methods())
 
     def _sanitize_request_data(self, data, keys=KEYS_TO_SANITIZE):
         """Remove keys so that we can log safely"""
@@ -177,7 +192,7 @@ class ManagementHandler(MainHandler):
         self.settings['add_or_updating_endpoint'] = request_uuid
         try:
             description = (request_data['description'] if 'description' in
-                           request_data else None)
+                                                          request_data else None)
             if 'docstring' in request_data:
                 if sys.version_info > (3, 0):
                     docstring = str(bytes(request_data['docstring'],
@@ -192,7 +207,7 @@ class ManagementHandler(MainHandler):
             methods = (request_data['methods'] if 'methods' in request_data
                        else [])
             dependencies = (request_data['dependencies'] if 'dependencies' in
-                            request_data else None)
+                                                            request_data else None)
             target = (request_data['target'] if 'target' in request_data
                       else None)
             schema = (request_data['schema'] if 'schema' in request_data
@@ -213,8 +228,8 @@ class ManagementHandler(MainHandler):
 
                 yield self._copy_po_future(src_path, target_path)
             elif endpoint_type != 'alias':
-                    raise gen.Return("src_path is required to add/update an "
-                                     "endpoint.")
+                raise gen.Return("src_path is required to add/update an "
+                                 "endpoint.")
 
             # alias special logic:
             if endpoint_type == 'alias':
@@ -267,6 +282,7 @@ class ServiceInfoHandler(ManagementHandler):
         super(ServiceInfoHandler, self).initialize()
 
     def get(self):
+        self._add_CORS_header()
         info = {}
         info['state_path'] = self.settings['state_file_path']
         info['name'] = self.tabpy.name
@@ -341,6 +357,7 @@ class EndpointsHandler(ManagementHandler):
                 self.finish()
                 return
 
+            logger.debug("Adding endpoint '{}'".format(name))
             err_msg = yield self._add_or_update_endpoint('add', name, 1,
                                                          request_data)
             if err_msg:
@@ -474,6 +491,7 @@ class EvaluationPlaneHandler(BaseHandler):
     @tornado.web.asynchronous
     @gen.coroutine
     def post(self):
+        self._add_CORS_header()
         try:
             body = simplejson.loads(self.request.body.decode('utf-8'))
             if 'script' not in body:
@@ -490,17 +508,17 @@ class EvaluationPlaneHandler(BaseHandler):
             if arguments is not None:
                 if not isinstance(arguments, dict):
                     self.error_out(400, 'Script parameters need to be '
-                                   'provided as a dictionary.')
+                                        'provided as a dictionary.')
                     return
                 else:
                     arguments_expected = []
-                    for i in range(1, len(arguments.keys())+1):
-                        arguments_expected.append('_arg'+str(i))
+                    for i in range(1, len(arguments.keys()) + 1):
+                        arguments_expected.append('_arg' + str(i))
                     if sorted(arguments_expected) == sorted(arguments.keys()):
                         arguments_str = ', ' + ', '.join(arguments.keys())
                     else:
                         self.error_out(400, 'Variables names should follow '
-                                       'the format _arg1, _arg2, _argN')
+                                            'the format _arg1, _arg2, _argN')
                         return
 
             function_to_evaluate = ('def _user_script(tabpy'
@@ -528,9 +546,9 @@ class EvaluationPlaneHandler(BaseHandler):
             else:
                 self.error_out(
                     404, 'Error processing script', info="The endpoint you're "
-                    "trying to query did not respond. Please make sure the "
-                    "endpoint exists and the correct set of arguments are "
-                    "provided.")
+                                                         "trying to query did not respond. Please make sure the "
+                                                         "endpoint exists and the correct set of arguments are "
+                                                         "provided.")
 
     @gen.coroutine
     def call_subprocess(self, function_to_evaluate, arguments):
@@ -633,7 +651,7 @@ class QueryPlaneHandler(BaseHandler):
             if response_type == UnknownURI:
                 self.error_out(404, 'UnknownURI',
                                info="No query object has been registered"
-                               " with the name '%s'" % po_name)
+                                    " with the name '%s'" % po_name)
             elif response_type == QueryError:
                 self.error_out(400, 'QueryError', info=response)
             else:
@@ -668,7 +686,7 @@ class QueryPlaneHandler(BaseHandler):
                 logger.error("UnknownURI", endpoint_name=endpoint_name)
                 self.error_out(404, 'UnknownURI',
                                info="Endpoint '%s' does not exist"
-                               % endpoint_name)
+                                    % endpoint_name)
                 return
 
             po_obj = self.py_handler.ps.query_objects.get(po_name)
@@ -719,7 +737,7 @@ class QueryPlaneHandler(BaseHandler):
             else:
                 self.error_out(500, 'Unknown endpoint type',
                                info="Endpoint type '%s' does not exist"
-                               % endpoint_type)
+                                    % endpoint_type)
                 return
 
         return (endpoint_name, all_endpoint_names)
@@ -764,60 +782,82 @@ def get_config():
     environment.
     For naming standards use all capitals and start with 'TABPY_'
     """
-
-    try:
-        import tabpy_server.common.config as config
-    except ImportError:
-        config = None
-
-    settings = {}
+    parser = configparser.ConfigParser()
 
     cli_args = parse_arguments()
+    path = cli_args.config if cli_args.config is not None else os.path.join(os.path.dirname(__file__), 'common',
+                                                                            'default.conf')
+    if os.path.isfile(path):
+        with open(path) as f:
+            data = '[dummy-header]\n' + f.read()
+        parser.read_string(data)
+    else:
+        logger.warning("Unable to find config file at '{}', using default settings.".format(path))
+
+    settings = {}
+    for section in parser.sections():
+        for key, val in parser.items(section):
+            settings[key] = val
+
+    def set_parameter(settings_key, config_key, default_val=None, check_env_var=False):
+        if config_key is not None and parser.has_option('dummy-header', config_key):
+            settings[settings_key] = parser.get('dummy-header', config_key)
+        elif check_env_var:
+            settings[settings_key] = os.getenv(config_key, default_val)
+        elif default_val is not None:
+            settings[settings_key] = default_val
+
+    # convert log level string into int, set log level
+    # defaults to INFO if the level is not recognized
+    set_parameter('log_level', 'TABPY_LOG_LEVEL', default_val='INFO', check_env_var=True)
+    settings['log_level'] = settings['log_level'].upper()
+    level = settings['log_level']
+    if level not in {'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'}:
+        logger.warning('The log level indicated is not supported: {}. '
+                       'Will be using the default level INFO.'.format(level))
+        level = 'INFO'
+    settings['log_level'] = level
+    logging.getLogger().setLevel(level)
+    for handler in logger.handlers:
+        handler.setLevel(level)
 
     if cli_args.port is not None:
         settings['port'] = cli_args.port
     else:
+        set_parameter('port', 'TABPY_PORT', default_val=9004, check_env_var=True)
         try:
-            settings['port'] = config.TABPY_PORT
-        except AttributeError:
-            settings['port'] = os.getenv('TABPY_PORT', 9004)
+            settings['port'] = int(settings['port'])
+        except ValueError:
+            logger.warning('Error during config validation, invalid port: {}. '
+                           'Using default port 9004'.format(settings['port']))
+            settings['port'] = 9004
 
-    try:
-        settings['server_version'] = config.TABPY_SERVER_VERSION
-    except AttributeError:
-        settings['server_version'] = os.getenv('TABPY_SERVER_VERSION', 'Alpha')
+    set_parameter('server_version', None, default_val=__version__)
+    set_parameter('bind_ip', 'TABPY_BIND_IP', default_val='0.0.0.0', check_env_var=True)
 
-    try:
-        settings['bind_ip'] = config.TABPY_BIND_IP
-    except AttributeError:
-        settings['bind_ip'] = os.getenv('TABPY_BIND_IP', '0.0.0.0')
-
-    try:
-        settings['upload_dir'] = config.TABPY_QUERY_OBJECT_PATH
-    except AttributeError:
-        settings['upload_dir'] = os.getenv('TABPY_QUERY_OBJECT_PATH',
-                                           '/tmp/query_objects')
-
+    set_parameter('upload_dir', 'TABPY_QUERY_OBJECT_PATH', default_val='/tmp/query_objects', check_env_var=True)
     if not os.path.exists(settings['upload_dir']):
         os.makedirs(settings['upload_dir'])
 
-    try:
-        _state_file_path = config.TABPY_STATE_PATH
-    except AttributeError:
-        _state_file_path = os.getenv('TABPY_STATE_PATH', './')
+    set_parameter('state_file_path', 'TABPY_STATE_PATH', default_val='./', check_env_var=True)
     settings['state_file_path'] = os.path.realpath(
-                                    os.path.normpath(
-                                      os.path.expanduser(_state_file_path)))
+        os.path.normpath(
+            os.path.expanduser(settings['state_file_path'])))
+
+    # set and validate transfer protocol
+    set_parameter('transfer_protocol', 'TABPY_TRANSFER_PROTOCOL', default_val='http')
+    settings['transfer_protocol'] = settings['transfer_protocol'].lower()
+
+    set_parameter('certificate_file', 'TABPY_CERTIFICATE_FILE')
+    set_parameter('key_file', 'TABPY_KEY_FILE')
+    validate_transfer_protocol_settings(settings)
 
     # if state.ini does not exist try and create it - remove last dependence
     # on batch/shell script
-    if not os.path.isfile('{}/state.ini'.format(settings['state_file_path'])):
-        shutil.copy('./state.ini.template', '{}/state.ini'.format(
-            settings['state_file_path']))
-
-    logger.info("Loading state from state file")
-    tabpy_state = _get_state_from_file(settings['state_file_path'])
-    settings['tabpy'] = TabPyState(config=tabpy_state)
+    state_file_path = settings['state_file_path']
+    logger.info("Loading state from state file {}/state.ini".format(state_file_path))
+    tabpy_state = _get_state_from_file(state_file_path)
+    settings['tabpy'] = TabPyState(config=tabpy_state, settings=settings)
 
     settings['py_handler'] = PythonServiceHandler(PythonService())
     settings['compress_response'] = True if TORNADO_MAJOR >= 4 else "gzip"
@@ -829,6 +869,64 @@ def get_config():
         subdirectory = "/" + tabpy_state.get("Service Info", "Subdirectory")
 
     return settings, subdirectory
+
+
+def validate_transfer_protocol_settings(settings):
+    if 'transfer_protocol' not in settings:
+        logger.error('Missing transfer protocol information.')
+        raise RuntimeError('Missing transfer protocol information.')
+
+    protocol = settings['transfer_protocol']
+
+    if protocol == 'http':
+        return
+
+    if protocol != 'https':
+        err = 'Unsupported transfer protocol: {}.'.format(protocol)
+        logger.fatal(err)
+        raise RuntimeError(err)
+
+    validate_cert_key_state('The parameter(s) {} must be set.', 'certificate_file' in settings, 'key_file' in settings)
+    cert = settings['certificate_file']
+
+    validate_cert_key_state('The parameter(s) {} must point to an existing file.', os.path.isfile(cert),
+                            os.path.isfile(settings['key_file']))
+    validate_cert(cert)
+    return
+
+
+def validate_cert_key_state(msg, cert_valid, key_valid):
+    cert_param, key_param = 'TABPY_CERTIFICATE_FILE', 'TABPY_KEY_FILE'
+    cert_and_key_param = '{} and {}'.format(cert_param, key_param)
+    https_error = 'Error using HTTPS: '
+    err = None
+    if not cert_valid and not key_valid:
+        err = https_error + msg.format(cert_and_key_param)
+    elif not cert_valid:
+        err = https_error + msg.format(cert_param)
+    elif not key_valid:
+        err = https_error + msg.format(key_param)
+    if err is not None:
+        logger.fatal(err)
+        raise RuntimeError(err)
+
+
+def validate_cert(cert_file_path):
+    with open(cert_file_path, 'r') as f:
+        cert_buf = f.read()
+
+    cert = crypto.load_certificate(crypto.FILETYPE_PEM, cert_buf)
+
+    date_format, encoding = '%Y%m%d%H%M%SZ', 'ascii'
+    not_before = datetime.strptime(cert.get_notBefore().decode(encoding), date_format)
+    not_after = datetime.strptime(cert.get_notAfter().decode(encoding), date_format)
+    now = datetime.now()
+
+    https_error = 'Error using HTTPS: '
+    if now < not_before:
+        raise RuntimeError(https_error + 'The certificate provided is not valid until {}.'.format(not_before))
+    if now > not_after:
+        raise RuntimeError(https_error + 'The certificate provided expired on {}.'.format(not_after))
 
 
 def main():
@@ -863,7 +961,17 @@ def main():
 
     init_model_evaluator(settings)
 
-    application.listen(settings['port'], address=settings['bind_ip'])
+    if settings['transfer_protocol'] == 'http':
+        application.listen(settings['port'], address=settings['bind_ip'])
+    elif settings['transfer_protocol'] == 'https':
+        application.listen(settings['port'], address=settings['bind_ip'],
+                           ssl_options={
+                               'certfile': settings['certificate_file'],
+                               'keyfile': settings['key_file']
+                           })
+    else:
+        raise RuntimeError('Unsupported transfer protocol.')
+
     print('Web service listening on {} port {}'.format(settings['bind_ip'],
                                                        str(settings['port'])))
     tornado.ioloop.IOLoop.instance().start()

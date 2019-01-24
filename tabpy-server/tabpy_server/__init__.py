@@ -3,6 +3,7 @@ import logging.handlers
 import os
 import tempfile
 
+from ._version import get_versions
 
 # Create application wide logging
 logger = logging.getLogger(__name__)
@@ -15,3 +16,8 @@ formatter = logging.Formatter(
     '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 fh.setFormatter(formatter)
 logger.addHandler(fh)
+
+
+__version__ = get_versions()['version']
+del get_versions
+
