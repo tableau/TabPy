@@ -18,7 +18,7 @@ These instructions explain how to start up TabPy Server.
 
 To start up TabPy Server from an environment the following prerequisites are required:
 
-- Python 3 or greater
+- Python 3.7.2
 - setuptools (Python module, can be installed from PyPi)
 
 First, select a TabPy version and download its source code from the [releases page](https://github.com/tableau/TabPy/releases). To start up a TabPy server instance, follow the instructions for your OS (found below).
