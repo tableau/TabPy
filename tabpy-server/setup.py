@@ -8,7 +8,7 @@ except ImportError as err:
 
 setup(
     name='tabpy-server',
-    python-requires='>=3.7.2',
+    python_requires='>=3.7.2',
     version=versioneer.get_version(),
     description='Web server Tableau uses to run Python scripts.',
     url='https://github.com/tableau/TabPy',
@@ -34,6 +34,7 @@ setup(
         'cloudpickle',
         'configparser',
         'decorator',
+        'future',
         'genson',
         'jsonschema>=2.3.0',
         'mock',

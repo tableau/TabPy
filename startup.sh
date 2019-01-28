@@ -16,6 +16,8 @@ echo Installing TabPy-server requirements.
 echo Read the logs at $TABPY_ROOT/tabpy-server/install.log
 cd $TABPY_ROOT/tabpy-server
 python3 setup.py install &> install.log
+cd $TABPY_ROOT/tabpy-tools
+python3 setup.py install &> install.log
 cd $TABPY_ROOT
 check_status
 
