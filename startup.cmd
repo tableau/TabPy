@@ -9,6 +9,8 @@ REM Install requirements using Python setup tools.
 ECHO Installing any missing dependencies...
 CD %TABPY_ROOT%\tabpy-server
 python setup.py install>install.log 2>&1
+CD %TABPY_ROOT%\tabpy-tools
+python setup.py install>install.log 2>&1
 CD %TABPY_ROOT%
 
 SET INSTALL_LOG_MESSAGE=    Check %TABPY_ROOT%\tabpy-server\install.log for details.
