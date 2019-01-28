@@ -1,12 +1,17 @@
-import versioneer
 try:
     from setuptools import setup
 except ImportError:
     from distutils.core import setup
 
+version = '../VERSION'
+
+def read_version():
+    with open(version) as h:
+        return h.read().strip()
+
 setup(
     name='tabpy-tools',
-    version=versioneer.get_version(),
+    version=read_version(),
     description='Python library of tools to manage Tableau Python Server.',
     url='https://github.com/tableau/TabPy',
     author='Tableau',
@@ -28,6 +33,5 @@ setup(
         'requests',
         'genson',
         'jsonschema'
-    ],
-    cmdclass=versioneer.get_cmdclass(),
+    ]
 )

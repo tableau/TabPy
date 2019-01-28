@@ -1,15 +1,19 @@
-import versioneer
 try:
     from setuptools import setup
 except ImportError as err:
     print("Missing Python module requirement: setuptools.")
     raise err
 
+version = '../VERSION'
+
+def read_version():
+    with open(version) as h:
+        return h.read().strip()
 
 setup(
     name='tabpy-server',
     python_requires='>=3.7.2',
-    version=versioneer.get_version(),
+    version=read_version(),
     description='Web server Tableau uses to run Python scripts.',
     url='https://github.com/tableau/TabPy',
     author='Tableau',
@@ -46,6 +50,5 @@ setup(
         'simplejson',
         'tornado==5.1.1',
         'Tornado-JSON'
-    ],
-    cmdclass=versioneer.get_cmdclass(),
+    ]
 )
