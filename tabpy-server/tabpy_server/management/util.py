@@ -14,26 +14,20 @@ from dateutil import parser
 from datetime import datetime, timedelta, tzinfo
 from time import mktime
 
-from tabpy_server.common.tabpy_logging import (
+from tabpy_tools.tabpy_logging import (
     PYLogging, log_error, log_info, log_debug, log_warning)
 import logging
 logger = logging.getLogger(__name__)
 PYLogging.initialize(logger)
 
-def load_state_from_config_file(ps_state):
-    '''
-    Fill initial TabPy state from state file path
-    '''
-    try:
-        log_info("Loading state from state file")
-        state_file_path = os.environ['TABPY_STATE_PATH']
-        config = util._get_state_from_file(state_file_path)
-        ps_state.set_config(config)
-    except Exception as e:
-        log_error("Unable to get state file:", str(e.message))
 
-def write_state_config(state):
-    state_path = os.environ['TABPY_STATE_PATH']
+def write_state_config(state, settings):
+    if 'state_file_path' in settings:
+        state_path = settings['state_file_path']
+    else:
+        raise ValueError('TABPY_STATE_PATH is not set')
+    
+    logger.debug("State path is {}".format(state_path))
     state_key = os.path.join(state_path, 'state.ini')
     tmp_state_file = state_key
 
