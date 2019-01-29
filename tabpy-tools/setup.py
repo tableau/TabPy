@@ -3,15 +3,11 @@ try:
 except ImportError:
     from distutils.core import setup
 
-version = '../VERSION'
-
-def read_version():
-    with open(version) as h:
-        return h.read().strip()
+from tabpy_server.version import _version
 
 setup(
     name='tabpy-tools',
-    version=read_version(),
+    version=_version,
     description='Python library of tools to manage Tableau Python Server.',
     url='https://github.com/tableau/TabPy',
     author='Tableau',

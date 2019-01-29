@@ -4,16 +4,16 @@ except ImportError as err:
     print("Missing Python module requirement: setuptools.")
     raise err
 
-version = '../VERSION'
-
 def read_version():
-    with open(version) as h:
+    with open('../VERSION') as h:
         return h.read().strip()
+
+__version__=read_version()
 
 setup(
     name='tabpy-server',
     python_requires='>=3.7.2',
-    version=read_version(),
+    version=__version__,
     description='Web server Tableau uses to run Python scripts.',
     url='https://github.com/tableau/TabPy',
     author='Tableau',

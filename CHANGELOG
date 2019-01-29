@@ -3,6 +3,10 @@
 This file list notable changes for TabPy project releases.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## v0.3.2
+
+- Remove versioneer and just replace it with VERSION file
+
 ## v0.3.1
 
 - Fixed dependency on tabpy-tools in startup scripts

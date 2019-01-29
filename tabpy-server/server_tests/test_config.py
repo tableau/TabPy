@@ -87,7 +87,6 @@ class TestPartialConfigFile(unittest.TestCase):
         mock_os.getenv.assert_has_calls(getenv_calls, any_order=True)
         self.assertEqual(settings['log_level'], 'WARNING')
         self.assertEqual(settings['port'], 1234)
-        self.assertEquals(settings['server_version'], tabpy_server.__version__)
         self.assertEquals(settings['bind_ip'], '0.0.0.0')
         self.assertEquals(settings['upload_dir'], 'foo')
         self.assertEquals(settings['state_file_path'], 'bar')

@@ -41,12 +41,7 @@ from tabpy_server.management.util import _get_state_from_file
 from tabpy_server.management.state import TabPyState, get_query_object_path
 import concurrent.futures
 
-# The next lines are copied from __init.py__ where versioneer adds them to
-# tabpy_server is an app not a package so __init__.py is never executed
-# and this is why we need the lines here
-from tabpy_server._version import get_versions
-__version__ = get_versions()['version']
-del get_versions
+from tabpy_server.version import _version
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -833,7 +828,7 @@ def get_config():
                            'Using default port 9004'.format(settings['port']))
             settings['port'] = 9004
 
-    set_parameter('server_version', None, default_val=__version__)
+    set_parameter('server_version', None, default_val=_version)
     set_parameter('bind_ip', 'TABPY_BIND_IP', default_val='0.0.0.0', check_env_var=True)
 
     set_parameter('upload_dir', 'TABPY_QUERY_OBJECT_PATH', default_val='/tmp/query_objects', check_env_var=True)
