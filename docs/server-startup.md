@@ -25,6 +25,8 @@ First, select a TabPy version and download its source code from the [releases pa
 
 Instructions on how to configure your TabPy server instance can be found in the [TabPy Server Configuration Instructions](server-config.md)
 
+While it is recommended to install TabPy in a new virtual environment, if you are installing a new version of TabPy in the same environment as a previous install, delete the previous TabPy version folder in your Python directory.
+
 ## Windows
 
 1. Open a command prompt.
