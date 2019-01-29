@@ -22,7 +22,7 @@ and run it locally.
 These are prerequisites for an environment required for a contributor to
 be able to work on TabPy changes:
 
-- Python 3.x
+- Python 3.6.5:
   - To see which version of Python you have installed, run ```python --version```.
 - git
 - TabPy repo:
