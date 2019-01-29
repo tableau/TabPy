@@ -12,7 +12,7 @@ __version__=read_version()
 
 setup(
     name='tabpy-server',
-    python_requires='>=3.7.2',
+    python_requires='>=3.6.5',
     version=__version__,
     description='Web server Tableau uses to run Python scripts.',
     url='https://github.com/tableau/TabPy',
@@ -21,7 +21,7 @@ setup(
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
-        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
         "Topic :: Scientific/Engineering",
         "Topic :: Scientific/Engineering :: Information Analysis",
     ],
@@ -40,7 +40,7 @@ setup(
         'decorator',
         'future',
         'genson',
-        'jsonschema>=2.3.0',
+        'jsonschema~=2.3.0',
         'mock',
         'numpy',
         'python-dateutil',
@@ -49,6 +49,7 @@ setup(
         'singledispatch',
         'simplejson',
         'tornado==5.1.1',
-        'Tornado-JSON'
+        'Tornado-JSON',
+        'urllib3'
     ]
 )
