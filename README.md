@@ -1,7 +1,5 @@
 # TabPy [![Community Supported](https://img.shields.io/badge/Support%20Level-Community%20Supported-457387.svg)](https://www.tableau.com/support-levels-it-and-developer-tools)  
 
-![TabPy logo](docs/img/TabPy-logo.png)
-
 TabPy (Tableau Python Server) is external server implementation which allows expanding Tableau with executing Python scripts on table calculation.
 
 All documentation is in the [docs](docs) folder. Consider reading it the next order:
