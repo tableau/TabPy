@@ -8,6 +8,7 @@ SET INSTALL_LOG=%TABPY_ROOT%\tabpy-server\install.log
 
 REM Install requirements using Python setup tools.
 ECHO Installing any missing dependencies...
+
 CD %TABPY_ROOT%\tabpy-server
 ECHO Installing tabpy-server dependencies...>%INSTALL_LOG%	
 python setup.py install>>%INSTALL_LOG% 2>&1
@@ -16,8 +17,8 @@ CD %TABPY_ROOT%\tabpy-tools
 ECHO: >> %INSTALL_LOG%
 ECHO Installing tabpy-tools dependencies...>>%INSTALL_LOG%
 python setup.py install>>%INSTALL_LOG% 2>&1
-CD %TABPY_ROOT%
 
+CD %TABPY_ROOT%
 SET INSTALL_LOG_MESSAGE=    Check %INSTALL_LOG% for details.
 IF %ERRORLEVEL% NEQ 0 (
     IF %CD% NEQ %TABPY_ROOT% (
