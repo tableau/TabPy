@@ -10,6 +10,7 @@ These instructions explain how to start up TabPy Server.
 - [Mac](#mac)
   * [Command Line Arguments](#command-line-arguments-1)
 - [Linux](#linux)
+  * [CentOS Specific Steps](#centos-specific-steps)
   * [Command Line Arguments](#command-line-arguments-2)
 
 <!-- tocstop -->

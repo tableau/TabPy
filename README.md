@@ -8,7 +8,6 @@ All documentation is in the [docs](docs) folder. Consider reading it the next or
 * [TabPy Server Download Instructions](docs/server-download.md)
 * [TabPy Server Configuration Instructions](docs/server-config.md)
 * [TabPy Server Startup Instructions](docs/server-startup.md)
-* [TabPy Known Issues](docs/known-issues.md)
 * [Supported TabPy Server Configurations](docs/server-configurations.md)
 * [Running TabPy in Python Virtual Environment](docs/tabpy-virtualenv.md)
 * [Authoring Python calculations in Tableau](docs/TableauConfiguration.md).
