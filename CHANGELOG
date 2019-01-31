@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Remove versioneer and just replace it with VERSION file
 - Require Python 3.6.5
 - Require jsonschema to be compatible with 2.3.0
+- Added setup instructions (known issues) for CentOS
 
 ## v0.3.1
 
