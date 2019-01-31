@@ -10,6 +10,7 @@ These instructions explain how to start up TabPy Server.
 - [Mac](#mac)
   * [Command Line Arguments](#command-line-arguments-1)
 - [Linux](#linux)
+  * [CentOS Specific Steps](#centos-specific-steps)
   * [Command Line Arguments](#command-line-arguments-2)
 
 <!-- tocstop -->
@@ -96,6 +97,38 @@ The following is an example of how you might set both the port and the config:
     sudo ./startup.sh
     ```
 
+### CentOS Specific Steps
+
+For Python on CentOS you may need to rebuild it with enabling all the features.
+Also you'll need `pip` and `setuptools` for TabPy startup script to work.
+To install and enable all the required prerequisites follow the steps:
+
+```sh
+sudo yum update
+sudo yum groupinstall -y "Development tools"
+sudo yum install -y zlib-devel bzip2-devel openssl-devel ncurses-devel sqlite-devel readline-devel tk-devel gdbm-devel db4-devel libpcap-devel xz-devel expat-devel
+sudo yum install -y wget
+wget http://python.org/ftp/python/3.6.5/Python-3.6.5.tar.xz
+tar xf Python-3.6.5.tar.xz
+cd Python-3.6.5
+./configure --prefix=/usr/local --enable-shared LDFLAGS="-Wl,-rpath /usr/local/lib"
+```
+
+Edit `./Module/Setup` file uncommenting line 
+`#zlib zlibmodule.c -I$(prefix)/include -L$(exec_prefix)/lib -lz` 
+(remove pound sign).
+
+Continue the steps:
+
+```sh
+make
+sudo make altinstall
+```
+
+It is highly recommended to use Python virtual enviroment for running TabPy,
+check [Running TabPy in Python Virtual Environment](tabpy-virtualenv.md) page
+for more details.
+    
 ### Command Line Arguments
 
 - To specify the *port* on which your server instance listens, set the ```-p``` command line argument as follows:
