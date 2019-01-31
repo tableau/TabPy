@@ -99,9 +99,12 @@ The following is an example of how you might set both the port and the config:
 
 ### CentOS Specific Steps
 
-For Python on CentOS you may need to rebuild it with enabling all the features.
+To install the latest Python version just use package manager.
+
+In case you need older version of Python on CentOS you may need to rebuild 
+it with enabling all the features.
 Also you'll need `pip` and `setuptools` for TabPy startup script to work.
-To install and enable all the required prerequisites follow the steps:
+The steps below show how to instal Python 3.6.5 with all the features enabled:
 
 ```sh
 sudo yum update

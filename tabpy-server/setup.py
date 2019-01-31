@@ -4,12 +4,6 @@ except ImportError as err:
     print("Missing Python module requirement: setuptools.")
     raise err
 
-def read_version():
-    with open('../VERSION') as h:
-        return h.read().strip()
-
-__version__=read_version()
-
 setup(
     name='tabpy-server',
     python_requires='>=3.6.5',

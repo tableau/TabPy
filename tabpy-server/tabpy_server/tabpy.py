@@ -41,7 +41,19 @@ from tabpy_server.management.util import _get_state_from_file
 from tabpy_server.management.state import TabPyState, get_query_object_path
 import concurrent.futures
 
-from tabpy_server.version import _version
+from pathlib import Path
+
+def read_version():
+    if Path('VERSION').exists():
+        f = 'VERSION'
+    else:
+        f = '../../VERSION'
+
+    with open(f) as h:
+        return h.read().strip()
+    
+
+__version__ = read_version()
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -828,7 +840,7 @@ def get_config():
                            'Using default port 9004'.format(settings['port']))
             settings['port'] = 9004
 
-    set_parameter('server_version', None, default_val=_version)
+    set_parameter('server_version', None, default_val=__version__)
     set_parameter('bind_ip', 'TABPY_BIND_IP', default_val='0.0.0.0', check_env_var=True)
 
     set_parameter('upload_dir', 'TABPY_QUERY_OBJECT_PATH', default_val='/tmp/query_objects', check_env_var=True)
