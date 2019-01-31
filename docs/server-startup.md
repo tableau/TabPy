@@ -26,8 +26,6 @@ First, select a TabPy version and download its source code from the [releases pa
 
 Instructions on how to configure your TabPy server instance can be found in the [TabPy Server Configuration Instructions](server-config.md)
 
-Check [TabPy Known Issue](known-issues.md) page in case of any issues to check if there is a solution for it.
-
 ## Windows
 
 1. Open a command prompt.
