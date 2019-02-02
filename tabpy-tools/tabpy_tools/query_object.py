@@ -60,6 +60,7 @@ class QueryObject(object):
         try:
             os.makedirs(path)
         except OSError as e:
+            import errno
             if e.errno == errno.EEXIST and os.path.isdir(path):
                 pass
             else:
