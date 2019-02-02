@@ -2,6 +2,7 @@ import logging
 import os
 import sys
 import multiprocessing
+import tempfile
 import time
 import configparser
 import simplejson
@@ -817,9 +818,18 @@ def get_config():
                        'Will be using the default level INFO.'.format(level))
         level = 'INFO'
     settings['log_level'] = level
-    logging.getLogger().setLevel(level)
-    for handler in logger.handlers:
-        handler.setLevel(level)
+
+    # Create application wide logging
+    root_logger = logging.getLogger('')
+    root_logger.setLevel(level)
+    temp_dir = tempfile.gettempdir()
+    fh = logging.handlers.RotatingFileHandler(
+        filename=os.path.join(temp_dir, "tabpy_log.log"),
+        maxBytes=10000000, backupCount=5)
+    formatter = logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    fh.setFormatter(formatter)
+    root_logger.addHandler(fh)
 
     if cli_args.port is not None:
         settings['port'] = cli_args.port
