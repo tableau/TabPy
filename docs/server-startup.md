@@ -22,11 +22,17 @@ To start up TabPy Server from an environment the following prerequisites are req
 - Python 3.6.5
 - setuptools (Python module, can be installed from PyPi)
 
-First, select a TabPy version and download its source code from the [releases page](https://github.com/tableau/TabPy/releases). To start up a TabPy server instance, follow the instructions for your OS (found below).
+First, select a TabPy version and download its source code from the
+[releases page](https://github.com/tableau/TabPy/releases). To start up
+a TabPy server instance, follow the instructions for your OS (found below).
 
 Instructions on how to configure your TabPy server instance can be found in the [TabPy Server Configuration Instructions](server-config.md)
 
-While it is recommended to install TabPy in a new virtual environment, if you are installing a new version of TabPy in the same environment as a previous install, delete the previous TabPy version folder in your Python directory.
+It is highly recommended to use Python virtual enviroment for running TabPy,
+check [Running TabPy in Python Virtual Environment](tabpy-virtualenv.md) page
+for more details.
+If you are installing a new version of TabPy in the same environment as a
+previous install, delete the previous TabPy version folder in your Python directory.
 
 ## Windows
 
@@ -97,41 +103,6 @@ The following is an example of how you might set both the port and the config:
     sudo ./startup.sh
     ```
 
-### CentOS Specific Steps
-
-To install the latest Python version just use package manager.
-
-In case you need older version of Python on CentOS you may need to rebuild 
-it with enabling all the features.
-Also you'll need `pip` and `setuptools` for TabPy startup script to work.
-The steps below show how to instal Python 3.6.5 with all the features enabled:
-
-```sh
-sudo yum update
-sudo yum groupinstall -y "Development tools"
-sudo yum install -y zlib-devel bzip2-devel openssl-devel ncurses-devel sqlite-devel readline-devel tk-devel gdbm-devel db4-devel libpcap-devel xz-devel expat-devel
-sudo yum install -y wget
-wget http://python.org/ftp/python/3.6.5/Python-3.6.5.tar.xz
-tar xf Python-3.6.5.tar.xz
-cd Python-3.6.5
-./configure --prefix=/usr/local --enable-shared LDFLAGS="-Wl,-rpath /usr/local/lib"
-```
-
-Edit `./Module/Setup` file uncommenting line 
-`#zlib zlibmodule.c -I$(prefix)/include -L$(exec_prefix)/lib -lz` 
-(remove pound sign).
-
-Continue the steps:
-
-```sh
-make
-sudo make altinstall
-```
-
-It is highly recommended to use Python virtual enviroment for running TabPy,
-check [Running TabPy in Python Virtual Environment](tabpy-virtualenv.md) page
-for more details.
-    
 ### Command Line Arguments
 
 - To specify the *port* on which your server instance listens, set the ```-p``` command line argument as follows:
