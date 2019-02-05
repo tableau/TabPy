@@ -3,21 +3,12 @@ from future.utils import with_metaclass
 import requests
 from re import compile
 
-_logger = logging.getLogger(__name__)
-
 from collections import MutableMapping as _MutableMapping
 
 import json as json
 
-from .tabpy_logging import (
-    PYLogging,
-    log_error,
-    log_info,
-    log_debug,
-    log_warning,
-)
 
-PYLogging.initialize(_logger)
+logger = logging.getLogger(__name__)
 
 
 class ResponseError(Exception):
@@ -70,9 +61,9 @@ class RequestsNetworkWrapper(object):
         self.session = session
 
     def raise_error(self, response):
-        _logger.error("Error with server response. code=%s; text=%s",
-                      response.status_code,
-                      response.text)
+        logger.error("Error with server response. code=%s; text=%s",
+                     response.status_code,
+                     response.text)
 
         raise ResponseError(response)
 
@@ -94,12 +85,12 @@ class RequestsNetworkWrapper(object):
         object that is parsed from the response JSON."""
         self._remove_nones(data)
 
-        _logger.info("GET %s with %r", url, data)
+        logger.info("GET %s with %r", url, data)
 
         response = self.session.get(url, params=data, timeout=timeout)
         if response.status_code != 200:
             self.raise_error(response)
-        _logger.info("response=%r", response.text)
+        logger.info("response=%r", response.text)
 
         if response.text == '':
             return dict()
@@ -111,13 +102,14 @@ class RequestsNetworkWrapper(object):
         object that is parsed from the response JSON."""
         data = self._encode_request(data)
 
-        _logger.info("POST %s with %r", url, data)
+        logger.info("POST %s with %r", url, data)
         response = self.session.post(url,
                                      data=data,
                                      headers={
                                          'content-type': 'application/json',
                                      },
                                      timeout=timeout)
+
         if response.status_code not in (200, 201):
             self.raise_error(response)
 
@@ -128,7 +120,7 @@ class RequestsNetworkWrapper(object):
         object that is parsed from the response JSON."""
         data = self._encode_request(data)
 
-        _logger.info("PUT %s with %r", url, data)
+        logger.info("PUT %s with %r", url, data)
 
         response = self.session.put(url,
                                     data=data,
@@ -147,7 +139,7 @@ class RequestsNetworkWrapper(object):
         if data is not None:
             data = json.dumps(data)
 
-        _logger.info("DELETE %s with %r", url, data)
+        logger.info("DELETE %s with %r", url, data)
 
         response = self.session.delete(url, data=data, timeout=timeout)
 
@@ -174,7 +166,8 @@ class ServiceClient(object):
 
         pattern = compile('.*(:[0-9]+)$')
         if not endpoint.endswith('/') and not pattern.match(endpoint):
-            _logger.warning("endpoint %s does not end with '/': appending.", endpoint)
+            logger.warning("endpoint %s does not end with '/': appending.",
+                           endpoint)
             endpoint = endpoint + '/'
 
         self.endpoint = endpoint
@@ -279,9 +272,8 @@ class RESTObject(with_metaclass(_RESTMetaclass, _MutableMapping)):
         are ignored.
 
         """
-        _logger.info("Initializing %s from %r",
-                     self.__class__.__name__,
-                     kwargs)
+        logger.info("Initializing %s from %r",
+                    self.__class__.__name__, kwargs)
         for attr in self.__rest__:
             if attr in kwargs:
                 setattr(self, attr, kwargs.pop(attr))

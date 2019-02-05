@@ -12,26 +12,20 @@ from tabpy_server.management.state import TabPyState, get_query_object_path
 
 from tabpy_server.management import util
 
-from tabpy_tools.tabpy_logging import (
-    PYLogging, log_error, log_info, log_warning)
-
 
 logger = logging.getLogger(__name__)
-
-
-PYLogging.initialize(logger)
 
 
 def wait_for_endpoint_loaded(py_handler, object_uri):
     '''
     This method waits for the object to be loaded.
     '''
-    log_info('Waiting for object to be loaded...')
+    logger.info('Waiting for object to be loaded...')
     while True:
         msg = ListObjects()
         list_object_msg = py_handler.manage_request(msg)
         if not isinstance(list_object_msg, ObjectList):
-            log_error("Error loading endpoint %s: %s" % (
+            logger.error("Error loading endpoint %s: %s" % (
                 object_uri, list_object_msg))
             return
 
@@ -40,7 +34,7 @@ def wait_for_endpoint_loaded(py_handler, object_uri):
                 else list_object_msg.objects.iteritems()):
             if uri == object_uri:
                 if info['status'] != 'LoadInProgress':
-                    log_info("Object load status: %s" % info['status'])
+                    logger.info("Object load status: %s" % info['status'])
                     return
 
         sleep(0.1)
@@ -59,8 +53,8 @@ def init_ps_server(settings):
                 settings['state_file_path'],
                 object_name, object_version)
         except Exception as e:
-            log_error('Exception encounted when downloading object: %s'
-                      ', error: %s' % (object_name, e))
+            logger.error('Exception encounted when downloading object: %s'
+                         ', error: %s' % (object_name, e))
 
 
 @gen.coroutine
@@ -83,8 +77,8 @@ def init_model_evaluator(settings):
             settings['state_file_path'],
             object_name, object_version)
 
-        log_info('Load endpoint: %s, version: %s, type: %s' %
-                 (object_name, object_version, object_type))
+        logger.info('Load endpoint: %s, version: %s, type: %s' %
+                    (object_name, object_version, object_type))
         if object_type == 'alias':
             msg = LoadObject(object_name, obj_info['target'],
                              object_version, False, 'alias')
@@ -143,14 +137,14 @@ def on_state_change(settings):
     try:
         py_handler = settings['py_handler']
 
-        log_info("Loading state from state file")
+        logger.info("Loading state from state file")
         config = util._get_state_from_file(settings['state_file_path'])
         new_ps_state = TabPyState(config=config, settings=settings)
 
         (has_changes, changes) = _get_latest_service_state(settings,
                                                            new_ps_state)
         if not has_changes:
-            log_info("Nothing changed, return.")
+            logger.info("Nothing changed, return.")
             return
 
         new_endpoints = new_ps_state.get_endpoints()
@@ -159,7 +153,7 @@ def on_state_change(settings):
                 object_name]
 
             if not object_path and not object_version:  # removal
-                log_info("Removing object", uri=object_name)
+                logger.info("Removing object", uri=object_name)
 
                 py_handler.manage_request(DeleteObjects([object_name]))
 
@@ -187,4 +181,4 @@ def on_state_change(settings):
 
     except Exception as e:
         err_msg = format_exception(e, 'on_state_change')
-        log_warning("Error submitting update model request", error=err_msg)
+        logger.warning("Error submitting update model request", error=err_msg)

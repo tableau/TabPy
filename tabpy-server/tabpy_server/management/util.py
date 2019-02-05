@@ -1,7 +1,5 @@
-import concurrent.futures
+import logging
 import os
-import tempfile
-import shutil
 try:
     from ConfigParser import ConfigParser as _ConfigParser
 except ImportError:
@@ -14,11 +12,8 @@ from dateutil import parser
 from datetime import datetime, timedelta, tzinfo
 from time import mktime
 
-from tabpy_tools.tabpy_logging import (
-    PYLogging, log_error, log_info, log_debug, log_warning)
-import logging
+
 logger = logging.getLogger(__name__)
-PYLogging.initialize(logger)
 
 
 def write_state_config(state, settings):
