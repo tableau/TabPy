@@ -3,6 +3,7 @@ import tabpy_tools
 import logging
 import sys
 
+
 from tabpy_tools.query_object import QueryObject
 from tabpy_server.common.util import format_exception
 from tabpy_server.common.messages import (
@@ -11,14 +12,8 @@ from tabpy_server.common.messages import (
     QuerySuccessful, UnknownURI, DownloadSkipped, LoadInProgress, ObjectCount,
     ObjectList)
 
-from tabpy_tools.tabpy_logging import (
-    PYLogging, log_error, log_info, log_warning)
-
 
 logger = logging.getLogger(__name__)
-
-
-PYLogging.initialize(logger)
 
 
 if sys.version_info.major == 3:
@@ -35,7 +30,7 @@ class PythonServiceHandler:
 
     def manage_request(self, msg):
         try:
-            log_info("Received request", request_type=type(msg).__name__)
+            logger.info("Received request", request_type=type(msg).__name__)
             if isinstance(msg, LoadObject):
                 response = self.ps.load_object(*msg)
             elif isinstance(msg, DeleteObjects):
@@ -51,7 +46,7 @@ class PythonServiceHandler:
 
             return response
         except Exception as e:
-            log_error("Error processing request", error=e.message)
+            logger.info("Error processing request", error=e.message)
             return UnknownMessage(e.message)
 
 
@@ -79,9 +74,9 @@ class PythonService(object):
     def _load_object(self, object_uri, object_url, object_version, is_update,
                      object_type):
         try:
-            log_info(msg="Loading object",
-                     uri=object_uri, url=object_url,
-                     version=object_version, is_update=is_update)
+            logger.info(msg="Loading object",
+                        uri=object_uri, url=object_url,
+                        version=object_version, is_update=is_update)
             if object_type == 'model':
                 po = QueryObject.load(object_url)
             elif object_type == 'alias':
@@ -95,8 +90,8 @@ class PythonService(object):
                                               'status': 'LoadSuccessful',
                                               'last_error': None}
         except Exception as e:
-            log_error("Unable to load QueryObject", path=object_url,
-                      error=str(e))
+            logger.error("Unable to load QueryObject", path=object_url,
+                         error=str(e))
 
             self.query_objects[object_uri] = {
                 'version': object_version,
@@ -111,7 +106,8 @@ class PythonService(object):
                 obj_info = self.query_objects.get(object_uri)
                 if obj_info and obj_info['endpoint_obj'] and (
                         obj_info['version'] >= object_version):
-                    log_info("Received load message for object already loaded")
+                    logger.info(
+                        "Received load message for object already loaded")
 
                     return DownloadSkipped(
                         object_uri, obj_info['version'], "Object with greater "
@@ -136,8 +132,8 @@ class PythonService(object):
                         object_uri, object_url, object_version, is_update,
                         object_type)
             except Exception as e:
-                log_error("Unable to load QueryObject", path=object_url,
-                          error=str(e))
+                logger.error("Unable to load QueryObject", path=object_url,
+                             error=str(e))
 
                 self.query_objects[object_uri] = {
                     'version': object_version,
@@ -160,13 +156,14 @@ class PythonService(object):
             if deleted_obj:
                 return ObjectsDeleted([object_uris])
             else:
-                log_warning("Received message to delete query object "
-                            "that doesn't exist", object_uris=object_uris)
+                logger.warning("Received message to delete query object "
+                               "that doesn't exist", object_uris=object_uris)
                 return ObjectsDeleted([])
         else:
-            log_error("Unexpected input to delete objects", input=object_uris,
-                      info="Input should be list or str. Type: %s" % type(
-                          object_uris))
+            logger.error("Unexpected input to delete objects",
+                         input=object_uris,
+                         info="Input should be list or str. Type: %s" % type(
+                             object_uris))
             return ObjectsDeleted([])
 
     def flush_objects(self):
@@ -228,5 +225,5 @@ class PythonService(object):
                 return UnknownURI(object_uri)
         except Exception as e:
             err_msg = format_exception(e, '/query')
-            log_error(err_msg)
+            logger.error(err_msg)
             return QueryFailed(uri=object_uri, error=err_msg)

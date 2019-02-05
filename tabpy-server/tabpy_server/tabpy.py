@@ -2,6 +2,7 @@ import logging
 import os
 import sys
 import multiprocessing
+import tempfile
 import time
 import configparser
 import simplejson
@@ -30,8 +31,6 @@ from tabpy_server.psws.python_service import PythonService
 from tabpy_server.psws.python_service import PythonServiceHandler
 
 from tabpy_server.common.util import format_exception
-from tabpy_tools.tabpy_logging import (
-    PYLogging, log_error, log_info, log_debug)
 from tabpy_server.common.messages import (
     Query, QuerySuccessful, QueryError, UnknownURI)
 from tabpy_server.psws.callbacks import (
@@ -48,15 +47,15 @@ from tabpy_server._version import get_versions
 __version__ = get_versions()['version']
 del get_versions
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-PYLogging.initialize(logger)
 
 STAGING_THREAD = concurrent.futures.ThreadPoolExecutor(max_workers=3)
 _QUERY_OBJECT_STAGING_FOLDER = 'staging'
 
 if sys.version_info.major == 3:
     unicode = str
+
+
+logger = logging.getLogger(__name__)
 
 
 def parse_arguments():
@@ -125,7 +124,7 @@ class BaseHandler(tornado.web.RequestHandler):
         print(info)
         self.write(simplejson.dumps(
             {'message': log_message, 'info': info or {}}))
-        log_error(log_message, info=info)
+        logger.error(log_message, info=info)
         self.finish()
 
     def options(self):
@@ -417,7 +416,7 @@ class EndpointHandler(ManagementHandler):
                 return
 
             new_version = int(endpoints[name]['version']) + 1
-            log_info('Endpoint info: %s' % request_data)
+            logger.info('Endpoint info: %s' % request_data)
             err_msg = yield self._add_or_update_endpoint(
                 'update', name, new_version, request_data)
             if err_msg:
@@ -528,7 +527,8 @@ class EvaluationPlaneHandler(BaseHandler):
             for u in user_code.splitlines():
                 function_to_evaluate += ' ' + u + '\n'
 
-            log_info("function to evaluate=%s" % function_to_evaluate)
+            logger.info(
+                "function to evaluate=%s" % function_to_evaluate)
 
             result = yield self.call_subprocess(function_to_evaluate,
                                                 arguments)
@@ -622,7 +622,7 @@ class QueryPlaneHandler(BaseHandler):
                 'utf-8')).hexdigest())
             return (QuerySuccessful, response.for_json(), gls_time)
         else:
-            log_error("Failed query", response=response)
+            logger.error("Failed query", response=response)
             return (type(response), response.for_json(), gls_time)
 
     # handle HTTP Options requests to support CORS
@@ -684,7 +684,7 @@ class QueryPlaneHandler(BaseHandler):
             # po_name is None if self.py_handler.ps.query_objects.get(
             # endpoint_name) is None
             if not po_name:
-                log_error("UnknownURI", endpoint_name=endpoint_name)
+                logger.error("UnknownURI", endpoint_name=endpoint_name)
                 self.error_out(404, 'UnknownURI',
                                info="Endpoint '%s' does not exist"
                                     % endpoint_name)
@@ -693,13 +693,13 @@ class QueryPlaneHandler(BaseHandler):
             po_obj = self.py_handler.ps.query_objects.get(po_name)
 
             if not po_obj:
-                log_error("UnknownURI", endpoint_name=po_name)
+                logger.error("UnknownURI", endpoint_name=po_name)
                 self.error_out(404, 'UnknownURI',
                                info="Endpoint '%s' does not exist" % po_name)
                 return
 
             if po_name != endpoint_name:
-                log_info("Querying actual model", po_name=po_name)
+                logger.info("Querying actual model", po_name=po_name)
 
             uid = _get_uuid()
 
@@ -750,7 +750,7 @@ class QueryPlaneHandler(BaseHandler):
             endpoint_name = urllib.parse.unquote(endpoint_name)
         else:
             endpoint_name = urllib.unquote(endpoint_name)
-        log_debug("GET /query", endpoint_name=endpoint_name)
+        logger.debug("GET /query", endpoint_name=endpoint_name)
         self._process_query(endpoint_name, start)
 
     @tornado.web.asynchronous
@@ -760,7 +760,7 @@ class QueryPlaneHandler(BaseHandler):
             endpoint_name = urllib.parse.unquote(endpoint_name)
         else:
             endpoint_name = urllib.unquote(endpoint_name)
-        log_debug("POST /query", endpoint_name=endpoint_name)
+        logger.debug("POST /query", endpoint_name=endpoint_name)
         self._process_query(endpoint_name, start)
 
 
@@ -818,9 +818,18 @@ def get_config():
                        'Will be using the default level INFO.'.format(level))
         level = 'INFO'
     settings['log_level'] = level
-    logging.getLogger().setLevel(level)
-    for handler in logger.handlers:
-        handler.setLevel(level)
+
+    # Create application wide logging
+    root_logger = logging.getLogger('')
+    root_logger.setLevel(level)
+    temp_dir = tempfile.gettempdir()
+    fh = logging.handlers.RotatingFileHandler(
+        filename=os.path.join(temp_dir, "tabpy_log.log"),
+        maxBytes=10000000, backupCount=5)
+    formatter = logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    fh.setFormatter(formatter)
+    root_logger.addHandler(fh)
 
     if cli_args.port is not None:
         settings['port'] = cli_args.port
@@ -856,7 +865,7 @@ def get_config():
     # if state.ini does not exist try and create it - remove last dependence
     # on batch/shell script
     state_file_path = settings['state_file_path']
-    log_info("Loading state from state file {}/state.ini".format(state_file_path))
+    logger.info("Loading state from state file {}/state.ini".format(state_file_path))
     tabpy_state = _get_state_from_file(state_file_path)
     settings['tabpy'] = TabPyState(config=tabpy_state, settings=settings)
 

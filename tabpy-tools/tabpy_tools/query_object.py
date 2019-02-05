@@ -1,15 +1,13 @@
 import abc
+import logging
 import os
-import sys
 import json
 import shutil
-import tempfile as _tempfie
-from tempfile import mkdtemp
 
 import cloudpickle as _cloudpickle
 
-import logging as _logging
-_logger = _logging.getLogger(__name__)
+
+logger = logging.getLogger(__name__)
 
 
 class QueryObject(object):
@@ -50,7 +48,8 @@ class QueryObject(object):
           The location to save the query object to
         """
         if os.path.exists(path):
-            _logger.warning("Overwriting existing file '%s' when saving query object" % path)
+            logger.warning("Overwriting existing file '%s' when saving query "
+                           "object" % path)
             rm_fn = os.remove if os.path.isfile(path) else shutil.rmtree
             rm_fn(path)
         self._save_local(path)
@@ -77,8 +76,8 @@ class QueryObject(object):
         new_po = None
         new_po = cls._load_local(path)
 
-
-        _logger.info('Loaded query object "%s" successfully' % type(new_po).__name__)
+        logger.info('Loaded query object "%s" successfully' %
+                    type(new_po).__name__)
 
         return new_po
 
