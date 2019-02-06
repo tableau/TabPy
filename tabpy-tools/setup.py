@@ -3,16 +3,29 @@ try:
 except ImportError:
     from distutils.core import setup
 
+from pathlib import Path
+
 def read_version():
-    with open('../VERSION') as h:
-        return h.read().strip()
+    f = None
+    for path in ['VERSION', '../VERSION', '../../VERSION']:
+        if Path(path).exists():
+            f = path
+            break
+
+    if f is not None:
+        with open(f) as h:
+            return h.read().strip()
+    else:
+        return 'dev'
+
 
 __version__=read_version()
+
 
 setup(
     name='tabpy-tools',
     version=__version__,
-    description='Python library of tools to manage Tableau Python Server.',
+    description='Python library of tools to manage TabPy Server.',
     url='https://github.com/tableau/TabPy',
     author='Tableau',
     author_email='github@tableau.com',
