@@ -13,9 +13,7 @@ import os
 import shutil
 from re import compile as _compile
 
-
 logger = logging.getLogger(__name__)
-
 
 _name_checker = _compile('^[a-zA-Z0-9-_\ ]+$')
 

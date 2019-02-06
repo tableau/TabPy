@@ -1,46 +1,40 @@
+from argparse import ArgumentParser
+import concurrent.futures
+import configparser
+from datetime import datetime
+from hashlib import md5
+from io import StringIO
 import logging
-import os
-import sys
+import logging.config
 import multiprocessing
+from OpenSSL import crypto
+import os
+from pathlib import Path
+from re import compile as _compile
+import requests
+import shutil
+import simplejson
+import sys
+from tabpy_server.psws.python_service import PythonService
+from tabpy_server.psws.python_service import PythonServiceHandler
+from tabpy_server.common.util import format_exception
+from tabpy_server.common.messages import (
+    Query, QuerySuccessful, QueryError, UnknownURI)
+from tabpy_server.psws.callbacks import (
+    init_ps_server, init_model_evaluator, on_state_change)
+from tabpy_server.management.util import _get_state_from_file
+from tabpy_server.management.state import TabPyState, get_query_object_path
 import tempfile
 import time
-import configparser
-import simplejson
-from uuid import uuid4 as random_uuid
-import shutil
-from re import compile as _compile
-
-import uuid
-import urllib
-import requests
 import tornado
 import tornado.options
 import tornado.web
 import tornado.ioloop
 from tornado import gen
 from tornado_json.constants import TORNADO_MAJOR
-
-from hashlib import md5
-from argparse import ArgumentParser
-
-from OpenSSL import crypto
-from datetime import datetime
-from io import StringIO
-
-from tabpy_server.psws.python_service import PythonService
-from tabpy_server.psws.python_service import PythonServiceHandler
-
-from tabpy_server.common.util import format_exception
-from tabpy_server.common.messages import (
-    Query, QuerySuccessful, QueryError, UnknownURI)
-from tabpy_server.psws.callbacks import (
-    init_ps_server, init_model_evaluator, on_state_change)
-
-from tabpy_server.management.util import _get_state_from_file
-from tabpy_server.management.state import TabPyState, get_query_object_path
-import concurrent.futures
-
-from pathlib import Path
+from uuid import uuid4 as random_uuid
+import urllib
+import uuid
 
 def read_version():
     if Path('VERSION').exists():
@@ -54,16 +48,11 @@ def read_version():
 
 __version__ = read_version()
 
-
 STAGING_THREAD = concurrent.futures.ThreadPoolExecutor(max_workers=3)
 _QUERY_OBJECT_STAGING_FOLDER = 'staging'
 
 if sys.version_info.major == 3:
     unicode = str
-
-
-logger = logging.getLogger(__name__)
-
 
 def parse_arguments():
     '''
@@ -75,6 +64,17 @@ def parse_arguments():
                         help='Listening port for this service.')
     parser.add_argument('--config', help='Path to a config file.')
     return parser.parse_args()
+
+
+cli_args = parse_arguments()
+config_file = cli_args.config if cli_args.config is not None else os.path.join(os.path.dirname(__file__), 'common',
+                                                                        'default.conf')
+if os.path.isfile(config_file):
+    logging.config.fileConfig(config_file)
+else:
+    logging.basicConfig(level=logging.info)
+
+logger = logging.getLogger(__name__)
 
 
 def copy_from_local(localpath, remotepath, is_dir=False):
@@ -792,51 +792,24 @@ def get_config():
     """
     parser = configparser.ConfigParser()
 
-    cli_args = parse_arguments()
-    path = cli_args.config if cli_args.config is not None else os.path.join(os.path.dirname(__file__), 'common',
-                                                                            'default.conf')
-    if os.path.isfile(path):
-        with open(path) as f:
-            data = '[dummy-header]\n' + f.read()
-        parser.read_string(data)
+    if os.path.isfile(config_file):
+        parser.read_string(open(config_file).read())
     else:
         logger.warning("Unable to find config file at '{}', using default settings.".format(path))
 
     settings = {}
     for section in parser.sections():
-        for key, val in parser.items(section):
-            settings[key] = val
+        if section == "TabPy":
+            for key, val in parser.items(section):
+                settings[key] = val
 
     def set_parameter(settings_key, config_key, default_val=None, check_env_var=False):
-        if config_key is not None and parser.has_option('dummy-header', config_key):
-            settings[settings_key] = parser.get('dummy-header', config_key)
+        if config_key is not None and parser.has_option('TabPy', config_key):
+            settings[settings_key] = parser.get('TabPy', config_key)
         elif check_env_var:
             settings[settings_key] = os.getenv(config_key, default_val)
         elif default_val is not None:
             settings[settings_key] = default_val
-
-    # convert log level string into int, set log level
-    # defaults to INFO if the level is not recognized
-    set_parameter('log_level', 'TABPY_LOG_LEVEL', default_val='INFO', check_env_var=True)
-    settings['log_level'] = settings['log_level'].upper()
-    level = settings['log_level']
-    if level not in {'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'}:
-        logger.warning('The log level indicated is not supported: {}. '
-                       'Will be using the default level INFO.'.format(level))
-        level = 'INFO'
-    settings['log_level'] = level
-
-    # Create application wide logging
-    root_logger = logging.getLogger('')
-    root_logger.setLevel(level)
-    temp_dir = tempfile.gettempdir()
-    fh = logging.handlers.RotatingFileHandler(
-        filename=os.path.join(temp_dir, "tabpy_log.log"),
-        maxBytes=10000000, backupCount=5)
-    formatter = logging.Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    fh.setFormatter(formatter)
-    root_logger.addHandler(fh)
 
     if cli_args.port is not None:
         settings['port'] = cli_args.port

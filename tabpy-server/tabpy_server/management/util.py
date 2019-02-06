@@ -12,7 +12,6 @@ from dateutil import parser
 from datetime import datetime, timedelta, tzinfo
 from time import mktime
 
-
 logger = logging.getLogger(__name__)
 
 

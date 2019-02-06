@@ -12,7 +12,6 @@ from tabpy_server.management.state import TabPyState, get_query_object_path
 
 from tabpy_server.management import util
 
-
 logger = logging.getLogger(__name__)
 
 

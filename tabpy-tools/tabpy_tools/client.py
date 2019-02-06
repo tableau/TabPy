@@ -19,7 +19,7 @@ from .custom_query_object import CustomQueryObject
 import os
 import logging
 
-_logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 _name_checker = compile('^[a-zA-Z0-9-_\ ]+$')
 
@@ -443,7 +443,7 @@ class Client(object):
         version. If all the versions are equal to or greater than the version
         expected, then it will return. Uses time.sleep().
         """
-        _logger.info("Waiting for endpoint %r to deploy to version %r",
+        logger.info("Waiting for endpoint %r to deploy to version %r",
                      endpoint_name,
                      version)
         start = time.time()
@@ -452,10 +452,10 @@ class Client(object):
             try:
                 ep = ep_status[endpoint_name]
             except KeyError:
-                _logger.info("Endpoint %r doesn't exist in endpoints yet",
+                logger.info("Endpoint %r doesn't exist in endpoints yet",
                              endpoint_name)
             else:
-                _logger.info("ep=%r", ep)
+                logger.info("ep=%r", ep)
 
                 if ep['status'] == 'LoadFailed':
                     raise RuntimeError("LoadFailed: %r" % (
@@ -464,15 +464,15 @@ class Client(object):
 
                 elif ep['status'] == 'LoadSuccessful':
                     if ep['version'] >= version:
-                        _logger.info("LoadSuccessful")
+                        logger.info("LoadSuccessful")
                         break
                     else:
-                        _logger.info("LoadSuccessful but wrong version")
+                        logger.info("LoadSuccessful but wrong version")
 
             if time.time() - start > 10:
                 raise RuntimeError("Waited more then 10s for deployment")
 
-            _logger.info("Sleeping %r", interval)
+            logger.info("Sleeping %r", interval)
             time.sleep(interval)
 
     def remove(self, name):

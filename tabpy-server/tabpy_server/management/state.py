@@ -15,9 +15,7 @@ import sys
 
 from tabpy_server.management.util import write_state_config
 
-
 logger = logging.getLogger(__name__)
-
 
 if sys.version_info.major == 3:
     unicode = str
