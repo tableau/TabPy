@@ -21,6 +21,28 @@ def assert_raises_runtime_error(message, fn, args={}):
         assert err.args[0] == message
 
 
+def append_logger_settings_to_config_file(config_file):
+    config_file.write("[loggers]\n"
+                      "keys=root\n"
+                      "[handlers]\n"
+                      "keys=rotatingFileHandler\n"
+                      "[formatters]\n"
+                      "keys=rootFormatter\n"
+                      "[logger_root]\n"
+                      "level=ERROR\n"
+                      "handlers=rotatingFileHandler\n"
+                      "qualname=root\n"
+                      "propagete=0\n"
+                      "[handler_rotatingFileHandler]\n"
+                      "class=handlers.RotatingFileHandler\n"
+                      "level=DEBUG\n"
+                      "formatter=rootFormatter\n"
+                      "args=('tabpy_server_tests_log.log', 'w', 1000000, 5)\n"
+                      "[formatter_rootFormatter]\n"
+                      "format=%(asctime)s [%(levelname)s] (%(filename)s:%(module)s:%(lineno)d): %(message)s\n"
+                      "datefmt=%Y-%m-%d,%H:%M:%S\n".encode())
+
+
 class TestConfigEnvironmentCalls(unittest.TestCase):
 
     @patch('tabpy_server.tabpy.TabPyState')
@@ -32,7 +54,7 @@ class TestConfigEnvironmentCalls(unittest.TestCase):
     @patch('tabpy_server.tabpy.os')
     def test_no_config_file(self, mock_os, mock_file_exists, mock_path_exists, mock_psws, mock_shutil,
                             mock_management_util, mock_tabpy_state):
-        get_config()
+        get_config(None)
 
         getenv_calls = [call('TABPY_PORT', 9004),
                         call('TABPY_QUERY_OBJECT_PATH', '/tmp/query_objects'), call('TABPY_STATE_PATH', './')]
@@ -54,7 +76,7 @@ class TestConfigEnvironmentCalls(unittest.TestCase):
     @patch('tabpy_server.tabpy.os')
     def test_no_state_ini_file_or_state_dir(self, mock_os, mock_file_exists, mock_path_exists, mock_psws, mock_shutil,
                                             mock_management_util, mock_tabpy_state):
-        get_config()
+        get_config(None)
         self.assertEqual(len(mock_os.makedirs.mock_calls), 1)
 
 
@@ -70,29 +92,12 @@ class TestPartialConfigFile(unittest.TestCase):
     def test_config_file_present(self, mock_os, mock_path_exists, mock_psws, mock_shutil, mock_management_util,
                                  mock_tabpy_state, mock_parse_arguments):
         config_file = NamedTemporaryFile(delete=False)
-        config_file.write("[loggers]\n"
-                          "keys=root\n"
-                          "[handlers]\n"
-                          "keys=console\n"
-                          "[formatters]\n"
-                          "keys=default\n"
-                          "[logger_root]\n"
-                          "level=INFO\n"
-                          "handlers=console\n"
-                          "[handler_console]\n"
-                          "class=StreamHandler\n"
-                          "level=INFO\n"
-                          "formatter=default\n"
-                          "args=(sys.stdout,)\n"
-                          "[formatter_default]\n"
-                          "format=%(asctime)s - %(name)s - %(levelname)s - %(message)s\n"
-                          "datefmt=%Y-%m-%d %H:%M:%s\n".encode())
+        append_logger_settings_to_config_file(config_file)
 
         config_file.write("[TabPy]\n"
                           "TABPY_BIND_IP = 0.0.0.0\n"
                           "TABPY_QUERY_OBJECT_PATH = foo\n"
-                          "TABPY_STATE_PATH = bar\n"
-                          "TABPY_LOG_LEVEL = warning".encode())
+                          "TABPY_STATE_PATH = bar\n".encode())
         config_file.close()
 
         mock_parse_arguments.return_value = Namespace(config=config_file.name, port=None)
@@ -100,11 +105,10 @@ class TestPartialConfigFile(unittest.TestCase):
         mock_os.getenv.side_effect = [1234]
         mock_os.path.realpath.return_value = 'bar'
 
-        settings, _ = get_config()
+        settings, _ = get_config(config_file.name)
         getenv_calls = [call('TABPY_PORT', 9004)]
 
         mock_os.getenv.assert_has_calls(getenv_calls, any_order=True)
-        self.assertEqual(settings['log_level'], 'WARNING')
         self.assertEqual(settings['port'], 1234)
         self.assertEqual(settings['server_version'], open('VERSION').read().strip())
         self.assertEquals(settings['bind_ip'], '0.0.0.0')
@@ -137,23 +141,8 @@ class TestTransferProtocolValidation(unittest.TestCase):
     def setUp(self):
         os.chdir(self.tabpy_cwd)
         self.fp = NamedTemporaryFile(delete=False)
-        self.fp.write("[loggers]\n"
-                      "keys=root\n"
-                      "[handlers]\n"
-                      "keys=console\n"
-                      "[formatters]\n"
-                      "keys=default\n"
-                      "[logger_root]\n"
-                      "level=INFO\n"
-                      "handlers=console\n"
-                      "[handler_console]\n"
-                      "class=StreamHandler\n"
-                      "level=INFO\n"
-                      "formatter=default\n"
-                      "args=(sys.stdout,)\n"
-                      "[formatter_default]\n"
-                      "format=%(asctime)s - %(name)s - %(levelname)s - %(message)s\n"
-                      "datefmt=%Y-%m-%d %H:%M:%s\n".encode())
+        self.config_name = self.fp.name
+        append_logger_settings_to_config_file(self.fp)
 
         patcher = patch('tabpy_server.tabpy.parse_arguments', return_value=Namespace(config=self.fp.name, port=None))
         patcher.start()
@@ -167,7 +156,7 @@ class TestTransferProtocolValidation(unittest.TestCase):
                       "TABPY_TRANSFER_PROTOCOL = http".encode())
         self.fp.close()
 
-        settings, _ = get_config()
+        settings, _ = get_config(self.fp.name)
         self.assertEqual(settings['transfer_protocol'], 'http')
 
     def test_https_without_cert_and_key(self):
@@ -176,7 +165,8 @@ class TestTransferProtocolValidation(unittest.TestCase):
         self.fp.close()
 
         assert_raises_runtime_error(
-            'Error using HTTPS: The parameter(s) TABPY_CERTIFICATE_FILE and TABPY_KEY_FILE must be set.', get_config)
+            'Error using HTTPS: The parameter(s) TABPY_CERTIFICATE_FILE and TABPY_KEY_FILE must be set.', 
+            get_config, {self.config_name})
 
     def test_https_without_cert(self):
         self.fp.write("[TabPy]\n"
@@ -185,7 +175,7 @@ class TestTransferProtocolValidation(unittest.TestCase):
         self.fp.close()
 
         assert_raises_runtime_error('Error using HTTPS: The parameter(s) TABPY_CERTIFICATE_FILE must be set.',
-                                    get_config)
+                                    get_config, {self.config_name})
 
     def test_https_without_key(self):
         self.fp.write("[TabPy]\n"
@@ -194,7 +184,7 @@ class TestTransferProtocolValidation(unittest.TestCase):
         self.fp.close()
 
         assert_raises_runtime_error('Error using HTTPS: The parameter(s) TABPY_KEY_FILE must be set.',
-                                    get_config)
+                                    get_config, {self.config_name})
 
     @patch('tabpy_server.tabpy.os.path')
     def test_https_cert_and_key_file_not_found(self, mock_path):
@@ -208,7 +198,7 @@ class TestTransferProtocolValidation(unittest.TestCase):
 
         assert_raises_runtime_error(
             'Error using HTTPS: The parameter(s) TABPY_CERTIFICATE_FILE and TABPY_KEY_FILE must point to an existing file.',
-            get_config)
+            get_config, {self.config_name})
 
     @patch('tabpy_server.tabpy.os.path')
     def test_https_cert_file_not_found(self, mock_path):
@@ -221,7 +211,8 @@ class TestTransferProtocolValidation(unittest.TestCase):
         mock_path.isfile.side_effect = lambda x: self.mock_isfile(x, {self.fp.name, 'bar'})
 
         assert_raises_runtime_error(
-            'Error using HTTPS: The parameter(s) TABPY_CERTIFICATE_FILE must point to an existing file.', get_config)
+            'Error using HTTPS: The parameter(s) TABPY_CERTIFICATE_FILE must point to an existing file.', 
+            get_config, {self.config_name})
 
     @patch('tabpy_server.tabpy.os.path')
     def test_https_key_file_not_found(self, mock_path):
@@ -234,7 +225,7 @@ class TestTransferProtocolValidation(unittest.TestCase):
         mock_path.isfile.side_effect = lambda x: self.mock_isfile(x, {self.fp.name, 'foo'})
 
         assert_raises_runtime_error(
-            'Error using HTTPS: The parameter(s) TABPY_KEY_FILE must point to an existing file.', get_config)
+            'Error using HTTPS: The parameter(s) TABPY_KEY_FILE must point to an existing file.', get_config, {self.config_name})
 
     @patch('tabpy_server.tabpy.os.path.isfile', return_value=True)
     @patch('tabpy_server.tabpy.validate_cert', return_value=True)
@@ -245,67 +236,11 @@ class TestTransferProtocolValidation(unittest.TestCase):
                       "TABPY_KEY_FILE = bar".encode())
         self.fp.close()
 
-        settings, _ = get_config()
+        settings, _ = get_config(self.config_name)
 
         self.assertEqual(settings['transfer_protocol'], 'https')
         self.assertEqual(settings['certificate_file'], 'foo')
         self.assertEqual(settings['key_file'], 'bar')
-
-
-class TestLogLevelValidation(unittest.TestCase):
-
-    def setUp(self):
-        os.chdir(os.path.join(os.getcwd(), 'tabpy-server', 'tabpy_server'))
-        self.addCleanup(os.chdir, os.path.join(os.getcwd(), '..', '..'))
-
-        self.fp = NamedTemporaryFile(delete=False)
-        self.fp.write("[loggers]\n"
-                      "keys=root\n"
-                      "[handlers]\n"
-                      "keys=console\n"
-                      "[formatters]\n"
-                      "keys=default\n"
-                      "[logger_root]\n"
-                      "level=INFO\n"
-                      "handlers=console\n"
-                      "[handler_console]\n"
-                      "class=StreamHandler\n"
-                      "level=INFO\n"
-                      "formatter=default\n"
-                      "args=(sys.stdout,)\n"
-                      "[formatter_default]\n"
-                      "format=%(asctime)s - %(name)s - %(levelname)s - %(message)s\n"
-                      "datefmt=%Y-%m-%d %H:%M:%s\n".encode())
-
-    def test_valid_log_level(self):
-        valid_levels = {'inFO', 'WARNING', 'error', 'CriTiCal'}
-        for level in valid_levels:
-            self.fp.write("[TabPy]\n"
-                          "TABPY_LOG_LEVEL = ".encode() + bytes(level, 'utf-8'))
-            self.fp.close()
-
-            patcher = patch('tabpy_server.tabpy.parse_arguments',
-                            return_value=Namespace(config=fp.name, port=None))
-            patcher.start()
-
-            settings, _ = get_config()
-            self.assertEqual(settings['log_level'], level.upper())
-
-    @patch('tabpy_server.tabpy.parse_arguments')
-    def test_invalid_log_level(self, mock_parse_arguments):
-        fp.write("[TabPy]\n"
-                 "TABPY_LOG_LEVEL = foo".encode())
-        fp.close()
-
-        mock_parse_arguments.return_value = Namespace(config=fp.name, port=None)
-
-        settings, _ = get_config()
-        self.assertEqual(settings['log_level'], 'INFO')
-
-    @patch('tabpy_server.tabpy.os.path.isfile', side_effect={False, True})
-    def test_default_log_level(self, mock_isfile):
-        settings, _ = get_config()
-        self.assertEqual(settings['log_level'], 'INFO')
 
 
 class TestCertificateValidation(unittest.TestCase):

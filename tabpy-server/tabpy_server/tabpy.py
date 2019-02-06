@@ -44,7 +44,6 @@ def read_version():
 
     with open(f) as h:
         return h.read().strip()
-    
 
 __version__ = read_version()
 
@@ -72,7 +71,7 @@ config_file = cli_args.config if cli_args.config is not None else os.path.join(o
 if os.path.isfile(config_file):
     logging.config.fileConfig(config_file)
 else:
-    logging.basicConfig(level=logging.info)
+    logging.basicConfig(level=logging.DEBUG)
 
 logger = logging.getLogger(__name__)
 
@@ -96,7 +95,6 @@ def copy_from_local(localpath, remotepath, is_dir=False):
                     shutil.copy(full_file_name, remotepath)
     else:
         shutil.copy(localpath, remotepath)
-
 
 def _sanitize_request_data(data):
     if not isinstance(data, dict):
@@ -128,9 +126,13 @@ class BaseHandler(tornado.web.RequestHandler):
 
     def error_out(self, code, log_message, info=None):
         self.set_status(code)
-        print(info)
         self.write(simplejson.dumps(
             {'message': log_message, 'info': info or {}}))
+
+        # We want to duplicate error message in console for
+        # loggers are misconfigured or causing the failure
+        # themselves
+        print(info)
         logger.error(log_message, info=info)
         self.finish()
 
@@ -771,7 +773,7 @@ class QueryPlaneHandler(BaseHandler):
         self._process_query(endpoint_name, start)
 
 
-def get_config():
+def get_config(config_file):
     """Provide consistent mechanism for pulling in configuration.
 
     Attempt to retain backward compatibility for existing implementations by
@@ -793,15 +795,17 @@ def get_config():
     parser = configparser.ConfigParser()
 
     if os.path.isfile(config_file):
-        parser.read_string(open(config_file).read())
+        with open(config_file) as f:
+            parser.read_string(f.read())
     else:
-        logger.warning("Unable to find config file at '{}', using default settings.".format(path))
+        logger.warning("Unable to find config file at '{}', using default settings.".format(config_file))
 
     settings = {}
     for section in parser.sections():
         if section == "TabPy":
             for key, val in parser.items(section):
                 settings[key] = val
+            break
 
     def set_parameter(settings_key, config_key, default_val=None, check_env_var=False):
         if config_key is not None and parser.has_option('TabPy', config_key):
@@ -845,7 +849,7 @@ def get_config():
     # if state.ini does not exist try and create it - remove last dependence
     # on batch/shell script
     state_file_path = settings['state_file_path']
-    logger.info("Loading state from state file {}/state.ini".format(state_file_path))
+    logger.info("Loading state from state file {}".format(os.path.join(state_file_path, "state.ini")))
     tabpy_state = _get_state_from_file(state_file_path)
     settings['tabpy'] = TabPyState(config=tabpy_state, settings=settings)
 
@@ -920,11 +924,11 @@ def validate_cert(cert_file_path):
 
 
 def main():
-    settings, subdirectory = get_config()
+    settings, subdirectory = get_config(config_file)
 
-    print('Initializing TabPy...')
+    logger.info('Initializing TabPy...')
     tornado.ioloop.IOLoop.instance().run_sync(lambda: init_ps_server(settings))
-    print('Done initializing TabPy.')
+    logger.info('Done initializing TabPy.')
 
     executor = concurrent.futures.ThreadPoolExecutor(
         max_workers=multiprocessing.cpu_count())
@@ -962,8 +966,8 @@ def main():
     else:
         raise RuntimeError('Unsupported transfer protocol.')
 
-    print('Web service listening on {} port {}'.format(settings['bind_ip'],
-                                                       str(settings['port'])))
+    logger.info('Web service listening on {} port {}'.format(settings['bind_ip'],
+                                                             str(settings['port'])))
     tornado.ioloop.IOLoop.instance().start()
 
 
