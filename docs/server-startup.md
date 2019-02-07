@@ -10,6 +10,7 @@ These instructions explain how to start up TabPy Server.
 - [Mac](#mac)
   * [Command Line Arguments](#command-line-arguments-1)
 - [Linux](#linux)
+  * [CentOS Specific Steps](#centos-specific-steps)
   * [Command Line Arguments](#command-line-arguments-2)
 
 <!-- tocstop -->
@@ -18,14 +19,20 @@ These instructions explain how to start up TabPy Server.
 
 To start up TabPy Server from an environment the following prerequisites are required:
 
-- Python 3 or greater
+- Python 3.6.5
 - setuptools (Python module, can be installed from PyPi)
 
-First, select a TabPy version and download its source code from the [releases page](https://github.com/tableau/TabPy/releases). To start up a TabPy server instance, follow the instructions for your OS (found below).
+First, select a TabPy version and download its source code from the
+[releases page](https://github.com/tableau/TabPy/releases). To start up
+a TabPy server instance, follow the instructions for your OS (found below).
 
 Instructions on how to configure your TabPy server instance can be found in the [TabPy Server Configuration Instructions](server-config.md)
 
-While it is recommended to install TabPy in a new virtual environment, if you are installing a new version of TabPy in the same environment as a previous install, delete the previous TabPy version folder in your Python directory.
+It is highly recommended to use Python virtual enviroment for running TabPy,
+check [Running TabPy in Python Virtual Environment](tabpy-virtualenv.md) page
+for more details.
+If you are installing a new version of TabPy in the same environment as a
+previous install, delete the previous TabPy version folder in your Python directory.
 
 ## Windows
 

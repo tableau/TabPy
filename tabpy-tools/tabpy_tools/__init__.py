@@ -2,22 +2,21 @@
 TabPy client is a Python client to interact with a Tornado-Python-Connector server process.
 """
 
-__version__ = 'dev'
+from pathlib import Path
 
-import logging
-import logging.handlers
-import os
-import tempfile
+def read_version():
+    f = None
+    for path in ['VERSION', '../VERSION', '../../VERSION']:
+        if Path(path).exists():
+            f = path
+            break
+
+    if f is not None:
+        with open(f) as h:
+            return h.read().strip()
+    else:
+        return 'dev'
 
 
-# Create application wide logging
-logger = logging.getLogger(__name__)
-logger.setLevel("INFO")
-temp_dir = tempfile.gettempdir()
-fh = logging.handlers.RotatingFileHandler(
-    filename=os.path.join(temp_dir, "tabpy_log.log"),
-    maxBytes=10000000, backupCount=5)
-formatter = logging.Formatter(
-    '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-fh.setFormatter(formatter)
-logger.addHandler(fh)
+__version__=read_version()
+

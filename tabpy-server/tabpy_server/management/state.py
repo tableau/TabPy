@@ -15,9 +15,7 @@ import sys
 
 from tabpy_server.management.util import write_state_config
 
-
 logger = logging.getLogger(__name__)
-
 
 if sys.version_info.major == 3:
     unicode = str
@@ -502,8 +500,10 @@ class TabPyState(object):
         '''
         _cors_origin = ''
         try:
+            logger.debug("Collecting Access-Control-Allow-Origin from state file...")
             _cors_origin = self._get_config_value('Service Info', 'Access-Control-Allow-Origin')
         except Exception as e:
+            logger.error(e)
             pass
         return _cors_origin
 

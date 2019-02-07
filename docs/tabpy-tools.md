@@ -20,9 +20,9 @@ to specify the service location for all subsequent operations:
 
 ```python
 
-import tabpy_tools
+from tabpy_tools.client import Client
 
-client = tabpy_tools.Client('http://localhost:9004/')
+client = Client('http://localhost:9004/')
 
 ```
 

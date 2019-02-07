@@ -3,6 +3,19 @@
 This file list notable changes for TabPy project releases.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## v0.3.2
+
+### Breaking changes
+
+- Logger configuration now is in TabPy config file.
+
+### Improvements
+
+- Remove versioneer and just replace it with VERSION file
+- Require Python 3.6.5
+- Require jsonschema to be compatible with 2.3.0
+- Added setup instructions (known issues) for CentOS
+
 ## v0.3.1
 
 - Fixed dependency on tabpy-tools in startup scripts

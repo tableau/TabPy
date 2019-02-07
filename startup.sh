@@ -10,14 +10,22 @@ function check_status() {
 # Set environment variables
 echo Setting TABPY_ROOT to current working directory.
 export TABPY_ROOT=$PWD
+export INSTALL_LOG=$TABPY_ROOT/tabpy-server/install.log
 
 # Check for dependencies, install them if they're not present.
 echo Installing TabPy-server requirements.
-echo Read the logs at $TABPY_ROOT/tabpy-server/install.log
+echo Read the logs at $INSTALL_LOG
+
 cd $TABPY_ROOT/tabpy-server
-python3 setup.py install &> install.log
+echo -e "\nInstalling tabpy-server dependencies..." > $INSTALL_LOG
+python3 setup.py install >> $INSTALL_LOG 2>&1
+check_status
+
 cd $TABPY_ROOT/tabpy-tools
-python3 setup.py install &> install.log
+echo -e "\nInstalling tabpy-tools dependencies..." >> $INSTALL_LOG
+python3 setup.py install >> $INSTALL_LOG 2>&1
+check_status
+
 cd $TABPY_ROOT
 check_status
 

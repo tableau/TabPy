@@ -22,7 +22,7 @@ and run it locally.
 These are prerequisites for an environment required for a contributor to
 be able to work on TabPy changes:
 
-- Python 3.x
+- Python 3.6.5:
   - To see which version of Python you have installed, run ```python --version```.
 - git
 - TabPy repo:
@@ -67,18 +67,6 @@ Please use markdown validation tools like web-based[markdownlint](https://dlaa.m
 or npm [markdownlint-cli](https://github.com/igorshubovych/markdownlint-cli).
 
 TOC for markdown file is built with [markdonw-toc](https://www.npmjs.com/package/markdown-toc).
-
-## Versioning
-
-TabPy is versioned with [Versioneer tool](https://github.com/warner/python-versioneer) and uses the github release
-tag as a version. In case you need to update version for TabPy use `git tag` command. Example below
-shows how to update TabPy version to `v3.14-gamma`:
-
-```sh
-git tag v3.14-gamma
-git push
-git push --tag
-```
 
 ## TabPy with Swagger
 
