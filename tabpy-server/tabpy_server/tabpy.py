@@ -15,6 +15,7 @@ import requests
 import shutil
 import simplejson
 import sys
+from tabpy_server import __version__
 from tabpy_server.psws.python_service import PythonService
 from tabpy_server.psws.python_service import PythonServiceHandler
 from tabpy_server.common.util import format_exception
@@ -36,16 +37,6 @@ from uuid import uuid4 as random_uuid
 import urllib
 import uuid
 
-def read_version():
-    if Path('VERSION').exists():
-        f = 'VERSION'
-    else:
-        f = '../../VERSION'
-
-    with open(f) as h:
-        return h.read().strip()
-
-__version__ = read_version()
 
 STAGING_THREAD = concurrent.futures.ThreadPoolExecutor(max_workers=3)
 _QUERY_OBJECT_STAGING_FOLDER = 'staging'
@@ -68,9 +59,15 @@ def parse_arguments():
 cli_args = parse_arguments()
 config_file = cli_args.config if cli_args.config is not None else os.path.join(os.path.dirname(__file__), 'common',
                                                                         'default.conf')
+loggingConfigured = False
 if os.path.isfile(config_file):
-    logging.config.fileConfig(config_file)
-else:
+    try:
+        logging.config.fileConfig(config_file, disable_existing_loggers=False)
+        loggingConfigured = True
+    except:
+        pass
+
+if not loggingConfigured:
     logging.basicConfig(level=logging.DEBUG)
 
 logger = logging.getLogger(__name__)
@@ -133,7 +130,7 @@ class BaseHandler(tornado.web.RequestHandler):
         # loggers are misconfigured or causing the failure
         # themselves
         print(info)
-        logger.error(log_message, info=info)
+        logger.error('message: {}, info: {}'.format(log_message, info))
         self.finish()
 
     def options(self):
@@ -146,17 +143,20 @@ class BaseHandler(tornado.web.RequestHandler):
         Add CORS header if the TabPy has attribute _cors_origin
         and _cors_origin is not an empty string.
         """
-        if len(self.tabpy.get_access_control_allow_origin()) > 0:
-            self.set_header("Access-Control-Allow-Origin",
-                            self.tabpy.get_access_control_allow_origin())
+        origin = self.tabpy.get_access_control_allow_origin()
+        if len(origin) > 0:
+            self.set_header("Access-Control-Allow-Origin", origin)
+            logger.debug("Access-Control-Allow-Origin:{}".format(origin))
 
-        if len(self.tabpy.get_access_control_allow_headers()) > 0:
-            self.set_header("Access-Control-Allow-Headers",
-                            self.tabpy.get_access_control_allow_headers())
+        headers = self.tabpy.get_access_control_allow_headers()
+        if len(headers) > 0:
+            self.set_header("Access-Control-Allow-Headers",headers)
+            logger.debug("Access-Control-Allow-Headers:{}".format(headers))
 
-        if len(self.tabpy.get_access_control_allow_methods()) > 0:
-            self.set_header("Access-Control-Allow-Methods",
-                            self.tabpy.get_access_control_allow_methods())
+        methods = self.tabpy.get_access_control_allow_methods()
+        if len(methods) > 0:
+            self.set_header("Access-Control-Allow-Methods",methods)
+            logger.debug("Access-Control-Allow-Methods:{}".format(methods))
 
     def _sanitize_request_data(self, data, keys=KEYS_TO_SANITIZE):
         """Remove keys so that we can log safely"""
@@ -186,6 +186,7 @@ class ManagementHandler(MainHandler):
         '''
         Add or update an endpoint
         '''
+        logging.debug("Adding/updating model {}...".format(name))
         _name_checker = _compile('^[a-zA-Z0-9-_\ ]+$')
         if not isinstance(name, (str, unicode)):
             raise TypeError("Endpoint name must be a string or unicode")
@@ -308,6 +309,8 @@ class StatusHandler(BaseHandler):
 
     def get(self):
         self._add_CORS_header()
+
+        logger.debug("Obtaining service status")
         status_dict = {}
         for k, v in self.py_handler.ps.query_objects.items():
             status_dict[k] = {
@@ -315,7 +318,11 @@ class StatusHandler(BaseHandler):
                 'type': v['type'],
                 'status': v['status'],
                 'last_error': v['last_error']}
+
+        logger.debug("Found models: {}".format(status_dict))
         self.write(simplejson.dumps(status_dict))
+        self.finish()
+        return
 
 
 class UploadDestinationHandler(ManagementHandler):
@@ -373,9 +380,11 @@ class EndpointsHandler(ManagementHandler):
             if err_msg:
                 self.error_out(400, err_msg)
             else:
+                logger.debug("Endopoint {} successfully added".format(name))
                 self.set_status(201)
                 self.write(self.tabpy.get_endpoints(name))
                 self.finish()
+                return
 
         except Exception as e:
             err_msg = format_exception(e, '/add_endpoint')
@@ -631,7 +640,7 @@ class QueryPlaneHandler(BaseHandler):
                 'utf-8')).hexdigest())
             return (QuerySuccessful, response.for_json(), gls_time)
         else:
-            logger.error("Failed query", response=response)
+            logger.error("Failed query, response: {}".format(response))
             return (type(response), response.for_json(), gls_time)
 
     # handle HTTP Options requests to support CORS
@@ -693,7 +702,6 @@ class QueryPlaneHandler(BaseHandler):
             # po_name is None if self.py_handler.ps.query_objects.get(
             # endpoint_name) is None
             if not po_name:
-                logger.error("UnknownURI", endpoint_name=endpoint_name)
                 self.error_out(404, 'UnknownURI',
                                info="Endpoint '%s' does not exist"
                                     % endpoint_name)
@@ -702,13 +710,12 @@ class QueryPlaneHandler(BaseHandler):
             po_obj = self.py_handler.ps.query_objects.get(po_name)
 
             if not po_obj:
-                logger.error("UnknownURI", endpoint_name=po_name)
                 self.error_out(404, 'UnknownURI',
                                info="Endpoint '%s' does not exist" % po_name)
                 return
 
             if po_name != endpoint_name:
-                logger.info("Querying actual model", po_name=po_name)
+                logger.info("Querying actual model: po_name={}".format(po_name))
 
             uid = _get_uuid()
 
@@ -759,7 +766,7 @@ class QueryPlaneHandler(BaseHandler):
             endpoint_name = urllib.parse.unquote(endpoint_name)
         else:
             endpoint_name = urllib.unquote(endpoint_name)
-        logger.debug("GET /query", endpoint_name=endpoint_name)
+        logger.debug("GET /query/{}".format(endpoint_name))
         self._process_query(endpoint_name, start)
 
     @tornado.web.asynchronous
@@ -769,7 +776,7 @@ class QueryPlaneHandler(BaseHandler):
             endpoint_name = urllib.parse.unquote(endpoint_name)
         else:
             endpoint_name = urllib.unquote(endpoint_name)
-        logger.debug("POST /query", endpoint_name=endpoint_name)
+        logger.debug("POST /query/{}".format(endpoint_name))
         self._process_query(endpoint_name, start)
 
 
@@ -815,7 +822,7 @@ def get_config(config_file):
         elif default_val is not None:
             settings[settings_key] = default_val
 
-    if cli_args.port is not None:
+    if cli_args is not None and cli_args.port is not None:
         settings['port'] = cli_args.port
     else:
         set_parameter('port', 'TABPY_PORT', default_val=9004, check_env_var=True)

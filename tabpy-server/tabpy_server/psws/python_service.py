@@ -30,7 +30,7 @@ class PythonServiceHandler:
 
     def manage_request(self, msg):
         try:
-            logger.info("Received request", request_type=type(msg).__name__)
+            logger.debug("Received request {}".format(type(msg).__name__))
             if isinstance(msg, LoadObject):
                 response = self.ps.load_object(*msg)
             elif isinstance(msg, DeleteObjects):
@@ -44,9 +44,10 @@ class PythonServiceHandler:
             else:
                 response = UnknownMessage(msg)
 
+            logger.debug("Returning response {}".format(response))
             return response
         except Exception as e:
-            logger.info("Error processing request", error=e.message)
+            logger.error("Error processing request: {}".format(e.message))
             return UnknownMessage(e.message)
 
 
@@ -74,9 +75,8 @@ class PythonService(object):
     def _load_object(self, object_uri, object_url, object_version, is_update,
                      object_type):
         try:
-            logger.info(msg="Loading object",
-                        uri=object_uri, url=object_url,
-                        version=object_version, is_update=is_update)
+            logger.info("Loading object:, URI={}, URL={}, version={}, is_updated={}".format(
+                object_uri, object_url,object_version, is_update))
             if object_type == 'model':
                 po = QueryObject.load(object_url)
             elif object_type == 'alias':
@@ -90,8 +90,7 @@ class PythonService(object):
                                               'status': 'LoadSuccessful',
                                               'last_error': None}
         except Exception as e:
-            logger.error("Unable to load QueryObject", path=object_url,
-                         error=str(e))
+            logger.error("Unable to load QueryObject: path={}, error={}".format(object_url, str(e)))
 
             self.query_objects[object_uri] = {
                 'version': object_version,
@@ -132,8 +131,7 @@ class PythonService(object):
                         object_uri, object_url, object_version, is_update,
                         object_type)
             except Exception as e:
-                logger.error("Unable to load QueryObject", path=object_url,
-                             error=str(e))
+                logger.error("Unable to load QueryObject: path={}, error={}".format(object_url, str(e)))
 
                 self.query_objects[object_uri] = {
                     'version': object_version,
@@ -157,17 +155,17 @@ class PythonService(object):
                 return ObjectsDeleted([object_uris])
             else:
                 logger.warning("Received message to delete query object "
-                               "that doesn't exist", object_uris=object_uris)
+                               "that doesn't exist: object_uris={}".format(object_uris))
                 return ObjectsDeleted([])
         else:
-            logger.error("Unexpected input to delete objects",
-                         input=object_uris,
-                         info="Input should be list or str. Type: %s" % type(
-                             object_uris))
+            logger.error("Unexpected input to delete objects: input={}, info={}".format(
+                         object_uris,
+                         "Input should be list or str. Type: %s" % type(object_uris)))
             return ObjectsDeleted([])
 
     def flush_objects(self):
         """Flush objects from the query_objects map"""
+        logger.debug("Flushing query objects")
         n = len(self.query_objects)
         self.query_objects.clear()
         return ObjectsFlushed(n, 0)

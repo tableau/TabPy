@@ -41,6 +41,7 @@ def wait_for_endpoint_loaded(py_handler, object_uri):
 
 @gen.coroutine
 def init_ps_server(settings):
+    logger.info("Initializing TabPy Server...")
     tabpy = settings['tabpy']
     existing_pos = tabpy.get_endpoints()
     for (object_name, obj_info) in (
@@ -62,6 +63,7 @@ def init_model_evaluator(settings):
     This will go through all models that the service currently have and
     initialize them.
     '''
+    logger.info("Initializing models...")
     tabpy = settings['tabpy']
     py_handler = settings['py_handler']
 
@@ -152,7 +154,7 @@ def on_state_change(settings):
                 object_name]
 
             if not object_path and not object_version:  # removal
-                logger.info("Removing object", uri=object_name)
+                logger.info("Removing object: URI={}".format(object_name))
 
                 py_handler.manage_request(DeleteObjects([object_name]))
 
@@ -180,4 +182,4 @@ def on_state_change(settings):
 
     except Exception as e:
         err_msg = format_exception(e, 'on_state_change')
-        logger.warning("Error submitting update model request", error=err_msg)
+        logger.error("Error submitting update model request: error={}".format(err_msg))

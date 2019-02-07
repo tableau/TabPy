@@ -12,7 +12,6 @@ from tempfile import NamedTemporaryFile
 from tabpy_server.tabpy import get_config, validate_cert
 from argparse import Namespace
 
-
 def assert_raises_runtime_error(message, fn, args={}):
     try:
         fn(*args)
@@ -35,7 +34,7 @@ def append_logger_settings_to_config_file(config_file):
                       "propagete=0\n"
                       "[handler_rotatingFileHandler]\n"
                       "class=handlers.RotatingFileHandler\n"
-                      "level=DEBUG\n"
+                      "level=ERROR\n"
                       "formatter=rootFormatter\n"
                       "args=('tabpy_server_tests_log.log', 'w', 1000000, 5)\n"
                       "[formatter_rootFormatter]\n"
@@ -175,7 +174,7 @@ class TestTransferProtocolValidation(unittest.TestCase):
         self.fp.close()
 
         assert_raises_runtime_error('Error using HTTPS: The parameter(s) TABPY_CERTIFICATE_FILE must be set.',
-                                    get_config, {self.config_name})
+                                    get_config, [self.config_name])
 
     def test_https_without_key(self):
         self.fp.write("[TabPy]\n"
@@ -184,7 +183,7 @@ class TestTransferProtocolValidation(unittest.TestCase):
         self.fp.close()
 
         assert_raises_runtime_error('Error using HTTPS: The parameter(s) TABPY_KEY_FILE must be set.',
-                                    get_config, {self.config_name})
+                                    get_config, [self.config_name])
 
     @patch('tabpy_server.tabpy.os.path')
     def test_https_cert_and_key_file_not_found(self, mock_path):
