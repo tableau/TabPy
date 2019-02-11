@@ -58,7 +58,7 @@ class Client(object):
 
     def __init__(self,
                  endpoint,
-                 query_timeout=None,
+                 query_timeout=1000,
                  verify_certificate=True):
         """
         Connects to a running server.
