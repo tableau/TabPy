@@ -104,7 +104,7 @@ You can find two detailed working examples with downloadable sample Tableau work
 [TabPy Tools documentation](tabpy-tools.md) covers in detail how functions could be deployed as endpoints.
 You can invoke such endpoints using `tabpy.query` option by specifying the endpoint name and arguments and retrieving the `response` object.
 
-A SCRIPT calculated field in Tableau using the [add endpoint](client.md#deploying-a-function) defined in [TabPy client documentation](client.md) could look like the following:
+A SCRIPT calculated field in Tableau using the [add endpoint](tabpy-tools.md#deploying-a-function) defined in [TabPy client documentation](tabpy-tools.md) could look like the following:
 
 ```sh
 SCRIPT_REAL("
