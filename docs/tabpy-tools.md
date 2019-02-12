@@ -231,7 +231,7 @@ have a Python API in `tabpy-tools`, only a raw [REST interface](server-rest.md#h
 that other client bindings can easily implement. Tableau connects to TabPy
 using REST `Evaluate`.
 
-`Evaluate` allows calling a deployed endpoint from within the Python code block.
+`evaluate` allows calling a deployed endpoint from within the Python code block.
 The convention for this is to use a provided function call `tabpy.query` in the
 code, which behaves like the `query` method in `tabpy-tools`. See the
-[REST API documentation](server.md#rest-interfaces) for an example.
+[REST API documentation](server-rest.md) for an example.
