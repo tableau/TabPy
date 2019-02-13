@@ -69,7 +69,6 @@ class TestPartialConfigFile(unittest.TestCase):
         config_file = NamedTemporaryFile(delete=False)
 
         config_file.write("[TabPy]\n"
-                          "TABPY_BIND_IP = 0.0.0.0\n"
                           "TABPY_QUERY_OBJECT_PATH = foo\n"
                           "TABPY_STATE_PATH = bar\n".encode())
         config_file.close()
@@ -84,9 +83,7 @@ class TestPartialConfigFile(unittest.TestCase):
 
         mock_os.getenv.assert_has_calls(getenv_calls, any_order=True)
         self.assertEqual(app.settings['port'], 1234)
-        self.assertEqual(app.settings['server_version'], open(
-            'VERSION').read().strip())
-        self.assertEquals(app.settings['bind_ip'], '0.0.0.0')
+        self.assertEqual(app.settings['server_version'], open('VERSION').read().strip())
         self.assertEquals(app.settings['upload_dir'], 'foo')
         self.assertEquals(app.settings['state_file_path'], 'bar')
         self.assertEqual(app.settings['transfer_protocol'], 'http')

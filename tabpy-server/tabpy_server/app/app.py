@@ -88,10 +88,9 @@ class TabPyApp:
         init_model_evaluator(self.settings, self.tabpy_state, self.python_service)
 
         if self.settings['transfer_protocol'] == 'http':
-            application.listen(
-                self.settings['port'], address=self.settings['bind_ip'])
+            application.listen(self.settings['port'])
         elif self.settings['transfer_protocol'] == 'https':
-            application.listen(self.settings['port'], address=self.settings['bind_ip'],
+            application.listen(self.settings['port'],
                                ssl_options={
                 'certfile': self.settings['certificate_file'],
                 'keyfile': self.settings['key_file']
@@ -99,8 +98,7 @@ class TabPyApp:
         else:
             log_and_raise('Unsupported transfer protocol.', RuntimeError)
 
-        logger.info('Web service listening on {} port {}'.format(self.settings['bind_ip'],
-                                                                 str(self.settings['port'])))
+        logger.info('Web service listening on port {}'.format(str(self.settings['port'])))
         tornado.ioloop.IOLoop.instance().start()
 
     def _parse_cli_arguments(self):
@@ -157,8 +155,6 @@ class TabPyApp:
         set_parameter('port', ConfigParameters.TABPY_PORT,
                       default_val=9004, check_env_var=True)
         set_parameter('server_version', None, default_val=__version__)
-        set_parameter('bind_ip', ConfigParameters.TABPY_BIND_IP,
-                      default_val='0.0.0.0', check_env_var=True)
 
         set_parameter('upload_dir', ConfigParameters.TABPY_QUERY_OBJECT_PATH,
                       default_val='/tmp/query_objects', check_env_var=True)
