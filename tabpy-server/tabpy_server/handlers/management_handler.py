@@ -55,15 +55,15 @@ class ManagementHandler(MainHandler):
         logging.debug("Adding/updating model {}...".format(name))
         _name_checker = _compile('^[a-zA-Z0-9-_\ ]+$')
         if not isinstance(name, (str, unicode)):
-            raise TypeError("Endpoint name must be a string or unicode")
+            log_and_raise("Endpoint name must be a string or unicode", TypeError)
 
         if not _name_checker.match(name):
             raise gen.Return('endpoint name can only contain: a-z, A-Z, 0-9,'
                              ' underscore, hyphens and spaces.')
 
         if self.settings.get('add_or_updating_endpoint'):
-            raise RuntimeError("Another endpoint update is already in progress"
-                               ", please wait a while and try again")
+            log_and_raise("Another endpoint update is already in progress"
+                               ", please wait a while and try again", RuntimeError)
 
         request_uuid = random_uuid()
         self.settings['add_or_updating_endpoint'] = request_uuid

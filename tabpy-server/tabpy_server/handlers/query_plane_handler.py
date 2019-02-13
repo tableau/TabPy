@@ -22,15 +22,15 @@ def _get_uuid():
 
 def _sanitize_request_data(data):
     if not isinstance(data, dict):
-        raise RuntimeError("Expect input data to be a dictionary")
+        log_and_raise("Expect input data to be a dictionary", RuntimeError)
 
     if "method" in data:
         return {"data": data.get("data"), "method": data.get("method")}
     elif "data" in data:
         return data.get("data")
     else:
-        raise RuntimeError("Expect input data is a dictionary with at least a "
-                           "key called 'data'")
+        log_and_raise("Expect input data is a dictionary with at least a "
+                           "key called 'data'", RuntimeError)
 
 
 class QueryPlaneHandler(BaseHandler):

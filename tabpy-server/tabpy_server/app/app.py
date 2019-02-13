@@ -192,9 +192,7 @@ class TabPyApp:
 
         # parse passwords file
         if not self._parse_pwd_file():
-            msg = 'Failed to read passwords file %s' % ConfigParameters.TABPY_PWD_FILE
-            logger.critical(msg)
-            raise RuntimeError(msg)
+            log_and_raise('Failed to read passwords file %s' % ConfigParameters.TABPY_PWD_FILE, RuntimeError)
 
         # Set subdirectory from config if applicable
         if tabpy_state.has_option("Service Info", "Subdirectory"):

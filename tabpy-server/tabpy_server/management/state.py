@@ -57,16 +57,16 @@ def load_state_from_str(state_string):
             config.readfp(StringIO(state_string))
             return config
         except Exception as e:
-            raise ValueError("Invalid state string %s" % str(e))
+            log_and_raise("Invalid state string %s" % str(e), ValueError)
     else:
-        raise ValueError("State string is empty!")
+        log_and_raise("State string is empty!", ValueError)
 
 def save_state_to_str(config):
     '''
     Convert from ConfigParser to String
     '''
     if not config:
-        raise ValueError("Invalid config")
+        log_and_raise("Invalid config", ValueError)
     value = None
     try:
         string_f = StringIO()
