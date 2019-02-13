@@ -2,8 +2,8 @@ from tabpy_server.handlers import BaseHandler
 
 
 class MainHandler(BaseHandler):
-    def initialize(self, tabpy_state):
-        super(MainHandler, self).initialize(tabpy_state)
+    def initialize(self, tabpy_state, python_service):
+        super(MainHandler, self).initialize(tabpy_state, python_service)
 
     def get(self):
         self._add_CORS_header()

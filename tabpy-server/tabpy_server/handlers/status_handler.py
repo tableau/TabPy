@@ -7,15 +7,15 @@ logger = logging.getLogger(__name__)
 
 
 class StatusHandler(BaseHandler):
-    def initialize(self, tabpy_state):
-        super(StatusHandler, self).initialize(tabpy_state)
+    def initialize(self, tabpy_state, python_service):
+        super(StatusHandler, self).initialize(tabpy_state, python_service)
 
     def get(self):
         self._add_CORS_header()
 
         logger.debug("Obtaining service status")
         status_dict = {}
-        for k, v in self.py_handler.ps.query_objects.items():
+        for k, v in self.python_service.ps.query_objects.items():
             status_dict[k] = {
                 'version': v['version'],
                 'type': v['type'],

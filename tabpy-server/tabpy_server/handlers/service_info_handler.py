@@ -4,8 +4,8 @@ from tabpy_server.handlers import ManagementHandler
 
 
 class ServiceInfoHandler(ManagementHandler):
-    def initialize(self, tabpy_state):
-        super(ServiceInfoHandler, self).initialize(tabpy_state)
+    def initialize(self, tabpy_state, python_service):
+        super(ServiceInfoHandler, self).initialize(tabpy_state, python_service)
 
     def get(self):
         self._add_CORS_header()

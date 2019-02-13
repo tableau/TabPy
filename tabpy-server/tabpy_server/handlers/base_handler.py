@@ -9,12 +9,12 @@ logger = logging.getLogger(__name__)
 class BaseHandler(tornado.web.RequestHandler):
     KEYS_TO_SANITIZE = ("api key", "api_key", "admin key", "admin_key")
 
-    def initialize(self, tabpy_state):
+    def initialize(self, tabpy_state, python_service):
         self.tabpy_state = tabpy_state
         # set content type to application/json
         self.set_header("Content-Type", "application/json")
         self.port = self.settings['port']
-        self.py_handler = self.settings['py_handler']
+        self.python_service = python_service
 
     def error_out(self, code, log_message, info=None):
         self.set_status(code)

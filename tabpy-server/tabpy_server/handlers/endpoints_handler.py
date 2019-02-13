@@ -10,8 +10,8 @@ logger = logging.getLogger(__name__)
 
 
 class EndpointsHandler(ManagementHandler):
-    def initialize(self, tabpy_state):
-        super(EndpointsHandler, self).initialize(tabpy_state)
+    def initialize(self, tabpy_state, python_service):
+        super(EndpointsHandler, self).initialize(tabpy_state, python_service)
 
     def get(self):
         self._add_CORS_header()

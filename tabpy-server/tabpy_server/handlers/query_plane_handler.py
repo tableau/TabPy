@@ -34,8 +34,8 @@ def _sanitize_request_data(data):
 
 
 class QueryPlaneHandler(BaseHandler):
-    def initialize(self, tabpy_state):
-        super(QueryPlaneHandler, self).initialize(tabpy_state)
+    def initialize(self, tabpy_state, python_service):
+        super(QueryPlaneHandler, self).initialize(tabpy_state, python_service)
 
     def _query(self, po_name, data, uid, qry):
         """
@@ -62,7 +62,7 @@ class QueryPlaneHandler(BaseHandler):
             the request.
         """
         start_time = time.time()
-        response = self.py_handler.ps.query(po_name, data, uid)
+        response = self.python_service.ps.query(po_name, data, uid)
         gls_time = time.time() - start_time
 
         if isinstance(response, QuerySuccessful):
@@ -127,10 +127,10 @@ class QueryPlaneHandler(BaseHandler):
             return
 
         try:
-            (po_name, all_endpoint_names) = self._get_actual_model(
+            (po_name, _) = self._get_actual_model(
                 endpoint_name)
 
-            # po_name is None if self.py_handler.ps.query_objects.get(
+            # po_name is None if self.python_service.ps.query_objects.get(
             # endpoint_name) is None
             if not po_name:
                 self.error_out(404, 'UnknownURI',
@@ -138,7 +138,7 @@ class QueryPlaneHandler(BaseHandler):
                                     % endpoint_name)
                 return
 
-            po_obj = self.py_handler.ps.query_objects.get(po_name)
+            po_obj = self.python_service.ps.query_objects.get(po_name)
 
             if not po_obj:
                 self.error_out(404, 'UnknownURI',
@@ -154,7 +154,7 @@ class QueryPlaneHandler(BaseHandler):
             qry = Query(po_name, request_json)
             gls_time = 0
             # send a query to PythonService and return
-            (gls_time, result) = self._handle_result(po_name, data, qry, uid)
+            (gls_time, _) = self._handle_result(po_name, data, qry, uid)
 
             # if error occurred, GLS time is None.
             if not gls_time:
@@ -170,7 +170,7 @@ class QueryPlaneHandler(BaseHandler):
         all_endpoint_names = []
 
         while True:
-            endpoint_info = self.py_handler.ps.query_objects.get(endpoint_name)
+            endpoint_info = self.python_service.ps.query_objects.get(endpoint_name)
             if not endpoint_info:
                 return [None, None]
 

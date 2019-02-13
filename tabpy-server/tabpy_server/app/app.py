@@ -35,14 +35,15 @@ class TabPyApp:
     settings = {}
     subdirectory = ""
     tabpy_state = None
+    python_service = None
 
-    def __init__(self, config_file = None):
+    def __init__(self, config_file=None):
         if config_file is None:
             cli_args = self._parse_cli_arguments()
             config_file = cli_args.config if cli_args.config is not None else os.path.join(os.path.dirname(__file__),
-                                                                                       os.path.pardir, 'common',
-                                                                                       'default.conf')
-        
+                                                                                           os.path.pardir, 'common',
+                                                                                           'default.conf')
+
         if os.path.isfile(config_file):
             try:
                 logging.config.fileConfig(
@@ -66,20 +67,25 @@ class TabPyApp:
             # skip MainHandler to use StaticFileHandler .* page requests and
             # default to index.html
             # (r"/", MainHandler),
-            (self.subdirectory + r'/query/([^/]+)', QueryPlaneHandler, dict(tabpy_state=self.tabpy_state)),
-            (self.subdirectory + r'/status', StatusHandler, dict(tabpy_state=self.tabpy_state)),
-            (self.subdirectory + r'/info', ServiceInfoHandler, dict(tabpy_state=self.tabpy_state)),
-            (self.subdirectory + r'/endpoints', EndpointsHandler, dict(tabpy_state=self.tabpy_state)),
-            (self.subdirectory + r'/endpoints/([^/]+)?', EndpointHandler, dict(tabpy_state=self.tabpy_state)),
+            (self.subdirectory + r'/query/([^/]+)', QueryPlaneHandler, dict(
+                tabpy_state=self.tabpy_state, python_service=self.python_service)),
+            (self.subdirectory + r'/status', StatusHandler,
+             dict(tabpy_state=self.tabpy_state, python_service=self.python_service)),
+            (self.subdirectory + r'/info', ServiceInfoHandler,
+             dict(tabpy_state=self.tabpy_state, python_service=self.python_service)),
+            (self.subdirectory + r'/endpoints', EndpointsHandler,
+             dict(tabpy_state=self.tabpy_state, python_service=self.python_service)),
+            (self.subdirectory + r'/endpoints/([^/]+)?', EndpointHandler, dict(
+                tabpy_state=self.tabpy_state, python_service=self.python_service)),
             (self.subdirectory + r'/evaluate', EvaluationPlaneHandler,
-             dict(executor=executor, tabpy_state=self.tabpy_state)),
+             dict(executor=executor, tabpy_state=self.tabpy_state, python_service=self.python_service)),
             (self.subdirectory + r'/configurations/endpoint_upload_destination',
-             UploadDestinationHandler, dict(tabpy_state=self.tabpy_state)),
+             UploadDestinationHandler, dict(tabpy_state=self.tabpy_state, python_service=self.python_service)),
             (self.subdirectory + r'/(.*)', tornado.web.StaticFileHandler,
-             dict(path=self.settings['static_path'], default_filename="index.html", tabpy_state=self.tabpy_state)),
+             dict(path=self.settings['static_path'], default_filename="index.html", tabpy_state=self.tabpy_state, python_service=self.python_service)),
         ], debug=False, **self.settings)
 
-        init_model_evaluator(self.settings, self.tabpy_state)
+        init_model_evaluator(self.settings, self.tabpy_state, self.python_service)
 
         if self.settings['transfer_protocol'] == 'http':
             application.listen(
@@ -128,6 +134,7 @@ class TabPyApp:
         self.settings = {}
         self.subdirectory = ""
         self.tabpy_state = None
+        self.python_service = None
 
         parser = configparser.ConfigParser()
 
@@ -142,7 +149,8 @@ class TabPyApp:
             if config_key is not None and parser.has_option('TabPy', config_key):
                 self.settings[settings_key] = parser.get('TabPy', config_key)
             elif check_env_var:
-                self.settings[settings_key] = os.getenv(config_key, default_val)
+                self.settings[settings_key] = os.getenv(
+                    config_key, default_val)
             elif default_val is not None:
                 self.settings[settings_key] = default_val
 
@@ -162,7 +170,8 @@ class TabPyApp:
                       ConfigParameters.TABPY_TRANSFER_PROTOCOL, default_val='http')
         self.settings['transfer_protocol'] = self.settings['transfer_protocol'].lower()
 
-        set_parameter('certificate_file', ConfigParameters.TABPY_CERTIFICATE_FILE)
+        set_parameter('certificate_file',
+                      ConfigParameters.TABPY_CERTIFICATE_FILE)
         set_parameter('key_file', ConfigParameters.TABPY_KEY_FILE)
         self._validate_transfer_protocol_settings()
 
@@ -180,7 +189,7 @@ class TabPyApp:
         self.tabpy_state = TabPyState(
             config=tabpy_state, settings=self.settings)
 
-        self.settings['py_handler'] = PythonServiceHandler(PythonService())
+        self.python_service = PythonServiceHandler(PythonService())
         self.settings['compress_response'] = True if TORNADO_MAJOR >= 4 else "gzip"
         self.settings['static_path'] = os.path.join(
             os.path.dirname(__file__), "static")
@@ -196,10 +205,10 @@ class TabPyApp:
             self.subdirectory = "/" + \
                 tabpy_state.get("Service Info", "Subdirectory")
 
-
     def _validate_transfer_protocol_settings(self):
         if 'transfer_protocol' not in self.settings:
-            log_and_raise('Missing transfer protocol information.', RuntimeError)
+            log_and_raise(
+                'Missing transfer protocol information.', RuntimeError)
 
         protocol = self.settings['transfer_protocol']
 
@@ -207,7 +216,8 @@ class TabPyApp:
             return
 
         if protocol != 'https':
-            log_and_raise('Unsupported transfer protocol: {}.'.format(protocol), RuntimeError)
+            log_and_raise('Unsupported transfer protocol: {}.'.format(
+                protocol), RuntimeError)
 
         self._validate_cert_key_state('The parameter(s) {} must be set.',
                                       'certificate_file' in self.settings, 'key_file' in self.settings)
@@ -229,7 +239,7 @@ class TabPyApp:
                 msg.format(ConfigParameters.TABPY_CERTIFICATE_FILE)
         elif not key_valid:
             err = https_error + msg.format(ConfigParameters.TABPY_KEY_FILE)
-        
+
         if err is not None:
             log_and_raise(err, RuntimeError)
 
