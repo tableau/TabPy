@@ -16,5 +16,6 @@ def read_version():
 
 __version__ = read_version()
 
+
 from tabpy_server.app.app import TabPyApp
 __app__ = TabPyApp()

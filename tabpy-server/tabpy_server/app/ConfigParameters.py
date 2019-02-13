@@ -1,6 +1,4 @@
-from enum import Enum
-
-class ConfigParameters(Enum):
+class ConfigParameters:
     '''
     Configuration settings names
     '''

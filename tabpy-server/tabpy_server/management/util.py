@@ -38,14 +38,14 @@ def _get_state_from_file(state_path):
     tmp_state_file = state_key
 
     if not os.path.exists(tmp_state_file):
-        raise ValueError("Missing config file at %r" % (tmp_state_file,))
+        log_and_raise("Missing config file at %r" % (tmp_state_file,), ValueError)
 
     config = _ConfigParser(allow_no_value=True)
     config.optionxform = str
     config.read(tmp_state_file)
 
     if not config.has_section('Service Info'):
-        raise ValueError("Config error: Expected 'Service Info' section in %s" % (tmp_state_file,))
+        log_and_raise("Config error: Expected 'Service Info' section in %s" % (tmp_state_file,), ValueError)
 
     return config
 
@@ -86,6 +86,6 @@ def _dt_to_utc_timestamp(t):
     elif not t.tzinfo:
         return mktime(t.timetuple())
     else:
-        raise ValueError('Only local time and UTC time is supported')
+        log_and_raise('Only local time and UTC time is supported', ValueError)
 
 
