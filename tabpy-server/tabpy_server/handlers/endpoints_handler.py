@@ -10,12 +10,12 @@ logger = logging.getLogger(__name__)
 
 
 class EndpointsHandler(ManagementHandler):
-    def initialize(self):
-        super(EndpointsHandler, self).initialize()
+    def initialize(self, tabpy_state):
+        super(EndpointsHandler, self).initialize(tabpy_state)
 
     def get(self):
         self._add_CORS_header()
-        self.write(simplejson.dumps(self.tabpy.get_endpoints()))
+        self.write(simplejson.dumps(self.tabpy_state.get_endpoints()))
 
     @tornado.web.asynchronous
     @gen.coroutine
@@ -43,7 +43,7 @@ class EndpointsHandler(ManagementHandler):
             name = request_data['name']
 
             # check if endpoint already exist
-            if name in self.tabpy.get_endpoints():
+            if name in self.tabpy_state.get_endpoints():
                 self.error_out(400, "endpoint %s already exists." % name)
                 self.finish()
                 return
@@ -56,7 +56,7 @@ class EndpointsHandler(ManagementHandler):
             else:
                 logger.debug("Endpoint {} successfully added".format(name))
                 self.set_status(201)
-                self.write(self.tabpy.get_endpoints(name))
+                self.write(self.tabpy_state.get_endpoints(name))
                 self.finish()
                 return
 

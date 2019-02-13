@@ -40,8 +40,8 @@ def copy_from_local(localpath, remotepath, is_dir=False):
 
 
 class ManagementHandler(MainHandler):
-    def initialize(self):
-        super(ManagementHandler, self).initialize()
+    def initialize(self, tabpy_state):
+        super(ManagementHandler, self).initialize(tabpy_state)
         self.port = self.settings['port']
 
     def _get_protocol(self):
@@ -117,7 +117,7 @@ class ManagementHandler(MainHandler):
             # update local config
             try:
                 if action == 'add':
-                    self.tabpy.add_endpoint(
+                    self.tabpy_state.add_endpoint(
                         name=name,
                         description=description,
                         docstring=docstring,
@@ -127,7 +127,7 @@ class ManagementHandler(MainHandler):
                         target=target,
                         schema=schema)
                 else:
-                    self.tabpy.update_endpoint(
+                    self.tabpy_state.update_endpoint(
                         name=name,
                         description=description,
                         docstring=docstring,
@@ -141,7 +141,7 @@ class ManagementHandler(MainHandler):
             except Exception as e:
                 raise gen.Return("Error when changing TabPy state: %s" % e)
 
-            on_state_change(self.settings)
+            on_state_change(self.settings, self.tabpy_state)
 
         finally:
             self.settings['add_or_updating_endpoint'] = None

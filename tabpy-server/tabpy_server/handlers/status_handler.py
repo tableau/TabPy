@@ -7,8 +7,8 @@ logger = logging.getLogger(__name__)
 
 
 class StatusHandler(BaseHandler):
-    def initialize(self):
-        super(StatusHandler, self).initialize()
+    def initialize(self, tabpy_state):
+        super(StatusHandler, self).initialize(tabpy_state)
 
     def get(self):
         self._add_CORS_header()

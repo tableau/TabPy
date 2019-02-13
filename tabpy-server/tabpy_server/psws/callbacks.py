@@ -40,10 +40,9 @@ def wait_for_endpoint_loaded(py_handler, object_uri):
 
 
 @gen.coroutine
-def init_ps_server(settings):
+def init_ps_server(settings, tabpy_state):
     logger.info("Initializing TabPy Server...")
-    tabpy = settings['tabpy']
-    existing_pos = tabpy.get_endpoints()
+    existing_pos = tabpy_state.get_endpoints()
     for (object_name, obj_info) in (
             existing_pos.items() if sys.version_info > (3, 0)
             else existing_pos.iteritems()):
@@ -58,16 +57,15 @@ def init_ps_server(settings):
 
 
 @gen.coroutine
-def init_model_evaluator(settings):
+def init_model_evaluator(settings, tabpy_state):
     '''
     This will go through all models that the service currently have and
     initialize them.
     '''
     logger.info("Initializing models...")
-    tabpy = settings['tabpy']
     py_handler = settings['py_handler']
 
-    existing_pos = tabpy.get_endpoints()
+    existing_pos = tabpy_state.get_endpoints()
 
     for (object_name, obj_info) in (
             existing_pos.items() if sys.version_info > (3, 0)
@@ -90,7 +88,7 @@ def init_model_evaluator(settings):
         py_handler.manage_request(msg)
 
 
-def _get_latest_service_state(settings, new_ps_state):
+def _get_latest_service_state(settings, tabpy_state, new_ps_state):
     '''
     Update the endpoints from the latest remote state file.
 
@@ -129,12 +127,12 @@ def _get_latest_service_state(settings, new_ps_state):
     if diff:
         changes['endpoints'] = diff
 
-    settings['tabpy'] = new_ps_state
+    tabpy_state = new_ps_state
     return (True, changes)
 
 
 @gen.coroutine
-def on_state_change(settings):
+def on_state_change(settings, tabpy_state):
     try:
         py_handler = settings['py_handler']
 
@@ -142,7 +140,7 @@ def on_state_change(settings):
         config = util._get_state_from_file(settings['state_file_path'])
         new_ps_state = TabPyState(config=config, settings=settings)
 
-        (has_changes, changes) = _get_latest_service_state(settings,
+        (has_changes, changes) = _get_latest_service_state(settings, tabpy_state,
                                                            new_ps_state)
         if not has_changes:
             logger.info("Nothing changed, return.")

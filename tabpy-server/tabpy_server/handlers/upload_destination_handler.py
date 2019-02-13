@@ -6,8 +6,8 @@ _QUERY_OBJECT_STAGING_FOLDER = 'staging'
 
 
 class UploadDestinationHandler(ManagementHandler):
-    def initialize(self):
-        super(UploadDestinationHandler, self).initialize()
+    def initialize(self, tabpy_state):
+        super(UploadDestinationHandler, self).initialize(tabpy_state)
 
     def get(self):
         path = self.settings['state_file_path']

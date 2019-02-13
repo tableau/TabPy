@@ -34,8 +34,8 @@ def _sanitize_request_data(data):
 
 
 class QueryPlaneHandler(BaseHandler):
-    def initialize(self):
-        super(QueryPlaneHandler, self).initialize()
+    def initialize(self, tabpy_state):
+        super(QueryPlaneHandler, self).initialize(tabpy_state)
 
     def _query(self, po_name, data, uid, qry):
         """

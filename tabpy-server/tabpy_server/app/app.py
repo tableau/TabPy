@@ -34,6 +34,7 @@ class TabPyApp:
 
     settings = {}
     subdirectory = ""
+    tabpy_state = None
 
     def __init__(self, config_file = None):
         if config_file is None:
@@ -54,7 +55,7 @@ class TabPyApp:
     def run(self):
         logger.info('Initializing TabPy...')
         tornado.ioloop.IOLoop.instance().run_sync(
-            lambda: init_ps_server(self.settings))
+            lambda: init_ps_server(self.settings, self.tabpy_state))
         logger.info('Done initializing TabPy.')
 
         executor = concurrent.futures.ThreadPoolExecutor(
@@ -65,20 +66,20 @@ class TabPyApp:
             # skip MainHandler to use StaticFileHandler .* page requests and
             # default to index.html
             # (r"/", MainHandler),
-            (self.subdirectory + r'/query/([^/]+)', QueryPlaneHandler),
-            (self.subdirectory + r'/status', StatusHandler),
-            (self.subdirectory + r'/info', ServiceInfoHandler),
-            (self.subdirectory + r'/endpoints', EndpointsHandler),
-            (self.subdirectory + r'/endpoints/([^/]+)?', EndpointHandler),
+            (self.subdirectory + r'/query/([^/]+)', QueryPlaneHandler, dict(tabpy_state=self.tabpy_state)),
+            (self.subdirectory + r'/status', StatusHandler, dict(tabpy_state=self.tabpy_state)),
+            (self.subdirectory + r'/info', ServiceInfoHandler, dict(tabpy_state=self.tabpy_state)),
+            (self.subdirectory + r'/endpoints', EndpointsHandler, dict(tabpy_state=self.tabpy_state)),
+            (self.subdirectory + r'/endpoints/([^/]+)?', EndpointHandler, dict(tabpy_state=self.tabpy_state)),
             (self.subdirectory + r'/evaluate', EvaluationPlaneHandler,
-             dict(executor=executor)),
+             dict(executor=executor, tabpy_state=self.tabpy_state)),
             (self.subdirectory + r'/configurations/endpoint_upload_destination',
-             UploadDestinationHandler),
+             UploadDestinationHandler, dict(tabpy_state=self.tabpy_state)),
             (self.subdirectory + r'/(.*)', tornado.web.StaticFileHandler,
-             dict(path=self.settings['static_path'], default_filename="index.html")),
+             dict(path=self.settings['static_path'], default_filename="index.html", tabpy_state=self.tabpy_state)),
         ], debug=False, **self.settings)
 
-        init_model_evaluator(self.settings)
+        init_model_evaluator(self.settings, self.tabpy_state)
 
         if self.settings['transfer_protocol'] == 'http':
             application.listen(
@@ -126,7 +127,8 @@ class TabPyApp:
         """
         self.settings = {}
         self.subdirectory = ""
-        
+        self.tabpy_state = None
+
         parser = configparser.ConfigParser()
 
         if os.path.isfile(config_file):
@@ -175,7 +177,7 @@ class TabPyApp:
         logger.info("Loading state from state file %s" %
                     os.path.join(state_file_path, "state.ini"))
         tabpy_state = _get_state_from_file(state_file_path)
-        self.settings['tabpy'] = TabPyState(
+        self.tabpy_state = TabPyState(
             config=tabpy_state, settings=self.settings)
 
         self.settings['py_handler'] = PythonServiceHandler(PythonService())

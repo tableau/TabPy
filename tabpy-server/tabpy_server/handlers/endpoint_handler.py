@@ -15,17 +15,17 @@ logger = logging.getLogger(__name__)
 
 
 class EndpointHandler(ManagementHandler):
-    def initialize(self):
-        super(EndpointHandler, self).initialize()
+    def initialize(self, tabpy_state):
+        super(EndpointHandler, self).initialize(tabpy_state)
 
     def get(self, endpoint_name):
         self._add_CORS_header()
         if not endpoint_name:
-            self.write(simplejson.dumps(self.tabpy.get_endpoints()))
+            self.write(simplejson.dumps(self.tabpy_state.get_endpoints()))
         else:
-            if endpoint_name in self.tabpy.get_endpoints():
+            if endpoint_name in self.tabpy_state.get_endpoints():
                 self.write(simplejson.dumps(
-                    self.tabpy.get_endpoints()[endpoint_name]))
+                    self.tabpy_state.get_endpoints()[endpoint_name]))
             else:
                 self.error_out(404, 'Unknown endpoint',
                                info='Endpoint %s is not found' % endpoint_name)
@@ -47,7 +47,7 @@ class EndpointHandler(ManagementHandler):
                 return
 
             # check if endpoint exists
-            endpoints = self.tabpy.get_endpoints(name)
+            endpoints = self.tabpy_state.get_endpoints(name)
             if len(endpoints) == 0:
                 self.error_out(404,
                                "endpoint %s does not exist." % name)
@@ -62,7 +62,7 @@ class EndpointHandler(ManagementHandler):
                 self.error_out(400, err_msg)
                 self.finish()
             else:
-                self.write(self.tabpy.get_endpoints(name))
+                self.write(self.tabpy_state.get_endpoints(name))
                 self.finish()
 
         except Exception as e:
@@ -74,7 +74,7 @@ class EndpointHandler(ManagementHandler):
     @gen.coroutine
     def delete(self, name):
         try:
-            endpoints = self.tabpy.get_endpoints(name)
+            endpoints = self.tabpy_state.get_endpoints(name)
             if len(endpoints) == 0:
                 self.error_out(404,
                                "endpoint %s does not exist." % name)
@@ -83,7 +83,7 @@ class EndpointHandler(ManagementHandler):
 
             # update state
             try:
-                endpoint_info = self.tabpy.delete_endpoint(name)
+                endpoint_info = self.tabpy_state.delete_endpoint(name)
             except Exception as e:
                 self.error_out(400,
                                "Error when removing endpoint: %s" % e.message)
@@ -110,7 +110,7 @@ class EndpointHandler(ManagementHandler):
             self.error_out(500, err_msg)
             self.finish()
 
-        on_state_change(self.settings)
+        on_state_change(self.settings, self.tabpy_state)
 
     @gen.coroutine
     def _delete_po_future(self, delete_path):

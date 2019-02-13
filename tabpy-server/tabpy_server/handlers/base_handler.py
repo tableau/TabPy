@@ -9,8 +9,8 @@ logger = logging.getLogger(__name__)
 class BaseHandler(tornado.web.RequestHandler):
     KEYS_TO_SANITIZE = ("api key", "api_key", "admin key", "admin_key")
 
-    def initialize(self):
-        self.tabpy = self.settings['tabpy']
+    def initialize(self, tabpy_state):
+        self.tabpy_state = tabpy_state
         # set content type to application/json
         self.set_header("Content-Type", "application/json")
         self.port = self.settings['port']
@@ -38,17 +38,17 @@ class BaseHandler(tornado.web.RequestHandler):
         Add CORS header if the TabPy has attribute _cors_origin
         and _cors_origin is not an empty string.
         """
-        origin = self.tabpy.get_access_control_allow_origin()
+        origin = self.tabpy_state.get_access_control_allow_origin()
         if len(origin) > 0:
             self.set_header("Access-Control-Allow-Origin", origin)
             logger.debug("Access-Control-Allow-Origin:{}".format(origin))
 
-        headers = self.tabpy.get_access_control_allow_headers()
+        headers = self.tabpy_state.get_access_control_allow_headers()
         if len(headers) > 0:
             self.set_header("Access-Control-Allow-Headers",headers)
             logger.debug("Access-Control-Allow-Headers:{}".format(headers))
 
-        methods = self.tabpy.get_access_control_allow_methods()
+        methods = self.tabpy_state.get_access_control_allow_methods()
         if len(methods) > 0:
             self.set_header("Access-Control-Allow-Methods",methods)
             logger.debug("Access-Control-Allow-Methods:{}".format(methods))
