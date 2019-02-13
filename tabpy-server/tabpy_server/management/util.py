@@ -10,6 +10,9 @@ except ImportError:
     from io import StringIO as _StringIO
 from dateutil import parser
 from datetime import datetime, timedelta, tzinfo
+from tabpy_server.app.app import log_and_raise
+from tabpy_server.app.ConfigParameters import ConfigParameters
+from tabpy_server.app.util import log_and_raise
 from time import mktime
 
 logger = logging.getLogger(__name__)
@@ -19,7 +22,7 @@ def write_state_config(state, settings):
     if 'state_file_path' in settings:
         state_path = settings['state_file_path']
     else:
-        raise ValueError('TABPY_STATE_PATH is not set')
+        log_and_raise('{} is not set'.format(ConfigParameters.TABPY_STATE_PATH), ValueError)
     
     logger.debug("State path is {}".format(state_path))
     state_key = os.path.join(state_path, 'state.ini')
