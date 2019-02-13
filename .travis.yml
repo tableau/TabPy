@@ -1,0 +1,12 @@
+os: linux
+language: python
+python: 3.6
+install:
+   - export ROOT=$PWD
+   - cd $ROOT/tabpy-server
+   - python3 setup.py install
+   - cd $ROOT/tabpy-tools
+   - python3 setup.py install
+   - cd $ROOT
+script:
+   - python3 $ROOT/tests/runtests.py
