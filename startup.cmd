@@ -35,7 +35,7 @@ IF %ERRORLEVEL% NEQ 0 (
 
 REM Parse optional CLI arguments: port and config.
 ECHO Parsing parameters...
-SET STARTUP_CMD=python tabpy.py
+SET STARTUP_CMD=python tabpy-server\tabpy.py
 IF [%1] NEQ [] (
     ECHO     Using config file at %TABPY_ROOT%\tabpy-server\tabpy_server\%1
     SET STARTUP_CMD=%STARTUP_CMD% --config=%1

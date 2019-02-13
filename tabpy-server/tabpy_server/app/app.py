@@ -35,11 +35,13 @@ class TabPyApp:
     settings = {}
     subdirectory = ""
 
-    def __init__(self):
-        cli_args = self._parse_cli_arguments()
-        config_file = cli_args.config if cli_args.config is not None else os.path.join(os.path.dirname(__file__),
+    def __init__(self, config_file = None):
+        if config_file is None:
+            cli_args = self._parse_cli_arguments()
+            config_file = cli_args.config if cli_args.config is not None else os.path.join(os.path.dirname(__file__),
                                                                                        os.path.pardir, 'common',
                                                                                        'default.conf')
+        
         if os.path.isfile(config_file):
             try:
                 logging.config.fileConfig(
@@ -48,13 +50,6 @@ class TabPyApp:
                 logging.basicConfig(level=logging.DEBUG)
 
         self._parse_config(config_file)
-
-    def parse_config(self, config_file):
-        self.settings = {}
-        self.subdirectory = ""
-
-        self._parse_config(config_file) 
-
 
     def run(self):
         logger.info('Initializing TabPy...')
@@ -129,6 +124,9 @@ class TabPyApp:
         environment.
         For naming standards use all capitals and start with 'TABPY_'
         """
+        self.settings = {}
+        self.subdirectory = ""
+        
         parser = configparser.ConfigParser()
 
         if os.path.isfile(config_file):
@@ -142,8 +140,7 @@ class TabPyApp:
             if config_key is not None and parser.has_option('TabPy', config_key):
                 self.settings[settings_key] = parser.get('TabPy', config_key)
             elif check_env_var:
-                self.settings[settings_key] = os.getenv(
-                    config_key, default_val)
+                self.settings[settings_key] = os.getenv(config_key, default_val)
             elif default_val is not None:
                 self.settings[settings_key] = default_val
 
@@ -163,8 +160,7 @@ class TabPyApp:
                       ConfigParameters.TABPY_TRANSFER_PROTOCOL, default_val='http')
         self.settings['transfer_protocol'] = self.settings['transfer_protocol'].lower()
 
-        set_parameter('certificate_file',
-                      ConfigParameters.TABPY_CERTIFICATE_FILE)
+        set_parameter('certificate_file', ConfigParameters.TABPY_CERTIFICATE_FILE)
         set_parameter('key_file', ConfigParameters.TABPY_KEY_FILE)
         self._validate_transfer_protocol_settings()
 
@@ -231,9 +227,9 @@ class TabPyApp:
                 msg.format(ConfigParameters.TABPY_CERTIFICATE_FILE)
         elif not key_valid:
             err = https_error + msg.format(ConfigParameters.TABPY_KEY_FILE)
+        
         if err is not None:
-            logger.fatal(err)
-            raise RuntimeError(err)
+            log_and_raise(err, RuntimeError)
 
     def _parse_pwd_file(self):
         if not ConfigParameters.TABPY_PWD_FILE in self.settings:

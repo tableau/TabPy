@@ -1,6 +1,42 @@
-from tabpy_server.handlers import MainHandler
-from tornado import gen
+import concurrent
 import logging
+import os
+import sys
+import shutil
+from re import compile as _compile
+from uuid import uuid4 as random_uuid
+
+from tornado import gen
+
+from tabpy_server.handlers import MainHandler
+from tabpy_server.management.state import get_query_object_path
+from tabpy_server.psws.callbacks import on_state_change
+
+STAGING_THREAD = concurrent.futures.ThreadPoolExecutor(max_workers=3)
+
+
+if sys.version_info.major == 3:
+    unicode = str
+
+def copy_from_local(localpath, remotepath, is_dir=False):
+    if is_dir:
+        if not os.path.exists(remotepath):
+            # remote folder does not exist
+            shutil.copytree(localpath, remotepath)
+        else:
+            # remote folder exists, copy each file
+            src_files = os.listdir(localpath)
+            for file_name in src_files:
+                full_file_name = os.path.join(localpath, file_name)
+                if os.path.isdir(full_file_name):
+                    # copy folder recursively
+                    full_remote_path = os.path.join(remotepath, file_name)
+                    shutil.copytree(full_file_name, full_remote_path)
+                else:
+                    # copy each file
+                    shutil.copy(full_file_name, remotepath)
+    else:
+        shutil.copy(localpath, remotepath)
 
 
 class ManagementHandler(MainHandler):

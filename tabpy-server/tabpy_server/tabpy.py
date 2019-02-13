@@ -1,4 +1,5 @@
-from tabpy_server import __app__
+from tabpy_server.app.app import TabPyApp
 
 if __name__ == '__main__':
-    __app__.run()
+    app = TabPyApp()
+    app.run()

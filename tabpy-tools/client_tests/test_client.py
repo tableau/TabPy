@@ -12,10 +12,6 @@ from tabpy_tools.client import Client
 import requests
 
 
-# Keep test cases logging quiet
-logging.basicConfig(level=logging.CRITICAL + 1)
-
-
 class TestClient(unittest.TestCase):
 
     def setUp(self):
