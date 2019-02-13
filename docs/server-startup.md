@@ -10,7 +10,6 @@ These instructions explain how to start up TabPy Server.
 - [Mac](#mac)
   * [Command Line Arguments](#command-line-arguments-1)
 - [Linux](#linux)
-  * [CentOS Specific Steps](#centos-specific-steps)
   * [Command Line Arguments](#command-line-arguments-2)
 
 <!-- tocstop -->
@@ -28,10 +27,10 @@ a TabPy server instance, follow the instructions for your OS (found below).
 
 Instructions on how to configure your TabPy server instance can be found in the [TabPy Server Configuration Instructions](server-config.md)
 
-It is highly recommended to use Python virtual enviroment for running TabPy,
-check [Running TabPy in Python Virtual Environment](tabpy-virtualenv.md) page
+It is highly recommended to use Python virtual enviroment for running TabPy. 
+Check the [Running TabPy in Python Virtual Environment](tabpy-virtualenv.md) page
 for more details.
-If you are installing a new version of TabPy in the same environment as a
+If you are installing a newer version of TabPy in the same environment as a
 previous install, delete the previous TabPy version folder in your Python directory.
 
 ## Windows

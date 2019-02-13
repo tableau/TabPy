@@ -27,7 +27,7 @@ client = Client('http://localhost:9004/')
 ```
 
 The URL and port are where the Tableau-Python-Server process has been started -
-more info can be found in the [server section](server.md) of the documentation.
+more info can be found in the [server section](server-startup.md#Command-Line-Arguments) of the documentation.
 
 ## Deploying a Function
 
@@ -67,7 +67,7 @@ In this example the function `clustering` expects a set of two-dimensional data
 points, represented by the list of all x-coordinates and the list of all y-coordinates.
 It will return a set of numerical labels corresponding to the clusters each datapoint
 is assigned to. We deploy this function as an endpoint named `clustering`. It is now
-reachable as a [REST API](server.md#httppost-queryendpoint), as well as through the
+reachable as a [REST API](server-rest.md#httppost-queryendpoint), as well as through the
 TabPy tools - for details see the next section.
 
 You can re-deploy a function (for example, after you modified its code) by setting
@@ -187,7 +187,7 @@ schema = generate_schema(
 
 ```
 
-A schema described as such can be retrieved through the [REST Endpoints API](server.md#httpget-endpoints)
+A schema described as such can be retrieved through the [REST Endpoints API](server-rest.md#httpget-endpoints)
 or through the `get_endpoints` client API as follows:
 
 ```python
@@ -227,11 +227,11 @@ Response:
 
 The other core functionality besides deploying and querying methods as endpoints
 is the ad-hoc execution of Python code, called `evaluate`. Evaluate does not
-have a Python API in `tabpy-tools`, only a raw [REST interface](server.md#httppost-evaluate)
+have a Python API in `tabpy-tools`, only a raw [REST interface](server-rest.md#httppost-evaluate)
 that other client bindings can easily implement. Tableau connects to TabPy
 using REST `Evaluate`.
 
-`Evaluate` allows calling a deployed endpoint from within the Python code block.
+`evaluate` allows calling a deployed endpoint from within the Python code block.
 The convention for this is to use a provided function call `tabpy.query` in the
 code, which behaves like the `query` method in `tabpy-tools`. See the
-[REST API documentation](server.md#rest-interfaces) for an example.
+[REST API documentation](server-rest.md) for an example.
