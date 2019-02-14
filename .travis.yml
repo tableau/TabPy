@@ -5,4 +5,4 @@ install:
    - export TEST_ENV=true
    - ./startup.sh
 script:
-   - python3 $ROOT/tests/runtests.py
+   - python3 tests/runtests.py
