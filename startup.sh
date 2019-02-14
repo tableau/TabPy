@@ -44,6 +44,12 @@ if [ ! -z $CONFIG ]; then
     echo Using the config file at $TABPY_ROOT/tabpy-server/$CONFIG.
 fi
 
+# Exit if in a test environent
+if [ ! -z $TEST_ENV ]; then
+    echo Detected testing environment. Exiting successfully.
+	exit 0
+fi
+
 # Start TabPy server
 echo
 echo Starting TabPy server...
