@@ -9,10 +9,10 @@ from uuid import uuid4 as random_uuid
 from tornado import gen
 
 from tabpy_server.handlers import MainHandler
+from tabpy_server.handlers.base_handler import STAGING_THREAD
 from tabpy_server.management.state import get_query_object_path
 from tabpy_server.psws.callbacks import on_state_change
 
-STAGING_THREAD = concurrent.futures.ThreadPoolExecutor(max_workers=3)
 
 
 if sys.version_info.major == 3:

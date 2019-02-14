@@ -1,9 +1,11 @@
+import concurrent
 import tornado.web
 import simplejson
 import logging
 
 
 logger = logging.getLogger(__name__)
+STAGING_THREAD = concurrent.futures.ThreadPoolExecutor(max_workers=3)
 
 
 class BaseHandler(tornado.web.RequestHandler):
