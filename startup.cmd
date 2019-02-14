@@ -4,7 +4,7 @@ SETLOCAL
 
 REM Check for Python in PATH
 ECHO Checking for presence of Python in the system path variable.
-python --version
+python --version >nul 2>&1
 IF %ERRORLEVEL% NEQ 0 (
     ECHO     Cannot find Python.
 	GOTO:ERROR
