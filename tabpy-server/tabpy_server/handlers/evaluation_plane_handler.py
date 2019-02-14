@@ -31,8 +31,8 @@ class EvaluationPlaneHandler(BaseHandler):
     EvaluationPlaneHandler is responsible for running arbitrary python scripts.
     '''
 
-    def initialize(self, executor):
-        super(EvaluationPlaneHandler, self).initialize()
+    def initialize(self, executor, tabpy_state, python_service):
+        super(EvaluationPlaneHandler, self).initialize(tabpy_state, python_service)
         self.executor = executor
 
     @tornado.web.asynchronous

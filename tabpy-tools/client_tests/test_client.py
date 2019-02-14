@@ -1,5 +1,6 @@
 import unittest
 import json
+import logging
 
 try:
     from unittest.mock import Mock

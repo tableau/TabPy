@@ -22,14 +22,14 @@ def _check_endpoint_name(name):
     """Checks that the endpoint name is valid by comparing it with an RE and
     checking that it is not reserved."""
     if not isinstance(name, str):
-        raise TypeError("Endpoint name must be a string or unicode")
+        log_and_raise("Endpoint name must be a string or unicode", TypeError)
 
     if name == '':
-        raise ValueError("Endpoint name cannot be empty")
+        log_and_raise("Endpoint name cannot be empty", ValueError)
 
     if not _name_checker.match(name):
-        raise ValueError('Endpoint name can only contain: a-z, A-Z, 0-9,'
-            ' underscore, hyphens and spaces.')
+        log_and_raise('Endpoint name can only contain: a-z, A-Z, 0-9,'
+            ' underscore, hyphens and spaces.', ValueError)
 
 
 def grab_files(directory):

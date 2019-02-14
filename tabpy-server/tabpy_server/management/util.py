@@ -10,6 +10,9 @@ except ImportError:
     from io import StringIO as _StringIO
 from dateutil import parser
 from datetime import datetime, timedelta, tzinfo
+from tabpy_server.app.app import log_and_raise
+from tabpy_server.app.ConfigParameters import ConfigParameters
+from tabpy_server.app.util import log_and_raise
 from time import mktime
 
 logger = logging.getLogger(__name__)
@@ -19,7 +22,7 @@ def write_state_config(state, settings):
     if 'state_file_path' in settings:
         state_path = settings['state_file_path']
     else:
-        raise ValueError('TABPY_STATE_PATH is not set')
+        log_and_raise('{} is not set'.format(ConfigParameters.TABPY_STATE_PATH), ValueError)
     
     logger.debug("State path is {}".format(state_path))
     state_key = os.path.join(state_path, 'state.ini')
@@ -35,14 +38,14 @@ def _get_state_from_file(state_path):
     tmp_state_file = state_key
 
     if not os.path.exists(tmp_state_file):
-        raise ValueError("Missing config file at %r" % (tmp_state_file,))
+        log_and_raise("Missing config file at %r" % (tmp_state_file,), ValueError)
 
     config = _ConfigParser(allow_no_value=True)
     config.optionxform = str
     config.read(tmp_state_file)
 
     if not config.has_section('Service Info'):
-        raise ValueError("Config error: Expected 'Service Info' section in %s" % (tmp_state_file,))
+        log_and_raise("Config error: Expected 'Service Info' section in %s" % (tmp_state_file,), ValueError)
 
     return config
 
@@ -83,6 +86,6 @@ def _dt_to_utc_timestamp(t):
     elif not t.tzinfo:
         return mktime(t.timetuple())
     else:
-        raise ValueError('Only local time and UTC time is supported')
+        log_and_raise('Only local time and UTC time is supported', ValueError)
 
 

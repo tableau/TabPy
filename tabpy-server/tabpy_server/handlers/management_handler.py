@@ -1,11 +1,47 @@
-from tabpy_server.handlers import MainHandler
-from tornado import gen
+import concurrent
 import logging
+import os
+import sys
+import shutil
+from re import compile as _compile
+from uuid import uuid4 as random_uuid
+
+from tornado import gen
+
+from tabpy_server.handlers import MainHandler
+from tabpy_server.handlers.base_handler import STAGING_THREAD
+from tabpy_server.management.state import get_query_object_path
+from tabpy_server.psws.callbacks import on_state_change
+
+
+
+if sys.version_info.major == 3:
+    unicode = str
+
+def copy_from_local(localpath, remotepath, is_dir=False):
+    if is_dir:
+        if not os.path.exists(remotepath):
+            # remote folder does not exist
+            shutil.copytree(localpath, remotepath)
+        else:
+            # remote folder exists, copy each file
+            src_files = os.listdir(localpath)
+            for file_name in src_files:
+                full_file_name = os.path.join(localpath, file_name)
+                if os.path.isdir(full_file_name):
+                    # copy folder recursively
+                    full_remote_path = os.path.join(remotepath, file_name)
+                    shutil.copytree(full_file_name, full_remote_path)
+                else:
+                    # copy each file
+                    shutil.copy(full_file_name, remotepath)
+    else:
+        shutil.copy(localpath, remotepath)
 
 
 class ManagementHandler(MainHandler):
-    def initialize(self):
-        super(ManagementHandler, self).initialize()
+    def initialize(self, tabpy_state, python_service):
+        super(ManagementHandler, self).initialize(tabpy_state, python_service)
         self.port = self.settings['port']
 
     def _get_protocol(self):
@@ -19,15 +55,15 @@ class ManagementHandler(MainHandler):
         logging.debug("Adding/updating model {}...".format(name))
         _name_checker = _compile('^[a-zA-Z0-9-_\ ]+$')
         if not isinstance(name, (str, unicode)):
-            raise TypeError("Endpoint name must be a string or unicode")
+            log_and_raise("Endpoint name must be a string or unicode", TypeError)
 
         if not _name_checker.match(name):
             raise gen.Return('endpoint name can only contain: a-z, A-Z, 0-9,'
                              ' underscore, hyphens and spaces.')
 
         if self.settings.get('add_or_updating_endpoint'):
-            raise RuntimeError("Another endpoint update is already in progress"
-                               ", please wait a while and try again")
+            log_and_raise("Another endpoint update is already in progress"
+                               ", please wait a while and try again", RuntimeError)
 
         request_uuid = random_uuid()
         self.settings['add_or_updating_endpoint'] = request_uuid
@@ -81,7 +117,7 @@ class ManagementHandler(MainHandler):
             # update local config
             try:
                 if action == 'add':
-                    self.tabpy.add_endpoint(
+                    self.tabpy_state.add_endpoint(
                         name=name,
                         description=description,
                         docstring=docstring,
@@ -91,7 +127,7 @@ class ManagementHandler(MainHandler):
                         target=target,
                         schema=schema)
                 else:
-                    self.tabpy.update_endpoint(
+                    self.tabpy_state.update_endpoint(
                         name=name,
                         description=description,
                         docstring=docstring,
@@ -105,7 +141,7 @@ class ManagementHandler(MainHandler):
             except Exception as e:
                 raise gen.Return("Error when changing TabPy state: %s" % e)
 
-            on_state_change(self.settings)
+            on_state_change(self.settings, self.tabpy_state)
 
         finally:
             self.settings['add_or_updating_endpoint'] = None

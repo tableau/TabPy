@@ -31,10 +31,8 @@ check_status
 
 # Check for CLI parameters
 echo Parsing command line parameters...
-while getopts ":p:c:" opt; do
+while getopts ":c:" opt; do
     case $opt in
-        p) PORT="$OPTARG"
-        ;;
         c) CONFIG="$OPTARG"
         ;;
         \?) echo "Invalid option -$OPTARG" >&2
@@ -42,9 +40,6 @@ while getopts ":p:c:" opt; do
     esac
 done
 
-if [ ! -z $PORT ]; then
-    echo Using port $PORT.
-fi
 if [ ! -z $CONFIG ]; then
     echo Using the config file at $TABPY_ROOT/tabpy-server/$CONFIG.
 fi
@@ -52,18 +47,12 @@ fi
 # Start TabPy server
 echo
 echo Starting TabPy server...
-cd $TABPY_ROOT/tabpy-server/tabpy_server
-if [ -z $PORT ] && [ -z $CONFIG ]; then
+if [ -z $CONFIG ]; then
     echo Using default parameters.
-    python3 tabpy.py
-elif [ -z $CONFIG ]; then
-    python3 tabpy.py --port=$PORT
-elif [ -z $PORT ]; then
-    python3 tabpy.py --config=$CONFIG
+    python3 tabpy-server/tabpy.py
 else
-    python3 tabpy.py --port=$PORT --config=$CONFIG
+    python3 tabpy-server/tabpy.py --config=$CONFIG
 fi
-cd $TABPY_ROOT
 
 check_status
 exit 0

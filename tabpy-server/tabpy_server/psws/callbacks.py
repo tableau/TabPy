@@ -15,14 +15,14 @@ from tabpy_server.management import util
 logger = logging.getLogger(__name__)
 
 
-def wait_for_endpoint_loaded(py_handler, object_uri):
+def wait_for_endpoint_loaded(python_service, object_uri):
     '''
     This method waits for the object to be loaded.
     '''
     logger.info('Waiting for object to be loaded...')
     while True:
         msg = ListObjects()
-        list_object_msg = py_handler.manage_request(msg)
+        list_object_msg = python_service.manage_request(msg)
         if not isinstance(list_object_msg, ObjectList):
             logger.error("Error loading endpoint %s: %s" % (
                 object_uri, list_object_msg))
@@ -40,10 +40,9 @@ def wait_for_endpoint_loaded(py_handler, object_uri):
 
 
 @gen.coroutine
-def init_ps_server(settings):
+def init_ps_server(settings, tabpy_state):
     logger.info("Initializing TabPy Server...")
-    tabpy = settings['tabpy']
-    existing_pos = tabpy.get_endpoints()
+    existing_pos = tabpy_state.get_endpoints()
     for (object_name, obj_info) in (
             existing_pos.items() if sys.version_info > (3, 0)
             else existing_pos.iteritems()):
@@ -58,16 +57,14 @@ def init_ps_server(settings):
 
 
 @gen.coroutine
-def init_model_evaluator(settings):
+def init_model_evaluator(settings, tabpy_state, python_service):
     '''
     This will go through all models that the service currently have and
     initialize them.
     '''
     logger.info("Initializing models...")
-    tabpy = settings['tabpy']
-    py_handler = settings['py_handler']
 
-    existing_pos = tabpy.get_endpoints()
+    existing_pos = tabpy_state.get_endpoints()
 
     for (object_name, obj_info) in (
             existing_pos.items() if sys.version_info > (3, 0)
@@ -87,10 +84,10 @@ def init_model_evaluator(settings):
             local_path = object_path
             msg = LoadObject(object_name, local_path, object_version,
                              False, object_type)
-        py_handler.manage_request(msg)
+        python_service.manage_request(msg)
 
 
-def _get_latest_service_state(settings, new_ps_state):
+def _get_latest_service_state(settings, tabpy_state, new_ps_state, python_service):
     '''
     Update the endpoints from the latest remote state file.
 
@@ -106,7 +103,7 @@ def _get_latest_service_state(settings, new_ps_state):
     # update endpoints
     new_endpoints = new_ps_state.get_endpoints()
     diff = {}
-    current_endpoints = settings['py_handler'].ps.query_objects
+    current_endpoints = python_service.ps.query_objects
     for (endpoint_name, endpoint_info) in new_endpoints.items():
         existing_endpoint = current_endpoints.get(endpoint_name)
         if (existing_endpoint is None) or \
@@ -129,21 +126,19 @@ def _get_latest_service_state(settings, new_ps_state):
     if diff:
         changes['endpoints'] = diff
 
-    settings['tabpy'] = new_ps_state
+    tabpy_state = new_ps_state
     return (True, changes)
 
 
 @gen.coroutine
-def on_state_change(settings):
+def on_state_change(settings, tabpy_state, python_service):
     try:
-        py_handler = settings['py_handler']
-
         logger.info("Loading state from state file")
         config = util._get_state_from_file(settings['state_file_path'])
         new_ps_state = TabPyState(config=config, settings=settings)
 
-        (has_changes, changes) = _get_latest_service_state(settings,
-                                                           new_ps_state)
+        (has_changes, changes) = _get_latest_service_state(settings, tabpy_state,
+                                                           new_ps_state, python_service)
         if not has_changes:
             logger.info("Nothing changed, return.")
             return
@@ -156,7 +151,7 @@ def on_state_change(settings):
             if not object_path and not object_version:  # removal
                 logger.info("Removing object: URI={}".format(object_name))
 
-                py_handler.manage_request(DeleteObjects([object_name]))
+                python_service.manage_request(DeleteObjects([object_name]))
 
                 cleanup_endpoint_files(object_name, settings['upload_dir'])
 
@@ -171,8 +166,8 @@ def on_state_change(settings):
                     msg = LoadObject(object_name, local_path, object_version,
                                      is_update, object_type)
 
-                py_handler.manage_request(msg)
-                wait_for_endpoint_loaded(py_handler, object_name)
+                python_service.manage_request(msg)
+                wait_for_endpoint_loaded(python_service, object_name)
 
                 # cleanup old version of endpoint files
                 if object_version > 2:
