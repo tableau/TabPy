@@ -101,7 +101,8 @@ class TabPyApp:
         logger.info('Web service listening on port {}'.format(str(self.settings['port'])))
         tornado.ioloop.IOLoop.instance().start()
 
-    def _parse_cli_arguments(self):
+    @staticmethod
+    def _parse_cli_arguments():
         '''
         Parse command line arguments. Expected arguments:
         * --config: string
@@ -199,6 +200,8 @@ class TabPyApp:
             self.subdirectory = "/" + \
                 tabpy_state.get("Service Info", "Subdirectory")
 
+        self._set_features()
+
     def _validate_transfer_protocol_settings(self):
         if 'transfer_protocol' not in self.settings:
             log_and_raise(
@@ -221,7 +224,8 @@ class TabPyApp:
                                       os.path.isfile(self.settings['key_file']))
         tabpy_server.app.util.validate_cert(cert)
 
-    def _validate_cert_key_state(self, msg, cert_valid, key_valid):
+    @staticmethod
+    def _validate_cert_key_state(msg, cert_valid, key_valid):
         cert_and_key_param = '{} and {}'.format(
             ConfigParameters.TABPY_CERTIFICATE_FILE, ConfigParameters.TABPY_KEY_FILE)
         https_error = 'Error using HTTPS: '
@@ -238,10 +242,19 @@ class TabPyApp:
             log_and_raise(err, RuntimeError)
 
     def _parse_pwd_file(self):
-        if not ConfigParameters.TABPY_PWD_FILE in self.settings:
+        if ConfigParameters.TABPY_PWD_FILE not in self.settings:
             return True
 
         logger.info('Parsing password file %s' %
                     self.settings[ConfigParameters.TABPY_PWD_FILE])
 
         return True
+
+    def _set_features(self):
+        features = {}
+
+        # Check for auth
+        if ConfigParameters.TABPY_PWD_FILE in self.settings:
+            features['authentication'] = {'required': True, 'methods': {'basic-auth': {}}}
+
+        self.settings['features'] = features

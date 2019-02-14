@@ -16,5 +16,6 @@ class ServiceInfoHandler(ManagementHandler):
         info['server_version'] = self.settings['server_version']
         info['name'] = self.tabpy_state.name
         info['version'] = __version__
+        info['features'] = self.settings['features']
         self.write(simplejson.dumps(info))
 

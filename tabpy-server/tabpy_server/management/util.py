@@ -8,9 +8,7 @@ try:
     from StringIO import StringIO as _StringIO
 except ImportError:
     from io import StringIO as _StringIO
-from dateutil import parser
 from datetime import datetime, timedelta, tzinfo
-from tabpy_server.app.app import log_and_raise
 from tabpy_server.app.ConfigParameters import ConfigParameters
 from tabpy_server.app.util import log_and_raise
 from time import mktime
@@ -32,7 +30,6 @@ def write_state_config(state, settings):
         state.write(f)
 
 
-
 def _get_state_from_file(state_path):
     state_key = os.path.join(state_path, 'state.ini')
     tmp_state_file = state_key
@@ -49,7 +46,10 @@ def _get_state_from_file(state_path):
 
     return config
 
+
 _ZERO = timedelta(0)
+
+
 class _UTC(tzinfo):
     """
     A UTC datetime.tzinfo class modeled after the pytz library. It includes a
@@ -78,7 +78,9 @@ class _UTC(tzinfo):
     def __str__(self):
         return "UTC"
 
+
 _utc = _UTC()
+
 
 def _dt_to_utc_timestamp(t):
     if t.tzname() == 'UTC':
