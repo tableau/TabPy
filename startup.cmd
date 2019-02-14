@@ -2,6 +2,14 @@
 SETLOCAL
 
 
+REM Check for Python in PATH
+ECHO Checking for presence of Python in the system path variable.
+python --version
+IF %ERRORLEVEL% NEQ 0 (
+    ECHO     Cannot find Python.
+	GOTO:ERROR
+)
+
 REM Set environment variables.
 SET TABPY_ROOT=%CD%
 SET INSTALL_LOG=%TABPY_ROOT%\tabpy-server\install.log

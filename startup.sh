@@ -7,6 +7,11 @@ function check_status() {
     fi
 }
 
+# Check for Python in PATH
+echo Checking for presence of Python in the system path variable.
+python --version &>-
+check_status
+
 # Set environment variables
 echo Setting TABPY_ROOT to current working directory.
 export TABPY_ROOT=$PWD
