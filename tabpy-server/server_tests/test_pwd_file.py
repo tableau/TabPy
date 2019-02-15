@@ -1,4 +1,5 @@
 import logging
+import pathlib
 import os
 import unittest
 from argparse import Namespace
@@ -7,22 +8,14 @@ from tempfile import NamedTemporaryFile
 from tabpy_server.app.app import TabPyApp
 from tabpy_server.app.ConfigParameters import ConfigParameters
 
-try:
-    from unittest.mock import patch, call
-except ImportError:
-    from mock import patch, call
-
+from unittest.mock import patch, call
 
 class TestPasswordFile(unittest.TestCase):
-    def __init__(self, *args, **kwargs):
-        super(TestPasswordFile, self).__init__(*args, **kwargs)
-        self.config_file = None
-        self.pwd_file = None
-        self.cwd = os.getcwd()
-        self.tabpy_cwd = os.path.join(self.cwd, 'tabpy-server', 'tabpy_server')
-
     def setUp(self):
+        self.cwd = pathlib.Path.cwd()
+        self.tabpy_cwd = self.cwd / 'tabpy-server' / 'tabpy_server'
         os.chdir(self.tabpy_cwd)
+
         self.config_file = NamedTemporaryFile(mode='w', delete=False)
         self.config_file.close()
         self.pwd_file = NamedTemporaryFile(mode='w', delete=False)
