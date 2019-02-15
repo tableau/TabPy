@@ -10,6 +10,7 @@ from tabpy_server.app.ConfigParameters import ConfigParameters
 
 from unittest.mock import patch, call
 
+
 class TestPasswordFile(unittest.TestCase):
     def setUp(self):
         self.cwd = pathlib.Path.cwd()
@@ -34,47 +35,49 @@ class TestPasswordFile(unittest.TestCase):
 
     def test_given_no_pwd_file_expect_empty_credentials_list(self):
         self._set_file(self.config_file.name,
-            "[TabPy]\n"
-            "TABPY_TRANSFER_PROTOCOL = http")
+                       "[TabPy]\n"
+                       "TABPY_TRANSFER_PROTOCOL = http")
 
         app = TabPyApp(self.config_file.name)
-        self.assertDictEqual(app.credentials, {}, 'Expected no credentials with no password file provided')
+        self.assertDictEqual(
+            app.credentials, {},
+            'Expected no credentials with no password file provided')
 
-    
     def test_given_empty_pwd_file_expect_app_fails(self):
         self._set_file(self.config_file.name,
-            "[TabPy]\n"
-            "TABPY_PWD_FILE = {}".format(self.pwd_file.name))
-        
+                       "[TabPy]\n"
+                       "TABPY_PWD_FILE = {}".format(self.pwd_file.name))
+
         self._set_file(self.pwd_file.name, "# just a comment")
 
         with self.assertRaises(RuntimeError) as cm:
             TabPyApp(self.config_file.name)
             ex = cm.exception
-            self.assertEqual('Failed to read password file {}'.format(self.pwd_file.name), ex.args[0])
+            self.assertEqual('Failed to read password file {}'.format(
+                self.pwd_file.name), ex.args[0])
 
     def test_given_missing_pwd_file_expect_app_fails(self):
         self._set_file(self.config_file.name,
-            "[TabPy]\n"
-            "TABPY_PWD_FILE = foo")
+                       "[TabPy]\n"
+                       "TABPY_PWD_FILE = foo")
 
         with self.assertRaises(RuntimeError) as cm:
             TabPyApp(self.config_file.name)
             ex = cm.exception
-            self.assertEqual('Failed to read password file {}'.format(self.pwd_file.name), ex.args[0])
-
+            self.assertEqual('Failed to read password file {}'.format(
+                self.pwd_file.name), ex.args[0])
 
     def test_given_one_password_in_pwd_file_expect_one_credentials_entry(self):
         self._set_file(self.config_file.name,
-            "[TabPy]\n"
-            "TABPY_PWD_FILE = {}".format(self.pwd_file.name))
-        
+                       "[TabPy]\n"
+                       "TABPY_PWD_FILE = {}".format(self.pwd_file.name))
+
         login = 'user_name_123'
         pwd = 'someting@something_else'
-        self._set_file(self.pwd_file.name, 
-            "# passwords\n"
-            "\n"
-            "{} {}".format(login, pwd))
+        self._set_file(self.pwd_file.name,
+                       "# passwords\n"
+                       "\n"
+                       "{} {}".format(login, pwd))
 
         app = TabPyApp(self.config_file.name)
 
@@ -82,19 +85,19 @@ class TestPasswordFile(unittest.TestCase):
         self.assertIn(login, app.credentials)
         self.assertEqual(app.credentials[login], pwd)
 
-    
-    def test_given_one_username_multiple_times_in_pwd_file_expect_app_fails(self):
+    def test_given_one_login_many_times_in_pwd_file_expect_app_fails(self):
         self._set_file(self.config_file.name,
-            "[TabPy]\n"
-            "TABPY_PWD_FILE = {}".format(self.pwd_file.name))
-        
-        self._set_file(self.pwd_file.name, 
-            "# passwords\n"
-            "user1 pwd1\n"
-            "user_2 pwd#2"
-            "user1 pwd@3")
+                       "[TabPy]\n"
+                       "TABPY_PWD_FILE = {}".format(self.pwd_file.name))
+
+        self._set_file(self.pwd_file.name,
+                       "# passwords\n"
+                       "user1 pwd1\n"
+                       "user_2 pwd#2"
+                       "user1 pwd@3")
 
         with self.assertRaises(RuntimeError) as cm:
             TabPyApp(self.config_file.name)
             ex = cm.exception
-            self.assertEqual('Failed to read password file {}'.format(self.pwd_file.name), ex.args[0])            
+            self.assertEqual('Failed to read password file {}'.format(
+                self.pwd_file.name), ex.args[0])
