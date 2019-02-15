@@ -101,3 +101,27 @@ class TestPasswordFile(unittest.TestCase):
             ex = cm.exception
             self.assertEqual('Failed to read password file {}'.format(
                 self.pwd_file.name), ex.args[0])
+
+    
+    def test_given_multiple_credentials_expect_all_parsed(self):
+        self._set_file(self.config_file.name,
+                       "[TabPy]\n"
+                       "TABPY_PWD_FILE = {}".format(self.pwd_file.name))
+        creds = { 
+            'user_1': 'pwd_1',
+            'user@2': 'pwd@2',
+            'user#3': 'pwd#3'
+        }
+        
+        pwd_file_context = ""
+        for login in creds:
+            pwd_file_context += '{} {}\n'.format(login, creds[login])
+
+        self._set_file(self.pwd_file.name, pwd_file_context)
+        app = TabPyApp(self.config_file.name)
+
+        self.assertCountEqual(creds, app.credentials)
+        for login in creds:
+            self.assertIn(login, app.credentials)
+            self.assertEqual(creds[login], app.credentials[login])
+
