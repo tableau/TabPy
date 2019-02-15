@@ -4,6 +4,7 @@ python: 3.6
 install:
    - export TEST_ENV=true
    - ./startup.sh
+   - pip install python-coveralls
 script:
    - python3 tests/runtests.py
 after_success:
