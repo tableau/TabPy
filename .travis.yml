@@ -6,3 +6,5 @@ install:
    - ./startup.sh
 script:
    - python3 tests/runtests.py
+after_success:
+   - coveralls
