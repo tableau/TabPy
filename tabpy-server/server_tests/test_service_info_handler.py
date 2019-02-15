@@ -46,10 +46,12 @@ class TestServiceInfoHandlerDefault(AsyncHTTPTestCase):
 
 class TestServiceInfoHandlerWithAuth(AsyncHTTPTestCase):
     def get_app(self):
+        test_pwd_file = tempfile.NamedTemporaryFile(prefix='___TestServiceInfoHandlerWithAuth_', suffix='.txt', delete=False)
+        test_pwd_file.write(b'username password')
+        test_pwd_file.close()
+
         test_config = tempfile.NamedTemporaryFile(prefix='___TestServiceInfoHandlerWithAuth_', suffix='.conf',
                                                   delete=False)
-        test_pwd_file = tempfile.NamedTemporaryFile(prefix='___TestServiceInfoHandlerWithAuth_', suffix='.txt')
-
         config = '[TabPy]\n' \
                  'TABPY_PWD_FILE = {}\n' \
                  'TABPY_STATE_PATH = ./tabpy-server/tabpy_server'.format(test_pwd_file.name)
@@ -59,6 +61,7 @@ class TestServiceInfoHandlerWithAuth(AsyncHTTPTestCase):
         app, self.settings, self.state = _get_app_and_state(test_config.name)
 
         os.remove(test_config.name)
+        os.remove(test_pwd_file.name)
 
         return app
 
@@ -76,6 +79,6 @@ class TestServiceInfoHandlerWithAuth(AsyncHTTPTestCase):
                 'methods': {
                     'basic-auth': {}
                 },
-                'required': 'true',
+                'required': True,
             }
         }, features)
