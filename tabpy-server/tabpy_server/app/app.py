@@ -11,11 +11,10 @@ from argparse import ArgumentParser
 import tabpy_server
 from tabpy_server import __version__
 from tabpy_server.app.ConfigParameters import ConfigParameters
-from tabpy_server.app.util import (log_and_raise, validate_cert)
+from tabpy_server.app.util import log_and_raise
 from tabpy_server.management.state import TabPyState
 from tabpy_server.management.util import _get_state_from_file
-from tabpy_server.psws.callbacks import (init_model_evaluator, init_ps_server,
-                                         on_state_change)
+from tabpy_server.psws.callbacks import (init_model_evaluator, init_ps_server)
 from tabpy_server.psws.python_service import (PythonService,
                                               PythonServiceHandler)
 from tabpy_server.handlers import (EndpointHandler, EndpointsHandler, EvaluationPlaneHandler, QueryPlaneHandler,
@@ -54,6 +53,25 @@ class TabPyApp:
         self._parse_config(config_file)
 
     def run(self):
+        application = self._create_tornado_web_app()
+
+        init_model_evaluator(self.settings, self.tabpy_state, self.python_service)
+
+        if self.settings['transfer_protocol'] == 'http':
+            application.listen(self.settings['port'])
+        elif self.settings['transfer_protocol'] == 'https':
+            application.listen(self.settings['port'],
+                               ssl_options={
+                'certfile': self.settings['certificate_file'],
+                'keyfile': self.settings['key_file']
+            })
+        else:
+            log_and_raise('Unsupported transfer protocol.', RuntimeError)
+
+        logger.info('Web service listening on port {}'.format(str(self.settings['port'])))
+        tornado.ioloop.IOLoop.instance().start()
+
+    def _create_tornado_web_app(self):
         logger.info('Initializing TabPy...')
         tornado.ioloop.IOLoop.instance().run_sync(
             lambda: init_ps_server(self.settings, self.tabpy_state))
@@ -85,21 +103,7 @@ class TabPyApp:
              dict(path=self.settings['static_path'], default_filename="index.html", tabpy_state=self.tabpy_state, python_service=self.python_service)),
         ], debug=False, **self.settings)
 
-        init_model_evaluator(self.settings, self.tabpy_state, self.python_service)
-
-        if self.settings['transfer_protocol'] == 'http':
-            application.listen(self.settings['port'])
-        elif self.settings['transfer_protocol'] == 'https':
-            application.listen(self.settings['port'],
-                               ssl_options={
-                'certfile': self.settings['certificate_file'],
-                'keyfile': self.settings['key_file']
-            })
-        else:
-            log_and_raise('Unsupported transfer protocol.', RuntimeError)
-
-        logger.info('Web service listening on port {}'.format(str(self.settings['port'])))
-        tornado.ioloop.IOLoop.instance().start()
+        return application
 
     @staticmethod
     def _parse_cli_arguments():
