@@ -9,6 +9,8 @@ import tornado
 
 from argparse import ArgumentParser
 
+from logging import config
+
 import tabpy_server
 from tabpy_server import __version__
 from tabpy_server.app.ConfigParameters import ConfigParameters
@@ -55,7 +57,7 @@ class TabPyApp:
             try:
                 logging.config.fileConfig(
                     config_file, disable_existing_loggers=False)
-            except IOError:
+            except KeyError:
                 logging.basicConfig(level=logging.DEBUG)
 
         self._parse_config(config_file)
