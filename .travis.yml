@@ -6,6 +6,6 @@ install:
    - ./startup.sh
    - pip install python-coveralls
 script:
-   - python3 tests/runtests.py
+   - coverage run tests/runtests.py
 after_success:
    - coveralls
