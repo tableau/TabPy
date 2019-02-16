@@ -6,12 +6,6 @@ import tempfile, os
 
 
 def _create_expected_info_response(settings, tabpy_state):
-    """
-    Create the expected
-    :param settings:
-    :param state:
-    :return:
-    """
     response = {}
     response['description'] = tabpy_state.get_description()
     response['creation_time'] = tabpy_state.creation_time
@@ -35,6 +29,9 @@ class TestServiceInfoHandlerDefault(AsyncHTTPTestCase):
         return app
 
     def test_info(self):
+        """
+        Tests that /info returns the correct response on a vanilla TabPy instance.
+        """
         response = self.fetch('/info')
         self.assertEqual(response.code, 200)
         actual_response = json.loads(response.body)
@@ -65,6 +62,9 @@ class TestServiceInfoHandlerWithAuth(AsyncHTTPTestCase):
         return app
 
     def test_info(self):
+        """
+        Tests that /info returns thecorrect response on a TabPy instance with auth enabled.
+        """
         response = self.fetch('/info')
         self.assertEqual(response.code, 200)
         actual_response = json.loads(response.body)
