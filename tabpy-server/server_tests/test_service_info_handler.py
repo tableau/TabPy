@@ -73,10 +73,10 @@ class TestServiceInfoHandlerWithAuth(AsyncHTTPTestCase):
         self.assertDictEqual(actual_response, expected_response)
         self.assertTrue('versions' in actual_response)
         versions = actual_response['versions']
-        self.assertTrue('v0.3' in versions)
-        v0_3 = versions['v0.3']
-        self.assertTrue('features' in v0_3)
-        features = v0_3['features']
+        self.assertTrue('v0.4' in versions)
+        v0_4 = versions['v0.4']
+        self.assertTrue('features' in v0_4)
+        features = v0_4['features']
         self.assertDictEqual({
             'authentication': {
                 'methods': {

@@ -243,7 +243,7 @@ class TabPyApp:
                               RuntimeError)
 
         features = self._get_features()
-        self.settings['versions'] = {'v0.3': {'features': features}}
+        self.settings['versions'] = {'v0.4': {'features': features}}
 
     def _validate_transfer_protocol_settings(self):
         if 'transfer_protocol' not in self.settings:
