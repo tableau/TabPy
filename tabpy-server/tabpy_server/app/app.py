@@ -242,7 +242,8 @@ class TabPyApp:
                               self.settings[ConfigParameters.TABPY_PWD_FILE],
                               RuntimeError)
 
-        self._set_features()
+        features = self._get_features()
+        self.settings['versions'] = {'v0.3': {'features': features}}
 
     def _validate_transfer_protocol_settings(self):
         if 'transfer_protocol' not in self.settings:
@@ -332,11 +333,11 @@ class TabPyApp:
 
         return True
 
-    def _set_features(self):
+    def _get_features(self):
         features = {}
 
         # Check for auth
         if ConfigParameters.TABPY_PWD_FILE in self.settings:
             features['authentication'] = {'required': True, 'methods': {'basic-auth': {}}}
 
-        self.settings['features'] = features
+        return features

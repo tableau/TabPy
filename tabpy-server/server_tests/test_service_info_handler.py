@@ -18,8 +18,7 @@ def _create_expected_info_response(settings, tabpy_state):
     response['state_path'] = settings['state_file_path']
     response['server_version'] = settings['server_version']
     response['name'] = tabpy_state.name
-    response['version'] = __version__
-    response['features'] = settings['features']
+    response['versions'] = settings['versions']
     return response
 
 
@@ -72,8 +71,12 @@ class TestServiceInfoHandlerWithAuth(AsyncHTTPTestCase):
         expected_response = _create_expected_info_response(self.settings, self.state)
 
         self.assertDictEqual(actual_response, expected_response)
-        self.assertTrue('features' in actual_response)
-        features = actual_response['features']
+        self.assertTrue('versions' in actual_response)
+        versions = actual_response['versions']
+        self.assertTrue('v0.3' in versions)
+        v0_3 = versions['v0.3']
+        self.assertTrue('features' in v0_3)
+        features = v0_3['features']
         self.assertDictEqual({
             'authentication': {
                 'methods': {
