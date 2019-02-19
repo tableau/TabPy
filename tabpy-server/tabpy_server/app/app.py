@@ -64,7 +64,10 @@ class TabPyApp:
     def run(self):
         application = self._create_tornado_web_app()
 
-        init_model_evaluator(self.settings, self.tabpy_state, self.python_service)
+        init_model_evaluator(
+            self.settings,
+            self.tabpy_state,
+            self.python_service)
 
         if self.settings['transfer_protocol'] == 'http':
             application.listen(self.settings['port'])
@@ -77,7 +80,8 @@ class TabPyApp:
         else:
             log_and_raise('Unsupported transfer protocol.', RuntimeError)
 
-        logger.info('Web service listening on port {}'.format(str(self.settings['port'])))
+        logger.info('Web service listening on port {}'.format(
+            str(self.settings['port'])))
         tornado.ioloop.IOLoop.instance().start()
 
     def _create_tornado_web_app(self):
@@ -338,6 +342,8 @@ class TabPyApp:
 
         # Check for auth
         if ConfigParameters.TABPY_PWD_FILE in self.settings:
-            features['authentication'] = {'required': True, 'methods': {'basic-auth': {}}}
+            features['authentication'] = {
+                'required': True, 'methods': {
+                    'basic-auth': {}}}
 
         return features

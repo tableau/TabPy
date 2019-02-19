@@ -1,7 +1,8 @@
 from tornado.testing import AsyncHTTPTestCase
 from tabpy_server.app import TabPyApp
 import simplejson as json
-import tempfile, os
+import tempfile
+import os
 
 
 def _create_expected_info_response(settings, tabpy_state):
@@ -24,7 +25,8 @@ class TestServiceInfoHandlerDefault(AsyncHTTPTestCase):
         response = self.fetch('/info')
         self.assertEqual(response.code, 200)
         actual_response = json.loads(response.body)
-        expected_response = _create_expected_info_response(self.app.settings, self.app.tabpy_state)
+        expected_response = _create_expected_info_response(
+            self.app.settings, self.app.tabpy_state)
 
         self.assertDictEqual(actual_response, expected_response)
 
@@ -34,7 +36,8 @@ class TestServiceInfoHandlerWithAuth(AsyncHTTPTestCase):
     def setUpClass(cls):
         prefix = '__TestServiceInfoHandlerWithAuth_'
         # create password file
-        cls.pwd_file = tempfile.NamedTemporaryFile(prefix=prefix, suffix='.txt', delete=False)
+        cls.pwd_file = tempfile.NamedTemporaryFile(
+            prefix=prefix, suffix='.txt', delete=False)
         cls.pwd_file.write(b'username password')
         cls.pwd_file.close()
 
@@ -58,10 +61,16 @@ class TestServiceInfoHandlerWithAuth(AsyncHTTPTestCase):
         cls.state_file.close()
 
         # create config file
-        cls.config_file = tempfile.NamedTemporaryFile(prefix=prefix, suffix='.conf', delete=False)
-        cls.config_file.write(bytes('[TabPy]\n'
-                        'TABPY_PWD_FILE = {}\n'
-                        'TABPY_STATE_PATH = {}'.format(cls.pwd_file.name, cls.state_dir), 'utf-8'))
+        cls.config_file = tempfile.NamedTemporaryFile(
+            prefix=prefix, suffix='.conf', delete=False)
+        cls.config_file.write(
+            bytes(
+                '[TabPy]\n'
+                'TABPY_PWD_FILE = {}\n'
+                'TABPY_STATE_PATH = {}'.format(
+                    cls.pwd_file.name,
+                    cls.state_dir),
+                'utf-8'))
         cls.config_file.close()
 
     @classmethod
@@ -79,7 +88,8 @@ class TestServiceInfoHandlerWithAuth(AsyncHTTPTestCase):
         response = self.fetch('/info')
         self.assertEqual(response.code, 200)
         actual_response = json.loads(response.body)
-        expected_response = _create_expected_info_response(self.app.settings, self.app.tabpy_state)
+        expected_response = _create_expected_info_response(
+            self.app.settings, self.app.tabpy_state)
 
         self.assertDictEqual(actual_response, expected_response)
         self.assertTrue('versions' in actual_response)
