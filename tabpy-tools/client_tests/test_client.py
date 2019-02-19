@@ -21,20 +21,16 @@ class TestClient(unittest.TestCase):
         client = Client("http://example.com:9004")
 
         self.assertEqual(client._endpoint, "http://example.com:9004")
-        self.assertEqual(client._verify_certificate, True)
 
-        client = Client("http://example.com/", 10.0, False)
+        client = Client("http://example.com/", 10.0)
 
         self.assertEqual(client._endpoint, "http://example.com/")
-        self.assertEqual(client._verify_certificate, False)
 
         client = Client(
             endpoint="https://example.com/",
-            query_timeout=-10.0,
-            verify_certificate=False)
+            query_timeout=-10.0)
 
         self.assertEqual(client._endpoint, "https://example.com/")
-        self.assertEqual(client._verify_certificate, False)
         self.assertEqual(client.query_timeout, 0.0)
 
         # valid name tests
