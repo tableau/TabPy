@@ -4,7 +4,6 @@ import csv
 import logging
 import multiprocessing
 import os
-import time
 import tornado
 
 from argparse import ArgumentParser

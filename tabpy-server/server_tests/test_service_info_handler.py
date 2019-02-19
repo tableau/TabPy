@@ -3,6 +3,8 @@ from tabpy_server.app import TabPyApp
 import simplejson as json
 import tempfile
 import os
+from unittest.mock import patch
+from argparse import Namespace
 
 
 def _create_expected_info_response(settings, tabpy_state):
@@ -17,6 +19,18 @@ def _create_expected_info_response(settings, tabpy_state):
 
 
 class TestServiceInfoHandlerDefault(AsyncHTTPTestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.patcher = patch(
+            'tabpy_server.app.TabPyApp._parse_cli_arguments',
+            return_value=Namespace(
+                config=None))
+        cls.patcher.start()
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.patcher.stop()
+
     def get_app(self):
         self.app = TabPyApp()
         return self.app._create_tornado_web_app()
