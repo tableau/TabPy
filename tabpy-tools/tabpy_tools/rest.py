@@ -46,15 +46,10 @@ class RequestsNetworkWrapper(object):
     For authentication, use::
 
         session.auth = (username, password)
-
-    For modifying SSL behavior::
-
-        session.verify = False # Ignore SSL warnings
-
     """
 
     def __init__(self, session=None):
-        # Set .verify and .auth as appropriate.
+        # Set .auth as appropriate.
         if session is None:
             session = requests.session()
 
