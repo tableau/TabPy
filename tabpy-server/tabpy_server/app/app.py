@@ -4,7 +4,6 @@ import csv
 import logging
 import multiprocessing
 import os
-import time
 import tornado
 
 from argparse import ArgumentParser
@@ -14,11 +13,10 @@ from logging import config
 import tabpy_server
 from tabpy_server import __version__
 from tabpy_server.app.ConfigParameters import ConfigParameters
-from tabpy_server.app.util import (log_and_raise, validate_cert)
+from tabpy_server.app.util import log_and_raise
 from tabpy_server.management.state import TabPyState
 from tabpy_server.management.util import _get_state_from_file
-from tabpy_server.psws.callbacks import (init_model_evaluator, init_ps_server,
-                                         on_state_change)
+from tabpy_server.psws.callbacks import (init_model_evaluator, init_ps_server)
 from tabpy_server.psws.python_service import (PythonService,
                                               PythonServiceHandler)
 from tabpy_server.handlers import (EndpointHandler, EndpointsHandler,
@@ -63,6 +61,29 @@ class TabPyApp:
         self._parse_config(config_file)
 
     def run(self):
+        application = self._create_tornado_web_app()
+
+        init_model_evaluator(
+            self.settings,
+            self.tabpy_state,
+            self.python_service)
+
+        if self.settings['transfer_protocol'] == 'http':
+            application.listen(self.settings['port'])
+        elif self.settings['transfer_protocol'] == 'https':
+            application.listen(self.settings['port'],
+                               ssl_options={
+                'certfile': self.settings['certificate_file'],
+                'keyfile': self.settings['key_file']
+            })
+        else:
+            log_and_raise('Unsupported transfer protocol.', RuntimeError)
+
+        logger.info('Web service listening on port {}'.format(
+            str(self.settings['port'])))
+        tornado.ioloop.IOLoop.instance().start()
+
+    def _create_tornado_web_app(self):
         logger.info('Initializing TabPy...')
         tornado.ioloop.IOLoop.instance().run_sync(
             lambda: init_ps_server(self.settings, self.tabpy_state))
@@ -107,25 +128,10 @@ class TabPyApp:
                   python_service=self.python_service)),
         ], debug=False, **self.settings)
 
-        init_model_evaluator(
-            self.settings, self.tabpy_state, self.python_service)
+        return application
 
-        if self.settings['transfer_protocol'] == 'http':
-            application.listen(self.settings['port'])
-        elif self.settings['transfer_protocol'] == 'https':
-            application.listen(self.settings['port'],
-                               ssl_options={
-                'certfile': self.settings['certificate_file'],
-                'keyfile': self.settings['key_file']
-            })
-        else:
-            log_and_raise('Unsupported transfer protocol.', RuntimeError)
-
-        logger.info('Web service listening on port {}'.format(
-            str(self.settings['port'])))
-        tornado.ioloop.IOLoop.instance().start()
-
-    def _parse_cli_arguments(self):
+    @staticmethod
+    def _parse_cli_arguments():
         '''
         Parse command line arguments. Expected arguments:
         * --config: string
@@ -239,6 +245,9 @@ class TabPyApp:
                               self.settings[ConfigParameters.TABPY_PWD_FILE],
                               RuntimeError)
 
+        features = self._get_features()
+        self.settings['versions'] = {'v1': {'features': features}}
+
     def _validate_transfer_protocol_settings(self):
         if 'transfer_protocol' not in self.settings:
             log_and_raise(
@@ -265,7 +274,8 @@ class TabPyApp:
             os.path.isfile(self.settings['key_file']))
         tabpy_server.app.util.validate_cert(cert)
 
-    def _validate_cert_key_state(self, msg, cert_valid, key_valid):
+    @staticmethod
+    def _validate_cert_key_state(msg, cert_valid, key_valid):
         cert_and_key_param = '{} and {}'.format(
             ConfigParameters.TABPY_CERTIFICATE_FILE,
             ConfigParameters.TABPY_KEY_FILE)
@@ -325,3 +335,14 @@ class TabPyApp:
                 return False
 
         return True
+
+    def _get_features(self):
+        features = {}
+
+        # Check for auth
+        if ConfigParameters.TABPY_PWD_FILE in self.settings:
+            features['authentication'] = {
+                'required': True, 'methods': {
+                    'basic-auth': {}}}
+
+        return features

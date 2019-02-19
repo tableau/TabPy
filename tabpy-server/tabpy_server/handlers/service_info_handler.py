@@ -1,5 +1,4 @@
 import simplejson
-from tabpy_server import __version__
 from tabpy_server.handlers import ManagementHandler
 
 
@@ -15,6 +14,5 @@ class ServiceInfoHandler(ManagementHandler):
         info['state_path'] = self.settings['state_file_path']
         info['server_version'] = self.settings['server_version']
         info['name'] = self.tabpy_state.name
-        info['version'] = __version__
+        info['versions'] = self.settings['versions']
         self.write(simplejson.dumps(info))
-
