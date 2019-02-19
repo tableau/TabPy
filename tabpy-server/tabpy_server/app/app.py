@@ -320,7 +320,7 @@ class TabPyApp:
                             'in password file'.format(row))
                         return False
 
-                    login = row[0]
+                    login = row[0].lower()
                     if login in self.credentials:
                         logger.error(
                             'Multiple entries for username {} '
