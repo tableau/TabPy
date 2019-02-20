@@ -58,8 +58,7 @@ class Client(object):
 
     def __init__(self,
                  endpoint,
-                 query_timeout=1000,
-                 verify_certificate=True):
+                 query_timeout=1000):
         """
         Connects to a running server.
 
@@ -76,20 +75,12 @@ class Client(object):
         query_timeout : float, optional
 
             The timeout for query operations.
-
-        verify_certificate : bool, optional
-
-            Whether to check the certificate for SSL connections. Defaults to
-            True.
-
         """
         _check_hostname(endpoint)
 
         self._endpoint = endpoint
-        self._verify_certificate = verify_certificate
 
         session = requests.session()
-        session.verify = self._verify_certificate
 
         # Setup the communications layer.
         network_wrapper = RequestsNetworkWrapper(session)
