@@ -88,3 +88,22 @@ Access-Control-Allow-Methods = GET, OPTIONS, POST
 - Open `misc/TabPy.yml` in Swagger editor.
 - In case your TabPy server runs not on `localhost:9004` update
   `host` value in `TabPy.yml` accordingly.
+
+## Code styling
+
+On github repo for merge request `pycodestyle` is used to check Python code against our
+style conventions. You can run install it and run locally for file where modifications 
+were made:
+
+```sh
+pip install pycodestyle
+pycodestyle <file.py>
+```
+
+For reported errors and warnings either fix them manually or auto-format files with
+`autopep8`:
+
+```sh
+pip install autopep8
+autopep8 -i <file.py>
+```

@@ -5,9 +5,10 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 def validate_basic_auth_credentials(username, pwd, credentials):
     '''
-    Validates username:pwd if they are the same as 
+    Validates username:pwd if they are the same as
     stored credentials.
 
     Parameters
@@ -17,7 +18,7 @@ def validate_basic_auth_credentials(username, pwd, credentials):
 
     pwd : str
         Password in plain text. The function will hash
-        the password with SHA3 to compare with hashed 
+        the password with SHA3 to compare with hashed
         passwords in stored credentials.
 
     credentials: dict
@@ -27,7 +28,7 @@ def validate_basic_auth_credentials(username, pwd, credentials):
     Returns
     -------
     bool
-        True if credentials has key login and 
+        True if credentials has key login and
         credentials[login] equal SHA3(pwd), False
         otherwise.
     '''
@@ -41,13 +42,13 @@ def validate_basic_auth_credentials(username, pwd, credentials):
     if credentials[login].lower() != hashed_pwd.lower():
         logger.error('Wrong password for user name "{}"'.format(username))
         return False
-        
+
     return True
 
 
 def check_and_validate_basic_auth_credentials(headers, credentials):
     '''
-    Checks if credentials are provided in headers and 
+    Checks if credentials are provided in headers and
     if they are valid.
 
     Parameters
@@ -73,7 +74,7 @@ def check_and_validate_basic_auth_credentials(headers, credentials):
     auth_header = headers['Authorization']
     auth_header_list = headers['Authorization'].split(' ')
     if len(auth_header_list) != 2 or\
-        auth_header_list[0] != 'Basic':
+            auth_header_list[0] != 'Basic':
         logger.error('Uknown authentication method "{}"'.format(auth_header))
         return False
 
@@ -88,7 +89,9 @@ def check_and_validate_basic_auth_credentials(headers, credentials):
         logger.error('Invalid string in encoded credentials')
         return False
 
-    return validate_basic_auth_credentials(login_pwd[0], login_pwd[1], credentials)
+    return validate_basic_auth_credentials(login_pwd[0],
+                                           login_pwd[1],
+                                           credentials)
 
 
 def handle_authentication(headers, api_version, settings, credentials):
@@ -117,7 +120,7 @@ def handle_authentication(headers, api_version, settings, credentials):
         If for the specified API version authentication is
         not turned on returns True.
         Otherwise checks what authentication type is used
-        and if it is supported type validates provided 
+        and if it is supported type validates provided
         credentials.
         If authentication type is supported and credentials
         are valid returns True, otherwise False.
@@ -134,14 +137,18 @@ def handle_authentication(headers, api_version, settings, credentials):
 
     features = version_settings['features']
     if 'authentication' not in features or\
-        features['authentication']['required'] != True:
-        logger.info('Authentication is not a required feature for API {}'.format(api_version))
+            not features['authentication']['required']:
+        logger.info(
+            'Authentication is not a required feature for API '
+            '{}'.format(api_version))
         return True
 
     auth_feature = features['authentication']
     if 'methods' not in auth_feature or\
-        'basic-auth' not in auth_feature['methods']:
-        logger.critical('Basic authentication access method is not configured for API {}'.format(api_version))
+            'basic-auth' not in auth_feature['methods']:
+        logger.critical(
+            'Basic authentication access method is not configured '
+            'for API {}'.format(api_version))
         return False
 
     return check_and_validate_basic_auth_credentials(headers, credentials)
