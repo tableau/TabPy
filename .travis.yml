@@ -1,14 +1,15 @@
 os: linux
 language: python
 python: 3.6
+env:
+   - TEST_ENV=true
 install:
-   - export TEST_ENV=true
    - ./startup.sh
    - pip install pytest
    - pip install pytest-cov
    - pip install coveralls
 script:
    - pytest tabpy-server/server_tests/ --cov=tabpy-server/tabpy_server
-   - pytest tabpy-tools/client_tests/ --cov=tabpy-tools/tabpy_tools --cov-append
+   - pytest tabpy-tools/tools_tests/ --cov=tabpy-tools/tabpy_tools --cov-append
 after_success:
    - coveralls

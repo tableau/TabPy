@@ -182,6 +182,32 @@ definitions:
         type: string
       name:
         type: string
+      versions:
+        type: object
+        properties:
+          v1:
+            type: object
+            properties:
+              features:
+                type: object
+                properties:
+                  authentication:
+                    type: object
+                    properties:
+                      required:
+                        type: boolean
+                      methods:
+                        type: object
+                        properties:
+                          basic-auth:
+                            type: object
+                        required:
+                          - basic-auth
+                    required:
+                      - required
+                      - methods
+            required:
+              - features
   ErrorEvaluateScript500:
     type: object
     properties:
