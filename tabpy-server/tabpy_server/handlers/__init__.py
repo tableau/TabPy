@@ -9,3 +9,4 @@ from tabpy_server.handlers.query_plane_handler import QueryPlaneHandler
 from tabpy_server.handlers.service_info_handler import ServiceInfoHandler
 from tabpy_server.handlers.status_handler import StatusHandler
 from tabpy_server.handlers.upload_destination_handler import UploadDestinationHandler
+from tabpy_server.handlers.util import handle_authentication
