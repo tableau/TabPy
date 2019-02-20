@@ -17,9 +17,6 @@ from tabpy_server.management.util import write_state_config
 
 logger = logging.getLogger(__name__)
 
-if sys.version_info.major == 3:
-    unicode = str
-
 # State File Config Section Names
 _DEPLOYMENT_SECTION_NAME = 'Query Objects Service Versions'
 _QUERY_OBJECT_DOCSTRING = 'Query Objects Docstrings'
@@ -212,25 +209,25 @@ class TabPyState(object):
         '''
         try:
             endpoints = self.get_endpoints()
-            if name is None or not isinstance(name, (str, unicode)) or len(name) == 0:
+            if name is None or not isinstance(name, str) or len(name) == 0:
                 raise ValueError("name of the endpoint must be a valid string.")
             elif name in endpoints:
                 raise ValueError("endpoint %s already exists." % name)
-            if description and not isinstance(description, (str, unicode)):
+            if description and not isinstance(description, str):
                 raise ValueError("description must be a string.")
             elif not description:
                 description = ''
-            if docstring and not isinstance(docstring, (str, unicode)):
+            if docstring and not isinstance(docstring, str):
                 raise ValueError("docstring must be a string.")
             elif not docstring:
                 docstring = '-- no docstring found in query function --'
-            if not endpoint_type or not isinstance(endpoint_type, (str, unicode)):
+            if not endpoint_type or not isinstance(endpoint_type, str):
                 raise ValueError("endpoint type must be a string.")
             if dependencies and not isinstance(dependencies, list):
                 raise ValueError("dependencies must be a list.")
             elif not dependencies:
                 dependencies = []
-            if target and not isinstance(target, (str, unicode)):
+            if target and not isinstance(target, str):
                 raise ValueError("target must be a string.")
             elif target and target not in endpoints:
                 raise ValueError("target endpoint is not valid.")
@@ -305,22 +302,22 @@ class TabPyState(object):
         '''
         try:
             endpoints = self.get_endpoints()
-            if not name or not isinstance(name, (str, unicode)):
+            if not name or not isinstance(name, str):
                 raise ValueError("name of the endpoint must be string.")
             elif name not in endpoints:
                 raise ValueError("endpoint %s does not exist." % name)
 
             endpoint_info = endpoints[name]
 
-            if description and not isinstance(description, (str, unicode)):
+            if description and not isinstance(description, str):
                 raise ValueError("description must be a string.")
             elif not description:
                 description = endpoint_info['description']
-            if docstring and not isinstance(docstring, (str, unicode)):
+            if docstring and not isinstance(docstring, str):
                 raise ValueError("docstring must be a string.")
             elif not docstring:
                 docstring = endpoint_info['docstring']
-            if endpoint_type and not isinstance(endpoint_type, (str, unicode)):
+            if endpoint_type and not isinstance(endpoint_type, str):
                 raise ValueError("endpoint type must be a string.")
             elif not endpoint_type:
                 endpoint_type = endpoint_info['type']
@@ -335,7 +332,7 @@ class TabPyState(object):
                     dependencies = endpoint_info['dependencies']
                 else:
                     dependencies = []
-            if target and not isinstance(target, (str, unicode)):
+            if target and not isinstance(target, str):
                 raise ValueError("target must be a string.")
             elif target and target not in endpoints:
                 raise ValueError("target endpoint is not valid.")
@@ -445,7 +442,7 @@ class TabPyState(object):
         name : str
             Name of TabPy service.
         '''
-        if not isinstance(name, (str, unicode)):
+        if not isinstance(name, str):
             raise ValueError("name must be a string.")
         try:
             self._set_config_value(_SERVICE_INFO_SECTION_NAME, 'Name', name)
@@ -474,7 +471,7 @@ class TabPyState(object):
         description : str
             Description of TabPy service.
         '''
-        if not isinstance(description, (str, unicode)):
+        if not isinstance(description, str):
             raise ValueError("Description must be a string.")
         try:
             self._set_config_value(

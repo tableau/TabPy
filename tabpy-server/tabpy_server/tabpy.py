@@ -41,9 +41,6 @@ import uuid
 STAGING_THREAD = concurrent.futures.ThreadPoolExecutor(max_workers=3)
 _QUERY_OBJECT_STAGING_FOLDER = 'staging'
 
-if sys.version_info.major == 3:
-    unicode = str
-
 def parse_arguments():
     '''
     Parse input arguments and return the parsed arguments. Expected arguments:
@@ -188,8 +185,8 @@ class ManagementHandler(MainHandler):
         '''
         logging.debug("Adding/updating model {}...".format(name))
         _name_checker = _compile('^[a-zA-Z0-9-_\ ]+$')
-        if not isinstance(name, (str, unicode)):
-            raise TypeError("Endpoint name must be a string or unicode")
+        if not isinstance(name, str):
+            raise TypeError("Endpoint name must be a string")
 
         if not _name_checker.match(name):
             raise gen.Return('endpoint name can only contain: a-z, A-Z, 0-9,'
@@ -205,14 +202,11 @@ class ManagementHandler(MainHandler):
             description = (request_data['description'] if 'description' in
                                                           request_data else None)
             if 'docstring' in request_data:
-                if sys.version_info > (3, 0):
-                    docstring = str(bytes(request_data['docstring'],
-                                          "utf-8").decode('unicode_escape'))
-                else:
-                    docstring = request_data['docstring'].decode(
-                        'string_escape')
+                docstring = str(bytes(request_data['docstring'],
+                            "utf-8").decode('unicode_escape'))
             else:
                 docstring = None
+
             endpoint_type = (request_data['type'] if 'type' in request_data
                              else None)
             methods = (request_data['methods'] if 'methods' in request_data
@@ -231,7 +225,7 @@ class ManagementHandler(MainHandler):
             _path_checker = _compile('^[\\a-zA-Z0-9-_\ /]+$')
             # copy from staging
             if src_path:
-                if not isinstance(request_data['src_path'], (str, unicode)):
+                if not isinstance(request_data['src_path'], str):
                     raise gen.Return("src_path must be a string.")
                 if not _path_checker.match(src_path):
                     raise gen.Return('Endpoint name can only contain: a-z, A-'
