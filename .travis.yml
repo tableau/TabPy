@@ -1,8 +1,9 @@
 os: linux
 language: python
 python: 3.6
+env:
+   - TEST_ENV=true
 install:
-   - export TEST_ENV=true
    - ./startup.sh
    - pip install pytest
    - pip install pytest-cov
