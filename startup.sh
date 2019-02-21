@@ -2,7 +2,7 @@
 
 function check_status() {
     if [ $? -ne 0 ]; then
-        echo TabPy startup failed.  Cannot find Python.  Check that Python is installed and is in the system PATH environment variable.
+        echo TabPy startup failed.
         exit 1
     fi
 }
