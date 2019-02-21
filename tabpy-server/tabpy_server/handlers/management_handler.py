@@ -40,8 +40,8 @@ def copy_from_local(localpath, remotepath, is_dir=False):
 
 
 class ManagementHandler(MainHandler):
-    def initialize(self, tabpy_state, python_service):
-        super(ManagementHandler, self).initialize(tabpy_state, python_service)
+    def initialize(self, app):
+        super(ManagementHandler, self).initialize(app)
         self.port = self.settings['port']
 
     def _get_protocol(self):

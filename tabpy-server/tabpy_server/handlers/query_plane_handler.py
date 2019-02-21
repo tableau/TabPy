@@ -34,8 +34,8 @@ def _sanitize_request_data(data):
 
 
 class QueryPlaneHandler(BaseHandler):
-    def initialize(self, tabpy_state, python_service):
-        super(QueryPlaneHandler, self).initialize(tabpy_state, python_service)
+    def initialize(self, app):
+        super(QueryPlaneHandler, self).initialize(app)
 
     def _query(self, po_name, data, uid, qry):
         """
@@ -78,12 +78,15 @@ class QueryPlaneHandler(BaseHandler):
     # don't check API key (client does not send or receive data for OPTIONS,
     # it just allows the client to subsequently make a POST request)
     def options(self, pred_name):
+        if self.should_fail_with_not_authorized():
+            self.fail_with_not_authorized()
+            return
+
         # add CORS headers if TabPy has a cors_origin specified
         self._add_CORS_header()
         self.write({})
 
     def _handle_result(self, po_name, data, qry, uid):
-
         (response_type, response, gls_time) = \
             self._query(po_name, data, uid, qry)
 
@@ -192,6 +195,10 @@ class QueryPlaneHandler(BaseHandler):
 
     @tornado.web.asynchronous
     def get(self, endpoint_name):
+        if self.should_fail_with_not_authorized():
+            self.fail_with_not_authorized()
+            return
+
         start = time.time()
         if sys.version_info > (3, 0):
             endpoint_name = urllib.parse.unquote(endpoint_name)
@@ -200,8 +207,13 @@ class QueryPlaneHandler(BaseHandler):
         logger.debug("GET /query/{}".format(endpoint_name))
         self._process_query(endpoint_name, start)
 
+
     @tornado.web.asynchronous
     def post(self, endpoint_name):
+        if self.should_fail_with_not_authorized():
+            self.fail_with_not_authorized()
+            return
+
         start = time.time()
         if sys.version_info > (3, 0):
             endpoint_name = urllib.parse.unquote(endpoint_name)

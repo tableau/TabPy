@@ -31,13 +31,18 @@ class EvaluationPlaneHandler(BaseHandler):
     EvaluationPlaneHandler is responsible for running arbitrary python scripts.
     '''
 
-    def initialize(self, executor, tabpy_state, python_service):
-        super(EvaluationPlaneHandler, self).initialize(tabpy_state, python_service)
+    def initialize(self, executor, app):
+        super(EvaluationPlaneHandler, self).initialize(app)
         self.executor = executor
+
 
     @tornado.web.asynchronous
     @gen.coroutine
     def post(self):
+        if self.should_fail_with_not_authorized():
+            self.fail_with_not_authorized()
+            return
+
         self._add_CORS_header()
         try:
             body = simplejson.loads(self.request.body.decode('utf-8'))

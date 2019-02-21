@@ -54,6 +54,21 @@ To run the unit test suite:
 python tests\runtests.py
 ```
 
+Alternatevly you can run unit tests to collect code coverage data. First
+install `pytest`:
+
+```sh
+pip install pytest
+```
+
+And then run `pytest` either for server or tools test, or even combined:
+
+```sh
+pytest tabpy-server/server_tests/ --cov=tabpy-server/tabpy_server
+pytest tabpy-tools/tools_tests/ --cov=tabpy-tools/tabpy_tools --cov-append
+```
+
+
 ## Linux and Mac Specific Steps
 
 If you have downloaded Tabpy and would like to manually install Tabpy Server
@@ -92,18 +107,33 @@ Access-Control-Allow-Methods = GET, OPTIONS, POST
 ## Code styling
 
 On github repo for merge request `pycodestyle` is used to check Python code against our
-style conventions. You can run install it and run locally for file where modifications 
-were made:
+style conventions.
+
+You need to install `pycodestyle` locally:
 
 ```sh
 pip install pycodestyle
-pycodestyle <file.py>
+```
+
+And then run it for file where modifications were made, e.g.:
+
+```sh
+pycodestyle tabpy-server/server_tests/test_pwd_file.py
 ```
 
 For reported errors and warnings either fix them manually or auto-format files with
-`autopep8`:
+`autopep8`.
+
+To install `autopep8` run the next command:
 
 ```sh
 pip install autopep8
-autopep8 -i <file.py>
+```
+
+And then you can run the tool for a file. In the example below `-i`
+option tells `autopep8` to update the file. Without the option it
+outputs formated code to console.
+
+```sh
+autopep8 -i tabpy-server/server_tests/test_pwd_file.py
 ```

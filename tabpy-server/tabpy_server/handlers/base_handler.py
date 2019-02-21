@@ -3,6 +3,7 @@ import tornado.web
 import simplejson
 import logging
 
+from tabpy_server.handlers.util import handle_basic_authentication
 
 logger = logging.getLogger(__name__)
 STAGING_THREAD = concurrent.futures.ThreadPoolExecutor(max_workers=3)
@@ -11,12 +12,13 @@ STAGING_THREAD = concurrent.futures.ThreadPoolExecutor(max_workers=3)
 class BaseHandler(tornado.web.RequestHandler):
     KEYS_TO_SANITIZE = ("api key", "api_key", "admin key", "admin_key")
 
-    def initialize(self, tabpy_state, python_service):
-        self.tabpy_state = tabpy_state
+    def initialize(self, app):
+        self.tabpy_state = app.tabpy_state
         # set content type to application/json
         self.set_header("Content-Type", "application/json")
         self.port = self.settings['port']
-        self.python_service = python_service
+        self.python_service = app.python_service
+        self.credentials = app.credentials
 
     def error_out(self, code, log_message, info=None):
         self.set_status(code)
@@ -59,3 +61,31 @@ class BaseHandler(tornado.web.RequestHandler):
         """Remove keys so that we can log safely"""
         for key in keys:
             data.pop(key, None)
+
+
+    def should_fail_with_not_authorized(self):
+        '''
+        Checks if authentication is required:
+        - if it is not returns false, None
+        - if it is required validates provided credentials
+
+        Returns
+        -------
+        bool
+            False if authentication is not required or is
+            required and validation for credentials passes.
+            True if validation for credentials failed.
+        '''
+        return handle_basic_authentication(self.request.headers,
+                                           "v1",
+                                           self.settings,
+                                           self.credentials)
+
+
+    def fail_with_not_authorized(self):
+        '''
+        Prepares server 401 response.
+        '''
+        logger.error('Failing with 401 for anothorized request')
+        self.set_status(401)
+        self.set_header('WWW-Authenticate', 'Basic realm="{}"'.format(self.tabpy_state.name))
