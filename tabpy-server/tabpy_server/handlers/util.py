@@ -151,4 +151,4 @@ def handle_basic_authentication(headers, api_version, settings, credentials):
             'for API {}'.format(api_version))
         return False
 
-    return not check_and_validate_basic_auth_credentials(headers, credentials)
+    return check_and_validate_basic_auth_credentials(headers, credentials)

@@ -77,10 +77,11 @@ class BaseHandler(tornado.web.RequestHandler):
             True if validation for credentials failed.
         '''
         logger.debug('Checking if need to handle authentication')
-        return handle_basic_authentication(self.request.headers,
-                                           "v1",
-                                           self.settings,
-                                           self.credentials)
+        return not handle_basic_authentication(
+            self.request.headers,
+            "v1",
+            self.settings,
+            self.credentials)
 
 
     def fail_with_not_authorized(self):
