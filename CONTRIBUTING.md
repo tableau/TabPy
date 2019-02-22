@@ -54,7 +54,7 @@ To run the unit test suite:
 python tests\runtests.py
 ```
 
-Alternatevly you can run unit tests to collect code coverage data. First
+Alternatively you can run unit tests to collect code coverage data. First
 install `pytest`:
 
 ```sh
