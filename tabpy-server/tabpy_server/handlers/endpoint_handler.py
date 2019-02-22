@@ -18,7 +18,6 @@ class EndpointHandler(ManagementHandler):
     def initialize(self, app):
         super(EndpointHandler, self).initialize(app)
 
-
     def get(self, endpoint_name):
         logger.debug('Processing GET for /endpoints/{}'.format(endpoint_name))
         if self.should_fail_with_not_authorized():
@@ -51,8 +50,11 @@ class EndpointHandler(ManagementHandler):
             try:
                 request_data = simplejson.loads(
                     self.request.body.decode('utf-8'))
-            except:
-                self.error_out(400, "Failed to decode input body")
+            except BaseException as ex:
+                self.error_out(
+                    400,
+                    log_message="Failed to decode input body",
+                    info=str(ex))
                 self.finish()
                 return
 
@@ -79,7 +81,6 @@ class EndpointHandler(ManagementHandler):
             err_msg = format_exception(e, 'update_endpoint')
             self.error_out(500, err_msg)
             self.finish()
-
 
     @tornado.web.asynchronous
     @gen.coroutine
@@ -132,4 +133,3 @@ class EndpointHandler(ManagementHandler):
         future = STAGING_THREAD.submit(shutil.rmtree, delete_path)
         ret = yield future
         raise gen.Return(ret)
-

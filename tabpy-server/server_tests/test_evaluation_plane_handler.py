@@ -52,18 +52,17 @@ class TestEvaluationPlainHandlerWithAuth(AsyncHTTPTestCase):
         cls.config_file = tempfile.NamedTemporaryFile(
             mode='w+t', prefix=prefix, suffix='.conf', delete=False)
         cls.config_file.write(
-                '[TabPy]\n'
-                'TABPY_PWD_FILE = {}\n'
-                'TABPY_STATE_PATH = {}'.format(
-                    cls.pwd_file.name,
-                    cls.state_dir))
+            '[TabPy]\n'
+            'TABPY_PWD_FILE = {}\n'
+            'TABPY_STATE_PATH = {}'.format(
+                cls.pwd_file.name,
+                cls.state_dir))
         cls.config_file.close()
 
         cls.script =\
             '{"data":{"_arg1":[2,3],"_arg2":[3,-1]},'\
             '"script":"res=[]\\nfor i in range(len(_arg1)):\\n  '\
             'res.append(_arg1[i] * _arg2[i])\\nreturn res"}'
-
 
     @classmethod
     def tearDownClass(cls):
@@ -73,44 +72,39 @@ class TestEvaluationPlainHandlerWithAuth(AsyncHTTPTestCase):
         os.remove(cls.config_file.name)
         os.rmdir(cls.state_dir)
 
-
     def get_app(self):
         self.app = TabPyApp(self.config_file.name)
         return self.app._create_tornado_web_app()
 
-
     def test_no_creds_required_auth_fails(self):
         response = self.fetch(
             '/evaluate',
-            method = 'POST',
-            body = self.script)
+            method='POST',
+            body=self.script)
         self.assertEqual(401, response.code)
-
 
     def test_invalid_creds_fails(self):
         response = self.fetch(
             '/evaluate',
-            method = 'POST',
-            body = self.script,
-            headers = {
-                'Authorization': 'Basic {}'.\
+            method='POST',
+            body=self.script,
+            headers={
+                'Authorization': 'Basic {}'.
                 format(
-                    base64.b64encode('user:wrong_password'.encode('utf-8')).\
+                    base64.b64encode('user:wrong_password'.encode('utf-8')).
                     decode('utf-8'))
             })
         self.assertEqual(401, response.code)
 
-
     def test_valid_creds_pass(self):
         response = self.fetch(
             '/evaluate',
-            method = 'POST',
-            body = self.script,
-            headers = {
-                'Authorization': 'Basic {}'.\
+            method='POST',
+            body=self.script,
+            headers={
+                'Authorization': 'Basic {}'.
                 format(
-                    base64.b64encode('username:password'.encode('utf-8')).\
+                    base64.b64encode('username:password'.encode('utf-8')).
                     decode('utf-8'))
             })
         self.assertEqual(200, response.code)
-

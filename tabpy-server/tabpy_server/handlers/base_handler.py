@@ -29,7 +29,9 @@ class BaseHandler(tornado.web.RequestHandler):
         # loggers are misconfigured or causing the failure
         # themselves
         print(info)
-        logger.error('Responding with status={}, message="{}", info="{}"'.format(code, log_message, info))
+        logger.error(
+            'Responding with status={}, message="{}", info="{}"'.
+            format(code, log_message, info))
         self.finish()
 
     def options(self):
@@ -49,19 +51,18 @@ class BaseHandler(tornado.web.RequestHandler):
 
         headers = self.tabpy_state.get_access_control_allow_headers()
         if len(headers) > 0:
-            self.set_header("Access-Control-Allow-Headers",headers)
+            self.set_header("Access-Control-Allow-Headers", headers)
             logger.debug("Access-Control-Allow-Headers:{}".format(headers))
 
         methods = self.tabpy_state.get_access_control_allow_methods()
         if len(methods) > 0:
-            self.set_header("Access-Control-Allow-Methods",methods)
+            self.set_header("Access-Control-Allow-Methods", methods)
             logger.debug("Access-Control-Allow-Methods:{}".format(methods))
 
     def _sanitize_request_data(self, data, keys=KEYS_TO_SANITIZE):
         """Remove keys so that we can log safely"""
         for key in keys:
             data.pop(key, None)
-
 
     def should_fail_with_not_authorized(self):
         '''
@@ -83,11 +84,11 @@ class BaseHandler(tornado.web.RequestHandler):
             self.settings,
             self.credentials)
 
-
     def fail_with_not_authorized(self):
         '''
         Prepares server 401 response.
         '''
         logger.error('Failing with 401 for anothorized request')
         self.set_status(401)
-        self.set_header('WWW-Authenticate', 'Basic realm="{}"'.format(self.tabpy_state.name))
+        self.set_header('WWW-Authenticate',
+                        'Basic realm="{}"'.format(self.tabpy_state.name))

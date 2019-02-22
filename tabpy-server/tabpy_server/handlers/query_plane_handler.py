@@ -30,7 +30,7 @@ def _sanitize_request_data(data):
         return data.get("data")
     else:
         log_and_raise("Expect input data is a dictionary with at least a "
-                           "key called 'data'", RuntimeError)
+                      "key called 'data'", RuntimeError)
 
 
 class QueryPlaneHandler(BaseHandler):
@@ -149,7 +149,8 @@ class QueryPlaneHandler(BaseHandler):
                 return
 
             if po_name != endpoint_name:
-                logger.info("Querying actual model: po_name={}".format(po_name))
+                logger.info(
+                    "Querying actual model: po_name={}".format(po_name))
 
             uid = _get_uuid()
 
@@ -173,7 +174,8 @@ class QueryPlaneHandler(BaseHandler):
         all_endpoint_names = []
 
         while True:
-            endpoint_info = self.python_service.ps.query_objects.get(endpoint_name)
+            endpoint_info = self.python_service.ps.query_objects.get(
+                endpoint_name)
             if not endpoint_info:
                 return [None, None]
 
@@ -207,7 +209,6 @@ class QueryPlaneHandler(BaseHandler):
         logger.debug("GET /query/{}".format(endpoint_name))
         self._process_query(endpoint_name, start)
 
-
     @tornado.web.asynchronous
     def post(self, endpoint_name):
         if self.should_fail_with_not_authorized():
@@ -221,4 +222,3 @@ class QueryPlaneHandler(BaseHandler):
             endpoint_name = urllib.unquote(endpoint_name)
         logger.debug("POST /query/{}".format(endpoint_name))
         self._process_query(endpoint_name, start)
-

@@ -35,7 +35,6 @@ class EvaluationPlaneHandler(BaseHandler):
         super(EvaluationPlaneHandler, self).initialize(app)
         self.executor = executor
 
-
     @tornado.web.asynchronous
     @gen.coroutine
     def post(self):
@@ -97,10 +96,12 @@ class EvaluationPlaneHandler(BaseHandler):
                 self.error_out(500, 'Error processing script', info=err_msg)
             else:
                 self.error_out(
-                    404, 'Error processing script', info="The endpoint you're "
-                                                         "trying to query did not respond. Please make sure the "
-                                                         "endpoint exists and the correct set of arguments are "
-                                                         "provided.")
+                    404,
+                    'Error processing script',
+                    info="The endpoint you're "
+                    "trying to query did not respond. Please make sure the "
+                    "endpoint exists and the correct set of arguments are "
+                    "provided.")
 
     @gen.coroutine
     def call_subprocess(self, function_to_evaluate, arguments):

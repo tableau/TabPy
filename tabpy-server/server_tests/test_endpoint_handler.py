@@ -51,13 +51,12 @@ class TestEndpointHandlerWithAuth(AsyncHTTPTestCase):
         cls.config_file = tempfile.NamedTemporaryFile(
             mode='w+t', prefix=prefix, suffix='.conf', delete=False)
         cls.config_file.write(
-                '[TabPy]\n'
-                'TABPY_PWD_FILE = {}\n'
-                'TABPY_STATE_PATH = {}'.format(
-                    cls.pwd_file.name,
-                    cls.state_dir))
+            '[TabPy]\n'
+            'TABPY_PWD_FILE = {}\n'
+            'TABPY_STATE_PATH = {}'.format(
+                cls.pwd_file.name,
+                cls.state_dir))
         cls.config_file.close()
-
 
     @classmethod
     def tearDownClass(cls):
@@ -67,51 +66,46 @@ class TestEndpointHandlerWithAuth(AsyncHTTPTestCase):
         os.remove(cls.config_file.name)
         os.rmdir(cls.state_dir)
 
-
     def get_app(self):
         self.app = TabPyApp(self.config_file.name)
         return self.app._create_tornado_web_app()
-
 
     def test_no_creds_required_auth_fails(self):
         response = self.fetch('/endpoints/anything')
         self.assertEqual(401, response.code)
 
-
     def test_invalid_creds_fails(self):
         response = self.fetch(
             '/endpoints/anything',
-            method = 'GET',
-            headers = {
-                'Authorization': 'Basic {}'.\
+            method='GET',
+            headers={
+                'Authorization': 'Basic {}'.
                 format(
-                    base64.b64encode('user:wrong_password'.encode('utf-8')).\
+                    base64.b64encode('user:wrong_password'.encode('utf-8')).
                     decode('utf-8'))
             })
         self.assertEqual(401, response.code)
 
-
     def test_valid_creds_pass(self):
         response = self.fetch(
             '/endpoints/',
-            method = 'GET',
-            headers = {
-                'Authorization': 'Basic {}'.\
+            method='GET',
+            headers={
+                'Authorization': 'Basic {}'.
                 format(
-                    base64.b64encode('username:password'.encode('utf-8')).\
+                    base64.b64encode('username:password'.encode('utf-8')).
                     decode('utf-8'))
             })
         self.assertEqual(200, response.code)
 
-
     def test_valid_creds_unknown_endpoint_fails(self):
         response = self.fetch(
             '/endpoints/unknown_endpoint',
-            method = 'GET',
-            headers = {
-                'Authorization': 'Basic {}'.\
+            method='GET',
+            headers={
+                'Authorization': 'Basic {}'.
                 format(
-                    base64.b64encode('username:password'.encode('utf-8')).\
+                    base64.b64encode('username:password'.encode('utf-8')).
                     decode('utf-8'))
             })
         self.assertEqual(404, response.code)
