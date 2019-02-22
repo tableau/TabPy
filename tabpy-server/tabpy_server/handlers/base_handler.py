@@ -88,7 +88,7 @@ class BaseHandler(tornado.web.RequestHandler):
         '''
         Prepares server 401 response.
         '''
-        logger.error('Failing with 401 for anothorized request')
+        logger.error('Failing with 401 for unauthorized request')
         self.set_status(401)
         self.set_header('WWW-Authenticate',
                         'Basic realm="{}"'.format(self.tabpy_state.name))

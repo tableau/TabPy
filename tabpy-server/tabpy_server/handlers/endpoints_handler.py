@@ -13,7 +13,6 @@ class EndpointsHandler(ManagementHandler):
     def initialize(self, app):
         super(EndpointsHandler, self).initialize(app)
 
-
     def get(self):
         if self.should_fail_with_not_authorized():
             self.fail_with_not_authorized()
@@ -21,7 +20,6 @@ class EndpointsHandler(ManagementHandler):
 
         self._add_CORS_header()
         self.write(simplejson.dumps(self.tabpy_state.get_endpoints()))
-
 
     @tornado.web.asynchronous
     @gen.coroutine
@@ -39,8 +37,11 @@ class EndpointsHandler(ManagementHandler):
             try:
                 request_data = simplejson.loads(
                     self.request.body.decode('utf-8'))
-            except:
-                self.error_out(400, "Failed to decode input body")
+            except Exception as ex:
+                self.error_out(
+                    400, 
+                    "Failed to decode input body"
+                    str(ex))
                 self.finish()
                 return
 
