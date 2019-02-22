@@ -74,14 +74,17 @@ pytest tabpy-tools/tools_tests/ --cov=tabpy-tools/tabpy_tools --cov-append
 If you have downloaded Tabpy and would like to manually install Tabpy Server
 not using pip then follow the steps below [to run TabPy in Python virtual environment](docs/tabpy-virtualenv.md).
 
-
 ## Documentation Updates
 
 For any process, scripts or API changes documentation needs to be updated accordingly.
 Please use markdown validation tools like web-based[markdownlint](https://dlaa.me/markdownlint/)
 or npm [markdownlint-cli](https://github.com/igorshubovych/markdownlint-cli).
 
-TOC for markdown file is built with [markdonw-toc](https://www.npmjs.com/package/markdown-toc).
+TOC for markdown file is built with [markdown-toc](https://www.npmjs.com/package/markdown-toc):
+
+```sh
+markdownlint -i docs/server-startup.md
+```
 
 ## TabPy with Swagger
 
@@ -98,7 +101,7 @@ Access-Control-Allow-Methods = GET, OPTIONS, POST
 ```
 
 - Start local instance of TabPy server following [TabPy Server Startup Guide](docs/server-startup.md).
-- Run local copy of Swagger editor with steps provided at 
+- Run local copy of Swagger editor with steps provided at
   [https://github.com/swagger-api/swagger-editor](https://github.com/swagger-api/swagger-editor).
 - Open `misc/TabPy.yml` in Swagger editor.
 - In case your TabPy server runs not on `localhost:9004` update
@@ -106,10 +109,9 @@ Access-Control-Allow-Methods = GET, OPTIONS, POST
 
 ## Code styling
 
-On github repo for merge request `pycodestyle` is used to check Python code against our
-style conventions.
-
-You need to install `pycodestyle` locally:
+On github repo for merge request `pycodestyle` is used to check Python code
+against our style conventions. You can run install it and run locally for
+file where modifications were made:
 
 ```sh
 pip install pycodestyle
