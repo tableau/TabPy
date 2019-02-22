@@ -20,6 +20,7 @@ class EndpointHandler(ManagementHandler):
 
 
     def get(self, endpoint_name):
+        logger.debug('Processing GET for /endpoints/{}'.format(endpoint_name))
         if self.should_fail_with_not_authorized():
             self.fail_with_not_authorized()
             return

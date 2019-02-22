@@ -125,6 +125,11 @@ def handle_basic_authentication(headers, api_version, settings, credentials):
         If authentication type is supported and credentials
         are valid returns True, otherwise False.
     '''
+    logger.error('headers={}'.format(headers))
+    logger.error('api_version={}'.format(api_version))
+    logger.error('settings={}'.format(settings))
+    logger.error('credentials={}'.format(credentials))
+
     logger.debug('Handling authentication for request')
     if api_version not in settings['versions']:
         logger.critical('Uknows API version "{}"'.format(api_version))
@@ -151,4 +156,4 @@ def handle_basic_authentication(headers, api_version, settings, credentials):
             'for API {}'.format(api_version))
         return False
 
-    return check_and_validate_basic_auth_credentials(headers, credentials)
+    return not check_and_validate_basic_auth_credentials(headers, credentials)

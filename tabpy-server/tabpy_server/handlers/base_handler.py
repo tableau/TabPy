@@ -29,7 +29,7 @@ class BaseHandler(tornado.web.RequestHandler):
         # loggers are misconfigured or causing the failure
         # themselves
         print(info)
-        logger.error('message: {}, info: {}'.format(log_message, info))
+        logger.error('Responding with status={}, message="{}", info="{}"'.format(code, log_message, info))
         self.finish()
 
     def options(self):
@@ -76,6 +76,7 @@ class BaseHandler(tornado.web.RequestHandler):
             required and validation for credentials passes.
             True if validation for credentials failed.
         '''
+        logger.debug('Checking if need to handle authentication')
         return handle_basic_authentication(self.request.headers,
                                            "v1",
                                            self.settings,
