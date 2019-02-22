@@ -5,10 +5,10 @@
 - [Environment Setup](#environment-setup)
 - [Prerequisites](#prerequisites)
 - [Windows Specific Steps](#windows-specific-steps)
-- [Mac Specific Steps](#mac-specific-steps)
+- [Linux and Mac Specific Steps](#linux-and-mac-specific-steps)
 - [Documentation Updates](#documentation-updates)
-- [Versioning](#versioning)
 - [TabPy with Swagger](#tabpy-with-swagger)
+- [Code styling](#code-styling)
 
 <!-- tocstop -->
 
