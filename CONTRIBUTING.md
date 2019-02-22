@@ -65,7 +65,7 @@ For any process, scripts or API changes documentation needs to be updated accord
 Please use markdown validation tools like web-based[markdownlint](https://dlaa.me/markdownlint/)
 or npm [markdownlint-cli](https://github.com/igorshubovych/markdownlint-cli).
 
-TOC for markdown file is built with [markdonw-toc](https://www.npmjs.com/package/markdown-toc):
+TOC for markdown file is built with [markdown-toc](https://www.npmjs.com/package/markdown-toc):
 
 ```sh
 markdownlint -i docs/server-startup.md

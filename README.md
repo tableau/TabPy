@@ -7,7 +7,7 @@
 [![Python 3.6](https://img.shields.io/badge/python-3.6-blue.svg)](https://www.python.org/downloads/release/python-360/)
 
 TabPy (Tableau Python Server) is external server implementation which allows
-expanding Tableau with executing Python scripts on table calculation.
+expanding Tableau with executing Python scripts in table calculation.
 
 All documentation is in the [docs](docs) folder. Consider reading it the next
 order:
