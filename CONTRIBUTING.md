@@ -68,7 +68,6 @@ pytest tabpy-server/server_tests/ --cov=tabpy-server/tabpy_server
 pytest tabpy-tools/tools_tests/ --cov=tabpy-tools/tabpy_tools --cov-append
 ```
 
-
 ## Linux and Mac Specific Steps
 
 If you have downloaded Tabpy and would like to manually install Tabpy Server
