@@ -1,6 +1,7 @@
 # TabPy REST Interface
 
-The server process exposes several REST APIs to get status and to execute Python code and query deployed methods.
+The server process exposes several REST APIs to get status and to execute
+Python code and query deployed methods.
 
 <!-- toc -->
 
@@ -39,12 +40,17 @@ Content-Type: application/json
 
 ```
 
-- `description` is a string that is hardcoded in the `state.ini` file and can be edited there.
-- `creation_time` is the creation time in seconds since 1970-01-01, hardcoded in the `state.ini` file, where it can be edited.
-- `state_path` is the state file path of the server (the value of the TABPY_STATE_PATH at the time the server was started).
-- `server_version` is the TabPy Server version tag. Clients can use this information for compatibility checks.
+- `description` is a string that is hardcoded in the `state.ini` file and
+   can be edited there.
+- `creation_time` is the creation time in seconds since 1970-01-01, hardcoded
+   in the `state.ini` file, where it can be edited.
+- `state_path` is the state file path of the server (the value of the
+   TABPY_STATE_PATH at the time the server was started).
+- `server_version` is the TabPy Server version tag. Clients can use this
+   information for compatibility checks.
 
-See [TabPy Configuration](#tabpy-configuration) section for more information on modifying the settings.
+See [TabPy Configuration](#tabpy-configuration) section for more information
+on modifying the settings.
 
 Using curl:
 
@@ -54,7 +60,8 @@ curl -X GET http://localhost:9004/info
 
 ## http:get:: /status
 
-Gets runtime status of deployed endpoints. If no endpoints are deployed in the server, the returned data is an empty JSON object.
+Gets runtime status of deployed endpoints. If no endpoints are deployed in
+the server, the returned data is an empty JSON object.
 
 Example request:
 
@@ -91,7 +98,8 @@ curl -X GET http://localhost:9004/status
 
 ## http:get:: /endpoints
 
-Gets a list of deployed endpoints and their static information. If no endpoints are deployed in the server, the returned data is an empty JSON object.
+Gets a list of deployed endpoints and their static information. If no
+endpoints are deployed in the server, the returned data is an empty JSON object.
 
 Example request:
 
@@ -136,7 +144,8 @@ curl -X GET http://localhost:9004/endpoints
 
 ## http:get:: /endpoints/:endpoint
 
-Gets the description of a specific deployed endpoint. The endpoint must first be deployed in the server (see the [TabPy Tools documentation](tabpy-tools.md)).
+Gets the description of a specific deployed endpoint. The endpoint must first
+be deployed in the server (see the [TabPy Tools documentation](tabpy-tools.md)).
 
 Example request:
 
@@ -165,12 +174,17 @@ curl -X GET http://localhost:9004/endpoints/add
 
 ## http:post:: /evaluate
 
-Executes a block of Python code, replacing named parameters with their provided values.
+Executes a block of Python code, replacing named parameters with their provided
+values.
 
 The expected POST body is a JSON dictionary with two elements:
 
-- A key `data` with a value that contains the parameter values passed to the code. These values are key-value pairs, following a specific convention for key names (`_arg1`, `_arg2`, etc.).
-- A key `script` with a value that contains the Python code (one or more lines). Any references to the parameter names will be replaced by their values according to `data`.
+- A key `data` with a value that contains the parameter values passed to the
+  code. These values are key-value pairs, following a specific convention for
+  key names (`_arg1`, `_arg2`, etc.).
+- A key `script` with a value that contains the Python code (one or more lines).
+  Any references to the parameter names will be replaced by their values
+  according to `data`.
 
 Example request:
 
@@ -198,13 +212,14 @@ curl -X POST http://localhost:9004/evaluate \
 -d '{"data": {"_arg1": 1, "_arg2": 2}, "script": "return _arg1 + _arg2"}'
 ```
 
-It is possible to call a deployed function from within the code block, through the predefined
-function `tabpy.query`. This function works like the client library's `query` method, and
-returns the corresponding data structure.  The function must first be deployed as an endpoint
-in the server (for more details see the [TabPy Tools documentation](tabpy-tools.md)).
+It is possible to call a deployed function from within the code block, through
+the predefined function `tabpy.query`. This function works like the client
+library's `query` method, and returns the corresponding data structure. The
+function must first be deployed as an endpoint in the server (for more details
+see the [TabPy Tools documentation](tabpy-tools.md)).
 
-The following example calls the endpoint `clustering` as it was deployed in the section
-[deploy-function](tabpy-tools.md#deploying-a-function):
+The following example calls the endpoint `clustering` as it was deployed in the
+section [deploy-function](tabpy-tools.md#deploying-a-function):
 
 ```HTTP
 POST /evaluate HTTP/1.1
@@ -218,8 +233,9 @@ Accept: application/json
   "script": "return tabpy.query('clustering', x=_arg1, y=_arg2)"}
 ```
 
-The next example shows how to call `evaluate` from a terminal using curl; this code queries the method
-`add` that was deployed in the section [deploy-function](tabpy-tools.md#deploying-a-function):
+The next example shows how to call `evaluate` from a terminal using curl; this
+code queries the method `add` that was deployed in the section
+[deploy-function](tabpy-tools.md#deploying-a-function):
 
 ```bash
 curl -X POST http://localhost:9004/evaluate \
@@ -229,10 +245,13 @@ curl -X POST http://localhost:9004/evaluate \
 
 ## http:post:: /query/:endpoint
 
-Executes a function at the specified endpoint. The function must first be deployed
-(see the [TabPy Tools documentation](tabpy-tools.md)).
+Executes a function at the specified endpoint. The function must first be
+deployed (see the [TabPy Tools documentation](tabpy-tools.md)).
 
-This interface expects a JSON body with a `data` key, specifying the values for the function, according to its original definition. In the example below, the function `clustering` was defined with a signature of two parameters `x` and `y`, expecting arrays of numbers.
+This interface expects a JSON body with a `data` key, specifying the values
+for the function, according to its original definition. In the example below,
+the function `clustering` was defined with a signature of two parameters `x`
+and `y`, expecting arrays of numbers.
 
 Example request:
 

@@ -1,13 +1,16 @@
 # TabPy
+
 [![Community Supported](https://img.shields.io/badge/Support%20Level-Community%20Supported-457387.svg)](https://www.tableau.com/support-levels-it-and-developer-tools)
 [![Build Status](https://travis-ci.com/tableau/TabPy.svg?branch=master)](https://travis-ci.com/tableau/TabPy)
 [![Coverage Status](https://coveralls.io/repos/github/tableau/TabPy/badge.svg)](https://coveralls.io/github/tableau/TabPy)
 
 [![Python 3.6](https://img.shields.io/badge/python-3.6-blue.svg)](https://www.python.org/downloads/release/python-360/)
 
-TabPy (Tableau Python Server) is external server implementation which allows expanding Tableau with executing Python scripts on table calculation.
+TabPy (Tableau Python Server) is external server implementation which allows
+expanding Tableau with executing Python scripts on table calculation.
 
-All documentation is in the [docs](docs) folder. Consider reading it the next order:
+All documentation is in the [docs](docs) folder. Consider reading it the next
+order:
 
 * [About TabPy](docs/about.md)
 * [TabPy Server Download Instructions](docs/server-download.md)
@@ -26,7 +29,10 @@ More technical topics:
 
 Other useful resources:
 
-* For all questions not related to the TabPy code (installation, deployment, connections, Python issues, etc.) and requests use the [External Services Forum](https://community.tableau.com/community/forums/externalservices) on [Tableau Community](https://community.tableau.com).
+* For all questions not related to the TabPy code (installation, deployment,
+  connections, Python issues, etc.) and requests use the
+  [External Services Forum](https://community.tableau.com/community/forums/externalservices)
+  on [Tableau Community](https://community.tableau.com).
 * [Building advanced analytics applications with TabPy](https://www.tableau.com/about/blog/2017/1/building-advanced-analytics-applications-tabpy-64916)
 * [Building Data Science Applications with TabPy Video Tutorial](https://youtu.be/nRtOMTnBz_Y)
 * [TabPy Tutorial on TabWiki](https://community.tableau.com/docs/DOC-10856)
