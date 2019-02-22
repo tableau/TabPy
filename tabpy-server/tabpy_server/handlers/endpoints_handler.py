@@ -40,7 +40,7 @@ class EndpointsHandler(ManagementHandler):
             except Exception as ex:
                 self.error_out(
                     400, 
-                    "Failed to decode input body"
+                    "Failed to decode input body",
                     str(ex))
                 self.finish()
                 return
