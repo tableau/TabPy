@@ -30,12 +30,12 @@ def _sanitize_request_data(data):
         return data.get("data")
     else:
         log_and_raise("Expect input data is a dictionary with at least a "
-                           "key called 'data'", RuntimeError)
+                      "key called 'data'", RuntimeError)
 
 
 class QueryPlaneHandler(BaseHandler):
-    def initialize(self, tabpy_state, python_service):
-        super(QueryPlaneHandler, self).initialize(tabpy_state, python_service)
+    def initialize(self, app):
+        super(QueryPlaneHandler, self).initialize(app)
 
     def _query(self, po_name, data, uid, qry):
         """
@@ -78,12 +78,15 @@ class QueryPlaneHandler(BaseHandler):
     # don't check API key (client does not send or receive data for OPTIONS,
     # it just allows the client to subsequently make a POST request)
     def options(self, pred_name):
+        if self.should_fail_with_not_authorized():
+            self.fail_with_not_authorized()
+            return
+
         # add CORS headers if TabPy has a cors_origin specified
         self._add_CORS_header()
         self.write({})
 
     def _handle_result(self, po_name, data, qry, uid):
-
         (response_type, response, gls_time) = \
             self._query(po_name, data, uid, qry)
 
@@ -146,7 +149,8 @@ class QueryPlaneHandler(BaseHandler):
                 return
 
             if po_name != endpoint_name:
-                logger.info("Querying actual model: po_name={}".format(po_name))
+                logger.info(
+                    "Querying actual model: po_name={}".format(po_name))
 
             uid = _get_uuid()
 
@@ -170,7 +174,8 @@ class QueryPlaneHandler(BaseHandler):
         all_endpoint_names = []
 
         while True:
-            endpoint_info = self.python_service.ps.query_objects.get(endpoint_name)
+            endpoint_info = self.python_service.ps.query_objects.get(
+                endpoint_name)
             if not endpoint_info:
                 return [None, None]
 
@@ -192,6 +197,10 @@ class QueryPlaneHandler(BaseHandler):
 
     @tornado.web.asynchronous
     def get(self, endpoint_name):
+        if self.should_fail_with_not_authorized():
+            self.fail_with_not_authorized()
+            return
+
         start = time.time()
         if sys.version_info > (3, 0):
             endpoint_name = urllib.parse.unquote(endpoint_name)
@@ -202,6 +211,10 @@ class QueryPlaneHandler(BaseHandler):
 
     @tornado.web.asynchronous
     def post(self, endpoint_name):
+        if self.should_fail_with_not_authorized():
+            self.fail_with_not_authorized()
+            return
+
         start = time.time()
         if sys.version_info > (3, 0):
             endpoint_name = urllib.parse.unquote(endpoint_name)
@@ -209,4 +222,3 @@ class QueryPlaneHandler(BaseHandler):
             endpoint_name = urllib.unquote(endpoint_name)
         logger.debug("POST /query/{}".format(endpoint_name))
         self._process_query(endpoint_name, start)
-

@@ -15,10 +15,15 @@ logger = logging.getLogger(__name__)
 
 
 class EndpointHandler(ManagementHandler):
-    def initialize(self, tabpy_state, python_service):
-        super(EndpointHandler, self).initialize(tabpy_state, python_service)
+    def initialize(self, app):
+        super(EndpointHandler, self).initialize(app)
 
     def get(self, endpoint_name):
+        logger.debug('Processing GET for /endpoints/{}'.format(endpoint_name))
+        if self.should_fail_with_not_authorized():
+            self.fail_with_not_authorized()
+            return
+
         self._add_CORS_header()
         if not endpoint_name:
             self.write(simplejson.dumps(self.tabpy_state.get_endpoints()))
@@ -33,6 +38,10 @@ class EndpointHandler(ManagementHandler):
     @tornado.web.asynchronous
     @gen.coroutine
     def put(self, name):
+        if self.should_fail_with_not_authorized():
+            self.fail_with_not_authorized()
+            return
+
         try:
             if not self.request.body:
                 self.error_out(400, "Input body cannot be empty")
@@ -41,8 +50,11 @@ class EndpointHandler(ManagementHandler):
             try:
                 request_data = simplejson.loads(
                     self.request.body.decode('utf-8'))
-            except:
-                self.error_out(400, "Failed to decode input body")
+            except BaseException as ex:
+                self.error_out(
+                    400,
+                    log_message="Failed to decode input body",
+                    info=str(ex))
                 self.finish()
                 return
 
@@ -73,6 +85,10 @@ class EndpointHandler(ManagementHandler):
     @tornado.web.asynchronous
     @gen.coroutine
     def delete(self, name):
+        if self.should_fail_with_not_authorized():
+            self.fail_with_not_authorized()
+            return
+
         try:
             endpoints = self.tabpy_state.get_endpoints(name)
             if len(endpoints) == 0:
@@ -117,4 +133,3 @@ class EndpointHandler(ManagementHandler):
         future = STAGING_THREAD.submit(shutil.rmtree, delete_path)
         ret = yield future
         raise gen.Return(ret)
-

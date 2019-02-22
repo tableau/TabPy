@@ -3,10 +3,13 @@ from tabpy_server.handlers import ManagementHandler
 
 
 class ServiceInfoHandler(ManagementHandler):
-    def initialize(self, tabpy_state, python_service):
-        super(ServiceInfoHandler, self).initialize(tabpy_state, python_service)
+    def initialize(self, app):
+        super(ServiceInfoHandler, self).initialize(app)
 
     def get(self):
+        # do not check for authentication - this method
+        # is the only way for client to collect info about
+        # supported API versions and required features
         self._add_CORS_header()
         info = {}
         info['description'] = self.tabpy_state.get_description()

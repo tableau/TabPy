@@ -9,7 +9,7 @@ from tempfile import NamedTemporaryFile
 
 from tabpy_server.handlers.util import (
     validate_basic_auth_credentials,
-    handle_authentication,
+    handle_basic_authentication,
     check_and_validate_basic_auth_credentials)
 
 from unittest.mock import patch, call
@@ -153,37 +153,37 @@ class TestHandleAuthentication(unittest.TestCase):
         }
 
     def test_given_no_api_version_expect_failure(self):
-        self.assertFalse(handle_authentication(
+        self.assertFalse(handle_basic_authentication(
             {}, '', self.settings, self.credentials))
 
     def test_given_unknown_api_version_expect_failure(self):
-        self.assertFalse(handle_authentication(
+        self.assertFalse(handle_basic_authentication(
             {}, 'v0.314p', self.settings, self.credentials))
 
     def test_given_auth_is_not_configured_expect_success(self):
-        self.assertTrue(handle_authentication(
+        self.assertTrue(handle_basic_authentication(
             {}, 'v0.1a', self.settings, self.credentials))
 
     def test_given_auth_method_not_provided_expect_failure(self):
-        self.assertFalse(handle_authentication(
+        self.assertFalse(handle_basic_authentication(
             {}, 'v0.2beta', self.settings, self.credentials))
 
     def test_given_auth_method_is_unknown_expect_failure(self):
-        self.assertFalse(handle_authentication(
+        self.assertFalse(handle_basic_authentication(
             {}, 'v0.3gamma', self.settings, self.credentials))
 
     def test_given_features_not_configured_expect_success(self):
-        self.assertTrue(handle_authentication(
+        self.assertTrue(handle_basic_authentication(
             {}, 'v0.4yota', self.settings, self.credentials))
 
     def test_given_headers_not_provided_expect_failure(self):
-        self.assertFalse(handle_authentication(
+        self.assertFalse(handle_basic_authentication(
             {}, 'v1', self.settings, self.credentials))
 
     def test_given_valid_creds_expect_success(self):
         b64_username_pwd = base64.b64encode(
             'user1:password'.encode('utf-8')).decode('utf-8')
-        self.assertTrue(handle_authentication(
+        self.assertTrue(handle_basic_authentication(
             {
                 'Authorization': 'Basic {}'.format(b64_username_pwd)
             },
