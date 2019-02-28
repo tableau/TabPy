@@ -68,28 +68,19 @@ For example, in this case your config file would be located at ```%TABPY_ROOT%\t
 
 ### Command Line Arguments
 
-- To specify the *port* on which your server instance listens, set the ```-p``` command line argument as follows:
+- To specify the *config file* with which to configure your server instance, set the ```--config=*``` or ```-c=*``` command line argument as follows:
+
+	```bash
+	./startup.sh --config=myconfig.conf
+	```
+	or
 
     ```bash
-    ./startup.sh -p 1234
-    ```
-
-    Replace ```1234``` with the port of your choice.
-
-- To specify the *config file* with which to configure your server instance, set the ```-c``` command line argument as follows:
-
-    ```bash
-    ./startup.sh -c myconfig.conf
+    ./startup.sh -c=myconfig.conf
     ```
     Replace ```myconfig.conf``` with the path to your config file relative to ```$TABPY_ROOT/tabpy-server/tabpy_server/```.
 
     For example, in this case your config file would be located at ```$TABPY_ROOT/tabpy-server/tabpy_server/myconfig.conf```.
-
-The following is an example of how you might set both the port and the config:
-
-```bash
-./startup.sh -p 1234 -c myconfig.conf
-```
 
 ## Linux
 
@@ -99,31 +90,21 @@ The following is an example of how you might set both the port and the config:
 3. Run the following command from the terminal:
 
     ```bash
-    sudo ./startup.sh
+    ./startup.sh
     ```
 
 ### Command Line Arguments
 
-- To specify the *port* on which your server instance listens, set the ```-p``` command line argument as follows:
+- To specify the *config file* with which to configure your server instance, set the ```--config=*``` or ```-c=*``` command line argument as follows:
+
+	```bash
+	./startup.sh --config=myconfig.conf
+	```
+	or
 
     ```bash
-    sudo ./startup.sh -p 1234
-
+    ./startup.sh -c=myconfig.conf
     ```
-
-    Replace ```1234``` with the port of your choice.
-- To specify the *config file* with which to configure your server instance, set the ```-c``` command line argument as follows:
-
-    ```bash
-    sudo ./startup.sh -c myconfig.conf
-    ```
-    
     Replace ```myconfig.conf``` with the path to your config file relative to ```$TABPY_ROOT/tabpy-server/tabpy_server/```.
 
     For example, in this case your config file would be located at ```$TABPY_ROOT/tabpy-server/tabpy_server/myconfig.conf```.
-
-The following is an example of how you might set both the port and the config:
-
-```bash
-sudo ./startup.sh -p 1234 -c myconfig.conf
-```
