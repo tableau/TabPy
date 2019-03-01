@@ -7,10 +7,14 @@ logger = logging.getLogger(__name__)
 
 
 class StatusHandler(BaseHandler):
-    def initialize(self, tabpy_state, python_service):
-        super(StatusHandler, self).initialize(tabpy_state, python_service)
+    def initialize(self, app):
+        super(StatusHandler, self).initialize(app)
 
     def get(self):
+        if self.should_fail_with_not_authorized():
+            self.fail_with_not_authorized()
+            return
+
         self._add_CORS_header()
 
         logger.debug("Obtaining service status")

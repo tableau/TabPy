@@ -94,7 +94,7 @@ def check_and_validate_basic_auth_credentials(headers, credentials):
                                            credentials)
 
 
-def handle_authentication(headers, api_version, settings, credentials):
+def handle_basic_authentication(headers, api_version, settings, credentials):
     '''
     Checks if credentials need to be validated and they are
     validates them.

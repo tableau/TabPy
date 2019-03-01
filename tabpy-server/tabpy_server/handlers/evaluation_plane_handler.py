@@ -31,13 +31,17 @@ class EvaluationPlaneHandler(BaseHandler):
     EvaluationPlaneHandler is responsible for running arbitrary python scripts.
     '''
 
-    def initialize(self, executor, tabpy_state, python_service):
-        super(EvaluationPlaneHandler, self).initialize(tabpy_state, python_service)
+    def initialize(self, executor, app):
+        super(EvaluationPlaneHandler, self).initialize(app)
         self.executor = executor
 
     @tornado.web.asynchronous
     @gen.coroutine
     def post(self):
+        if self.should_fail_with_not_authorized():
+            self.fail_with_not_authorized()
+            return
+
         self._add_CORS_header()
         try:
             body = simplejson.loads(self.request.body.decode('utf-8'))
@@ -92,10 +96,12 @@ class EvaluationPlaneHandler(BaseHandler):
                 self.error_out(500, 'Error processing script', info=err_msg)
             else:
                 self.error_out(
-                    404, 'Error processing script', info="The endpoint you're "
-                                                         "trying to query did not respond. Please make sure the "
-                                                         "endpoint exists and the correct set of arguments are "
-                                                         "provided.")
+                    404,
+                    'Error processing script',
+                    info="The endpoint you're "
+                    "trying to query did not respond. Please make sure the "
+                    "endpoint exists and the correct set of arguments are "
+                    "provided.")
 
     @gen.coroutine
     def call_subprocess(self, function_to_evaluate, arguments):

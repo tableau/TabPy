@@ -14,9 +14,9 @@ from tabpy_server.management.state import get_query_object_path
 from tabpy_server.psws.callbacks import on_state_change
 
 
-
 if sys.version_info.major == 3:
     unicode = str
+
 
 def copy_from_local(localpath, remotepath, is_dir=False):
     if is_dir:
@@ -40,8 +40,8 @@ def copy_from_local(localpath, remotepath, is_dir=False):
 
 
 class ManagementHandler(MainHandler):
-    def initialize(self, tabpy_state, python_service):
-        super(ManagementHandler, self).initialize(tabpy_state, python_service)
+    def initialize(self, app):
+        super(ManagementHandler, self).initialize(app)
         self.port = self.settings['port']
 
     def _get_protocol(self):
@@ -53,9 +53,10 @@ class ManagementHandler(MainHandler):
         Add or update an endpoint
         '''
         logging.debug("Adding/updating model {}...".format(name))
-        _name_checker = _compile('^[a-zA-Z0-9-_\ ]+$')
+        _name_checker = _compile('^[a-zA-Z0-9-_\\s]+$')
         if not isinstance(name, (str, unicode)):
-            log_and_raise("Endpoint name must be a string or unicode", TypeError)
+            log_and_raise(
+                "Endpoint name must be a string or unicode", TypeError)
 
         if not _name_checker.match(name):
             raise gen.Return('endpoint name can only contain: a-z, A-Z, 0-9,'
@@ -63,13 +64,13 @@ class ManagementHandler(MainHandler):
 
         if self.settings.get('add_or_updating_endpoint'):
             log_and_raise("Another endpoint update is already in progress"
-                               ", please wait a while and try again", RuntimeError)
+                          ", please wait a while and try again", RuntimeError)
 
         request_uuid = random_uuid()
         self.settings['add_or_updating_endpoint'] = request_uuid
         try:
-            description = (request_data['description'] if 'description' in
-                                                          request_data else None)
+            description = (request_data['description']
+                           if 'description' in request_data else None)
             if 'docstring' in request_data:
                 if sys.version_info > (3, 0):
                     docstring = str(bytes(request_data['docstring'],
@@ -83,10 +84,10 @@ class ManagementHandler(MainHandler):
                              else None)
             methods = (request_data['methods'] if 'methods' in request_data
                        else [])
-            dependencies = (request_data['dependencies'] if 'dependencies' in
-                                                            request_data else None)
-            target = (request_data['target'] if 'target' in request_data
-                      else None)
+            dependencies = (request_data['dependencies']
+                            if 'dependencies' in request_data else None)
+            target = (request_data['target']
+                      if 'target' in request_data else None)
             schema = (request_data['schema'] if 'schema' in request_data
                       else None)
 
@@ -94,7 +95,7 @@ class ManagementHandler(MainHandler):
                         else None)
             target_path = get_query_object_path(
                 self.settings['state_file_path'], name, version)
-            _path_checker = _compile('^[\\a-zA-Z0-9-_\ /]+$')
+            _path_checker = _compile('^[\\a-zA-Z0-9-_\\s/]+$')
             # copy from staging
             if src_path:
                 if not isinstance(request_data['src_path'], (str, unicode)):
