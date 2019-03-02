@@ -76,7 +76,7 @@ For example, in this case your config file would be located at
 ### Command Line Arguments for Mac
 
 - To specify the *config file* with which to configure your server instance,
-set the ```--config=*``` or ```-c=*``` command line argument as follows:
+  set the ```--config=*``` or ```-c=*``` command line argument as follows:
 
     ```bash
     ./startup.sh --config=myconfig.conf
@@ -107,7 +107,8 @@ set the ```--config=*``` or ```-c=*``` command line argument as follows:
 
 ### Command Line Arguments for Linux
 
-- To specify the *config file* with which to configure your server instance, set the ```--config=*``` or ```-c=*``` command line argument as follows:
+- To specify the *config file* with which to configure your server instance,
+  set the ```--config=*``` or ```-c=*``` command line argument as follows:
 
     ```bash
     ./startup.sh --config=myconfig.conf
