@@ -90,6 +90,7 @@ For example, in this case your config file would be located at
     ```bash
     ./startup.sh -c myconfig.conf
     ```
+
     Replace `myconfig.conf` with the path to your config file relative to
    `$TABPY_ROOT/tabpy-server/tabpy_server/`.
 
