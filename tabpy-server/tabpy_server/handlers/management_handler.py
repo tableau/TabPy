@@ -142,7 +142,9 @@ class ManagementHandler(MainHandler):
             except Exception as e:
                 raise gen.Return("Error when changing TabPy state: %s" % e)
 
-            on_state_change(self.settings, self.tabpy_state, self.python_service)
+            on_state_change(self.settings,
+                            self.tabpy_state,
+                            self.python_service)
 
         finally:
             self.settings['add_or_updating_endpoint'] = None
