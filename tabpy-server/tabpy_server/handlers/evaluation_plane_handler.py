@@ -38,6 +38,7 @@ class EvaluationPlaneHandler(BaseHandler):
     @tornado.web.asynchronous
     @gen.coroutine
     def post(self):
+        logger.debug('Processing GET for /evaluate')
         if self.should_fail_with_not_authorized():
             self.fail_with_not_authorized()
             return
