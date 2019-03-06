@@ -44,6 +44,7 @@ setup(
         'requests',
         'singledispatch',
         'simplejson',
+        'six',
         'tornado==5.1.1',
         'Tornado-JSON',
         'urllib3'
