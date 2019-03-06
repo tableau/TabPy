@@ -24,6 +24,7 @@ class EndpointsHandler(ManagementHandler):
     @tornado.web.asynchronous
     @gen.coroutine
     def post(self):
+        logger.debug('Processing POST for /endpoints')
         if self.should_fail_with_not_authorized():
             self.fail_with_not_authorized()
             return
