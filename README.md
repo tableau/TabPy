@@ -2,7 +2,7 @@
 
 [![Community Supported](https://img.shields.io/badge/Support%20Level-Community%20Supported-457387.svg)](https://www.tableau.com/support-levels-it-and-developer-tools)
 [![GitHub](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://raw.githubusercontent.com/Tableau/TabPy/master/LICENSE)
-[![Build Status](https://travis-ci.com/tableau/TabPy.svg?branch=master)](https://img.shields.io/travis/com/tableau/TabPy.svg)
+[![Build Status](https://travis-ci.com/tableau/TabPy?branch=master)](https://img.shields.io/travis/com/tableau/TabPy.svg)
 [![Coverage Status](https://img.shields.io/coveralls/github/tableau/TabPy.svg)](https://coveralls.io/github/tableau/TabPy)
 
 [![Python 3.6](https://img.shields.io/badge/python-3.6-blue.svg)](https://www.python.org/downloads/release/python-360/)
