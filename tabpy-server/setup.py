@@ -3,9 +3,9 @@ try:
 except ImportError as err:
     print("Missing Python module requirement: setuptools.")
     raise err
-    
+
 import sys
-if sys.version_info < (3,6,5):
+if sys.version_info < (3 , 6):
     print("TabPy requires python version >= 3.6.5.  Detected")
     print(sys.version)
     raise Exception("Python Version Not Supported")
