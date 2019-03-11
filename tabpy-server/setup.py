@@ -30,6 +30,8 @@ setup(
                   'tabpy_server': ['startup.*', 'state.ini']},
     license='MIT',
     install_requires=[
+        'pyopenssl',
+        'python-dateutil',
         'requests',
         'simplejson',
         'tornado==5.1.1',
