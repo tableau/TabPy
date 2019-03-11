@@ -8,7 +8,6 @@ from tabpy_server import __version__
 
 setup(
     name='tabpy-server',
-    python_requires='>=3.6.5',
     version=__version__,
     description='Web server Tableau uses to run Python scripts.',
     url='https://github.com/tableau/TabPy',
