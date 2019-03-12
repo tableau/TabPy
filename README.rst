@@ -45,9 +45,3 @@ Other useful resources:
 .. |Community Supported| image:: https://img.shields.io/badge/Support%20Level-Community%20Supported-457387.svg
    :target: https://www.tableau.com/support-levels-it-and-developer-tools
 
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
