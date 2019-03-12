@@ -23,7 +23,7 @@ class ResponseError(Exception):
             r = response.json()
             self.info = r['info']
             self.message = response.json()['message']
-        except:
+        except (json.JSONDecodeError, KeyError):
             self.info = None
             self.message = response.text
 
@@ -142,7 +142,8 @@ class RequestsNetworkWrapper(object):
             raise RuntimeError(response.text)
 
         if response.status_code not in (200, 201, 204):
-            raise RuntimeError("Error with server response code: %s", response.status_code)
+            raise RuntimeError(
+                "Error with server response code: %s", response.status_code)
 
 
 class ServiceClient(object):
@@ -155,7 +156,8 @@ class ServiceClient(object):
 
     def __init__(self, endpoint, network_wrapper=None):
         if network_wrapper is None:
-            network_wrapper = RequestsNetworkWrapper(session=requests.session())
+            network_wrapper = RequestsNetworkWrapper(
+                session=requests.session())
 
         self.network_wrapper = network_wrapper
 
@@ -318,9 +320,9 @@ class RESTObject(with_metaclass(_RESTMetaclass, _MutableMapping)):
         return (
                 type(self) == type(other)
                 and all((
-            getattr(self, a) == getattr(other, a)
-            for a in self.__rest__
-        )))
+                    getattr(self, a) == getattr(other, a)
+                    for a in self.__rest__
+                )))
 
     def __len__(self):
         return len([a for a in self.__rest__ if hasattr(self, '_' + a)])
