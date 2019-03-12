@@ -1,5 +1,4 @@
 import logging
-from future.utils import with_metaclass
 import requests
 from re import compile
 
@@ -239,7 +238,7 @@ class _RESTMetaclass(type(_MutableMapping)):
                 self.__rest__.add(k)
 
 
-class RESTObject(with_metaclass(_RESTMetaclass, _MutableMapping)):
+class RESTObject(_MutableMapping, metaclass=_RESTMetaclass):
     """A base class that has methods generally useful for interacting with
     REST objects. The attributes are accessible either as dict keys or as
     attributes. The object also behaves like a dict, even replicating the

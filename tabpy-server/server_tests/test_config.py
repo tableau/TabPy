@@ -6,10 +6,7 @@ from tempfile import NamedTemporaryFile
 from tabpy_server.app.util import validate_cert
 from tabpy_server.app.app import TabPyApp
 
-try:
-    from unittest.mock import patch, call
-except ImportError:
-    from mock import patch, call
+from unittest.mock import patch, call
 
 
 def assert_raises_runtime_error(message, fn, args={}):
