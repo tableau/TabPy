@@ -6,9 +6,8 @@ allows expanding Tableau with executing Python scripts on table
 calculation.
 
 
- .. toctree::
-   :maxdepth: 2
-   :caption: General documentation:
+General documentation
+---------------------
 
 -  `About TabPy <about.md>`__
 -  `TabPy Server Download Instructions <server-download.md>`__
@@ -22,17 +21,15 @@ calculation.
    Tableau <TableauConfiguration.md>`__.
 -  `TabPy Tools <tabpy-tools.md>`__
 
- .. toctree::
-   :maxdepth: 2
-   :caption: More technical topics:
+More technical topics
+---------------------
 
 -  `Contributing Guide <../CONTRIBUTING.md>`__ for TabPy developers
 -  `TabPy REST API <server-rest.md>`__
 -  `TabPy Security Considerations <security.md>`__
 
- .. toctree::
-   :maxdepth: 2
-   :caption: Other useful resources:
+Other useful resources
+----------------------
 
 -  For all questions not related to the TabPy code (installation,
    deployment, connections, Python issues, etc.) and requests use the
@@ -47,10 +44,3 @@ calculation.
    TabWiki <https://community.tableau.com/docs/DOC-10856>`__
 -  `Running TabPy in Docker
    containers <https://hub.docker.com/r/emhemh/tabpy/>`__
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
