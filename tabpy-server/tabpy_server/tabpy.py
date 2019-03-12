@@ -3,13 +3,11 @@ import concurrent.futures
 import configparser
 from datetime import datetime
 from hashlib import md5
-from io import StringIO
 import logging
 import logging.config
 import multiprocessing
 from OpenSSL import crypto
 import os
-from pathlib import Path
 from re import compile as _compile
 import requests
 import shutil
@@ -25,7 +23,6 @@ from tabpy_server.psws.callbacks import (
     init_ps_server, init_model_evaluator, on_state_change)
 from tabpy_server.management.util import _get_state_from_file
 from tabpy_server.management.state import TabPyState, get_query_object_path
-import tempfile
 import time
 import tornado
 import tornado.options
@@ -44,6 +41,7 @@ _QUERY_OBJECT_STAGING_FOLDER = 'staging'
 if sys.version_info.major == 3:
     unicode = str
 
+
 def parse_arguments():
     '''
     Parse input arguments and return the parsed arguments. Expected arguments:
@@ -57,18 +55,23 @@ def parse_arguments():
 
 
 cli_args = parse_arguments()
-config_file = cli_args.config if cli_args.config is not None else os.path.join(os.path.dirname(__file__), 'common',
-                                                                        'default.conf')
+config_file = (cli_args.config if cli_args.config is not None else
+               os.path.join(os.path.dirname(__file__), 'common',
+                            'default.conf'))
 loggingConfigured = False
+
+
 if os.path.isfile(config_file):
     try:
         logging.config.fileConfig(config_file, disable_existing_loggers=False)
         loggingConfigured = True
-    except:
+    except Exception:
         pass
+
 
 if not loggingConfigured:
     logging.basicConfig(level=logging.DEBUG)
+
 
 logger = logging.getLogger(__name__)
 
@@ -92,6 +95,7 @@ def copy_from_local(localpath, remotepath, is_dir=False):
                     shutil.copy(full_file_name, remotepath)
     else:
         shutil.copy(localpath, remotepath)
+
 
 def _sanitize_request_data(data):
     if not isinstance(data, dict):
@@ -150,12 +154,12 @@ class BaseHandler(tornado.web.RequestHandler):
 
         headers = self.tabpy.get_access_control_allow_headers()
         if len(headers) > 0:
-            self.set_header("Access-Control-Allow-Headers",headers)
+            self.set_header("Access-Control-Allow-Headers", headers)
             logger.debug("Access-Control-Allow-Headers:{}".format(headers))
 
         methods = self.tabpy.get_access_control_allow_methods()
         if len(methods) > 0:
-            self.set_header("Access-Control-Allow-Methods",methods)
+            self.set_header("Access-Control-Allow-Methods", methods)
             logger.debug("Access-Control-Allow-Methods:{}".format(methods))
 
     def _sanitize_request_data(self, data, keys=KEYS_TO_SANITIZE):
@@ -187,7 +191,7 @@ class ManagementHandler(MainHandler):
         Add or update an endpoint
         '''
         logging.debug("Adding/updating model {}...".format(name))
-        _name_checker = _compile('^[a-zA-Z0-9-_\ ]+$')
+        _name_checker = _compile(r'^[a-zA-Z0-9-_\ ]+$')
         if not isinstance(name, (str, unicode)):
             raise TypeError("Endpoint name must be a string or unicode")
 
@@ -203,7 +207,7 @@ class ManagementHandler(MainHandler):
         self.settings['add_or_updating_endpoint'] = request_uuid
         try:
             description = (request_data['description'] if 'description' in
-                                                          request_data else None)
+                           request_data else None)
             if 'docstring' in request_data:
                 if sys.version_info > (3, 0):
                     docstring = str(bytes(request_data['docstring'],
@@ -218,7 +222,7 @@ class ManagementHandler(MainHandler):
             methods = (request_data['methods'] if 'methods' in request_data
                        else [])
             dependencies = (request_data['dependencies'] if 'dependencies' in
-                                                            request_data else None)
+                            request_data else None)
             target = (request_data['target'] if 'target' in request_data
                       else None)
             schema = (request_data['schema'] if 'schema' in request_data
@@ -228,7 +232,7 @@ class ManagementHandler(MainHandler):
                         else None)
             target_path = get_query_object_path(
                 self.settings['state_file_path'], name, version)
-            _path_checker = _compile('^[\\a-zA-Z0-9-_\ /]+$')
+            _path_checker = _compile(r'^[\\a-zA-Z0-9-_\ /]+$')
             # copy from staging
             if src_path:
                 if not isinstance(request_data['src_path'], (str, unicode)):
@@ -355,7 +359,7 @@ class EndpointsHandler(ManagementHandler):
             try:
                 request_data = simplejson.loads(
                     self.request.body.decode('utf-8'))
-            except:
+            except Exception:
                 self.error_out(400, "Failed to decode input body")
                 self.finish()
                 return
@@ -420,7 +424,7 @@ class EndpointHandler(ManagementHandler):
             try:
                 request_data = simplejson.loads(
                     self.request.body.decode('utf-8'))
-            except:
+            except Exception:
                 self.error_out(400, "Failed to decode input body")
                 self.finish()
                 return
@@ -564,27 +568,18 @@ class EvaluationPlaneHandler(BaseHandler):
                 self.error_out(500, 'Error processing script', info=err_msg)
             else:
                 self.error_out(
-                    404, 'Error processing script', info="The endpoint you're "
-                                                         "trying to query did not respond. Please make sure the "
-                                                         "endpoint exists and the correct set of arguments are "
-                                                         "provided.")
+                    404, 'Error processing script',
+                    info=("The endpoint you're trying to query did not respond"
+                          ". Please make sure the endpoint exists and the "
+                          "correct set of arguments are provided."))
 
     @gen.coroutine
     def call_subprocess(self, function_to_evaluate, arguments):
-        restricted_tabpy = RestrictedTabPy(self.port)
         # Exec does not run the function, so it does not block.
         if sys.version_info > (3, 0):
             exec(function_to_evaluate, globals())
         else:
             exec(function_to_evaluate)
-
-        if arguments is None:
-            future = self.executor.submit(_user_script, restricted_tabpy)
-        else:
-            future = self.executor.submit(_user_script, restricted_tabpy,
-                                          **arguments)
-        ret = yield future
-        raise gen.Return(ret)
 
 
 class RestrictedTabPy:
@@ -715,7 +710,8 @@ class QueryPlaneHandler(BaseHandler):
                 return
 
             if po_name != endpoint_name:
-                logger.info("Querying actual model: po_name={}".format(po_name))
+                logger.info(
+                    "Querying actual model: po_name={}".format(po_name))
 
             uid = _get_uuid()
 
@@ -805,7 +801,8 @@ def get_config(config_file):
         with open(config_file) as f:
             parser.read_string(f.read())
     else:
-        logger.warning("Unable to find config file at '{}', using default settings.".format(config_file))
+        logger.warning("Unable to find config file at '{}', "
+                       "using default settings.".format(config_file))
 
     settings = {}
     for section in parser.sections():
@@ -814,7 +811,10 @@ def get_config(config_file):
                 settings[key] = val
             break
 
-    def set_parameter(settings_key, config_key, default_val=None, check_env_var=False):
+    def set_parameter(settings_key,
+                      config_key,
+                      default_val=None,
+                      check_env_var=False):
         if config_key is not None and parser.has_option('TabPy', config_key):
             settings[settings_key] = parser.get('TabPy', config_key)
         elif check_env_var:
@@ -825,7 +825,8 @@ def get_config(config_file):
     if cli_args is not None and cli_args.port is not None:
         settings['port'] = cli_args.port
     else:
-        set_parameter('port', 'TABPY_PORT', default_val=9004, check_env_var=True)
+        set_parameter(
+            'port', 'TABPY_PORT', default_val=9004, check_env_var=True)
         try:
             settings['port'] = int(settings['port'])
         except ValueError:
@@ -834,19 +835,23 @@ def get_config(config_file):
             settings['port'] = 9004
 
     set_parameter('server_version', None, default_val=__version__)
-    set_parameter('bind_ip', 'TABPY_BIND_IP', default_val='0.0.0.0', check_env_var=True)
+    set_parameter(
+        'bind_ip', 'TABPY_BIND_IP', default_val='0.0.0.0', check_env_var=True)
 
-    set_parameter('upload_dir', 'TABPY_QUERY_OBJECT_PATH', default_val='/tmp/query_objects', check_env_var=True)
+    set_parameter('upload_dir', 'TABPY_QUERY_OBJECT_PATH',
+                  default_val='/tmp/query_objects', check_env_var=True)
     if not os.path.exists(settings['upload_dir']):
         os.makedirs(settings['upload_dir'])
 
-    set_parameter('state_file_path', 'TABPY_STATE_PATH', default_val='./', check_env_var=True)
+    set_parameter('state_file_path', 'TABPY_STATE_PATH',
+                  default_val='./', check_env_var=True)
     settings['state_file_path'] = os.path.realpath(
         os.path.normpath(
             os.path.expanduser(settings['state_file_path'])))
 
     # set and validate transfer protocol
-    set_parameter('transfer_protocol', 'TABPY_TRANSFER_PROTOCOL', default_val='http')
+    set_parameter('transfer_protocol', 'TABPY_TRANSFER_PROTOCOL',
+                  default_val='http')
     settings['transfer_protocol'] = settings['transfer_protocol'].lower()
 
     set_parameter('certificate_file', 'TABPY_CERTIFICATE_FILE')
@@ -856,7 +861,8 @@ def get_config(config_file):
     # if state.ini does not exist try and create it - remove last dependence
     # on batch/shell script
     state_file_path = settings['state_file_path']
-    logger.info("Loading state from state file {}".format(os.path.join(state_file_path, "state.ini")))
+    logger.info("Loading state from state file {}".format(
+        os.path.join(state_file_path, "state.ini")))
     tabpy_state = _get_state_from_file(state_file_path)
     settings['tabpy'] = TabPyState(config=tabpy_state, settings=settings)
 
@@ -887,11 +893,14 @@ def validate_transfer_protocol_settings(settings):
         logger.fatal(err)
         raise RuntimeError(err)
 
-    validate_cert_key_state('The parameter(s) {} must be set.', 'certificate_file' in settings, 'key_file' in settings)
+    validate_cert_key_state('The parameter(s) {} must be set.',
+                            'certificate_file' in settings,
+                            'key_file' in settings)
     cert = settings['certificate_file']
 
-    validate_cert_key_state('The parameter(s) {} must point to an existing file.', os.path.isfile(cert),
-                            os.path.isfile(settings['key_file']))
+    validate_cert_key_state(
+        'The parameter(s) {} must point to an existing file.',
+        os.path.isfile(cert), os.path.isfile(settings['key_file']))
     validate_cert(cert)
     return
 
@@ -919,15 +928,19 @@ def validate_cert(cert_file_path):
     cert = crypto.load_certificate(crypto.FILETYPE_PEM, cert_buf)
 
     date_format, encoding = '%Y%m%d%H%M%SZ', 'ascii'
-    not_before = datetime.strptime(cert.get_notBefore().decode(encoding), date_format)
-    not_after = datetime.strptime(cert.get_notAfter().decode(encoding), date_format)
+    not_before = datetime.strptime(
+        cert.get_notBefore().decode(encoding), date_format)
+    not_after = datetime.strptime(
+        cert.get_notAfter().decode(encoding), date_format)
     now = datetime.now()
 
     https_error = 'Error using HTTPS: '
     if now < not_before:
-        raise RuntimeError(https_error + 'The certificate provided is not valid until {}.'.format(not_before))
+        raise RuntimeError(https_error + 'The certificate provided is not '
+                           'valid until {}.'.format(not_before))
     if now > not_after:
-        raise RuntimeError(https_error + 'The certificate provided expired on {}.'.format(not_after))
+        raise RuntimeError(https_error + 'The certificate provided expired '
+                           'on {}.'.format(not_after))
 
 
 def main():
@@ -973,8 +986,8 @@ def main():
     else:
         raise RuntimeError('Unsupported transfer protocol.')
 
-    logger.info('Web service listening on {} port {}'.format(settings['bind_ip'],
-                                                             str(settings['port'])))
+    logger.info('Web service listening on {} port {}'.format(
+        settings['bind_ip'], str(settings['port'])))
     tornado.ioloop.IOLoop.instance().start()
 
 
