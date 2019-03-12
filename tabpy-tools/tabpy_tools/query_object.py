@@ -18,7 +18,7 @@ class QueryObject(object):
     '''
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, description = ''):
+    def __init__(self, description=''):
         self.description = description
 
     def get_dependencies(self):
@@ -35,7 +35,7 @@ class QueryObject(object):
         '''Returns documentation for the query object
 
         By default, this method returns the docstring for 'query' method
-        Derived class may overwrite this method to dynamically create doc string
+        Derived class may overwrite this method to dynamically create docstring
         '''
         pass
 
@@ -95,12 +95,13 @@ class QueryObject(object):
         try:
             json.dumps(result)
         except TypeError:
-            raise TypeError("Result from object query is not json serializable: %s" % result)
+            raise TypeError("Result from object query is not json serializable"
+                            ":%s" % result)
 
         return result
 
-    # Returns an array of dictionary that contains the methods and their corresponding
-    # schema information.
+    # Returns an array of dictionary that contains the methods and their
+    # corresponding schema information.
     @abc.abstractmethod
     def get_methods(self):
         return None

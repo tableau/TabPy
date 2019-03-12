@@ -42,20 +42,23 @@ def _generate_schema_from_example_and_description(input, description):
         # This should not fail unless there are bugs with either genson or
         # jsonschema.
         _validate(input, input_schema)
-    except Exception as e:
+    except Exception:
         logger.error('Internal error validating schema.')
         raise
 
     return input_schema
 
 
-def generate_schema(input, output, input_description=None, output_description=None):
+def generate_schema(input,
+                    output,
+                    input_description=None,
+                    output_description=None):
     '''
     Generate schema from a given sample input and output.
     A generated schema can be passed to a server together with a function to
-    annotate it with information about input and output parameters, and examples
-    thereof. The schema needs to follow the conventions of JSON Schema (see
-    json-schema.org).
+    annotate it with information about input and output parameters, and
+    examples thereof. The schema needs to follow the conventions of JSON Schema
+    (see json-schema.org).
 
     Parameters
     -----------
@@ -74,10 +77,10 @@ def generate_schema(input, output, input_description=None, output_description=No
         For just one input parameter, state the example directly.
         >>> from tabpy_tools.schema import generate_schema
         >>> schema = generate_schema(
-                              input = 5,
-                              output = 25,
-                              input_description = 'input value',
-                              output_description = 'the squared value of input')
+                              input=5,
+                              output=25,
+                              input_description='input value',
+                              output_description='the squared value of input')
         >>> schema
         {'sample': 5,
          'input': {'type': 'integer', 'description': 'input value'},
@@ -85,9 +88,9 @@ def generate_schema(input, output, input_description=None, output_description=No
         For two or more input parameters, specify them using a dictionary.
         >>> import graphlab
         >>> schema = generate_schema(
-	          input={'x': 3, 'y': 2},
-	          output=6,
-	          input_description={'x': 'value of x',
+                  input={'x': 3, 'y': 2},
+                  output=6,
+                  input_description={'x': 'value of x',
                                  'y': 'value of y'},
               output_description='x times y')
         >>> schema
@@ -97,9 +100,11 @@ def generate_schema(input, output, input_description=None, output_description=No
                    'properties': {'y': {'type': 'integer', 'description': 'value of y'},
                                   'x': {'type': 'integer', 'description': 'value of x'}}},
          'output': {'type': 'integer', 'description': 'x times y'}}
-    '''
-    input_schema = _generate_schema_from_example_and_description(input, input_description)
-    output_schema = _generate_schema_from_example_and_description(output, output_description)
+    '''  # noqa: E501
+    input_schema = _generate_schema_from_example_and_description(
+        input, input_description)
+    output_schema = _generate_schema_from_example_and_description(
+        output, output_description)
     return {'input': input_schema,
             'sample': input,
             'output': output_schema}
