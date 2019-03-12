@@ -165,8 +165,6 @@ class BaseHandler(tornado.web.RequestHandler):
 
 
 class MainHandler(BaseHandler):
-    def initialize(self):
-        super(MainHandler, self).initialize()
 
     def get(self):
         self._add_CORS_header()
@@ -289,8 +287,6 @@ class ManagementHandler(MainHandler):
 
 
 class ServiceInfoHandler(ManagementHandler):
-    def initialize(self):
-        super(ServiceInfoHandler, self).initialize()
 
     def get(self):
         self._add_CORS_header()
@@ -304,8 +300,6 @@ class ServiceInfoHandler(ManagementHandler):
 
 
 class StatusHandler(BaseHandler):
-    def initialize(self):
-        super(StatusHandler, self).initialize()
 
     def get(self):
         self._add_CORS_header()
@@ -326,8 +320,6 @@ class StatusHandler(BaseHandler):
 
 
 class UploadDestinationHandler(ManagementHandler):
-    def initialize(self):
-        super(UploadDestinationHandler, self).initialize()
 
     def get(self):
         path = self.settings['state_file_path']
@@ -336,8 +328,6 @@ class UploadDestinationHandler(ManagementHandler):
 
 
 class EndpointsHandler(ManagementHandler):
-    def initialize(self):
-        super(EndpointsHandler, self).initialize()
 
     def get(self):
         self._add_CORS_header()
@@ -394,8 +384,6 @@ class EndpointsHandler(ManagementHandler):
 
 
 class EndpointHandler(ManagementHandler):
-    def initialize(self):
-        super(EndpointHandler, self).initialize()
 
     def get(self, endpoint_name):
         self._add_CORS_header()
@@ -603,8 +591,6 @@ class RestrictedTabPy:
 
 
 class QueryPlaneHandler(BaseHandler):
-    def initialize(self):
-        super(QueryPlaneHandler, self).initialize()
 
     def _query(self, po_name, data, uid, qry):
         """
