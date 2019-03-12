@@ -1,7 +1,5 @@
 import os
 import unittest
-import logging
-import tabpy_server
 
 try:
     from unittest.mock import patch, call
@@ -11,6 +9,7 @@ except ImportError:
 from tempfile import NamedTemporaryFile
 from tabpy_server.tabpy import get_config, validate_cert
 from argparse import Namespace
+
 
 def assert_raises_runtime_error(message, fn, args={}):
     try:
@@ -38,7 +37,8 @@ def append_logger_settings_to_config_file(config_file):
                       "formatter=rootFormatter\n"
                       "args=('tabpy_server_tests_log.log', 'w', 1000000, 5)\n"
                       "[formatter_rootFormatter]\n"
-                      "format=%(asctime)s [%(levelname)s] (%(filename)s:%(module)s:%(lineno)d): %(message)s\n"
+                      "format=%(asctime)s [%(levelname)s] (%(filename)s:"
+                      "%(module)s:%(lineno)d): %(message)s\n"
                       "datefmt=%Y-%m-%d,%H:%M:%S\n".encode())
 
 
@@ -51,12 +51,14 @@ class TestConfigEnvironmentCalls(unittest.TestCase):
     @patch('tabpy_server.tabpy.os.path.exists', return_value=True)
     @patch('tabpy_server.tabpy.os.path.isfile', return_value=False)
     @patch('tabpy_server.tabpy.os')
-    def test_no_config_file(self, mock_os, mock_file_exists, mock_path_exists, mock_psws, mock_shutil,
-                            mock_management_util, mock_tabpy_state):
+    def test_no_config_file(self, mock_os, mock_file_exists, mock_path_exists,
+                            mock_psws, mock_shutil, mock_management_util,
+                            mock_tabpy_state):
         get_config(None)
 
         getenv_calls = [call('TABPY_PORT', 9004),
-                        call('TABPY_QUERY_OBJECT_PATH', '/tmp/query_objects'), call('TABPY_STATE_PATH', './')]
+                        call('TABPY_QUERY_OBJECT_PATH', '/tmp/query_objects'),
+                        call('TABPY_STATE_PATH', './')]
         mock_os.getenv.assert_has_calls(getenv_calls, any_order=True)
         mock_shutil.assert_not_called()
         self.assertEqual(len(mock_file_exists.mock_calls), 1)
@@ -73,8 +75,10 @@ class TestConfigEnvironmentCalls(unittest.TestCase):
     @patch('tabpy_server.tabpy.os.path.exists', return_value=False)
     @patch('tabpy_server.tabpy.os.path.isfile', return_value=False)
     @patch('tabpy_server.tabpy.os')
-    def test_no_state_ini_file_or_state_dir(self, mock_os, mock_file_exists, mock_path_exists, mock_psws, mock_shutil,
-                                            mock_management_util, mock_tabpy_state):
+    def test_no_state_ini_file_or_state_dir(self, mock_os, mock_file_exists,
+                                            mock_path_exists, mock_psws,
+                                            mock_shutil, mock_management_util,
+                                            mock_tabpy_state):
         get_config(None)
         self.assertEqual(len(mock_os.makedirs.mock_calls), 1)
 
@@ -88,7 +92,8 @@ class TestPartialConfigFile(unittest.TestCase):
     @patch('tabpy_server.tabpy.PythonServiceHandler')
     @patch('tabpy_server.tabpy.os.path.exists', return_value=True)
     @patch('tabpy_server.tabpy.os')
-    def test_config_file_present(self, mock_os, mock_path_exists, mock_psws, mock_shutil, mock_management_util,
+    def test_config_file_present(self, mock_os, mock_path_exists, mock_psws,
+                                 mock_shutil, mock_management_util,
                                  mock_tabpy_state, mock_parse_arguments):
         config_file = NamedTemporaryFile(delete=False)
         append_logger_settings_to_config_file(config_file)
@@ -99,7 +104,8 @@ class TestPartialConfigFile(unittest.TestCase):
                           "TABPY_STATE_PATH = bar\n".encode())
         config_file.close()
 
-        mock_parse_arguments.return_value = Namespace(config=config_file.name, port=None)
+        mock_parse_arguments.return_value = Namespace(
+            config=config_file.name, port=None)
 
         mock_os.getenv.side_effect = [1234]
         mock_os.path.realpath.return_value = 'bar'
@@ -109,7 +115,8 @@ class TestPartialConfigFile(unittest.TestCase):
 
         mock_os.getenv.assert_has_calls(getenv_calls, any_order=True)
         self.assertEqual(settings['port'], 1234)
-        self.assertEqual(settings['server_version'], open('VERSION').read().strip())
+        self.assertEqual(settings['server_version'],
+                         open('VERSION').read().strip())
         self.assertEquals(settings['bind_ip'], '0.0.0.0')
         self.assertEquals(settings['upload_dir'], 'foo')
         self.assertEquals(settings['state_file_path'], 'bar')
@@ -143,7 +150,8 @@ class TestTransferProtocolValidation(unittest.TestCase):
         self.config_name = self.fp.name
         append_logger_settings_to_config_file(self.fp)
 
-        patcher = patch('tabpy_server.tabpy.parse_arguments', return_value=Namespace(config=self.fp.name, port=None))
+        patcher = patch('tabpy_server.tabpy.parse_arguments',
+                        return_value=Namespace(config=self.fp.name, port=None))
         patcher.start()
         self.addCleanup(patcher.stop)
 
@@ -164,8 +172,8 @@ class TestTransferProtocolValidation(unittest.TestCase):
         self.fp.close()
 
         assert_raises_runtime_error(
-            'Error using HTTPS: The parameter(s) TABPY_CERTIFICATE_FILE and TABPY_KEY_FILE must be set.', 
-            get_config, {self.config_name})
+            'Error using HTTPS: The parameter(s) TABPY_CERTIFICATE_FILE '
+            'and TABPY_KEY_FILE must be set.', get_config, {self.config_name})
 
     def test_https_without_cert(self):
         self.fp.write("[TabPy]\n"
@@ -173,7 +181,8 @@ class TestTransferProtocolValidation(unittest.TestCase):
                       "TABPY_KEY_FILE = foo".encode())
         self.fp.close()
 
-        assert_raises_runtime_error('Error using HTTPS: The parameter(s) TABPY_CERTIFICATE_FILE must be set.',
+        assert_raises_runtime_error('Error using HTTPS: The parameter(s) '
+                                    'TABPY_CERTIFICATE_FILE must be set.',
                                     get_config, [self.config_name])
 
     def test_https_without_key(self):
@@ -182,7 +191,8 @@ class TestTransferProtocolValidation(unittest.TestCase):
                       "TABPY_CERTIFICATE_FILE = foo".encode())
         self.fp.close()
 
-        assert_raises_runtime_error('Error using HTTPS: The parameter(s) TABPY_KEY_FILE must be set.',
+        assert_raises_runtime_error('Error using HTTPS: The parameter(s) '
+                                    'TABPY_KEY_FILE must be set.',
                                     get_config, [self.config_name])
 
     @patch('tabpy_server.tabpy.os.path')
@@ -193,10 +203,12 @@ class TestTransferProtocolValidation(unittest.TestCase):
                       "TABPY_KEY_FILE = bar".encode())
         self.fp.close()
 
-        mock_path.isfile.side_effect = lambda x: self.mock_isfile(x, {self.fp.name})
+        mock_path.isfile.side_effect = lambda x: self.mock_isfile(
+            x, {self.fp.name})
 
         assert_raises_runtime_error(
-            'Error using HTTPS: The parameter(s) TABPY_CERTIFICATE_FILE and TABPY_KEY_FILE must point to an existing file.',
+            'Error using HTTPS: The parameter(s) TABPY_CERTIFICATE_FILE and '
+            'TABPY_KEY_FILE must point to an existing file.',
             get_config, {self.config_name})
 
     @patch('tabpy_server.tabpy.os.path')
@@ -207,11 +219,12 @@ class TestTransferProtocolValidation(unittest.TestCase):
                       "TABPY_KEY_FILE = bar".encode())
         self.fp.close()
 
-        mock_path.isfile.side_effect = lambda x: self.mock_isfile(x, {self.fp.name, 'bar'})
+        mock_path.isfile.side_effect = lambda x: self.mock_isfile(
+            x, {self.fp.name, 'bar'})
 
         assert_raises_runtime_error(
-            'Error using HTTPS: The parameter(s) TABPY_CERTIFICATE_FILE must point to an existing file.', 
-            get_config, {self.config_name})
+            'Error using HTTPS: The parameter(s) TABPY_CERTIFICATE_FILE must '
+            'point to an existing file.', get_config, {self.config_name})
 
     @patch('tabpy_server.tabpy.os.path')
     def test_https_key_file_not_found(self, mock_path):
@@ -221,10 +234,12 @@ class TestTransferProtocolValidation(unittest.TestCase):
                       "TABPY_KEY_FILE = bar".encode())
         self.fp.close()
 
-        mock_path.isfile.side_effect = lambda x: self.mock_isfile(x, {self.fp.name, 'foo'})
+        mock_path.isfile.side_effect = lambda x: self.mock_isfile(
+            x, {self.fp.name, 'foo'})
 
         assert_raises_runtime_error(
-            'Error using HTTPS: The parameter(s) TABPY_KEY_FILE must point to an existing file.', get_config, {self.config_name})
+            'Error using HTTPS: The parameter(s) TABPY_KEY_FILE must point to '
+            'an existing file.', get_config, {self.config_name})
 
     @patch('tabpy_server.tabpy.os.path.isfile', return_value=True)
     @patch('tabpy_server.tabpy.validate_cert', return_value=True)
@@ -246,16 +261,19 @@ class TestCertificateValidation(unittest.TestCase):
 
     def __init__(self, *args, **kwargs):
         super(TestCertificateValidation, self).__init__(*args, **kwargs)
-        self.resources_path = os.path.join(os.path.dirname(__file__), 'resources')
+        self.resources_path = os.path.join(
+            os.path.dirname(__file__), 'resources')
 
     def test_expired_cert(self):
         path = os.path.join(self.resources_path, 'expired.crt')
-        message = 'Error using HTTPS: The certificate provided expired on 2018-08-18 19:47:18.'
+        message = ('Error using HTTPS: The certificate provided expired '
+                   'on 2018-08-18 19:47:18.')
         assert_raises_runtime_error(message, validate_cert, {path})
 
     def test_future_cert(self):
         path = os.path.join(self.resources_path, 'future.crt')
-        message = 'Error using HTTPS: The certificate provided is not valid until 3001-01-01 00:00:00.'
+        message = ('Error using HTTPS: The certificate provided is not valid '
+                   'until 3001-01-01 00:00:00.')
         assert_raises_runtime_error(message, validate_cert, {path})
 
     def test_valid_cert(self):
