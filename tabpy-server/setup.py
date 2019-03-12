@@ -30,22 +30,11 @@ setup(
                   'tabpy_server': ['startup.*', 'state.ini']},
     license='MIT',
     install_requires=[
-        'backports_abc',
-        'cloudpickle',
-        'configparser',
-        'decorator',
-        'future',
-        'genson',
-        'jsonschema~=2.3.0',
-        'mock',
-        'numpy',
+        'pyopenssl',
         'python-dateutil',
-        'pyOpenSSL',
         'requests',
-        'singledispatch',
         'simplejson',
         'tornado==5.1.1',
         'Tornado-JSON',
-        'urllib3'
     ]
 )

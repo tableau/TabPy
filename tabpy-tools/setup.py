@@ -24,8 +24,6 @@ setup(
     license='MIT',
     install_requires=[
         'cloudpickle',
-        'decorator',
-        'python-dateutil',
         'requests',
         'genson',
         'jsonschema'

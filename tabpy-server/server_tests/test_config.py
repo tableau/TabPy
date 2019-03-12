@@ -3,10 +3,7 @@ import unittest
 import logging
 import tabpy_server
 
-try:
-    from unittest.mock import patch, call
-except ImportError:
-    from mock import patch, call
+from unittest.mock import patch, call
 
 from tempfile import NamedTemporaryFile
 from tabpy_server.tabpy import get_config, validate_cert
