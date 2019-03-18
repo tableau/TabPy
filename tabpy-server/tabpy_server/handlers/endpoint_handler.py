@@ -38,6 +38,7 @@ class EndpointHandler(ManagementHandler):
     @tornado.web.asynchronous
     @gen.coroutine
     def put(self, name):
+        logger.debug('Processing PUT for /endpoints/{}'.format(name))
         if self.should_fail_with_not_authorized():
             self.fail_with_not_authorized()
             return
@@ -85,6 +86,7 @@ class EndpointHandler(ManagementHandler):
     @tornado.web.asynchronous
     @gen.coroutine
     def delete(self, name):
+        logger.debug('Processing DELETE for /endpoints/{}'.format(name))
         if self.should_fail_with_not_authorized():
             self.fail_with_not_authorized()
             return
@@ -126,7 +128,7 @@ class EndpointHandler(ManagementHandler):
             self.error_out(500, err_msg)
             self.finish()
 
-        on_state_change(self.settings, self.tabpy_state)
+        on_state_change(self.settings, self.tabpy_state, self.python_service)
 
     @gen.coroutine
     def _delete_po_future(self, delete_path):

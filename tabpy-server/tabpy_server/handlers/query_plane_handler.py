@@ -78,6 +78,7 @@ class QueryPlaneHandler(BaseHandler):
     # don't check API key (client does not send or receive data for OPTIONS,
     # it just allows the client to subsequently make a POST request)
     def options(self, pred_name):
+        logger.debug('Processing OPTIONS for /query/{}'.format(pred_name))
         if self.should_fail_with_not_authorized():
             self.fail_with_not_authorized()
             return
@@ -197,6 +198,7 @@ class QueryPlaneHandler(BaseHandler):
 
     @tornado.web.asynchronous
     def get(self, endpoint_name):
+        logger.debug('Processing GET for /query/{}'.format(endpoint_name))
         if self.should_fail_with_not_authorized():
             self.fail_with_not_authorized()
             return
@@ -211,6 +213,7 @@ class QueryPlaneHandler(BaseHandler):
 
     @tornado.web.asynchronous
     def post(self, endpoint_name):
+        logger.debug('Processing POST for /query/{}'.format(endpoint_name))
         if self.should_fail_with_not_authorized():
             self.fail_with_not_authorized()
             return
