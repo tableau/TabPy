@@ -18,7 +18,7 @@ def install_dependencies(packages):
 
 
 if __name__ == '__main__':
-    install_dependencies(['sklearn', 'pandas', 'numpy', 'textblob', 'nltk'])
+    install_dependencies(['sklearn', 'pandas', 'numpy', 'textblob', 'nltk', 'scipy'])
     
     # Determine if we run python or python3
     if platform.system() == 'Windows':
