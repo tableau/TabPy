@@ -9,8 +9,9 @@ try:
 except ImportError:
     from io import StringIO as _StringIO
 from datetime import datetime, timedelta, tzinfo
-from tabpy_server.app.ConfigParameters import ConfigParameters
-from tabpy_server.app.util import log_and_raise
+import tabpy_server.app
+#from tabpy_server.app.ConfigParameters import ConfigParameters
+#from tabpy_server.app.util import log_and_raise
 from time import mktime
 
 logger = logging.getLogger(__name__)
