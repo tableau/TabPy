@@ -15,7 +15,7 @@ class TestEndpointsHandlerWithAuth(AsyncHTTPTestCase):
     @classmethod
     def setUpClass(cls):
         cls.patcher = patch(
-            'tabpy_server.app.TabPyApp._parse_cli_arguments',
+            'tabpy_server.app.app.TabPyApp._parse_cli_arguments',
             return_value=Namespace(
                 config=None))
         cls.patcher.start()
