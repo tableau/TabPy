@@ -66,9 +66,9 @@ echo
 echo Starting TabPy server...
 if [ -z $CONFIG ]; then
     echo Using default parameters.
-    python3 tabpy-server/tabpy.py
+    python3 tabpy-server/tabpy_server/tabpy.py
 else
-    python3 tabpy-server/tabpy.py --config=$CONFIG
+    python3 tabpy-server/tabpy_server/tabpy.py --config=$CONFIG
 fi
 
 check_status
