@@ -41,3 +41,41 @@ TABPY_KEY_FILE = C:/path/to/key/file.key
 
 Note that only PEM-encoded x509 certificates are supported for the secure
 connection scenario.
+
+## Authentication
+
+TabPy supports basic access authentication (see 
+[https://en.wikipedia.org/wiki/Basic_access_authentication](https://en.wikipedia.org/wiki/Basic_access_authentication)
+for more details). 
+
+### Enabling Authentication
+
+To enable the feature specify `TABPY_PWD_FILE` parameter in TabPy
+configuration file:
+
+```sh
+TABPY_PWD_FILE = c:\path\to\password\file.txt
+```
+
+### Password File
+
+Password file is a text file containing usernames and hashed passwords
+per line separated by space. For username only ASCII characters
+supported.
+
+
+```
+User1 235D461DCC778B54BDFE86CCCFB0E16C74B189704CC7A729EFC6A543CAAADB36
+User2 
+
+```
+
+Hash for a password built with PBKDF2 (
+see [https://en.wikipedia.org/wiki/PBKDF2](https://en.wikipedia.org/wiki/PBKDF2)
+for more details) with lower case username as salt and 10000 iterations:
+
+```python
+from pbkdf2 import crypt
+hash = crypt('P@ssw0rd', 'User@1'.lower(), 10000)
+hash # 235D461DCC778B54BDFE86CCCFB0E16C74B189704CC7A729EFC6A543CAAADB36 
+```

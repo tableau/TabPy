@@ -1,9 +1,40 @@
 import base64
 import binascii
-import hashlib
+from hashlib import pbkdf2_hmac
 import logging
 
 logger = logging.getLogger(__name__)
+
+
+def hash_password(username, pwd):
+    '''
+    Hashes password using PKDBF2 method:
+    hash = PKDBF2('sha512', pwd, salt=username, 10000)
+
+    Parameters
+    ----------
+    username : str
+        User name (login). Used as salt for hashing.
+        User name is lowercased befor being used in hashing.
+        Salt is formatted as '_$salt@tabpy:<username>$_' to
+        guarantee there's at least 16 characters.
+
+    pwd : str
+        Password to hash.
+
+    Returns
+    -------
+    str
+        Sting representation (hexidecimal) for PBKDF2 hash 
+        for the password.
+    '''
+    salt = '_$salt@tabpy:%s$_' % username.lower()
+
+    hash = pbkdf2_hmac(hash_name='sha512',
+                       password=pwd.encode(),
+                       salt.encode(),
+                       10000)
+    return binascii.helify(hash)
 
 
 def validate_basic_auth_credentials(username, pwd, credentials):
@@ -38,7 +69,7 @@ def validate_basic_auth_credentials(username, pwd, credentials):
         logger.error('User name "{}" not found'.format(username))
         return False
 
-    hashed_pwd = hashlib.sha3_256(pwd.encode('utf-8')).hexdigest()
+    hashed_pwd = hash_password(username, pwd)
     if credentials[login].lower() != hashed_pwd.lower():
         logger.error('Wrong password for user name "{}"'.format(username))
         return False
