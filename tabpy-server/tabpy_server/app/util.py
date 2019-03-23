@@ -56,11 +56,11 @@ def parse_pwd_file(pwd_file_name):
     credentials : dict
         Credentials from the file. Empty if succeeded is False.
     '''
-    logger.info('Parsing password file %s' % pwd_file_name)
+    logger.info('Parsing passwords file %s...' % pwd_file_name)
 
     if not os.path.isfile(pwd_file_name):
-        logger.fatal('Password file "%s" not found' % pwd_file_name)
-        return False, {}}
+        logger.fatal('Passwords file %s not found' % pwd_file_name)
+        return False, {}
 
     credentials = {}
     with open(pwd_file_name) as pwd_file:

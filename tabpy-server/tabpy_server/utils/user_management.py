@@ -3,10 +3,13 @@ Utility for managing user names and passwords for TabPy.
 '''
 
 from argparse import ArgumentParser
+import logging
 import random
 import string
 from tabpy_server.app.util import parse_pwd_file
-from tabpy_server.handlers.utils import hash_password
+from tabpy_server.handlers.util import hash_password
+
+logger = logging.getLogger(__name__)
 
 def build_cli_parser():
     parser = ArgumentParser(
@@ -16,42 +19,40 @@ def build_cli_parser():
             use authentication for TabPy read documentation
             at https://github.com/tableau/TabPy
             ''',
-        argument_default=None)
+        argument_default=None,
+        add_help=True)
     parser.add_argument(
         'command',
-        required=True,
         choices=['add', 'update'],
         help='Command to execute')
     parser.add_argument(
         '-u',
         '--username',
-        nargs=1,
         help='Username to add to passwords file')
     parser.add_argument(
         '-f',
         '--pwdfile',
-        nargs=1,
         help='Passwords file')
     parser.add_argument(
         '-p',
         '--password',
-        nargs=1,
         help=('Password for the username. If not specified password will '
               'be generated'))
-    parser.add_help()
     return parser
 
 
 def check_args(args):
-    if args.username is None or\
-        args.pwdfile is None:
+    if (args.username is None) or (args.pwdfile is None):
          return False
 
     return True
 
 
 def generate_password():
-    password_chars = string.printable
+    password_chars =\
+        string.ascii_letters +\
+        string.digits +\
+        string.punctuation
     pwd = ''.join(random.choice(password_chars) for i in range(16))
     logger.info('Generated password "%s"' % pwd)
     return pwd
@@ -59,25 +60,25 @@ def generate_password():
 
 def store_passwords_file(pwdfile, credentials):
     with open(pwdfile, 'wt') as f:
-        for username, pwd in credentials:
+        for username, pwd in credentials.items():
             f.write('%s %s' % (username, pwd))
     return True
 
 
 def add_user(args, credentials):
     username = args.username.lower()
-    if username is in credentials:
+    if username in credentials:
         logger.error('Can\'t add username %s as it is already present '
                      'in passwords file. Do you want to run '
                      '"update" command instead?' % username)
-        retunt False
+        return False
 
     password = args.password
     logger.info('Adding username "%s" with password "%s"...' % 
-                (username, password, args.pwdfile))
+                (username, password))
     credentials[username] = password
 
-    return store_passwords_file(args.pwdfile, credential)
+    return store_passwords_file(args.pwdfile, credentials)
 
 
 def update_user(args, credentials):
@@ -86,13 +87,13 @@ def update_user(args, credentials):
         logger.error('Username "%s" not found in passwords file. '
                      'Do you want to run "add" command instead?' %
                      username)
-        retunr False
+        return False
 
     password = args.password
     logger.info('Updating username "%s" password  to "%s"...' % 
-                (username, password, args.pwdfile))
+                (username, password))
     credentials[username] = password
-    return store_passwords_file(args.pwdfile, credential)
+    return store_passwords_file(args.pwdfile, credentials)
 
 
 def process_command(args, credentials):
@@ -113,17 +114,15 @@ def main():
         return
 
     succeeded, credentials = parse_pwd_file(args.pwdfile)
-    if not succeeded:
+    if not succeeded and args.command != 'add':
         return
 
     if args.password is None:
         args.password = generate_password()
 
-    if password is None:
-        password = generate_password()
-
     process_command(args, credentials)
     
 
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.DEBUG, format="%(message)s")
     main()

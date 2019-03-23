@@ -32,8 +32,8 @@ def hash_password(username, pwd):
 
     hash = pbkdf2_hmac(hash_name='sha512',
                        password=pwd.encode(),
-                       salt.encode(),
-                       10000)
+                       salt=salt.encode(),
+                       iterations=10000)
     return binascii.helify(hash)
 
 
