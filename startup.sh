@@ -64,6 +64,8 @@ fi
 # Start TabPy server
 echo
 echo Starting TabPy server...
+SAVE_PYTHONPATH=$PYTHONPATH
+export PYTHONPATH=${TABPY_ROOT}/tabpy-server:${TABPY_ROOT}/tabpy-tools:$PYTHONPATH
 if [ -z $CONFIG ]; then
     echo Using default parameters.
     python3 tabpy-server/tabpy_server/tabpy.py
@@ -71,5 +73,6 @@ else
     python3 tabpy-server/tabpy_server/tabpy.py --config=$CONFIG
 fi
 
+export PYTHONPATH=$SAVE_PYTHONPATH
 check_status
 exit 0
