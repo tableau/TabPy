@@ -46,7 +46,7 @@ IF %ERRORLEVEL% NEQ 0 (
 
 REM Parse optional CLI arguments: config file
 ECHO Parsing parameters...
-SET PYTHONPATH=%TABPY_ROOT%\tabpy-server;%PATH%
+SET PYTHONPATH=%TABPY_ROOT%\tabpy-server;%TABPY_ROOT%\tabpy-tools;%PATH%
 SET STARTUP_CMD=python tabpy-server\tabpy_server\tabpy.py
 IF [%1] NEQ [] (
     ECHO     Using config file at %TABPY_ROOT%\tabpy-server\tabpy_server\%1
