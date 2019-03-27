@@ -4,8 +4,9 @@ Utility for managing user names and passwords for TabPy.
 
 from argparse import ArgumentParser
 import logging
+import os
 import random
-import string
+import sys
 from tabpy_server.app.util import parse_pwd_file
 from tabpy_server.handlers.util import hash_password
 
@@ -57,13 +58,18 @@ def generate_password(pwd_len=16):
     upper_case_letters = 'ABCDEFGHIJKLMPQRSTUVWXYZ'
     digits = '23456789'
 
+    # and for punctuation we want to exclude some characters
+    # like inverted coma which can be hard to find and/or
+    # type
+    punctuation = '!#$%&()*+,-./:;<=>?@[\]^_{|}~'
+
     # we also want to have more letters and digits in
     # generated password then punctuations
     password_chars =\
         lower_case_letters + lower_case_letters +\
         upper_case_letters + upper_case_letters +\
         digits + digits +\
-        string.punctuation
+        punctuation
     pwd = ''.join(random.choice(password_chars) for i in range(pwd_len))
     logger.info('Generated password: "{}"'.format(pwd))
     return pwd
@@ -81,7 +87,7 @@ def add_user(args, credentials):
     logger.info('Adding username "{}"'.format(username))
 
     if username in credentials:
-        logger.error('Can\'t add username {}} as it is already present '
+        logger.error('Can\'t add username {} as it is already present '
                      'in passwords file. Do you want to run '
                      '"update" command instead?'.format(username))
         return False
@@ -99,7 +105,7 @@ def update_user(args, credentials):
     logger.info('Updating username "{}"'.format(username))
 
     if username not in credentials:
-        logger.error('Username "%{}" not found in passwords file. '
+        logger.error('Username "{}" not found in passwords file. '
                      'Do you want to run "add" command instead?'.
                      format(username))
         return False
@@ -142,7 +148,7 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG, format="%(message)s")
 
     # add tabpy-tools and tabpy-server folders to
-    # PYTHONPATH so code from there can be found when 
+    # PYTHONPATH so code from there can be found when
     # modules are imported
     for dir_ in {'tabpy-tools', 'tabpy-server'}:
         sys.path.insert(0, os.path.join(

@@ -3,6 +3,7 @@ import sys
 
 from tabpy_tools.rest import RESTObject, RESTProperty, enum
 
+
 class TestRESTObject(unittest.TestCase):
 
     def test_new_class(self):
@@ -62,4 +63,3 @@ class TestRESTObject(unittest.TestCase):
         self.assertEqual(f.i, 3)
         self.assertEqual(f.s, "hello!")
         self.assertEqual(f.x, "5")
-
