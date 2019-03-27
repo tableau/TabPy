@@ -8,9 +8,9 @@ logger = logging.getLogger(__name__)
 
 
 def _generate_schema_from_example_and_description(input, description):
-    ''' With an example input, a schema is automatically generated that conforms
-        to the example in json-schema.org. The description given by the users
-        is then added to the schema.
+    '''With an example input, a schema is automatically generated that conforms
+       to the example in json-schema.org. The description given by the users
+       is then added to the schema.
     '''
     s = _genson.Schema()
     s.add_object(input)
@@ -43,7 +43,7 @@ def _generate_schema_from_example_and_description(input, description):
         # jsonschema.
         _validate(input, input_schema)
     except Exception:
-        logger.error('Internal error validating schema.')
+        logger.exception('Internal error validating schema.')
         raise
 
     return input_schema

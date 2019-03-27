@@ -189,7 +189,7 @@ class RESTServiceClient(object):
             The name of the endpoint.
         """
         ((name, attrs),) = self.service_client.GET(
-            'endpoints/'+endpoint_name).items()
+            'endpoints/' + endpoint_name).items()
         endpoint = Endpoint.from_json(attrs)
         endpoint.name = name
         return endpoint

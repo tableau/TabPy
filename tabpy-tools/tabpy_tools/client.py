@@ -21,7 +21,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-_name_checker = compile(r'^[a-zA-Z0-9-_\ ]+$')
+_name_checker = compile(r'^[\w -]+$')
 
 if sys.version_info.major == 3:
     unicode = str
