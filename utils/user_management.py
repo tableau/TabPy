@@ -34,7 +34,7 @@ def build_cli_parser():
     parser.add_argument(
         '-f',
         '--pwdfile',
-        help='Passwords file')
+        help='Fully qualified path to passwords file')
     parser.add_argument(
         '-p',
         '--password',
@@ -59,12 +59,12 @@ def generate_password(pwd_len=16):
     digits = '23456789'
 
     # and for punctuation we want to exclude some characters
-    # like inverted coma which can be hard to find and/or
+    # like inverted comma which can be hard to find and/or
     # type
     punctuation = '!#$%&()*+,-./:;<=>?@[\\]^_{|}~'
 
     # we also want to have more letters and digits in
-    # generated password then punctuations
+    # generated password than punctuations
     password_chars =\
         lower_case_letters + lower_case_letters +\
         upper_case_letters + upper_case_letters +\

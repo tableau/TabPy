@@ -238,6 +238,8 @@ class TabPyApp:
                 log_and_raise('Failed to read passwords file %s' %
                               self.settings[ConfigParameters.TABPY_PWD_FILE],
                               RuntimeError)
+        else:
+            logger.info("Password file is not specified")
 
         features = self._get_features()
         self.settings['versions'] = {'v1': {'features': features}}
@@ -287,16 +289,12 @@ class TabPyApp:
             log_and_raise(err, RuntimeError)
 
     def _parse_pwd_file(self):
-        succeeded = True
-        if ConfigParameters.TABPY_PWD_FILE not in self.settings:
-            logger.info("Password file is not specified")
-        else:
-            succeeded, self.credentials = parse_pwd_file(
-                self.settings[ConfigParameters.TABPY_PWD_FILE])
+        succeeded, self.credentials = parse_pwd_file(
+            self.settings[ConfigParameters.TABPY_PWD_FILE])
 
-            if succeeded and len(self.credentials) == 0:
-                logger.error('No credentials found')
-                succeeded = False
+        if succeeded and len(self.credentials) == 0:
+            logger.error('No credentials found')
+            succeeded = False
 
         return succeeded
 

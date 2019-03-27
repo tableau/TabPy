@@ -51,7 +51,7 @@ for more details).
 ### Enabling Authentication
 
 To enable the feature specify `TABPY_PWD_FILE` parameter in TabPy
-configuration file:
+configuration file with a fully qualified name:
 
 ```sh
 TABPY_PWD_FILE = c:\path\to\password\file.txt
@@ -65,7 +65,7 @@ There is `utils/user_management.py` utility to operate with
 accounts in the password file. Run `utils/user_management.py -h` to
 see how to use it.
 
-Note for any of the changes for password file TabPy needs to be restarted.
+After making any changes to the password file, TabPy needs to be restarted.
 
 ### Adding an Account
 
