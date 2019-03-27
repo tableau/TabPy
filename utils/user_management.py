@@ -61,7 +61,7 @@ def generate_password(pwd_len=16):
     # and for punctuation we want to exclude some characters
     # like inverted coma which can be hard to find and/or
     # type
-    punctuation = '!#$%&()*+,-./:;<=>?@[\]^_{|}~'
+    punctuation = '!#$%&()*+,-./:;<=>?@[\\]^_{|}~'
 
     # we also want to have more letters and digits in
     # generated password then punctuations
@@ -143,6 +143,7 @@ def main():
 
     process_command(args, credentials)
     return
+
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG, format="%(message)s")

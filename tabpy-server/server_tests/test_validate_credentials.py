@@ -20,7 +20,9 @@ class TestValidateBasicAuthCredentials(unittest.TestCase):
         self.credentials = {
             # PBKDF2('user1', 'password', 10000)
             'user1':
-            '5961c87343553bf078add1189b4f59238f663eabd23dbc1dc538c5fedf18a8cc546f4a46500dd7672144595ac4e9610dc9edc66ee1cb7b58cab64ddb662390b3'
+            ('5961c87343553bf078add1189b4f59238f663eabd23dbc1dc538c5fed'
+             'f18a8cc546f4a46500dd7672144595ac4e9610dc9edc66ee1cb7b58cab'
+             '64ddb662390b3')
         }
 
     def test_given_unknown_username_expect_validation_fails(self):
@@ -45,7 +47,9 @@ class TestCheckAndValidateBasicAuthCredentials(unittest.TestCase):
         self.credentials = {
             # PBKDF2('user1', 'password', 10000)
             'user1':
-            '5961c87343553bf078add1189b4f59238f663eabd23dbc1dc538c5fedf18a8cc546f4a46500dd7672144595ac4e9610dc9edc66ee1cb7b58cab64ddb662390b3'
+            ('5961c87343553bf078add1189b4f59238f663eabd23dbc1dc538c5fed'
+             'f18a8cc546f4a46500dd7672144595ac4e9610dc9edc66ee1cb7b58cab'
+             '64ddb662390b3')
         }
 
     def test_given_no_headers_expect_validation_fails(self):
@@ -100,7 +104,9 @@ class TestHandleAuthentication(unittest.TestCase):
         self.credentials = {
             # PBKDF2('user1', 'password', 10000)
             'user1':
-            '5961c87343553bf078add1189b4f59238f663eabd23dbc1dc538c5fedf18a8cc546f4a46500dd7672144595ac4e9610dc9edc66ee1cb7b58cab64ddb662390b3'
+            ('5961c87343553bf078add1189b4f59238f663eabd23dbc1dc538c5fed'
+             'f18a8cc546f4a46500dd7672144595ac4e9610dc9edc66ee1cb7b58cab'
+             '64ddb662390b3')
         }
 
         self.settings = {
