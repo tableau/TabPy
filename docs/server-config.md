@@ -57,25 +57,41 @@ configuration file:
 TABPY_PWD_FILE = c:\path\to\password\file.txt
 ```
 
-### Password File
-
 Password file is a text file containing usernames and hashed passwords
 per line separated by space. For username only ASCII characters
 supported.
 
+There is `utils/user_management.py` utility to operate with
+accounts in the password file. Run `utils/user_management.py -h` to
+see how to use it.
 
+Note for any of the changes for password file TabPy needs to be restarted.
+
+### Adding an Account
+
+To add an account run `utils/user_management.py` utility with `add`
+command  providing user name, password (optional) and password file:
+
+```sh
+python utils/user_management.py add -u <username> -p <password> -f <pwdfile>
 ```
-User1 235D461DCC778B54BDFE86CCCFB0E16C74B189704CC7A729EFC6A543CAAADB36
-User2 
 
+If `-p` agrument is not provided (recommended) password for the user name
+will be generated.
+
+### Updating an Account
+
+To update password for an account run `utils/user_management.py` utility
+with `update` command:
+
+```sh
+python utils/user_management.py update -u <username> -p <password> -f <pwdfile>
 ```
 
-Hash for a password built with PBKDF2 (
-see [https://en.wikipedia.org/wiki/PBKDF2](https://en.wikipedia.org/wiki/PBKDF2)
-for more details) with lower case username as salt and 10000 iterations:
+If `-p` agrument is not provided (recommended) password for the user name
+will be generated.
 
-```python
-from pbkdf2 import crypt
-hash = crypt('P@ssw0rd', 'User@1'.lower(), 10000)
-hash # 235D461DCC778B54BDFE86CCCFB0E16C74B189704CC7A729EFC6A543CAAADB36 
-```
+### Deleting an Account
+
+To delete an account open password file in any text editor and delete the
+line with the user name.
