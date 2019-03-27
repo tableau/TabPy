@@ -11,6 +11,7 @@ from tabpy_server.handlers.util import hash_password
 
 logger = logging.getLogger(__name__)
 
+
 def build_cli_parser():
     parser = ArgumentParser(
         description=__doc__,
@@ -43,7 +44,7 @@ def build_cli_parser():
 
 def check_args(args):
     if (args.username is None) or (args.pwdfile is None):
-         return False
+        return False
 
     return True
 
@@ -61,7 +62,7 @@ def generate_password():
 def store_passwords_file(pwdfile, credentials):
     with open(pwdfile, 'wt') as f:
         for username, pwd in credentials.items():
-            f.write('%s %s' % (username, pwd))
+            f.write('%s %s\n' % (username, pwd))
     return True
 
 
@@ -76,7 +77,7 @@ def add_user(args, credentials):
     password = args.password
     logger.info('Adding username "%s" with password "%s"...' % 
                 (username, password))
-    credentials[username] = password
+    credentials[username] = hash_password(username, password)
 
     return store_passwords_file(args.pwdfile, credentials)
 
@@ -92,7 +93,7 @@ def update_user(args, credentials):
     password = args.password
     logger.info('Updating username "%s" password  to "%s"...' % 
                 (username, password))
-    credentials[username] = password
+    credentials[username] = hash_password(username, password)
     return store_passwords_file(args.pwdfile, credentials)
 
 

@@ -34,7 +34,7 @@ def hash_password(username, pwd):
                        password=pwd.encode(),
                        salt=salt.encode(),
                        iterations=10000)
-    return binascii.helify(hash)
+    return binascii.hexlify(hash).decode()
 
 
 def validate_basic_auth_credentials(username, pwd, credentials):

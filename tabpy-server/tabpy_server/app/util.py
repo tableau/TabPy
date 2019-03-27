@@ -38,6 +38,7 @@ def validate_cert(cert_file_path):
         log_and_raise(https_error +
                       'The certificate provided expired on {}.'.format(not_after), RuntimeError)
 
+
 def parse_pwd_file(pwd_file_name):
     '''
     Parses passwords file and returns set of credentials.
