@@ -44,9 +44,9 @@ connection scenario.
 
 ## Authentication
 
-TabPy supports basic access authentication (see 
+TabPy supports basic access authentication (see
 [https://en.wikipedia.org/wiki/Basic_access_authentication](https://en.wikipedia.org/wiki/Basic_access_authentication)
-for more details). 
+for more details).
 
 ### Enabling Authentication
 

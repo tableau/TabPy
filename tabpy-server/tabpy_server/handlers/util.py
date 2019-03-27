@@ -25,7 +25,7 @@ def hash_password(username, pwd):
     Returns
     -------
     str
-        Sting representation (hexidecimal) for PBKDF2 hash 
+        Sting representation (hexidecimal) for PBKDF2 hash
         for the password.
     '''
     salt = '_$salt@tabpy:%s$_' % username.lower()
