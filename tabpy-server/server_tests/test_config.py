@@ -17,31 +17,9 @@ def assert_raises_runtime_error(message, fn, args={}):
         assert err.args[0] == message
 
 
-def append_logger_settings_to_config_file(config_file):
-    config_file.write("[loggers]\n"
-                      "keys=root\n"
-                      "[handlers]\n"
-                      "keys=rotatingFileHandler\n"
-                      "[formatters]\n"
-                      "keys=rootFormatter\n"
-                      "[logger_root]\n"
-                      "level=ERROR\n"
-                      "handlers=rotatingFileHandler\n"
-                      "qualname=root\n"
-                      "propagete=0\n"
-                      "[handler_rotatingFileHandler]\n"
-                      "class=handlers.RotatingFileHandler\n"
-                      "level=ERROR\n"
-                      "formatter=rootFormatter\n"
-                      "args=('tabpy_server_tests_log.log', 'w', 1000000, 5)\n"
-                      "[formatter_rootFormatter]\n"
-                      "format=%(asctime)s [%(levelname)s] (%(filename)s:"
-                      "%(module)s:%(lineno)d): %(message)s\n"
-                      "datefmt=%Y-%m-%d,%H:%M:%S\n".encode())
-
-
 class TestConfigEnvironmentCalls(unittest.TestCase):
-
+    @patch('tabpy_server.app.app.TabPyApp._parse_cli_arguments',	
+        return_value=Namespace(config=None))
     @patch('tabpy_server.tabpy.TabPyState')
     @patch('tabpy_server.tabpy._get_state_from_file')
     @patch('tabpy_server.tabpy.shutil')
@@ -49,10 +27,11 @@ class TestConfigEnvironmentCalls(unittest.TestCase):
     @patch('tabpy_server.tabpy.os.path.exists', return_value=True)
     @patch('tabpy_server.tabpy.os.path.isfile', return_value=False)
     @patch('tabpy_server.tabpy.os')
-    def test_no_config_file(self, mock_os, mock_file_exists, mock_path_exists,
-                            mock_psws, mock_shutil, mock_management_util,
-                            mock_tabpy_state):
-        get_config(None)
+    def test_no_config_file(self, mock_os, mock_file_exists,
+                            mock_path_exists, mock_psws,
+                            mock_management_util, mock_tabpy_state,
+                            mock_parse_arguments):
+        TabPyApp(None)
 
         getenv_calls = [call('TABPY_PORT', 9004),
                         call('TABPY_QUERY_OBJECT_PATH', '/tmp/query_objects'),
@@ -65,31 +44,32 @@ class TestConfigEnvironmentCalls(unittest.TestCase):
         self.assertTrue(len(mock_management_util.mock_calls) > 0)
         mock_os.makedirs.assert_not_called()
 
-    @patch('tabpy_server.tabpy.TabPyState')
-    @patch('tabpy_server.tabpy._get_state_from_file')
-    @patch('tabpy_server.tabpy.shutil')
-    @patch('tabpy_server.tabpy.PythonServiceHandler')
-    @patch('tabpy_server.tabpy.os.path.exists', return_value=False)
-    @patch('tabpy_server.tabpy.os.path.isfile', return_value=False)
-    @patch('tabpy_server.tabpy.os')
+    @patch('tabpy_server.app.app.TabPyApp._parse_cli_arguments',
+           return_value=Namespace(config=None))
+    @patch('tabpy_server.app.app.TabPyState')
+    @patch('tabpy_server.app.app._get_state_from_file')
+    @patch('tabpy_server.app.app.PythonServiceHandler')
+    @patch('tabpy_server.app.app.os.path.exists', return_value=False)
+    @patch('tabpy_server.app.app.os.path.isfile', return_value=False)
+    @patch('tabpy_server.app.app.os')
     def test_no_state_ini_file_or_state_dir(self, mock_os, mock_file_exists,
                                             mock_path_exists, mock_psws,
-                                            mock_shutil, mock_management_util,
-                                            mock_tabpy_state):
-        get_config(None)
+                                            mock_management_util,
+                                            mock_tabpy_state,
+                                            mock_parse_arguments):
+        TabPyApp(None)
         self.assertEqual(len(mock_os.makedirs.mock_calls), 1)
 
 
 class TestPartialConfigFile(unittest.TestCase):
-    @patch('tabpy_server.tabpy.parse_arguments')
-    @patch('tabpy_server.tabpy.TabPyState')
-    @patch('tabpy_server.tabpy._get_state_from_file')
-    @patch('tabpy_server.tabpy.shutil')
-    @patch('tabpy_server.tabpy.PythonServiceHandler')
-    @patch('tabpy_server.tabpy.os.path.exists', return_value=True)
-    @patch('tabpy_server.tabpy.os')
-    def test_config_file_present(self, mock_os, mock_path_exists, mock_psws,
-                                 mock_shutil, mock_management_util,
+    @patch('tabpy_server.app.app.TabPyApp._parse_cli_arguments')
+    @patch('tabpy_server.app.app.TabPyState')
+    @patch('tabpy_server.app.app._get_state_from_file')
+    @patch('tabpy_server.app.app.PythonServiceHandler')
+    @patch('tabpy_server.app.app.os.path.exists', return_value=True)
+    @patch('tabpy_server.app.app.os')
+    def test_config_file_present(self, mock_os, mock_path_exists,
+                                 mock_psws, mock_management_util,
                                  mock_tabpy_state, mock_parse_arguments):
         config_file = NamedTemporaryFile(delete=False)
 
@@ -98,8 +78,7 @@ class TestPartialConfigFile(unittest.TestCase):
                           "TABPY_STATE_PATH = bar\n".encode())
         config_file.close()
 
-        mock_parse_arguments.return_value = Namespace(
-            config=config_file.name, port=None)
+        mock_parse_arguments.return_value = Namespace(config=config_file.name)
 
         mock_os.getenv.side_effect = [1234]
         mock_os.path.realpath.return_value = 'bar'
@@ -108,15 +87,14 @@ class TestPartialConfigFile(unittest.TestCase):
         getenv_calls = [call('TABPY_PORT', 9004)]
 
         mock_os.getenv.assert_has_calls(getenv_calls, any_order=True)
-        self.assertEqual(settings['port'], 1234)
-        self.assertEqual(settings['server_version'],
+        self.assertEqual(app.settings['port'], 1234)
+        self.assertEqual(app.settings['server_version'], 
                          open('VERSION').read().strip())
-        self.assertEquals(settings['bind_ip'], '0.0.0.0')
-        self.assertEquals(settings['upload_dir'], 'foo')
-        self.assertEquals(settings['state_file_path'], 'bar')
-        self.assertEqual(settings['transfer_protocol'], 'http')
-        self.assertTrue('certificate_file' not in settings)
-        self.assertTrue('key_file' not in settings)
+        self.assertEqual(app.settings['upload_dir'], 'foo')
+        self.assertEqual(app.settings['state_file_path'], 'bar')
+        self.assertEqual(app.settings['transfer_protocol'], 'http')
+        self.assertTrue('certificate_file' not in app.settings)
+        self.assertTrue('key_file' not in app.settings)
 
         os.remove(config_file.name)
 
@@ -140,14 +118,7 @@ class TestTransferProtocolValidation(unittest.TestCase):
 
     def setUp(self):
         os.chdir(self.tabpy_cwd)
-        self.fp = NamedTemporaryFile(delete=False)
-        self.config_name = self.fp.name
-        append_logger_settings_to_config_file(self.fp)
-
-        patcher = patch('tabpy_server.tabpy.parse_arguments',
-                        return_value=Namespace(config=self.fp.name, port=None))
-        patcher.start()
-        self.addCleanup(patcher.stop)
+        self.fp = NamedTemporaryFile(mode='w+t', delete=False)
 
     def tearDown(self):
         os.chdir(self.cwd)
