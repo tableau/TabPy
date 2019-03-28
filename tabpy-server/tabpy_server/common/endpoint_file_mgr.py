@@ -28,13 +28,10 @@ def _check_endpoint_name(name):
         log_and_raise("Endpoint name cannot be empty", ValueError)
 
     if not _name_checker.match(name):
-<<<<<<< HEAD
-        log_and_raise('Endpoint name can only contain: a-z, A-Z, 0-9,'
-            ' underscore, hyphens and spaces.', ValueError)
-=======
-        raise ValueError('Endpoint name can only contain: a-z, A-Z, 0-9,'
-                         ' underscore, hyphens and spaces.')
->>>>>>> fab86dd... Merge pull request #206 from WillAyd/server-linting
+        log_and_raise(
+            'Endpoint name can only contain: a-z, A-Z, 0-9,'
+            ' underscore, hyphens and spaces.',
+            ValueError)
 
 
 def grab_files(directory):
