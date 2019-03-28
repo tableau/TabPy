@@ -4,11 +4,6 @@ try:
     from ConfigParser import ConfigParser as _ConfigParser
 except ImportError:
     from configparser import ConfigParser as _ConfigParser
-try:
-    from StringIO import StringIO as _StringIO
-except ImportError:
-    from io import StringIO as _StringIO
-from dateutil import parser
 from datetime import datetime, timedelta, tzinfo
 from time import mktime
 
@@ -20,14 +15,13 @@ def write_state_config(state, settings):
         state_path = settings['state_file_path']
     else:
         raise ValueError('TABPY_STATE_PATH is not set')
-    
+
     logger.debug("State path is {}".format(state_path))
     state_key = os.path.join(state_path, 'state.ini')
     tmp_state_file = state_key
 
     with open(tmp_state_file, 'w') as f:
         state.write(f)
-
 
 
 def _get_state_from_file(state_path):
@@ -42,11 +36,15 @@ def _get_state_from_file(state_path):
     config.read(tmp_state_file)
 
     if not config.has_section('Service Info'):
-        raise ValueError("Config error: Expected 'Service Info' section in %s" % (tmp_state_file,))
+        raise ValueError("Config error: Expected 'Service Info' "
+                         "section in %s" % (tmp_state_file,))
 
     return config
 
+
 _ZERO = timedelta(0)
+
+
 class _UTC(tzinfo):
     """
     A UTC datetime.tzinfo class modeled after the pytz library. It includes a
@@ -75,7 +73,9 @@ class _UTC(tzinfo):
     def __str__(self):
         return "UTC"
 
+
 _utc = _UTC()
+
 
 def _dt_to_utc_timestamp(t):
     if t.tzname() == 'UTC':
@@ -84,5 +84,3 @@ def _dt_to_utc_timestamp(t):
         return mktime(t.timetuple())
     else:
         raise ValueError('Only local time and UTC time is supported')
-
-

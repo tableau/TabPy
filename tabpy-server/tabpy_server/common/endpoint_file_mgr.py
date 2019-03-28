@@ -15,7 +15,7 @@ from re import compile as _compile
 
 logger = logging.getLogger(__name__)
 
-_name_checker = _compile('^[a-zA-Z0-9-_\ ]+$')
+_name_checker = _compile(r'^[a-zA-Z0-9-_\ ]+$')
 
 
 def _check_endpoint_name(name):
@@ -29,7 +29,7 @@ def _check_endpoint_name(name):
 
     if not _name_checker.match(name):
         raise ValueError('Endpoint name can only contain: a-z, A-Z, 0-9,'
-            ' underscore, hyphens and spaces.')
+                         ' underscore, hyphens and spaces.')
 
 
 def grab_files(directory):
@@ -48,12 +48,13 @@ def grab_files(directory):
             elif os.path.isfile(full_path):
                 yield full_path
 
+
 def get_local_endpoint_file_path(name, version, query_path):
     _check_endpoint_name(name)
     return os.path.join(query_path, name, str(version))
 
 
-def cleanup_endpoint_files(name, query_path, retain_versions = None):
+def cleanup_endpoint_files(name, query_path, retain_versions=None):
     '''
     Cleanup the disk space a certain endpiont uses.
 
@@ -63,8 +64,9 @@ def cleanup_endpoint_files(name, query_path, retain_versions = None):
         The endpoint name
 
     retain_version : int, optional
-        If given, then all files for this endpoint are removed except the folder
-        for the given version, otherwise, all files for that endpoint are removed.
+        If given, then all files for this endpoint are removed except the
+        folder for the given version, otherwise, all files for that endpoint
+        are removed.
     '''
     _check_endpoint_name(name)
     local_dir = os.path.join(query_path, name)
@@ -84,5 +86,6 @@ def cleanup_endpoint_files(name, query_path, retain_versions = None):
 
         for file_or_dir in os.listdir(local_dir):
             candidate_dir = os.path.join(local_dir, file_or_dir)
-            if os.path.isdir(candidate_dir) and candidate_dir not in retain_folders:
+            if os.path.isdir(candidate_dir) and (
+                    candidate_dir not in retain_folders):
                 shutil.rmtree(candidate_dir)

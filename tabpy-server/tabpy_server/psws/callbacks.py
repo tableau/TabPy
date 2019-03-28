@@ -182,4 +182,5 @@ def on_state_change(settings):
 
     except Exception as e:
         err_msg = format_exception(e, 'on_state_change')
-        logger.error("Error submitting update model request: error={}".format(err_msg))
+        logger.error(
+            "Error submitting update model request: error={}".format(err_msg))
