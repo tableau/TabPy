@@ -16,5 +16,4 @@ tested with TabPy instances, but are not guaranteed to be 100% supported.
 
  TabPy release | Python | Operating System | Owner | When confirmed to work | Comments
 -------------- |------- |----------------- |------ |----------------------- |----------
-0.3.2 | 3.6.7 | Ubuntu 18.04 | @tableau | 2019-03-26 | Python 3.6.7 x64 | 
-Ubuntu 18.04 ships with Python 3.6.7
+0.3.2 | 3.6.7 | Ubuntu 18.04 | @tableau | 2019-03-26 | Python 3.6.7 x64
