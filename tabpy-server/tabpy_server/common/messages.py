@@ -3,6 +3,7 @@ import abc
 from abc import ABCMeta
 from collections import namedtuple
 
+
 class Msg(object):
     """
     An abstract base class for all messages used for communicating between
@@ -36,98 +37,125 @@ class Msg(object):
         return eval(type_str)(**d)
 
 
-class LoadSuccessful(namedtuple(
-    'LoadSuccessful', ['uri', 'path', 'version', 'is_update', 'endpoint_type']), Msg):
+class LoadSuccessful(namedtuple('LoadSuccessful', [
+            'uri', 'path', 'version', 'is_update', 'endpoint_type']), Msg):
     __slots__ = ()
 
-class LoadFailed(namedtuple('LoadFailed', ['uri', 'version', 'error_msg']), Msg):
+
+class LoadFailed(namedtuple('LoadFailed', [
+        'uri', 'version', 'error_msg']), Msg):
     __slots__ = ()
 
-class LoadInProgress(namedtuple(
-    'LoadInProgress', ['uri', 'path', 'version', 'is_update', 'endpoint_type']), Msg):
+
+class LoadInProgress(namedtuple('LoadInProgress', [
+        'uri', 'path', 'version', 'is_update', 'endpoint_type']), Msg):
     __slots__ = ()
+
 
 class Query(namedtuple('Query', ['uri', 'params']), Msg):
     __slots__ = ()
+
 
 class QuerySuccessful(namedtuple(
         'QuerySuccessful', ['uri', 'version', 'response']), Msg):
     __slots__ = ()
 
-class LoadObject(namedtuple(
-        'LoadObject', ['uri', 'url', 'version', 'is_update', 'endpoint_type']), Msg):
+
+class LoadObject(namedtuple('LoadObject', [
+        'uri', 'url', 'version', 'is_update', 'endpoint_type']), Msg):
     __slots__ = ()
+
 
 class DeleteObjects(namedtuple('DeleteObjects', ['uris']), Msg):
     __slots__ = ()
+
 
 # Used for testing to flush out objects
 class FlushObjects(namedtuple('FlushObjects', []), Msg):
     __slots__ = ()
 
+
 class ObjectsDeleted(namedtuple('ObjectsDeleted', ['uris']), Msg):
     __slots__ = ()
+
 
 class ObjectsFlushed(namedtuple(
         'ObjectsFlushed', ['n_before', 'n_after']), Msg):
     __slots__ = ()
 
+
 class CountObjects(namedtuple('CountObjects', []), Msg):
     __slots__ = ()
+
 
 class ObjectCount(namedtuple('ObjectCount', ['count']), Msg):
     __slots__ = ()
 
+
 class ListObjects(namedtuple('ListObjects', []), Msg):
     __slots__ = ()
+
 
 class ObjectList(namedtuple('ObjectList', ['objects']), Msg):
     __slots__ = ()
 
+
 class UnknownURI(namedtuple('UnknownURI', ['uri']), Msg):
     __slots__ = ()
+
 
 class UnknownMessage(namedtuple('UnknownMessage', ['msg']), Msg):
     __slots__ = ()
 
-class DownloadSkipped(namedtuple('DownloadSkipped', ['uri', 'version', 'msg','host']),
-                      Msg):
+
+class DownloadSkipped(namedtuple('DownloadSkipped', [
+        'uri', 'version', 'msg', 'host']), Msg):
     __slots__ = ()
+
 
 class QueryFailed(namedtuple('QueryFailed', ['uri', 'error']), Msg):
     __slots__ = ()
 
+
 class QueryError(namedtuple('QueryError', ['uri', 'error']), Msg):
     __slots__ = ()
+
 
 class CheckHealth(namedtuple('CheckHealth', []), Msg):
     __slots__ = ()
 
+
 class Healthy(namedtuple('Healthy', []), Msg):
     __slots__ = ()
+
 
 class Unhealthy(namedtuple('Unhealthy', []), Msg):
     __slots__ = ()
 
+
 class Ping(namedtuple('Ping', ['id']), Msg):
     __slots__ = ()
+
 
 class Pong(namedtuple('Pong', ['id']), Msg):
     __slots__ = ()
 
+
 class Listening(namedtuple('Listening', []), Msg):
     __slots__ = ()
+
 
 class EngineFailure(namedtuple('EngineFailure', ['error']), Msg):
     __slots__ = ()
 
+
 class FlushLogs(namedtuple('FlushLogs', []), Msg):
     __slots__ = ()
+
 
 class LogsFlushed(namedtuple('LogsFlushed', []), Msg):
     __slots__ = ()
 
-class ServiceError(namedtuple(
-        'ServiceError', ['error']), Msg):
-    __slots__ = ()
 
+class ServiceError(namedtuple('ServiceError', ['error']), Msg):
+    __slots__ = ()

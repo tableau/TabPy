@@ -177,4 +177,5 @@ def on_state_change(settings, tabpy_state, python_service):
 
     except Exception as e:
         err_msg = format_exception(e, 'on_state_change')
-        logger.error("Error submitting update model request: error={}".format(err_msg))
+        logger.error(
+            "Error submitting update model request: error={}".format(err_msg))

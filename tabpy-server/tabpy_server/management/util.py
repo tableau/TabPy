@@ -4,10 +4,13 @@ try:
     from ConfigParser import ConfigParser as _ConfigParser
 except ImportError:
     from configparser import ConfigParser as _ConfigParser
+<<<<<<< HEAD
 try:
     from StringIO import StringIO as _StringIO
 except ImportError:
     from io import StringIO as _StringIO
+=======
+>>>>>>> fab86dd... Merge pull request #206 from WillAyd/server-linting
 from datetime import datetime, timedelta, tzinfo
 from tabpy_server.app.ConfigParameters import ConfigParameters
 from tabpy_server.app.util import log_and_raise
@@ -20,10 +23,14 @@ def write_state_config(state, settings):
     if 'state_file_path' in settings:
         state_path = settings['state_file_path']
     else:
+<<<<<<< HEAD
         log_and_raise(
             '{} is not set'.format(
                 ConfigParameters.TABPY_STATE_PATH),
             ValueError)
+=======
+        raise ValueError('TABPY_STATE_PATH is not set')
+>>>>>>> fab86dd... Merge pull request #206 from WillAyd/server-linting
 
     logger.debug("State path is {}".format(state_path))
     state_key = os.path.join(state_path, 'state.ini')
@@ -47,9 +54,14 @@ def _get_state_from_file(state_path):
     config.read(tmp_state_file)
 
     if not config.has_section('Service Info'):
+<<<<<<< HEAD
         log_and_raise(
             "Config error: Expected 'Service Info' section in %s" %
             (tmp_state_file,), ValueError)
+=======
+        raise ValueError("Config error: Expected 'Service Info' "
+                         "section in %s" % (tmp_state_file,))
+>>>>>>> fab86dd... Merge pull request #206 from WillAyd/server-linting
 
     return config
 
@@ -96,4 +108,8 @@ def _dt_to_utc_timestamp(t):
     elif not t.tzinfo:
         return mktime(t.timetuple())
     else:
+<<<<<<< HEAD
         log_and_raise('Only local time and UTC time is supported', ValueError)
+=======
+        raise ValueError('Only local time and UTC time is supported')
+>>>>>>> fab86dd... Merge pull request #206 from WillAyd/server-linting
