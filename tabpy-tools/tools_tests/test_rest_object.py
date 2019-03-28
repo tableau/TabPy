@@ -38,7 +38,7 @@ class TestRESTObject(unittest.TestCase):
         self.assertEqual(set(f.keys()), set(['f', 'i', 's']))
         self.assertEqual(set(f.values()), set([6.0, 3, "hello!"]))
         self.assertEqual(set(f.items()), set(
-            [('f',6.0),('i',3), ('s',"hello!")]))
+            [('f', 6.0), ('i', 3), ('s', "hello!")]))
 
         f.e = "a"
         self.assertEqual(f.e, "a")

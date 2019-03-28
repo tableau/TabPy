@@ -99,7 +99,7 @@ def generate_schema(input, output, input_description=None, output_description=No
                    'properties': {'y': {'type': 'integer', 'description': 'value of y'},
                                   'x': {'type': 'integer', 'description': 'value of x'}}},
          'output': {'type': 'integer', 'description': 'x times y'}}
-    ''' # noqa: E501
+    '''  # noqa: E501
     input_schema = _generate_schema_from_example_and_description(
         input, input_description)
     output_schema = _generate_schema_from_example_and_description(

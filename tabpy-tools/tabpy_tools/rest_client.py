@@ -122,6 +122,7 @@ class AliasEndpoint(Endpoint):
         super(AliasEndpoint, self).__init__(**kwargs)
         self.type = 'alias'
 
+
 class RESTServiceClient(object):
     """A thin client for the REST Service."""
 
@@ -141,9 +142,8 @@ class RESTServiceClient(object):
                 'Mixing of keyword arguments and positional arguments '
                 'when querying an endpoint is not supported.')
         return self.service_client.POST('query/'+name,
-                                        data={'data':args or kwargs},
+                                        data={'data': args or kwargs},
                                         timeout=self.query_timeout)
-
 
     def get_endpoint_upload_destination(self):
         """Returns a dict representing where endpoint data should be uploaded.
