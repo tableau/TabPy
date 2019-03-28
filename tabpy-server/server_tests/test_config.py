@@ -19,14 +19,13 @@ def assert_raises_runtime_error(message, fn, args={}):
 
 class TestConfigEnvironmentCalls(unittest.TestCase):
     @patch('tabpy_server.app.app.TabPyApp._parse_cli_arguments',	
-        return_value=Namespace(config=None))
-    @patch('tabpy_server.tabpy.TabPyState')
-    @patch('tabpy_server.tabpy._get_state_from_file')
-    @patch('tabpy_server.tabpy.shutil')
-    @patch('tabpy_server.tabpy.PythonServiceHandler')
-    @patch('tabpy_server.tabpy.os.path.exists', return_value=True)
-    @patch('tabpy_server.tabpy.os.path.isfile', return_value=False)
-    @patch('tabpy_server.tabpy.os')
+           return_value=Namespace(config=None))
+    @patch('tabpy_server.tabpy.app.app.TabPyState')
+    @patch('tabpy_server.tabpy.app.app._get_state_from_file')
+    @patch('tabpy_server.tabpy.app.app.PythonServiceHandler')
+    @patch('tabpy_server.tabpy.app.app.os.path.exists', return_value=True)
+    @patch('tabpy_server.tabpy.app.app.os.path.isfile', return_value=False)
+    @patch('tabpy_server.tabpy.app.app.os')
     def test_no_config_file(self, mock_os, mock_file_exists,
                             mock_path_exists, mock_psws,
                             mock_management_util, mock_tabpy_state,
@@ -178,7 +177,7 @@ class TestTransferProtocolValidation(unittest.TestCase):
         assert_raises_runtime_error(
             'Error using HTTPS: The parameter(s) TABPY_CERTIFICATE_FILE and '
             'TABPY_KEY_FILE must point to an existing file.',
-            get_config, {self.config_name})
+            TabPyApp, {self.config_name})
 
     @patch('tabpy_server.app.app.os.path')
     def test_https_cert_file_not_found(self, mock_path):
@@ -192,8 +191,9 @@ class TestTransferProtocolValidation(unittest.TestCase):
             x, {self.fp.name, 'bar'})
 
         assert_raises_runtime_error(
-            'Error using HTTPS: The parameter(s) TABPY_CERTIFICATE_FILE must '
-            'point to an existing file.', get_config, {self.config_name})
+            'Error using HTTPS: The parameter(s) TABPY_CERTIFICATE_FILE '
+            'must point to an existing file.',
+            TabPyApp, {self.fp.name})
 
     @patch('tabpy_server.app.app.os.path')
     def test_https_key_file_not_found(self, mock_path):
@@ -207,8 +207,9 @@ class TestTransferProtocolValidation(unittest.TestCase):
             x, {self.fp.name, 'foo'})
 
         assert_raises_runtime_error(
-            'Error using HTTPS: The parameter(s) TABPY_KEY_FILE must point to '
-            'an existing file.', get_config, {self.config_name})
+            'Error using HTTPS: The parameter(s) TABPY_CERTIFICATE_FILE '
+            'and TABPY_KEY_FILE must point to an existing file.',
+            TabPyApp, {self.fp.name})
 
     @patch('tabpy_server.app.app.os.path.isfile', return_value=True)
     @patch('tabpy_server.app.util.validate_cert')
