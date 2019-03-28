@@ -52,15 +52,15 @@ def parse_pwd_file(pwd_file_name):
     -------
     succeeded : bool
         True if specified file was parsed successfully.
-        False if there were ane issues with parsing specified file.
+        False if there were any issues with parsing specified file.
 
     credentials : dict
         Credentials from the file. Empty if succeeded is False.
     '''
-    logger.info('Parsing passwords file %s...' % pwd_file_name)
+    logger.info('Parsing passwords file {}...'.format(pwd_file_name))
 
     if not os.path.isfile(pwd_file_name):
-        logger.fatal('Passwords file %s not found' % pwd_file_name)
+        logger.fatal('Passwords file {} not found'.format(pwd_file_name))
         return False, {}
 
     credentials = {}

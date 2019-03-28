@@ -29,7 +29,7 @@ class TestEvaluationPlainHandlerWithAuth(AsyncHTTPTestCase):
         password = 'password'
         cls.pwd_file.write('{} {}\n'.format(
             username,
-            hash_password(username, 'password')))
+            hash_password(username, password)))
         cls.pwd_file.close()
 
         # create state.ini dir and file

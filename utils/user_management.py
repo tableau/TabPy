@@ -123,7 +123,7 @@ def process_command(args, credentials):
     elif args.command == 'update':
         return update_user(args, credentials)
     else:
-        logger.error('Uknown command "%s"' % args.command)
+        logger.error('Uknown command "{}"'.format(args.command))
         return False
 
 

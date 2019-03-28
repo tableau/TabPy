@@ -57,9 +57,15 @@ configuration file with a fully qualified name:
 TABPY_PWD_FILE = c:\path\to\password\file.txt
 ```
 
+### Password File
+
 Password file is a text file containing usernames and hashed passwords
 per line separated by space. For username only ASCII characters
 supported.
+
+**It is highly recommended to restrict access to the password file
+with hosting OS mechanisms. Ideally the file should only be accessible
+for reading with account TabPy runs as and TabPy admin account.**
 
 There is `utils/user_management.py` utility to operate with
 accounts in the password file. Run `utils/user_management.py -h` to
