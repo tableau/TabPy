@@ -23,12 +23,9 @@ logger = logging.getLogger(__name__)
 
 _name_checker = compile('^[a-zA-Z0-9-_\ ]+$')
 
-if sys.version_info.major == 3:
-    unicode = str
-
 
 def _check_endpoint_type(name):
-    if not isinstance(name, (str, unicode)):
+    if not isinstance(name, str):
         raise TypeError("Endpoint name must be a string or unicode")
 
     if name == '':

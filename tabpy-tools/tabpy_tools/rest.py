@@ -14,7 +14,7 @@ class ResponseError(Exception):
     """Raised when we get an unexpected response."""
 
     def __init__(self, response):
-        super(ResponseError, self).__init__("Unexpected server response")
+        super().__init__("Unexpected server response")
         self.response = response
         self.status_code = response.status_code
 
@@ -214,7 +214,7 @@ class RESTProperty(object):
         delattr(instance, self.name)
 
 
-class _RESTMetaclass(type(_MutableMapping)):
+class _RESTMetaclass(abc.ABCMeta):
     """The metaclass for RESTObjects.
 
     This will look into the attributes for the class. If they are a
@@ -226,7 +226,7 @@ class _RESTMetaclass(type(_MutableMapping)):
     """
 
     def __init__(self, name, bases, dict):
-        super(_RESTMetaclass, self).__init__(name, bases, dict)
+        super().__init__(name, bases, dict)
 
         self.__rest__ = set()
         for base in bases:

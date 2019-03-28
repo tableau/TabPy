@@ -20,7 +20,7 @@ class CustomQueryObject(_QueryObject):
             The description of the custom query object
 
         '''
-        super(CustomQueryObject, self).__init__(description)
+        super().__init__(description)
 
         self.custom_query = query
 
