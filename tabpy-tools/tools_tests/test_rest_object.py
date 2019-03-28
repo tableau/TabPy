@@ -3,6 +3,7 @@ import sys
 
 from tabpy_tools.rest import RESTObject, RESTProperty, enum
 
+
 class TestRESTObject(unittest.TestCase):
 
     def test_new_class(self):
@@ -48,11 +49,11 @@ class TestRESTObject(unittest.TestCase):
             f.e = 'fubar'
 
         f.f = sys.float_info.max
-        self.assertEquals(f.f,sys.float_info.max)
+        self.assertEqual(f.f, sys.float_info.max)
         f.f = float("inf")
-        self.assertEquals(f.f, float("inf"))
+        self.assertEqual(f.f, float("inf"))
         f.f = None
-        self.assertEquals(f.f, None)
+        self.assertEqual(f.f, None)
 
         class BarObject(FooObject):
             x = RESTProperty(str)
@@ -62,4 +63,3 @@ class TestRESTObject(unittest.TestCase):
         self.assertEqual(f.i, 3)
         self.assertEqual(f.s, "hello!")
         self.assertEqual(f.x, "5")
-
