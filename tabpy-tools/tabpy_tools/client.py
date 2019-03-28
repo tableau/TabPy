@@ -21,7 +21,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-_name_checker = compile('^[a-zA-Z0-9-_\ ]+$')
+_name_checker = compile(r'^[\w -]+$')
 
 if sys.version_info.major == 3:
     unicode = str
@@ -37,11 +37,13 @@ def _check_endpoint_type(name):
 
 def _check_hostname(name):
     _check_endpoint_type(name)
-    hostname_checker = compile('^http(s)?://[a-zA-Z0-9-_\.]+(/)?(:[0-9]+)?(/)?$')
+    hostname_checker = compile(
+        r'^http(s)?://[a-zA-Z0-9-_\.]+(/)?(:[0-9]+)?(/)?$')
 
     if not hostname_checker.match(name):
-        raise ValueError('endpoint name {} should be in http(s)://<hostname>[:<port>] and hostname may consist only of:'
-                         ' a-z, A-Z, 0-9, underscore and hyphens.'.format(name))
+        raise ValueError('endpoint name {} should be in http(s)://<hostname>'
+                         '[:<port>] and hostname may consist only of: '
+                         'a-z, A-Z, 0-9, underscore and hyphens.'.format(name))
 
 
 def _check_endpoint_name(name):
@@ -62,8 +64,8 @@ class Client(object):
         """
         Connects to a running server.
 
-        The class constructor takes a server address which is then used to connect
-        for all subsequent member APIs.
+        The class constructor takes a server address which is then used to
+        connect for all subsequent member APIs.
 
         Parameters
         ----------
@@ -249,7 +251,8 @@ class Client(object):
             description = 'Alias for %s' % existing_endpoint_name
 
         if existing_endpoint_name not in self.get_endpoints():
-            raise ValueError("Endpoint '%s' does not exist." % existing_endpoint_name)
+            raise ValueError(
+                "Endpoint '%s' does not exist." % existing_endpoint_name)
 
         # Can only overwrite existing alias
         existing_endpoint = self.get_endpoints().get(alias)
@@ -264,7 +267,8 @@ class Client(object):
 
         if existing_endpoint:
             if existing_endpoint.type != 'alias':
-                raise RuntimeError('Name "%s" is already in use by another endpoint.' % alias)
+                raise RuntimeError(
+                    'Name "%s" is already in use by another endpoint.' % alias)
 
             endpoint.version = existing_endpoint.version + 1
 
@@ -295,8 +299,8 @@ class Client(object):
 
         schema : dict, optional
             The schema of the function, containing information about input and
-            output parameters, and respective examples. Providing a schema for a
-            deployed function lets other users of the service discover how to
+            output parameters, and respective examples. Providing a schema for
+            a deployed function lets other users of the service discover how to
             use it. Refer to schema.generate_schema for more information on
             how to generate the schema.
 
@@ -314,9 +318,10 @@ class Client(object):
         endpoint = self.get_endpoints().get(name)
         if endpoint:
             if not override:
-                raise RuntimeError("An endpoint with that name (%r) already"
-                                   " exists. Use 'override = True' to force update "
-                                   "an existing endpoint." % name)
+                raise RuntimeError(
+                    "An endpoint with that name (%r) already exists. Use "
+                    "'override = True' to force update an existing "
+                    "endpoint." % name)
 
             version = endpoint.version + 1
         else:
@@ -435,8 +440,7 @@ class Client(object):
         expected, then it will return. Uses time.sleep().
         """
         logger.info("Waiting for endpoint %r to deploy to version %r",
-                     endpoint_name,
-                     version)
+                    endpoint_name, version)
         start = time.time()
         while True:
             ep_status = self.get_status()
@@ -444,7 +448,7 @@ class Client(object):
                 ep = ep_status[endpoint_name]
             except KeyError:
                 logger.info("Endpoint %r doesn't exist in endpoints yet",
-                             endpoint_name)
+                            endpoint_name)
             else:
                 logger.info("ep=%r", ep)
 
@@ -507,13 +511,12 @@ class Client(object):
         Returns
         -------
         dependent endpoints : dict
-            if endpoint_name is given, returns a list of endpoint names that depend
-            on the given endpoint.
+            if endpoint_name is given, returns a list of endpoint names that
+            depend on the given endpoint.
 
-            If endpoint_name is not given, returns a dictionary where key is the
-            endpoint name and value is a set of endpoints that depend on the
-            endpoint specified by the key.
-
+            If endpoint_name is not given, returns a dictionary where key is
+            the endpoint name and value is a set of endpoints that depend on
+            the endpoint specified by the key.
         '''
         endpoints = self.get_endpoints()
 

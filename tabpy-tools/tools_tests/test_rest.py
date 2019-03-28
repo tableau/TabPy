@@ -14,7 +14,7 @@ from tabpy_tools.rest import (RequestsNetworkWrapper, ServiceClient)
 class TestRequestsNetworkWrapper(unittest.TestCase):
 
     def test_init(self):
-        rnw = RequestsNetworkWrapper()
+        RequestsNetworkWrapper()
 
     def test_init_with_session(self):
         session = {}
@@ -52,7 +52,7 @@ class TestRequestsNetworkWrapper(unittest.TestCase):
         data = {'cat'}
         try:
             self.assertEqual(self.rnw.GET(url, data), 'json')
-        except:
+        except Exception:  # TODO: refactor this...
             e = sys.exc_info()[0]
             self.assertEquals(e, TypeError)
 
@@ -61,7 +61,7 @@ class TestRequestsNetworkWrapper(unittest.TestCase):
         data = {'foo': 'bar'}
         try:
             self.assertEqual(self.rnw.GET(url, data), 'json')
-        except:
+        except Exception:  # TODO: refactor this...
             e = sys.exc_info()[0]
             self.assertEquals(e, TypeError)
 
@@ -69,17 +69,17 @@ class TestRequestsNetworkWrapper(unittest.TestCase):
         url = 'abc'
         data = {'foo': 'bar'}
         self.assertEqual(self.rnw.POST(url, data), 'json')
-        self.rnw.session.post.assert_called_once_with(url,
-                                                      data=json.dumps(data),
-                                                      headers={'content-type': 'application/json'},
-                                                      timeout=None)
+        self.rnw.session.post.assert_called_once_with(
+            url, data=json.dumps(data), headers={
+                'content-type': 'application/json'},
+            timeout=None)
 
     def test_POST_InvalidURL(self):
         url = ''
         data = {'foo': 'bar'}
         try:
             self.assertEqual(self.rnw.POST(url, data), 'json')
-        except:
+        except Exception:  # TODO: refactor this...
             e = sys.exc_info()[0]
             self.assertEquals(e, TypeError)
 
@@ -88,7 +88,7 @@ class TestRequestsNetworkWrapper(unittest.TestCase):
         data = {'cat'}
         try:
             self.assertEqual(self.rnw.POST(url, data), 'json')
-        except:
+        except Exception:  # TODO: refactor this...
             e = sys.exc_info()[0]
             self.assertEquals(e, TypeError)
 
@@ -96,17 +96,17 @@ class TestRequestsNetworkWrapper(unittest.TestCase):
         url = 'abc'
         data = {'foo': 'bar'}
         self.assertEqual(self.rnw.PUT(url, data), 'json')
-        self.rnw.session.put.assert_called_once_with(url,
-                                                     data=json.dumps(data),
-                                                     headers={'content-type': 'application/json'},
-                                                     timeout=None)
+        self.rnw.session.put.assert_called_once_with(
+            url, data=json.dumps(data), headers={
+                'content-type': 'application/json'},
+            timeout=None)
 
     def test_PUT_InvalidData(self):
         url = 'url'
         data = {'cat'}
         try:
             self.assertEqual(self.rnw.PUT(url, data), 'json')
-        except:
+        except Exception:  # TODO: refactor this...
             e = sys.exc_info()[0]
             self.assertEquals(e, TypeError)
 
@@ -115,7 +115,7 @@ class TestRequestsNetworkWrapper(unittest.TestCase):
         data = {'foo:bar'}
         try:
             self.assertEqual(self.rnw.PUT(url, data), 'json')
-        except:
+        except Exception:  # TODO: refactor this...
             e = sys.exc_info()[0]
             self.assertEquals(e, TypeError)
 
@@ -132,7 +132,7 @@ class TestRequestsNetworkWrapper(unittest.TestCase):
         data = {'cat'}
         try:
             self.assertEqual(self.rnw.DELETE(url, data), 'json')
-        except:
+        except Exception:  # TODO: refactor this...
             e = sys.exc_info()[0]
             self.assertEquals(e, TypeError)
 
@@ -141,7 +141,7 @@ class TestRequestsNetworkWrapper(unittest.TestCase):
         data = {'foo:bar'}
         try:
             self.assertEqual(self.rnw.DELETE(url, data), 'json')
-        except:
+        except Exception:  # TODO: refactor this...
             e = sys.exc_info()[0]
             self.assertEquals(e, TypeError)
 
