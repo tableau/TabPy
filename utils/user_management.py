@@ -5,7 +5,7 @@ Utility for managing user names and passwords for TabPy.
 from argparse import ArgumentParser
 import logging
 import os
-import random
+import secrets
 import sys
 from tabpy_server.app.util import parse_pwd_file
 from tabpy_server.handlers.util import hash_password
@@ -70,7 +70,7 @@ def generate_password(pwd_len=16):
         upper_case_letters + upper_case_letters +\
         digits + digits +\
         punctuation
-    pwd = ''.join(random.choice(password_chars) for i in range(pwd_len))
+    pwd = ''.join(secrets.choice(password_chars) for i in range(pwd_len))
     logger.info('Generated password: "{}"'.format(pwd))
     return pwd
 
