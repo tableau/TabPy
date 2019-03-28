@@ -1,5 +1,4 @@
 import unittest
-import json
 import logging
 
 try:
@@ -8,8 +7,6 @@ except ImportError:
     from mock import Mock
 
 from tabpy_tools.client import Client
-
-import requests
 
 
 class TestClient(unittest.TestCase):
@@ -36,17 +33,17 @@ class TestClient(unittest.TestCase):
 
         # valid name tests
         with self.assertRaises(ValueError):
-            c = Client('')
+            Client('')
         with self.assertRaises(TypeError):
-            c = Client(1.0)
+            Client(1.0)
         with self.assertRaises(ValueError):
-            c = Client("*#")
+            Client("*#")
         with self.assertRaises(TypeError):
-            c = Client()
+            Client()
         with self.assertRaises(ValueError):
-            c = Client("http:/www.example.com/")
+            Client("http:/www.example.com/")
         with self.assertRaises(ValueError):
-            c = Client("httpx://www.example.com:9004")
+            Client("httpx://www.example.com:9004")
 
     def test_get_status(self):
         self.client._service.get_status.return_value = "asdf"
@@ -68,7 +65,8 @@ class TestClient(unittest.TestCase):
 
         self.assertEqual(self.client.query("foo", a=1, b=2, c=3), "ok")
 
-        self.client._service.query.sssert_called_once_with("foo", a=1, b=2, c=3)
+        self.client._service.query.sssert_called_once_with(
+            "foo", a=1, b=2, c=3)
 
     def test_get_endpoints(self):
         self.client._service.get_endpoints.return_value = "foo"

@@ -31,18 +31,19 @@ class TestRESTObject(unittest.TestCase):
         with self.assertRaises(KeyError):
             f['cat']
         with self.assertRaises(KeyError):
-            f['cat']=5
+            f['cat'] = 5
 
         self.assertEqual(len(f), 3)
         self.assertEqual(set(f), set(['f', 'i', 's']))
         self.assertEqual(set(f.keys()), set(['f', 'i', 's']))
         self.assertEqual(set(f.values()), set([6.0, 3, "hello!"]))
-        self.assertEqual(set(f.items()), set([('f',6.0),('i',3), ('s',"hello!")]))
+        self.assertEqual(set(f.items()), set(
+            [('f', 6.0), ('i', 3), ('s', "hello!")]))
 
         f.e = "a"
         self.assertEqual(f.e, "a")
         self.assertEqual(f['e'], "a")
-        f['e']='b'
+        f['e'] = 'b'
         self.assertEqual(f.e, "b")
 
         with self.assertRaises(ValueError):
