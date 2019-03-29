@@ -87,8 +87,8 @@ class TestPartialConfigFile(unittest.TestCase):
 
         mock_os.getenv.assert_has_calls(getenv_calls, any_order=True)
         self.assertEqual(app.settings['port'], 1234)
-        self.assertEqual(app.settings['server_version'], open(
-            'VERSION').read().strip())
+        self.assertEqual(app.settings['server_version'],
+                         open('VERSION').read().strip())
         self.assertEqual(app.settings['upload_dir'], 'foo')
         self.assertEqual(app.settings['state_file_path'], 'bar')
         self.assertEqual(app.settings['transfer_protocol'], 'http')
@@ -171,12 +171,12 @@ class TestTransferProtocolValidation(unittest.TestCase):
                       "TABPY_KEY_FILE = bar")
         self.fp.close()
 
-        mock_path.isfile.side_effect =\
-            lambda x: self.mock_isfile(x, {self.fp.name})
+        mock_path.isfile.side_effect = lambda x: self.mock_isfile(
+            x, {self.fp.name})
 
         assert_raises_runtime_error(
-            'Error using HTTPS: The parameter(s) TABPY_CERTIFICATE_FILE '
-            'and TABPY_KEY_FILE must point to an existing file.',
+            'Error using HTTPS: The parameter(s) TABPY_CERTIFICATE_FILE and '
+            'TABPY_KEY_FILE must point to an existing file.',
             TabPyApp, {self.fp.name})
 
     @patch('tabpy_server.app.app.os.path')
@@ -207,8 +207,9 @@ class TestTransferProtocolValidation(unittest.TestCase):
             x, {self.fp.name, 'foo'})
 
         assert_raises_runtime_error(
-            'Error using HTTPS: The parameter(s) TABPY_KEY_FILE must '
-            'point to an existing file.', TabPyApp, {self.fp.name})
+            'Error using HTTPS: The parameter(s) TABPY_KEY_FILE '
+            'must point to an existing file.',
+            TabPyApp, {self.fp.name})
 
     @patch('tabpy_server.app.app.os.path.isfile', return_value=True)
     @patch('tabpy_server.app.util.validate_cert')
@@ -235,14 +236,14 @@ class TestCertificateValidation(unittest.TestCase):
 
     def test_expired_cert(self):
         path = os.path.join(self.resources_path, 'expired.crt')
-        message = 'Error using HTTPS: The certificate provided expired '\
-            'on 2018-08-18 19:47:18.'
+        message = ('Error using HTTPS: The certificate provided expired '
+                   'on 2018-08-18 19:47:18.')
         assert_raises_runtime_error(message, validate_cert, {path})
 
     def test_future_cert(self):
         path = os.path.join(self.resources_path, 'future.crt')
-        message = 'Error using HTTPS: The certificate provided is not '\
-            'valid until 3001-01-01 00:00:00.'
+        message = ('Error using HTTPS: The certificate provided is not valid '
+                   'until 3001-01-01 00:00:00.')
         assert_raises_runtime_error(message, validate_cert, {path})
 
     def test_valid_cert(self):
