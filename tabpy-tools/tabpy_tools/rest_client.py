@@ -105,7 +105,7 @@ class ModelEndpoint(Endpoint):
 
     def __eq__(self, other):
         return super().__eq__(other) and \
-            self.required_files==other.required_files and \
+            self.required_files == other.required_files and \
             self.required_packages == other.required_packages
 
 class AliasEndpoint(Endpoint):
