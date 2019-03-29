@@ -4,10 +4,6 @@ try:
     from ConfigParser import ConfigParser as _ConfigParser
 except ImportError:
     from configparser import ConfigParser as _ConfigParser
-try:
-    from StringIO import StringIO as _StringIO
-except ImportError:
-    from io import StringIO as _StringIO
 from datetime import datetime, timedelta, tzinfo
 from tabpy_server.app.ConfigParameters import ConfigParameters
 from tabpy_server.app.util import log_and_raise

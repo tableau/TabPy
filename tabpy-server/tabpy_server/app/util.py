@@ -36,7 +36,8 @@ def validate_cert(cert_file_path):
                           not_before), RuntimeError)
     if now > not_after:
         log_and_raise(https_error +
-                      'The certificate provided expired on {}.'.format(not_after), RuntimeError)
+                      f'The certificate provided expired on {not_after}.',
+                      RuntimeError)
 
 
 def parse_pwd_file(pwd_file_name):
