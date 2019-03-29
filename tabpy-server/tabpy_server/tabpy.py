@@ -189,7 +189,7 @@ class ManagementHandler(MainHandler):
         Add or update an endpoint
         '''
         logging.debug("Adding/updating model {}...".format(name))
-        _name_checker = _compile(r'^[a-zA-Z0-9-_\ ]+$')
+        _name_checker = _compile('^[a-zA-Z0-9-_\ ]+$')
         if not isinstance(name, (str, unicode)):
             raise TypeError("Endpoint name must be a string or unicode")
 
@@ -230,7 +230,7 @@ class ManagementHandler(MainHandler):
                         else None)
             target_path = get_query_object_path(
                 self.settings['state_file_path'], name, version)
-            _path_checker = _compile(r'^[\\a-zA-Z0-9-_\ /]+$')
+            _path_checker = _compile('^[\\a-zA-Z0-9-_\ /]+$')
             # copy from staging
             if src_path:
                 if not isinstance(request_data['src_path'], (str, unicode)):
@@ -563,11 +563,20 @@ class EvaluationPlaneHandler(BaseHandler):
 
     @gen.coroutine
     def call_subprocess(self, function_to_evaluate, arguments):
+        restricted_tabpy = RestrictedTabPy(self.port)
         # Exec does not run the function, so it does not block.
         if sys.version_info > (3, 0):
             exec(function_to_evaluate, globals())
         else:
             exec(function_to_evaluate)
+
+        if arguments is None:	
+            future = self.executor.submit(_user_script, restricted_tabpy)	
+        else:	
+            future = self.executor.submit(_user_script, restricted_tabpy,	
+                                          **arguments)	
+        ret = yield future	
+        raise gen.Return(ret)
 
 
 class RestrictedTabPy:
