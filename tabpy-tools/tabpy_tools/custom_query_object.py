@@ -14,7 +14,8 @@ class CustomQueryObject(_QueryObject):
 
         query : function
             Function that defines a custom query method. The query can have any
-            signature, but input and output of the query needs to be JSON serializable.
+            signature, but input and output of the query needs to be JSON
+            serializable.
 
         description : str
             The description of the custom query object
@@ -46,7 +47,8 @@ class CustomQueryObject(_QueryObject):
         --------
         QueryObject
         '''
-        # include the dependent files in sys path so that the query can run correctly
+        # include the dependent files in sys path so that the query can run
+        # correctly
 
         try:
             ret = self.custom_query(*args, **kwargs)

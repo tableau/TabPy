@@ -120,6 +120,10 @@ tabpy-server/install.log
 tabpy-server/tabpy_server/query_objects
 tabpy-server/tabpy_server/staging
 
+# VS Code
+*.code-workspace
+.vscode/
+
 # etc
 setup.bat
 *~

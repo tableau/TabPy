@@ -27,7 +27,8 @@ client = Client('http://localhost:9004/')
 ```
 
 The URL and port are where the Tableau-Python-Server process has been started -
-more info can be found in the [server section](server-startup.md#Command-Line-Arguments) of the documentation.
+more info can be found in the
+[server section](server-startup.md#Command-Line-Arguments) of the documentation.
 
 ## Deploying a Function
 
@@ -58,17 +59,18 @@ def clustering(x, y):
 
 
 client.deploy('clustering',
-                clustering,
-                'Returns cluster Ids for each data point specified by the pairs in x and y')
+              clustering,
+              'Returns cluster Ids for each data point specified by the '
+              'pairs in x and y')
 
 ```
 
 In this example the function `clustering` expects a set of two-dimensional data
 points, represented by the list of all x-coordinates and the list of all y-coordinates.
 It will return a set of numerical labels corresponding to the clusters each datapoint
-is assigned to. We deploy this function as an endpoint named `clustering`. It is now
-reachable as a [REST API](server-rest.md#httppost-queryendpoint), as well as through the
-TabPy tools - for details see the next section.
+is assigned to. We deploy this function as an endpoint named `clustering`. It is
+now reachable as a [REST API](server-rest.md#httppost-queryendpoint), as well as
+through the TabPy tools - for details see the next section.
 
 You can re-deploy a function (for example, after you modified its code) by setting
 the `override` parameter to `True`:
@@ -104,10 +106,10 @@ deployed (as in `gbm.predict(...)` below), Tableau will automatically save its
 definition using `cloudpickle` along with the definition of the function. The model
 will also be kept in memory on the server to achieve fast response times. If you
 persist your model manually to disk and read as part of your scoring function code
-however, you will notice that response times are noticeably longer as every time a
-client hits an endpoint, the code (including model loading) will get executed. In
-order to get the best performance, we recommended following the methodology outlined
-in this example.
+however, you will notice that response times are noticeably longer as every time
+a client hits an endpoint, the code (including model loading) will get executed.
+In order to get the best performance, we recommended following the methodology
+outlined in this example.
 
 ```python
 

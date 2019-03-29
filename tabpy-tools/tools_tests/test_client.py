@@ -1,5 +1,4 @@
 import unittest
-import json
 from unittest.mock import Mock
 
 import requests
@@ -63,7 +62,8 @@ class TestClient(unittest.TestCase):
 
         self.assertEqual(self.client.query("foo", a=1, b=2, c=3), "ok")
 
-        self.client._service.query.sssert_called_once_with("foo", a=1, b=2, c=3)
+        self.client._service.query.sssert_called_once_with(
+            "foo", a=1, b=2, c=3)
 
     def test_get_endpoints(self):
         self.client._service.get_endpoints.return_value = "foo"

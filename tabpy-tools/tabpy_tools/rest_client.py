@@ -1,9 +1,4 @@
-from .rest import (
-    RESTObject,
-    RESTProperty,
-    enum,
-)
-
+from .rest import RESTObject, RESTProperty
 from datetime import datetime
 
 
@@ -12,6 +7,7 @@ def from_epoch(value):
         return value
     else:
         return datetime.utcfromtimestamp(value)
+
 
 def to_epoch(value):
     return (value - datetime(1970, 1, 1)).total_seconds()
@@ -26,28 +22,22 @@ class Endpoint(RESTObject):
     ----------
 
     name : str
-
         The name of the endpoint. Valid names include ``[a-zA-Z0-9_\- ]+``
 
     type : str
-
         The type of endpoint. The types include "alias", "model".
 
     version : int
-
         The version of this endpoint. Initial versions have version on 1. New
         versions increment this by 1.
 
     description : str
-
         A human-readable description of the endpoint.
 
     dependencies: list
-
         A list of endpoints that this endpoint depends on.
 
     methods : list
-
         ???
 
     """
@@ -84,6 +74,7 @@ class Endpoint(RESTObject):
             self.evaluator == other.evaluator and \
             self.schema_version == other.schema_version and \
             self.schema == other.schema
+
 
 class ModelEndpoint(Endpoint):
     """Represents a model endpoint.
@@ -131,6 +122,7 @@ class AliasEndpoint(Endpoint):
         super().__init__(**kwargs)
         self.type = 'alias'
 
+
 class RESTServiceClient(object):
     """A thin client for the REST Service."""
 
@@ -146,12 +138,12 @@ class RESTServiceClient(object):
         """Performs a query. Either specify *args or **kwargs, not both.
         Respects query_timeout."""
         if args and kwargs:
-            raise ValueError('Mixing of keyword arguments and positional arguments '
-                                'when querying an endpoint is not supported.')
+            raise ValueError(
+                'Mixing of keyword arguments and positional arguments '
+                'when querying an endpoint is not supported.')
         return self.service_client.POST('query/'+name,
-            data={'data':args or kwargs},
-            timeout=self.query_timeout)
-
+                                        data={'data': args or kwargs},
+                                        timeout=self.query_timeout)
 
     def get_endpoint_upload_destination(self):
         """Returns a dict representing where endpoint data should be uploaded.
@@ -186,7 +178,7 @@ class RESTServiceClient(object):
         result = {}
         for name, attrs in self.service_client.GET(
                 'endpoints',
-                {'type':type}).items():
+                {'type': type}).items():
             endpoint = Endpoint.from_json(attrs)
             endpoint.name = name
             result[name] = endpoint
@@ -202,7 +194,8 @@ class RESTServiceClient(object):
 
             The name of the endpoint.
         """
-        ((name, attrs),) = self.service_client.GET('endpoints/'+endpoint_name).items()
+        ((name, attrs),) = self.service_client.GET(
+            'endpoints/'+endpoint_name).items()
         endpoint = Endpoint.from_json(attrs)
         endpoint.name = name
         return endpoint
@@ -215,9 +208,7 @@ class RESTServiceClient(object):
 
         endpoint : Endpoint
         """
-        return self.service_client.POST('endpoints',
-                endpoint.to_json()
-            )
+        return self.service_client.POST('endpoints', endpoint.to_json())
 
     def set_endpoint(self, endpoint):
         """Updates an endpoint through the management API.
@@ -229,8 +220,9 @@ class RESTServiceClient(object):
 
             The endpoint to update.
         """
-        return self.service_client.PUT('endpoints/'+endpoint.name,
-                endpoint.to_json())
+        return self.service_client.PUT(
+            'endpoints/'+endpoint.name,
+            endpoint.to_json())
 
     def remove_endpoint(self, endpoint_name):
         """Deletes an endpoint through the management API.
