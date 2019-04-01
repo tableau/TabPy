@@ -8,6 +8,7 @@ logger = logging.getLogger(__name__)
 
 
 def _generate_schema_from_example_and_description(input, description):
+<<<<<<< HEAD
     '''
     With an example input, a schema is automatically generated that conforms
     to the example in json-schema.org. The description given by the users
@@ -51,7 +52,10 @@ def _generate_schema_from_example_and_description(input, description):
     return input_schema
 
 
-def generate_schema(input, output, input_description=None, output_description=None):
+def generate_schema(input,
+                    output,
+                    input_description=None,
+                    output_description=None):
     '''
     Generate schema from a given sample input and output.
     A generated schema can be passed to a server together with a function to
@@ -76,10 +80,10 @@ def generate_schema(input, output, input_description=None, output_description=No
         For just one input parameter, state the example directly.
         >>> from tabpy_tools.schema import generate_schema
         >>> schema = generate_schema(
-                              input = 5,
-                              output = 25,
-                              input_description = 'input value',
-                              output_description = 'the squared value of input')
+                              input=5,
+                              output=25,
+                              input_description='input value',
+                              output_description='the squared value of input')
         >>> schema
         {'sample': 5,
          'input': {'type': 'integer', 'description': 'input value'},

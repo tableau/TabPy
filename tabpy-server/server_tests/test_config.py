@@ -9,6 +9,7 @@ from tabpy_server.app.app import TabPyApp
 from unittest.mock import patch, call
 
 
+
 def assert_raises_runtime_error(message, fn, args={}):
     try:
         fn(*args)

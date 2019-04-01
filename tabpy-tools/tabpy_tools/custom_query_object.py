@@ -25,7 +25,6 @@ class CustomQueryObject(_QueryObject):
 
         self.custom_query = query
 
-
     def query(self, *args, **kwargs):
         '''Query the custom defined query method using the given input.
 

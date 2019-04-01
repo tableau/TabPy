@@ -10,7 +10,7 @@ class TestClient(unittest.TestCase):
 
     def setUp(self):
         self.client = Client("http://example.com/")
-        self.client._service = Mock()
+        self.client._service = Mock()  # TODO: should spec this
 
     def test_init(self):
         client = Client("http://example.com:9004")
@@ -62,7 +62,7 @@ class TestClient(unittest.TestCase):
 
         self.assertEqual(self.client.query("foo", a=1, b=2, c=3), "ok")
 
-        self.client._service.query.sssert_called_once_with(
+        self.client._service.query.assert_called_once_with(
             "foo", a=1, b=2, c=3)
 
     def test_get_endpoints(self):

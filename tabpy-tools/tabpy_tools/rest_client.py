@@ -24,22 +24,18 @@ class Endpoint(RESTObject):
     name : str
         The name of the endpoint. Valid names include ``[a-zA-Z0-9_\- ]+``
 
+        The name of the endpoint. Valid names include ``[a-zA-Z0-9_\\- ]+``
     type : str
         The type of endpoint. The types include "alias", "model".
-
     version : int
         The version of this endpoint. Initial versions have version on 1. New
         versions increment this by 1.
-
     description : str
         A human-readable description of the endpoint.
-
     dependencies: list
         A list of endpoints that this endpoint depends on.
-
     methods : list
         ???
-
     """
     name = RESTProperty(str)
     type = RESTProperty(str)
@@ -108,6 +104,7 @@ class ModelEndpoint(Endpoint):
             self.required_files == other.required_files and \
             self.required_packages == other.required_packages
 
+
 class AliasEndpoint(Endpoint):
     """Represents an alias Endpoint.
 
@@ -139,9 +136,9 @@ class RESTServiceClient(object):
         Respects query_timeout."""
         if args and kwargs:
             raise ValueError(
-                'Mixing of keyword arguments and positional arguments '
-                'when querying an endpoint is not supported.')
-        return self.service_client.POST('query/'+name,
+                'Mixing of keyword arguments and positional arguments when '
+                'querying an endpoint is not supported.')
+        return self.service_client.POST('query/' + name,
                                         data={'data': args or kwargs},
                                         timeout=self.query_timeout)
 
@@ -150,9 +147,7 @@ class RESTServiceClient(object):
 
         Returns
         -------
-
         dict
-
             Keys include:
 
             * path: a local file path.
@@ -195,7 +190,7 @@ class RESTServiceClient(object):
             The name of the endpoint.
         """
         ((name, attrs),) = self.service_client.GET(
-            'endpoints/'+endpoint_name).items()
+            'endpoints/' + endpoint_name).items()
         endpoint = Endpoint.from_json(attrs)
         endpoint.name = name
         return endpoint
@@ -221,8 +216,7 @@ class RESTServiceClient(object):
             The endpoint to update.
         """
         return self.service_client.PUT(
-            'endpoints/'+endpoint.name,
-            endpoint.to_json())
+            'endpoints/' + endpoint.name, endpoint.to_json())
 
     def remove_endpoint(self, endpoint_name):
         """Deletes an endpoint through the management API.
@@ -235,7 +229,6 @@ class RESTServiceClient(object):
             The endpoint to delete.
         """
         self.service_client.DELETE('endpoints/'+endpoint_name)
-
 
     def get_status(self):
         """Returns the status of the server.

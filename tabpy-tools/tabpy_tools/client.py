@@ -39,8 +39,8 @@ def _check_hostname(name):
 
     if not hostname_checker.match(name):
         raise ValueError('endpoint name {} should be in http(s)://<hostname>'
-                         '[:<port>] and hostname may consist only of:'
-                         ' a-z, A-Z, 0-9, underscore and hyphens.'.format(name))
+                         '[:<port>] and hostname may consist only of: '
+                         'a-z, A-Z, 0-9, underscore and hyphens.'.format(name))
 
 
 def _check_endpoint_name(name):
@@ -297,8 +297,8 @@ class Client(object):
 
         schema : dict, optional
             The schema of the function, containing information about input and
-            output parameters, and respective examples. Providing a schema for a
-            deployed function lets other users of the service discover how to
+            output parameters, and respective examples. Providing a schema for
+            a deployed function lets other users of the service discover how to
             use it. Refer to schema.generate_schema for more information on
             how to generate the schema.
 
@@ -438,8 +438,7 @@ class Client(object):
         expected, then it will return. Uses time.sleep().
         """
         logger.info("Waiting for endpoint %r to deploy to version %r",
-                     endpoint_name,
-                     version)
+                    endpoint_name, version)
         start = time.time()
         while True:
             ep_status = self.get_status()
@@ -447,7 +446,7 @@ class Client(object):
                 ep = ep_status[endpoint_name]
             except KeyError:
                 logger.info("Endpoint %r doesn't exist in endpoints yet",
-                             endpoint_name)
+                            endpoint_name)
             else:
                 logger.info("ep=%r", ep)
 
@@ -516,7 +515,6 @@ class Client(object):
             If endpoint_name is not given, returns a dictionary where key is
             the endpoint name and value is a set of endpoints that depend on
             the endpoint specified by the key.
-
         '''
         endpoints = self.get_endpoints()
 

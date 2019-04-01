@@ -65,6 +65,7 @@ def load_state_from_str(state_string):
         log_and_raise("State string is empty!", ValueError)
 
 
+
 def save_state_to_str(config):
     '''
     Convert from ConfigParser to String
