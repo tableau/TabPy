@@ -10,6 +10,7 @@ import sys
 
 logger = logging.getLogger(__name__)
 
+
 class RestrictedTabPy:
     def __init__(self, port):
         self.port = port

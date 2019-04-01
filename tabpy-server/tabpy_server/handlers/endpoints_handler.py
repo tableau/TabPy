@@ -40,7 +40,7 @@ class EndpointsHandler(ManagementHandler):
                     self.request.body.decode('utf-8'))
             except Exception as ex:
                 self.error_out(
-                    400, 
+                    400,
                     "Failed to decode input body",
                     str(ex))
                 self.finish()
