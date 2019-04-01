@@ -15,7 +15,7 @@ from re import compile as _compile
 
 logger = logging.getLogger(__name__)
 
-_name_checker = _compile(r'^[a-zA-Z0-9-_\ ]+$')
+_name_checker = _compile('^[a-zA-Z0-9-_\ ]+$')
 
 
 def _check_endpoint_name(name):
