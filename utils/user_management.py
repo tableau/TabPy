@@ -94,7 +94,7 @@ def add_user(args, credentials):
 
     password = args.password
     logger.info('Adding username "{}" with password "{}"...'.format(
-                (username, password)))
+                username, password))
     credentials[username] = hash_password(username, password)
 
     return store_passwords_file(args.pwdfile, credentials)
@@ -112,7 +112,7 @@ def update_user(args, credentials):
 
     password = args.password
     logger.info('Updating username "{}" password  to "{}"...'.format(
-                (username, password)))
+                username, password))
     credentials[username] = hash_password(username, password)
     return store_passwords_file(args.pwdfile, credentials)
 
