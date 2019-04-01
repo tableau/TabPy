@@ -30,7 +30,7 @@ def main():
         f.write(new_ver)
 
     os.system('git add -u')
-    os.system(f'git commit -m "[ci skip] increase version to {new_version}')
+    os.system(f'git commit -m "[ci skip] increase version to {new_ver}')
     os.system('git push')
     return 0
 
