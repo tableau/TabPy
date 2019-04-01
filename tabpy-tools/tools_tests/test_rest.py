@@ -2,11 +2,7 @@ import json
 import requests
 import sys
 import unittest
-
-try:
-    from unittest.mock import Mock
-except ImportError:
-    from mock import Mock
+from unittest.mock import Mock
 
 from tabpy_tools.rest import (RequestsNetworkWrapper, ServiceClient)
 
