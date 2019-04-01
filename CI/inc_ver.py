@@ -31,7 +31,8 @@ def main():
 
     os.system(f'git add -u')
     os.system(f'git commit -m "[ci skip] increase version to {new_ver}"')
-    os.system('git push')
+    branch = os.environ.get('TRAVIS_BRANCH')
+    os.system(f'git push origin HEAD:{}')
     return 0
 
 
