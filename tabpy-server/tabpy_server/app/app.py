@@ -150,7 +150,7 @@ class TabPyApp:
         4. current defaults if a setting is not present in any location
 
         Additionally provide similar configuration capabilities in between
-        config filw and environment variables.
+        config file and environment variables.
         For consistency use the same variable name in the config file as
         in the os environment.
         For naming standards use all capitals and start with 'TABPY_'

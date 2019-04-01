@@ -96,8 +96,8 @@ explicitly specified with the `return` keyword (highlighted in red).
 
 In this simple example, there is only one input but you can pass as many
 arguments to SCRIPT functions as you like. Tableau takes the arguments in the
-order provided and replaces the _argN placeholders accordingly. In this case
-ATTR([Book Name]) maps to _arg1 and both are highlighted to indicate the
+order provided and replaces the \_argN placeholders accordingly. In this case
+ATTR([Book Name]) maps to \_arg1 and both are highlighted to indicate the
 association.
 
 Tableau expects the SCRIPT to return a single column that has either a single
