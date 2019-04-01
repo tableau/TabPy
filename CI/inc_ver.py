@@ -15,6 +15,10 @@ import os
 
 
 def main():
+    if not os.environ.get('TRAVIS', False):
+        print(__doc__)
+        return 1
+
     version = '0.0.0'
     with open('VERSION') as f:
         version = f.read()
@@ -28,11 +32,8 @@ def main():
     os.system('git add -u')
     os.system(f'git commit -m "[ci skip] increase version to {new_version}')
     os.system('git push')
+    return 0
 
 
 if __name__ == "__main__":
-    if not os.environ.get('TRAVIS', False):
-        print(__doc__)
-        return
-
     main()
