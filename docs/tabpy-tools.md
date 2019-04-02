@@ -163,7 +163,7 @@ be printed to the console
 ```
 
 If you would like to deploy additional models using the deploy script, you can
-copy any python files to the ./models/scripts directory and modify setup.py to
+copy any python file to the ./models/scripts directory and modify setup.py to
 include all necessary packages when installing dependencies or alternatively install
 all the required dependencies manually.
 
@@ -172,11 +172,11 @@ all the required dependencies manually.
 [Principal component analysis](https://en.wikipedia.org/wiki/Principal_component_analysis)
 is a statistical technique which extracts new, linearly uncorrelated, variables out of a
 dataset which capture the maximum variance in the data. In this way, PCA can be used to
-reduce the number of variables in a high dimensional dataset, a process is called
+reduce the number of variables in a high dimensional dataset, a process that is called
 dimensionality reduction. The first principal component captures the largest amount of
 variance, while the second captures the largest portion of the remaining variance while
 remaining orthogonal to the first and so on. This allows the reduction of the number of
-dimension while maintaining as much of the information from the original data as possible.
+dimensions while maintaining as much of the information from the original data as possible.
 PCA is useful in exploratory data analysis because complex relationships can be visualized
 in a 2D scatter plot of the first few principal components.
 
@@ -194,7 +194,7 @@ A Tableau calculated field to perform PCA will look like
 
 ```python
 
-tabpy.query(‘PCA’, 1, _arg1,_arg2, _arg3)[‘response’]
+tabpy.query(‘PCA’, 1, _arg1, _arg2, _arg3)[‘response’]
 
 ```
 
