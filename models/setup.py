@@ -33,7 +33,7 @@ if __name__ == '__main__':
         port = sys.argv[1]
     
     # Deploy each model in the scripts directory
-    directory = os.path.join(os.getcwd(), 'scripts/')
+    directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'scripts/')
     for filename in os.listdir(directory):
         path = py + directory + filename + ' ' + str(port)
         os.system(path)

@@ -10,6 +10,7 @@ install:
 script:
    - pytest tabpy-server/server_tests/ --cov=tabpy-server/tabpy_server
    - pytest tabpy-tools/tools_tests/ --cov=tabpy-tools/tabpy_tools --cov-append
+   - pytest tests/integration_tests/ --cov=models --cov-append
    - markdownlint .
 after_success:
    - coveralls

@@ -7,6 +7,7 @@ on TabPy server.
 
 - [Connecting to TabPy](#connecting-to-tabpy)
 - [Deploying a Function](#deploying-a-function)
+- [Predeployed Functions] (#predeployed-functions)
 - [Providing Schema Metadata](#providing-schema-metadata)
 - [Querying an Endpoint](#querying-an-endpoint)
 - [Evaluating Arbitrary Python Scripts](#evaluating-arbitrary-python-scripts)
@@ -133,6 +134,97 @@ The endpoints that are no longer needed can be removed the following way:
 ```python
 
 client.remove('WillItDefault')
+
+```
+
+## Predeployed Functions
+
+
+To setup models download the latest version of TabPy and follow the instructions
+to install and start up your server. Once your server is running, navigate to the
+models directory and run setup.py.  If your TabPy server is running on the default
+port (9004), you do not need to specify a port when launching the script. If your
+server is running on a port other than 9004 you can specify a different port in
+the command line like so
+
+```python
+
+python setup.py 4047 
+
+```
+
+The setup file will install all of the necessary dependencies (sklearn, nltk,
+textblob, pandas, & numpy) and deploy all of the prebuilt models located in
+./models/scripts. For every model that is successfully deployed a message will
+be printed to the console
+
+```
+
+"Successfully deployed PCA"
+
+```
+
+If you would like to deploy additional models using the deploy script, you can
+copy any python files to the ./models/scripts directory and modify setup.py to
+include all necessary packages when installing dependencies or alternatively install
+all the required dependencies manually.
+
+### Principal Component Analysis (PCA)
+
+[Principal component analysis] (https://en.wikipedia.org/wiki/Principal_component_analysis)
+is a statistical technique which extracts new, linearly uncorrelated, variables out of a
+dataset which capture the maximum variance in the data. In this way, PCA can be used to
+reduce the number of variables in a high dimensional dataset, a process is called
+dimensionality reduction. The first principal component captures the largest amount of
+variance, while the second captures the largest portion of the remaining variance while
+remaining orthogonal to the first and so on. This allows the reduction of the number of
+dimension while maintaining as much of the information from the original data as possible.
+PCA is useful in exploratory data analysis because complex relationships can be visualized
+in a 2D scatter plot of the first few principal components.
+
+TabPy’s implementation of PCA uses the scikit-learn [decomposition.PCA] (https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html)
+algorithm, which is further documented [here] (https://scikit-learn.org/stable/modules/decomposition.html#pca). 
+It requires the selected component to be > 0 and <= number of variables you pass in to the function. 
+When passing categorical variables we perform the scikit-learn [One Hot Encoding] (https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OneHotEncoder.html)
+to transform your non-numeric variables into a table of 0s and 1s. In order for One Hot
+Encoding to be performant we have limited the number of unique values your categorical
+column may contain to 25 and do not permit any nulls or empty strings in the column. Before
+PCA is performed, all variables are normalized to have a mean of 0 and unit variance using 
+the scikit-learn [StandardScaler] (https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.StandardScaler.html).
+
+A Tableau calculated field to perform PCA will look like
+
+```python
+
+tabpy.query(‘PCA’, 1, _arg1,_arg2, _arg3)[‘response’]
+
+```
+
+### Sentiment Analysis
+
+[Sentiment analysis] (https://en.wikipedia.org/wiki/Sentiment_analysis) is a technique
+which uses natural language processing to extract the emotional positivity or negativity
+– the sentiment – behind a piece of text and converts that into a numeric value. Our
+implementation of sentiment analysis returns a polarity score between -1 and 1 which rates
+the positivity of the string with 1 being very positive and -1 being very negative. Calling
+the Sentiment Analysis function from TabPy in Tableau will look like the following, where _arg1
+is a dimension containing text
+
+```python
+
+tabpy.query('Sentiment Analysis', _arg1)[‘response’]
+
+```
+
+Python provides multiple packages that compute sentiment analysis – our implementation
+defaults to use [NLTK’s sentiment package] (https://www.nltk.org/api/nltk.sentiment.html).
+If you would like to use [TextBlob’s sentiment analysis] (https://textblob.readthedocs.io/en/dev/quickstart.html)
+algorithm you can do so by specifying the optional argument “library=textblob” when calling
+the Sentiment Analysis function through a calculated field in Tableau
+
+```python
+
+tabpy.query('Sentiment Analysis', _arg1, library='textblob')[‘response’]
 
 ```
 
