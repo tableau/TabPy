@@ -1,5 +1,4 @@
 import concurrent.futures
-import tabpy_tools
 import logging
 import sys
 
@@ -75,8 +74,9 @@ class PythonService(object):
     def _load_object(self, object_uri, object_url, object_version, is_update,
                      object_type):
         try:
-            logger.info("Loading object:, URI={}, URL={}, version={}, is_updated={}".format(
-                object_uri, object_url,object_version, is_update))
+            logger.info("Loading object:, URI={}, URL={}, version={}, "
+                        "is_updated={}".format(
+                            object_uri, object_url, object_version, is_update))
             if object_type == 'model':
                 po = QueryObject.load(object_url)
             elif object_type == 'alias':
@@ -90,7 +90,8 @@ class PythonService(object):
                                               'status': 'LoadSuccessful',
                                               'last_error': None}
         except Exception as e:
-            logger.error("Unable to load QueryObject: path={}, error={}".format(object_url, str(e)))
+            logger.error("Unable to load QueryObject: path={}, "
+                         "error={}".format(object_url, str(e)))
 
             self.query_objects[object_uri] = {
                 'version': object_version,
@@ -101,46 +102,47 @@ class PythonService(object):
 
     def load_object(self, object_uri, object_url, object_version, is_update,
                     object_type):
-            try:
-                obj_info = self.query_objects.get(object_uri)
-                if obj_info and obj_info['endpoint_obj'] and (
-                        obj_info['version'] >= object_version):
-                    logger.info(
-                        "Received load message for object already loaded")
+        try:
+            obj_info = self.query_objects.get(object_uri)
+            if obj_info and obj_info['endpoint_obj'] and (
+                    obj_info['version'] >= object_version):
+                logger.info(
+                    "Received load message for object already loaded")
 
-                    return DownloadSkipped(
-                        object_uri, obj_info['version'], "Object with greater "
-                        "or equal version already loaded")
+                return DownloadSkipped(
+                    object_uri, obj_info['version'], "Object with greater "
+                    "or equal version already loaded")
+            else:
+                if object_uri not in self.query_objects:
+                    self.query_objects[object_uri] = {
+                        'version': object_version,
+                        'type': object_type,
+                        'endpoint_obj': None,
+                        'status': 'LoadInProgress',
+                        'last_error': None}
                 else:
-                    if object_uri not in self.query_objects:
-                        self.query_objects[object_uri] = {
-                            'version': object_version,
-                            'type': object_type,
-                            'endpoint_obj': None,
-                            'status': 'LoadInProgress',
-                            'last_error': None}
-                    else:
-                        self.query_objects[
-                            object_uri]['status'] = 'LoadInProgress'
+                    self.query_objects[
+                        object_uri]['status'] = 'LoadInProgress'
 
-                    self.EXECUTOR.submit(
-                        self._load_object, object_uri, object_url,
-                        object_version, is_update, object_type)
+                self.EXECUTOR.submit(
+                    self._load_object, object_uri, object_url,
+                    object_version, is_update, object_type)
 
-                    return LoadInProgress(
-                        object_uri, object_url, object_version, is_update,
-                        object_type)
-            except Exception as e:
-                logger.error("Unable to load QueryObject: path={}, error={}".format(object_url, str(e)))
+                return LoadInProgress(
+                    object_uri, object_url, object_version, is_update,
+                    object_type)
+        except Exception as e:
+            logger.error("Unable to load QueryObject: path={}, "
+                         "error={}".format(object_url, str(e)))
 
-                self.query_objects[object_uri] = {
-                    'version': object_version,
-                    'type': object_type,
-                    'endpoint_obj': None,
-                    'status': 'LoadFailed',
-                    'last_error': str(e)}
+            self.query_objects[object_uri] = {
+                'version': object_version,
+                'type': object_type,
+                'endpoint_obj': None,
+                'status': 'LoadFailed',
+                'last_error': str(e)}
 
-                return LoadFailed(object_uri, object_version, str(e))
+            return LoadFailed(object_uri, object_version, str(e))
 
     def delete_objects(self, object_uris):
         """Delete one or more objects from the query_objects map"""
@@ -155,12 +157,14 @@ class PythonService(object):
                 return ObjectsDeleted([object_uris])
             else:
                 logger.warning("Received message to delete query object "
-                               "that doesn't exist: object_uris={}".format(object_uris))
+                               "that doesn't exist: object_uris={}".format(
+                                   object_uris))
                 return ObjectsDeleted([])
         else:
-            logger.error("Unexpected input to delete objects: input={}, info={}".format(
-                         object_uris,
-                         "Input should be list or str. Type: %s" % type(object_uris)))
+            logger.error(
+                "Unexpected input to delete objects: input={}, info={}".format(
+                    object_uris, "Input should be list or str. "
+                    "Type: %s" % type(object_uris)))
             return ObjectsDeleted([])
 
     def flush_objects(self):

@@ -33,6 +33,8 @@ _QUERY_OBJECT_DIR = 'query_objects'
 Lock to change the TabPy State.
 '''
 _PS_STATE_LOCK = Lock()
+
+
 def state_lock(func):
     '''
     Mutex for changing PS state
@@ -45,6 +47,7 @@ def state_lock(func):
             # ALWAYS RELEASE LOCK
             _PS_STATE_LOCK.release()
     return wrapper
+
 
 def load_state_from_str(state_string):
     '''
@@ -61,6 +64,8 @@ def load_state_from_str(state_string):
     else:
         log_and_raise("State string is empty!", ValueError)
 
+
+
 def save_state_to_str(config):
     '''
     Convert from ConfigParser to String
@@ -72,17 +77,19 @@ def save_state_to_str(config):
         string_f = StringIO()
         config.write(string_f)
         value = string_f.getvalue()
-    except:
+    except Exception:
         logger.error("Cannot convert config to string")
     finally:
         string_f.close()
     return value
+
 
 def _get_root_path(state_path):
     if state_path[-1] != '/':
         return state_path + '/'
     else:
         return state_path
+
 
 def get_query_object_path(state_file_path, name, version):
     '''
@@ -98,6 +105,7 @@ def get_query_object_path(state_file_path, name, version):
         full_path = root_path + \
                 '/'.join([_QUERY_OBJECT_DIR, name])
     return full_path
+
 
 class TabPyState(object):
     '''
@@ -165,22 +173,24 @@ class TabPyState(object):
         if name:
             endpoint_info = simplejson.loads(endpoint_names)
             docstring = self._get_config_value(_QUERY_OBJECT_DOCSTRING, name)
-            if sys.version_info > (3,0):
-                endpoint_info['docstring'] = str(bytes(docstring,"utf-8").decode('unicode_escape'))
+            if sys.version_info > (3, 0):
+                endpoint_info['docstring'] = str(
+                    bytes(docstring, "utf-8").decode('unicode_escape'))
             else:
                 endpoint_info['docstring'] = docstring.decode('string_escape')
             endpoints = {name: endpoint_info}
         else:
             for endpoint_name in endpoint_names:
                 endpoint_info = simplejson.loads(self._get_config_value(
-                                            _DEPLOYMENT_SECTION_NAME,
-                                            endpoint_name))
+                    _DEPLOYMENT_SECTION_NAME, endpoint_name))
                 docstring = self._get_config_value(_QUERY_OBJECT_DOCSTRING,
-                                              endpoint_name, True, '')
+                                                   endpoint_name, True, '')
                 if sys.version_info > (3, 0):
-                    endpoint_info['docstring'] = str(bytes(docstring, "utf-8").decode('unicode_escape'))
+                    endpoint_info['docstring'] = str(
+                        bytes(docstring, "utf-8").decode('unicode_escape'))
                 else:
-                    endpoint_info['docstring'] = docstring.decode('string_escape')
+                    endpoint_info['docstring'] = docstring.decode(
+                        'string_escape')
                 endpoints[endpoint_name] = endpoint_info
         return endpoints
 
@@ -212,8 +222,10 @@ class TabPyState(object):
         '''
         try:
             endpoints = self.get_endpoints()
-            if name is None or not isinstance(name, (str, unicode)) or len(name) == 0:
-                raise ValueError("name of the endpoint must be a valid string.")
+            if name is None or not isinstance(
+                    name, (str, unicode)) or len(name) == 0:
+                raise ValueError(
+                    "name of the endpoint must be a valid string.")
             elif name in endpoints:
                 raise ValueError("endpoint %s already exists." % name)
             if description and not isinstance(description, (str, unicode)):
@@ -224,7 +236,8 @@ class TabPyState(object):
                 raise ValueError("docstring must be a string.")
             elif not docstring:
                 docstring = '-- no docstring found in query function --'
-            if not endpoint_type or not isinstance(endpoint_type, (str, unicode)):
+            if not endpoint_type or not isinstance(
+                    endpoint_type, (str, unicode)):
                 raise ValueError("endpoint type must be a string.")
             if dependencies and not isinstance(dependencies, list):
                 raise ValueError("dependencies must be a list.")
@@ -253,12 +266,13 @@ class TabPyState(object):
 
     def _add_update_endpoints_config(self, endpoints):
         # save the endpoint info to config
-        dstring=''
+        dstring = ''
         for endpoint_name in endpoints:
             try:
                 info = endpoints[endpoint_name]
                 if sys.version_info > (3, 0):
-                    dstring = str(bytes(info['docstring'], "utf-8").decode('unicode_escape'))
+                    dstring = str(bytes(info['docstring'], "utf-8").decode(
+                        'unicode_escape'))
                 else:
                     dstring = info['docstring'].decode('string_escape')
                 self._set_config_value(_QUERY_OBJECT_DOCSTRING,
@@ -395,7 +409,7 @@ class TabPyState(object):
         # check if other endpoints are depending on this endpoint
         if len(deps) > 0:
             raise ValueError("Cannot remove endpoint %s, it is currently "
-                            "used by %s endpoints." % (name, list(deps)))
+                             "used by %s endpoints." % (name, list(deps)))
 
         del endpoints[name]
 
@@ -500,8 +514,10 @@ class TabPyState(object):
         '''
         _cors_origin = ''
         try:
-            logger.debug("Collecting Access-Control-Allow-Origin from state file...")
-            _cors_origin = self._get_config_value('Service Info', 'Access-Control-Allow-Origin')
+            logger.debug("Collecting Access-Control-Allow-Origin from "
+                         "state file...")
+            _cors_origin = self._get_config_value(
+                'Service Info', 'Access-Control-Allow-Origin')
         except Exception as e:
             logger.error(e)
             pass
@@ -513,8 +529,9 @@ class TabPyState(object):
         '''
         _cors_headers = ''
         try:
-            _cors_headers = self._get_config_value('Service Info', 'Access-Control-Allow-Headers')
-        except Exception as e:
+            _cors_headers = self._get_config_value(
+                'Service Info', 'Access-Control-Allow-Headers')
+        except Exception:
             pass
         return _cors_headers
 
@@ -524,8 +541,9 @@ class TabPyState(object):
         '''
         _cors_methods = ''
         try:
-            _cors_methods = self._get_config_value('Service Info', 'Access-Control-Allow-Methods')
-        except Exception as e:
+            _cors_methods = self._get_config_value(
+                'Service Info', 'Access-Control-Allow-Methods')
+        except Exception:
             pass
         return _cors_methods
 
@@ -583,8 +601,8 @@ class TabPyState(object):
             raise ValueError("State configuration not yet loaded.")
         return self.config.items(section_name)
 
-    def _get_config_value(self, section_name, option_name, optional = False,
-                            default_value = None):
+    def _get_config_value(self, section_name, option_name, optional=False,
+                          default_value=None):
         if not self.config:
             raise ValueError("State configuration not yet loaded.")
 
@@ -597,7 +615,7 @@ class TabPyState(object):
             return default_value
         else:
             raise ValueError("Cannot find option name %s under section %s"
-                                % (option_name, section_name))
+                             % (option_name, section_name))
 
     def _write_state(self):
         '''

@@ -1,9 +1,40 @@
 import base64
 import binascii
-import hashlib
+from hashlib import pbkdf2_hmac
 import logging
 
 logger = logging.getLogger(__name__)
+
+
+def hash_password(username, pwd):
+    '''
+    Hashes password using PKDBF2 method:
+    hash = PKDBF2('sha512', pwd, salt=username, 10000)
+
+    Parameters
+    ----------
+    username : str
+        User name (login). Used as salt for hashing.
+        User name is lowercased befor being used in hashing.
+        Salt is formatted as '_$salt@tabpy:<username>$_' to
+        guarantee there's at least 16 characters.
+
+    pwd : str
+        Password to hash.
+
+    Returns
+    -------
+    str
+        Sting representation (hexidecimal) for PBKDF2 hash
+        for the password.
+    '''
+    salt = '_$salt@tabpy:%s$_' % username.lower()
+
+    hash = pbkdf2_hmac(hash_name='sha512',
+                       password=pwd.encode(),
+                       salt=salt.encode(),
+                       iterations=10000)
+    return binascii.hexlify(hash).decode()
 
 
 def validate_basic_auth_credentials(username, pwd, credentials):
@@ -38,7 +69,7 @@ def validate_basic_auth_credentials(username, pwd, credentials):
         logger.error('User name "{}" not found'.format(username))
         return False
 
-    hashed_pwd = hashlib.sha3_256(pwd.encode('utf-8')).hexdigest()
+    hashed_pwd = hash_password(username, pwd)
     if credentials[login].lower() != hashed_pwd.lower():
         logger.error('Wrong password for user name "{}"'.format(username))
         return False
@@ -75,7 +106,7 @@ def check_and_validate_basic_auth_credentials(headers, credentials):
     auth_header_list = headers['Authorization'].split(' ')
     if len(auth_header_list) != 2 or\
             auth_header_list[0] != 'Basic':
-        logger.error('Uknown authentication method "{}"'.format(auth_header))
+        logger.error('Unknown authentication method "{}"'.format(auth_header))
         return False
 
     try:
@@ -127,7 +158,7 @@ def handle_basic_authentication(headers, api_version, settings, credentials):
     '''
     logger.debug('Handling authentication for request')
     if api_version not in settings['versions']:
-        logger.critical('Uknows API version "{}"'.format(api_version))
+        logger.critical('Unknown API version "{}"'.format(api_version))
         return False
 
     version_settings = settings['versions'][api_version]

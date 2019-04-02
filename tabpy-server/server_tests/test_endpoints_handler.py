@@ -1,5 +1,4 @@
 import base64
-import hashlib
 import os
 import tempfile
 import unittest
@@ -7,6 +6,7 @@ import unittest
 from argparse import Namespace
 from tabpy_server.app.app import TabPyApp
 from tabpy_server.handlers.endpoints_handler import EndpointsHandler
+from tabpy_server.handlers.util import hash_password
 from tornado.testing import AsyncHTTPTestCase
 from unittest.mock import patch
 
@@ -24,8 +24,11 @@ class TestEndpointsHandlerWithAuth(AsyncHTTPTestCase):
         # create password file
         cls.pwd_file = tempfile.NamedTemporaryFile(
             mode='w+t', prefix=prefix, suffix='.txt', delete=False)
-        cls.pwd_file.write('username {}'.format(
-            hashlib.sha3_256('password'.encode('utf-8')).hexdigest()))
+        username = 'username'
+        password = 'password'
+        cls.pwd_file.write('{} {}'.format(
+            username,
+            hash_password(username, password)))
         cls.pwd_file.close()
 
         # create state.ini dir and file

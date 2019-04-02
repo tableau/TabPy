@@ -13,7 +13,9 @@ from logging import config
 import tabpy_server
 from tabpy_server import __version__
 from tabpy_server.app.ConfigParameters import ConfigParameters
-from tabpy_server.app.util import log_and_raise
+from tabpy_server.app.util import (
+    log_and_raise,
+    parse_pwd_file)
 from tabpy_server.management.state import TabPyState
 from tabpy_server.management.util import _get_state_from_file
 from tabpy_server.psws.callbacks import (init_model_evaluator, init_ps_server)
@@ -148,7 +150,7 @@ class TabPyApp:
         4. current defaults if a setting is not present in any location
 
         Additionally provide similar configuration capabilities in between
-        config filw and environment variables.
+        config file and environment variables.
         For consistency use the same variable name in the config file as
         in the os environment.
         For naming standards use all capitals and start with 'TABPY_'
@@ -236,6 +238,8 @@ class TabPyApp:
                 log_and_raise('Failed to read passwords file %s' %
                               self.settings[ConfigParameters.TABPY_PWD_FILE],
                               RuntimeError)
+        else:
+            logger.info("Password file is not specified")
 
         features = self._get_features()
         self.settings['versions'] = {'v1': {'features': features}}
@@ -285,48 +289,14 @@ class TabPyApp:
             log_and_raise(err, RuntimeError)
 
     def _parse_pwd_file(self):
-        if ConfigParameters.TABPY_PWD_FILE not in self.settings:
-            logger.info("Password file is not specified")
-        else:
-            pwd_file_name = self.settings[ConfigParameters.TABPY_PWD_FILE]
-            logger.info('Parsing password file %s' % pwd_file_name)
+        succeeded, self.credentials = parse_pwd_file(
+            self.settings[ConfigParameters.TABPY_PWD_FILE])
 
-            if not os.path.isfile(pwd_file_name):
-                logger.fatal('Password file not found')
-                return False
+        if succeeded and len(self.credentials) == 0:
+            logger.error('No credentials found')
+            succeeded = False
 
-            with open(pwd_file_name) as pwd_file:
-                pwd_file_reader = csv.reader(pwd_file, delimiter=' ')
-                for row in pwd_file_reader:
-                    # skip empty lines
-                    if len(row) == 0:
-                        continue
-
-                    # skip commented lines
-                    if row[0][0] == '#':
-                        continue
-
-                    if len(row) != 2:
-                        logger.error(
-                            'Incorrect entry "{}" '
-                            'in password file'.format(row))
-                        return False
-
-                    login = row[0].lower()
-                    if login in self.credentials:
-                        logger.error(
-                            'Multiple entries for username {} '
-                            'in password file'.format(login))
-                        return False
-
-                    self.credentials[login] = row[1]
-                    logger.debug('Found username {}'.format(login))
-
-            if len(self.credentials) == 0:
-                logger.error('No credentials found')
-                return False
-
-        return True
+        return succeeded
 
     def _get_features(self):
         features = {}

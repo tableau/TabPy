@@ -87,7 +87,10 @@ def init_model_evaluator(settings, tabpy_state, python_service):
         python_service.manage_request(msg)
 
 
-def _get_latest_service_state(settings, tabpy_state, new_ps_state, python_service):
+def _get_latest_service_state(settings,
+                              tabpy_state,
+                              new_ps_state,
+                              python_service):
     '''
     Update the endpoints from the latest remote state file.
 
@@ -137,8 +140,10 @@ def on_state_change(settings, tabpy_state, python_service):
         config = util._get_state_from_file(settings['state_file_path'])
         new_ps_state = TabPyState(config=config, settings=settings)
 
-        (has_changes, changes) = _get_latest_service_state(settings, tabpy_state,
-                                                           new_ps_state, python_service)
+        (has_changes, changes) = _get_latest_service_state(settings,
+                                                           tabpy_state,
+                                                           new_ps_state,
+                                                           python_service)
         if not has_changes:
             logger.info("Nothing changed, return.")
             return
@@ -177,4 +182,5 @@ def on_state_change(settings, tabpy_state, python_service):
 
     except Exception as e:
         err_msg = format_exception(e, 'on_state_change')
-        logger.error("Error submitting update model request: error={}".format(err_msg))
+        logger.error(
+            "Error submitting update model request: error={}".format(err_msg))

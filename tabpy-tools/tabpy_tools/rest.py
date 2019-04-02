@@ -1,3 +1,4 @@
+import abc
 import logging
 import requests
 from re import compile
@@ -14,7 +15,7 @@ class ResponseError(Exception):
     """Raised when we get an unexpected response."""
 
     def __init__(self, response):
-        super(ResponseError, self).__init__("Unexpected server response")
+        super().__init__("Unexpected server response")
         self.response = response
         self.status_code = response.status_code
 
@@ -22,7 +23,7 @@ class ResponseError(Exception):
             r = response.json()
             self.info = r['info']
             self.message = response.json()['message']
-        except:
+        except (json.JSONDecodeError, KeyError):
             self.info = None
             self.message = response.text
 
@@ -141,7 +142,8 @@ class RequestsNetworkWrapper(object):
             raise RuntimeError(response.text)
 
         if response.status_code not in (200, 201, 204):
-            raise RuntimeError("Error with server response code: %s", response.status_code)
+            raise RuntimeError(
+                "Error with server response code: %s", response.status_code)
 
 
 class ServiceClient(object):
@@ -154,7 +156,8 @@ class ServiceClient(object):
 
     def __init__(self, endpoint, network_wrapper=None):
         if network_wrapper is None:
-            network_wrapper = RequestsNetworkWrapper(session=requests.session())
+            network_wrapper = RequestsNetworkWrapper(
+                session=requests.session())
 
         self.network_wrapper = network_wrapper
 
@@ -214,7 +217,7 @@ class RESTProperty(object):
         delattr(instance, self.name)
 
 
-class _RESTMetaclass(type(_MutableMapping)):
+class _RESTMetaclass(abc.ABCMeta):
     """The metaclass for RESTObjects.
 
     This will look into the attributes for the class. If they are a
@@ -226,7 +229,7 @@ class _RESTMetaclass(type(_MutableMapping)):
     """
 
     def __init__(self, name, bases, dict):
-        super(_RESTMetaclass, self).__init__(name, bases, dict)
+        super().__init__(name, bases, dict)
 
         self.__rest__ = set()
         for base in bases:
@@ -317,9 +320,9 @@ class RESTObject(_MutableMapping, metaclass=_RESTMetaclass):
         return (
                 type(self) == type(other)
                 and all((
-            getattr(self, a) == getattr(other, a)
-            for a in self.__rest__
-        )))
+                    getattr(self, a) == getattr(other, a)
+                    for a in self.__rest__
+                )))
 
     def __len__(self):
         return len([a for a in self.__rest__ if hasattr(self, '_' + a)])

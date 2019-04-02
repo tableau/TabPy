@@ -1,3 +1,11 @@
+'''
+HTTP handeler to serve general endpoints request, specifically
+http://myserver:9004/endpoints
+
+For how individual endpoint requests are served look
+at endpoint_handler.py
+'''
+
 from tabpy_server.handlers import ManagementHandler
 import simplejson
 import tornado.web
@@ -40,7 +48,7 @@ class EndpointsHandler(ManagementHandler):
                     self.request.body.decode('utf-8'))
             except Exception as ex:
                 self.error_out(
-                    400, 
+                    400,
                     "Failed to decode input body",
                     str(ex))
                 self.finish()

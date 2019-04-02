@@ -16,7 +16,8 @@ class RestrictedTabPy:
         self.port = port
 
     def query(self, name, *args, **kwargs):
-        url = 'http://localhost:%d/query/%s' % (self.port, name)
+        url = f'http://localhost:{self.port}/query/{name}'
+        logger.debug(f'Quering {url}...')
         internal_data = {'data': args or kwargs}
         data = simplejson.dumps(internal_data)
         headers = {'content-type': 'application/json'}
@@ -38,7 +39,7 @@ class EvaluationPlaneHandler(BaseHandler):
     @tornado.web.asynchronous
     @gen.coroutine
     def post(self):
-        logger.debug('Processing GET for /evaluate')
+        logger.debug('Processing POST for /evaluate')
         if self.should_fail_with_not_authorized():
             self.fail_with_not_authorized()
             return
