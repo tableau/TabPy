@@ -16,17 +16,17 @@ tags:
   description: TabPy Server Info
   externalDocs:
     description: Find out more
-    url: https://gitlab.tableausoftware.com/tableau-advanced-analytics/TabPy-dev/blob/master/docs/server-rest.md
+    url: https://github.com/tableau/TabPy/blob/master/docs/server-rest.md
 - name: evaluate
   description: Evaluate Python script
   externalDocs:
     description: Find out more
-    url: https://gitlab.tableausoftware.com/tableau-advanced-analytics/TabPy-dev/blob/master/docs/server-rest.md
+    url: https://github.com/tableau/TabPy/blob/master/docs/server-rest.md
 - name: models
   description: TabPy Server Models
   externalDocs:
     description: Find out more
-    url: https://gitlab.tableausoftware.com/tableau-advanced-analytics/TabPy-dev/blob/master/docs/server-rest.md
+    url: https://github.com/tableau/TabPy/blob/master/docs/server-rest.md
 consumes:
   - application/json
 produces:
@@ -182,6 +182,32 @@ definitions:
         type: string
       name:
         type: string
+      versions:
+        type: object
+        properties:
+          v1:
+            type: object
+            properties:
+              features:
+                type: object
+                properties:
+                  authentication:
+                    type: object
+                    properties:
+                      required:
+                        type: boolean
+                      methods:
+                        type: object
+                        properties:
+                          basic-auth:
+                            type: object
+                        required:
+                          - basic-auth
+                    required:
+                      - required
+                      - methods
+            required:
+              - features
   ErrorEvaluateScript500:
     type: object
     properties:

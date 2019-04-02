@@ -10,13 +10,12 @@ import cloudpickle as _cloudpickle
 logger = logging.getLogger(__name__)
 
 
-class QueryObject(object):
+class QueryObject(abc.ABC):
     '''
     Derived class needs to implement the following interface:
       * query() -- given input, return query result
       * get_doc_string() -- returns documentation for the Query Object
     '''
-    __metaclass__ = abc.ABCMeta
 
     def __init__(self, description=''):
         self.description = description
@@ -95,8 +94,9 @@ class QueryObject(object):
         try:
             json.dumps(result)
         except TypeError:
-            raise TypeError("Result from object query is not json serializable"
-                            ":%s" % result)
+            raise TypeError(
+                "Result from object query is not json serializable: "
+                "{}".format(result))
 
         return result
 

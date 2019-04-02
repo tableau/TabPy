@@ -2,11 +2,7 @@ import json
 import requests
 import sys
 import unittest
-
-try:
-    from unittest.mock import Mock
-except ImportError:
-    from mock import Mock
+from unittest.mock import Mock
 
 from tabpy_tools.rest import (RequestsNetworkWrapper, ServiceClient)
 
@@ -81,7 +77,7 @@ class TestRequestsNetworkWrapper(unittest.TestCase):
             self.assertEqual(self.rnw.POST(url, data), 'json')
         except Exception:  # TODO: refactor this...
             e = sys.exc_info()[0]
-            self.assertEquals(e, TypeError)
+            self.assertEqual(e, TypeError)
 
     def test_POST_InvalidData(self):
         url = 'url'
@@ -90,15 +86,16 @@ class TestRequestsNetworkWrapper(unittest.TestCase):
             self.assertEqual(self.rnw.POST(url, data), 'json')
         except Exception:  # TODO: refactor this...
             e = sys.exc_info()[0]
-            self.assertEquals(e, TypeError)
+            self.assertEqual(e, TypeError)
 
     def test_PUT(self):
         url = 'abc'
         data = {'foo': 'bar'}
         self.assertEqual(self.rnw.PUT(url, data), 'json')
         self.rnw.session.put.assert_called_once_with(
-            url, data=json.dumps(data), headers={
-                'content-type': 'application/json'},
+            url,
+            data=json.dumps(data),
+            headers={'content-type': 'application/json'},
             timeout=None)
 
     def test_PUT_InvalidData(self):
@@ -108,7 +105,7 @@ class TestRequestsNetworkWrapper(unittest.TestCase):
             self.assertEqual(self.rnw.PUT(url, data), 'json')
         except Exception:  # TODO: refactor this...
             e = sys.exc_info()[0]
-            self.assertEquals(e, TypeError)
+            self.assertEqual(e, TypeError)
 
     def test_PUT_InvalidURL(self):
         url = ''
@@ -117,15 +114,16 @@ class TestRequestsNetworkWrapper(unittest.TestCase):
             self.assertEqual(self.rnw.PUT(url, data), 'json')
         except Exception:  # TODO: refactor this...
             e = sys.exc_info()[0]
-            self.assertEquals(e, TypeError)
+            self.assertEqual(e, TypeError)
 
     def test_DELETE(self):
         url = 'abc'
         data = {'foo': 'bar'}
         self.assertIs(self.rnw.DELETE(url, data), None)
-        self.rnw.session.delete.assert_called_once_with(url,
-                                                        data=json.dumps(data),
-                                                        timeout=None)
+        self.rnw.session.delete.assert_called_once_with(
+            url,
+            data=json.dumps(data),
+            timeout=None)
 
     def test_DELETE_InvalidData(self):
         url = 'abc'
@@ -134,7 +132,7 @@ class TestRequestsNetworkWrapper(unittest.TestCase):
             self.assertEqual(self.rnw.DELETE(url, data), 'json')
         except Exception:  # TODO: refactor this...
             e = sys.exc_info()[0]
-            self.assertEquals(e, TypeError)
+            self.assertEqual(e, TypeError)
 
     def test_DELETE_InvalidURL(self):
         url = ''
@@ -143,7 +141,7 @@ class TestRequestsNetworkWrapper(unittest.TestCase):
             self.assertEqual(self.rnw.DELETE(url, data), 'json')
         except Exception:  # TODO: refactor this...
             e = sys.exc_info()[0]
-            self.assertEquals(e, TypeError)
+            self.assertEqual(e, TypeError)
 
 
 class TestServiceClient(unittest.TestCase):
@@ -158,21 +156,21 @@ class TestServiceClient(unittest.TestCase):
         self.sc = ServiceClient('endpoint/', network_wrapper=nw)
 
     def test_GET(self):
-        self.assertEquals(self.sc.GET('test'), 'GET')
+        self.assertEqual(self.sc.GET('test'), 'GET')
         self.sc.network_wrapper.GET.assert_called_once_with('endpoint/test',
                                                             None, None)
 
     def test_POST(self):
-        self.assertEquals(self.sc.POST('test'), 'POST')
+        self.assertEqual(self.sc.POST('test'), 'POST')
         self.sc.network_wrapper.POST.assert_called_once_with('endpoint/test',
                                                              None, None)
 
     def test_PUT(self):
-        self.assertEquals(self.sc.PUT('test'), 'PUT')
+        self.assertEqual(self.sc.PUT('test'), 'PUT')
         self.sc.network_wrapper.PUT.assert_called_once_with('endpoint/test',
                                                             None, None)
 
     def test_DELETE(self):
-        self.assertEquals(self.sc.DELETE('test'), None)
+        self.assertEqual(self.sc.DELETE('test'), None)
         self.sc.network_wrapper.DELETE.assert_called_once_with('endpoint/test',
                                                                None, None)

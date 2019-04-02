@@ -5,6 +5,16 @@ SETLOCAL
 REM Set environment variables.
 SET TABPY_ROOT=%CD%
 SET INSTALL_LOG=%TABPY_ROOT%\tabpy-server\install.log
+SET SAVE_PYTHONPATH=%PYTHONPATH%
+
+
+ECHO Checking for presence of Python in the system path variable.
+python --version >nul 2>&1
+IF %ERRORLEVEL% NEQ 0 (
+    ECHO     Cannot find Python.exe.  Check that Python is installed and is in the system PATH environment variable.
+    SET RET=1
+    GOTO:END
+)
 
 REM Install requirements using Python setup tools.
 ECHO Installing any missing dependencies...
@@ -26,44 +36,41 @@ IF %ERRORLEVEL% NEQ 0 (
     )
     ECHO     failed
     ECHO %INSTALL_LOG_MESSAGE%
-    GOTO:ERROR
+    SET RET=1
+    GOTO:END
 ) ELSE (
     ECHO     success
     ECHO %INSTALL_LOG_MESSAGE%
 )
 
 
-REM Parse optional CLI arguments: port and config.
+REM Parse optional CLI arguments: config file
 ECHO Parsing parameters...
-SET STARTUP_CMD=python tabpy.py
+SET PYTHONPATH=%TABPY_ROOT%\tabpy-server;%TABPY_ROOT%\tabpy-tools;%PYTHONPATH%
+SET STARTUP_CMD=python tabpy-server\tabpy_server\tabpy.py
 IF [%1] NEQ [] (
     ECHO     Using config file at %TABPY_ROOT%\tabpy-server\tabpy_server\%1
     SET STARTUP_CMD=%STARTUP_CMD% --config=%1
 )
 
 
-REM Start TabPy server.
 ECHO Starting TabPy server...
 ECHO;
-CD %TABPY_ROOT%\tabpy-server\tabpy_server
 %STARTUP_CMD%
-CD %TABPY_ROOT%
 IF %ERRORLEVEL% NEQ 0 (
     ECHO      Failed to start TabPy server.
-    GOTO:ERROR
+    SET RET=1
+    GOTO:END
 )
 
 
-GOTO:SUCCESS
+SET RET=%ERRORLEVEL%
+GOTO:END
 
 
-REM Exit with error
-:ERROR
+:END
+    SET PYTHONPATH=%SAVE_PYTHONPATH%
+    CD %TABPY_ROOT%
+    EXIT /B %RET%
     ENDLOCAL
-    EXIT /B 1
 
-
-REM All succeeded
-:SUCCESS
-    EXIT /B %ERRORLEVEL%
-    ENDLOCAL

@@ -23,12 +23,9 @@ logger = logging.getLogger(__name__)
 
 _name_checker = compile(r'^[\w -]+$')
 
-if sys.version_info.major == 3:
-    unicode = str
-
 
 def _check_endpoint_type(name):
-    if not isinstance(name, (str, unicode)):
+    if not isinstance(name, str):
         raise TypeError("Endpoint name must be a string or unicode")
 
     if name == '':
@@ -252,7 +249,7 @@ class Client(object):
 
         if existing_endpoint_name not in self.get_endpoints():
             raise ValueError(
-                "Endpoint '%s' does not exist." % existing_endpoint_name)
+                "Endpoint '{}' does not exist.".format(existing_endpoint_name))
 
         # Can only overwrite existing alias
         existing_endpoint = self.get_endpoints().get(alias)
@@ -268,7 +265,8 @@ class Client(object):
         if existing_endpoint:
             if existing_endpoint.type != 'alias':
                 raise RuntimeError(
-                    'Name "%s" is already in use by another endpoint.' % alias)
+                    'Name "{}" is already in use by another '
+                    'endpoint.'.format(alias))
 
             endpoint.version = existing_endpoint.version + 1
 
@@ -319,9 +317,9 @@ class Client(object):
         if endpoint:
             if not override:
                 raise RuntimeError(
-                    "An endpoint with that name (%r) already exists. Use "
-                    "'override = True' to force update an existing "
-                    "endpoint." % name)
+                    "An endpoint with that name ({}) already"
+                    " exists. Use 'override = True' to force update "
+                    "an existing endpoint.".format(name))
 
             version = endpoint.version + 1
         else:
@@ -511,7 +509,7 @@ class Client(object):
         Returns
         -------
         dependent endpoints : dict
-            if endpoint_name is given, returns a list of endpoint names that
+            If endpoint_name is given, returns a list of endpoint names that
             depend on the given endpoint.
 
             If endpoint_name is not given, returns a dictionary where key is

@@ -1,5 +1,4 @@
 from .rest import RESTObject, RESTProperty
-
 from datetime import datetime
 
 
@@ -95,11 +94,11 @@ class ModelEndpoint(Endpoint):
     required_packages_dst_path = RESTProperty(str)
 
     def __init__(self, **kwargs):
-        super(ModelEndpoint, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.type = 'model'
 
     def __eq__(self, other):
-        return super(ModelEndpoint, self).__eq__(other) and \
+        return super().__eq__(other) and \
             self.required_files == other.required_files and \
             self.required_packages == other.required_packages
 
@@ -115,7 +114,7 @@ class AliasEndpoint(Endpoint):
     target = RESTProperty(str)
 
     def __init__(self, **kwargs):
-        super(AliasEndpoint, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.type = 'alias'
 
 
