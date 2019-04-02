@@ -167,7 +167,7 @@ copy any python files to the ./models/scripts directory and modify setup.py to
 include all necessary packages when installing dependencies or alternatively install
 all the required dependencies manually.
 
-### Principal Component Analysis (PCA)
+#### Principal Component Analysis (PCA)
 
 [Principal component analysis](https://en.wikipedia.org/wiki/Principal_component_analysis)
 is a statistical technique which extracts new, linearly uncorrelated, variables out of a
@@ -198,7 +198,7 @@ tabpy.query(‘PCA’, 1, _arg1,_arg2, _arg3)[‘response’]
 
 ```
 
-### Sentiment Analysis
+#### Sentiment Analysis
 
 [Sentiment analysis](https://en.wikipedia.org/wiki/Sentiment_analysis) is a technique
 which uses natural language processing to extract the emotional positivity or negativity
