@@ -7,7 +7,7 @@ on TabPy server.
 
 - [Connecting to TabPy](#connecting-to-tabpy)
 - [Deploying a Function](#deploying-a-function)
-- [Predeployed Functions] (#predeployed-functions)
+- [Predeployed Functions](#predeployed-functions)
 - [Providing Schema Metadata](#providing-schema-metadata)
 - [Querying an Endpoint](#querying-an-endpoint)
 - [Evaluating Arbitrary Python Scripts](#evaluating-arbitrary-python-scripts)
@@ -159,9 +159,7 @@ textblob, pandas, & numpy) and deploy all of the prebuilt models located in
 be printed to the console
 
 ```
-
 "Successfully deployed PCA"
-
 ```
 
 If you would like to deploy additional models using the deploy script, you can
@@ -171,7 +169,7 @@ all the required dependencies manually.
 
 ### Principal Component Analysis (PCA)
 
-[Principal component analysis] (https://en.wikipedia.org/wiki/Principal_component_analysis)
+[Principal component analysis](https://en.wikipedia.org/wiki/Principal_component_analysis)
 is a statistical technique which extracts new, linearly uncorrelated, variables out of a
 dataset which capture the maximum variance in the data. In this way, PCA can be used to
 reduce the number of variables in a high dimensional dataset, a process is called
@@ -182,15 +180,15 @@ dimension while maintaining as much of the information from the original data as
 PCA is useful in exploratory data analysis because complex relationships can be visualized
 in a 2D scatter plot of the first few principal components.
 
-TabPy’s implementation of PCA uses the scikit-learn [decomposition.PCA] (https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html)
-algorithm, which is further documented [here] (https://scikit-learn.org/stable/modules/decomposition.html#pca). 
+TabPy’s implementation of PCA uses the scikit-learn [decomposition.PCA](https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html)
+algorithm, which is further documented [here](https://scikit-learn.org/stable/modules/decomposition.html#pca). 
 It requires the selected component to be > 0 and <= number of variables you pass in to the function. 
-When passing categorical variables we perform the scikit-learn [One Hot Encoding] (https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OneHotEncoder.html)
+When passing categorical variables we perform the scikit-learn [One Hot Encoding](https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OneHotEncoder.html)
 to transform your non-numeric variables into a table of 0s and 1s. In order for One Hot
 Encoding to be performant we have limited the number of unique values your categorical
 column may contain to 25 and do not permit any nulls or empty strings in the column. Before
 PCA is performed, all variables are normalized to have a mean of 0 and unit variance using 
-the scikit-learn [StandardScaler] (https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.StandardScaler.html).
+the scikit-learn [StandardScaler](https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.StandardScaler.html).
 
 A Tableau calculated field to perform PCA will look like
 
@@ -202,7 +200,7 @@ tabpy.query(‘PCA’, 1, _arg1,_arg2, _arg3)[‘response’]
 
 ### Sentiment Analysis
 
-[Sentiment analysis] (https://en.wikipedia.org/wiki/Sentiment_analysis) is a technique
+[Sentiment analysis](https://en.wikipedia.org/wiki/Sentiment_analysis) is a technique
 which uses natural language processing to extract the emotional positivity or negativity
 – the sentiment – behind a piece of text and converts that into a numeric value. Our
 implementation of sentiment analysis returns a polarity score between -1 and 1 which rates
@@ -217,8 +215,8 @@ tabpy.query('Sentiment Analysis', _arg1)[‘response’]
 ```
 
 Python provides multiple packages that compute sentiment analysis – our implementation
-defaults to use [NLTK’s sentiment package] (https://www.nltk.org/api/nltk.sentiment.html).
-If you would like to use [TextBlob’s sentiment analysis] (https://textblob.readthedocs.io/en/dev/quickstart.html)
+defaults to use [NLTK’s sentiment package](https://www.nltk.org/api/nltk.sentiment.html).
+If you would like to use [TextBlob’s sentiment analysis](https://textblob.readthedocs.io/en/dev/quickstart.html)
 algorithm you can do so by specifying the optional argument “library=textblob” when calling
 the Sentiment Analysis function through a calculated field in Tableau
 
