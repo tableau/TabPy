@@ -1,3 +1,11 @@
+'''
+HTTP handeler to serve specific endpoint request like
+http://myserver:9004/endpoints/mymodel
+
+For how generic endpoints requests is served look
+at endpoints_handler.py
+'''
+
 from tabpy_server.handlers import ManagementHandler
 import simplejson
 import logging

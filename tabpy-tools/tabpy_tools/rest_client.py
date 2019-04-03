@@ -22,8 +22,6 @@ class Endpoint(RESTObject):
     ----------
 
     name : str
-        The name of the endpoint. Valid names include ``[a-zA-Z0-9_\- ]+``
-
         The name of the endpoint. Valid names include ``[a-zA-Z0-9_\\- ]+``
     type : str
         The type of endpoint. The types include "alias", "model".

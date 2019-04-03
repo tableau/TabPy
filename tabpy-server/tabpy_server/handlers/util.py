@@ -106,7 +106,7 @@ def check_and_validate_basic_auth_credentials(headers, credentials):
     auth_header_list = headers['Authorization'].split(' ')
     if len(auth_header_list) != 2 or\
             auth_header_list[0] != 'Basic':
-        logger.error('Uknown authentication method "{}"'.format(auth_header))
+        logger.error('Unknown authentication method "{}"'.format(auth_header))
         return False
 
     try:
@@ -158,7 +158,7 @@ def handle_basic_authentication(headers, api_version, settings, credentials):
     '''
     logger.debug('Handling authentication for request')
     if api_version not in settings['versions']:
-        logger.critical('Uknows API version "{}"'.format(api_version))
+        logger.critical('Unknown API version "{}"'.format(api_version))
         return False
 
     version_settings = settings['versions'][api_version]

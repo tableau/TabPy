@@ -1,3 +1,11 @@
+'''
+HTTP handeler to serve general endpoints request, specifically
+http://myserver:9004/endpoints
+
+For how individual endpoint requests are served look
+at endpoint_handler.py
+'''
+
 from tabpy_server.handlers import ManagementHandler
 import simplejson
 import tornado.web

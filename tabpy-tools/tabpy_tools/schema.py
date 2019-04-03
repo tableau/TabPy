@@ -8,7 +8,6 @@ logger = logging.getLogger(__name__)
 
 
 def _generate_schema_from_example_and_description(input, description):
-<<<<<<< HEAD
     '''
     With an example input, a schema is automatically generated that conforms
     to the example in json-schema.org. The description given by the users
