@@ -12,4 +12,5 @@ script:
    - pytest tabpy-tools/tools_tests/ --cov=tabpy-tools/tabpy_tools --cov-append
    - markdownlint .
 after_success:
+   - python CI/inc_ver.py
    - coveralls
