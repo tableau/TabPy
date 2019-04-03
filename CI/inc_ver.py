@@ -21,7 +21,8 @@ def main():
 
     branch = os.environ.get('TRAVIS_BRANCH')
     pr_branch = os.environ.get('TRAVIS_PULL_REQUEST_BRANCH')
-    if not pr_branch or pr_branch == branch:
+    if pr_branch and pr_branch == branch:
+        # Only update versions on source branch of pull requests
         new_ver = update_version()
         push_new_version_to_branch(branch, new_ver)
 
