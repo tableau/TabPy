@@ -32,7 +32,7 @@ def update_version():
     with open('VERSION') as f:
         version = f.read()
     ver = version.split('.')
-    commit = os.environ.get('TRAVIS_COMMIT')
+    commit = os.environ.get('TRAVIS_PULL_REQUEST_SHA')
     new_ver = f'{ver[0]}.{ver[1]}.{commit}'
 
     with open('VERSION', 'w') as f:
