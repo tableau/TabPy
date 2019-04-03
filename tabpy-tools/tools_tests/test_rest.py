@@ -39,9 +39,11 @@ class TestRequestsNetworkWrapper(unittest.TestCase):
         url = 'abc'
         data = {'foo': 'bar'}
         self.assertEqual(self.rnw.GET(url, data), 'json')
-        self.rnw.session.get.assert_called_once_with(url,
-                                                     params=data,
-                                                     timeout=None)
+        self.rnw.session.get.assert_called_once_with(
+            url,
+            params=data,
+            timeout=None,
+            auth=None)
 
     def test_GET_InvalidData(self):
         url = 'abc'
@@ -68,7 +70,8 @@ class TestRequestsNetworkWrapper(unittest.TestCase):
         self.rnw.session.post.assert_called_once_with(
             url, data=json.dumps(data), headers={
                 'content-type': 'application/json'},
-            timeout=None)
+            timeout=None,
+            auth=None)
 
     def test_POST_InvalidURL(self):
         url = ''
@@ -96,7 +99,8 @@ class TestRequestsNetworkWrapper(unittest.TestCase):
             url,
             data=json.dumps(data),
             headers={'content-type': 'application/json'},
-            timeout=None)
+            timeout=None,
+            auth=None)
 
     def test_PUT_InvalidData(self):
         url = 'url'
@@ -123,7 +127,8 @@ class TestRequestsNetworkWrapper(unittest.TestCase):
         self.rnw.session.delete.assert_called_once_with(
             url,
             data=json.dumps(data),
-            timeout=None)
+            timeout=None,
+            auth=None)
 
     def test_DELETE_InvalidData(self):
         url = 'abc'

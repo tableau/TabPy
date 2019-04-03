@@ -74,8 +74,9 @@ class EvaluationPlaneHandler(BaseHandler):
                                             'the format _arg1, _arg2, _argN')
                         return
 
-            function_to_evaluate = ('def _user_script(tabpy'
-                                    + arguments_str + '):\n')
+            function_to_evaluate = (
+                'def _user_script(tabpy'
+                + arguments_str + '):\n')
             for u in user_code.splitlines():
                 function_to_evaluate += ' ' + u + '\n'
 
