@@ -22,8 +22,8 @@ def main():
     branch = os.environ.get('TRAVIS_BRANCH')
     pr_branch = os.environ.get('TRAVIS_PULL_REQUEST_BRANCH')
     if not pr_branch or pr_branch == branch:
-        update_version()
-        push_to_branch(branch)
+        new_ver = update_version()
+        push_new_version_to_branch(branch, new_ver)
 
     return 0
 
@@ -38,10 +38,10 @@ def update_version():
     with open('VERSION', 'w') as f:
         f.write(new_ver)
 
-    return 0
+    return new_ver
 
 
-def push_to_branch(branch):
+def push_new_version_to_branch(branch, new_ver):
     # configure git
     os.system(f'git config --global user.email "travis@travis-ci.org"')
     os.system(f'git config --global user.name "Travis CI"')
