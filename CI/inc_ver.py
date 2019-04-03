@@ -19,6 +19,7 @@ def main():
         print(__doc__)
         return 1
 
+    # update version
     version = '0.0.0'
     with open('VERSION') as f:
         version = f.read()
@@ -29,6 +30,13 @@ def main():
     with open('VERSION', 'w') as f:
         f.write(new_ver)
 
+    # configure git
+    os.system(f'git config --global user.email "travis@travis-ci.org"')
+    os.system(f'git config --global user.name "Travis CI"')
+    gh_token = os.environ.get('GH_TOKEN')
+    os.system(f'git remote set-url https://{gh_token}:@github.com/tableau/TabPy > /dev/null 2>&1')
+
+    # commit and push new version
     os.system(f'git add -u')
     os.system(f'git commit -m "[ci skip] increase version to {new_ver}"')
     branch = os.environ.get('TRAVIS_BRANCH')
