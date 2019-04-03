@@ -7,6 +7,7 @@ function check_status() {
     fi
 }
 
+# !!!
 # Check for Python in PATH
 echo Checking for presence of Python in the system path variable.
 python --version &>-
