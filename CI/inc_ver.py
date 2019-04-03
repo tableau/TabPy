@@ -34,7 +34,7 @@ def main():
     os.system(f'git config --global user.email "travis@travis-ci.org"')
     os.system(f'git config --global user.name "Travis CI"')
     gh_token = os.environ.get('GH_TOKEN')
-    os.system(f'git remote set-url https://{gh_token}:@github.com/tableau/TabPy > /dev/null 2>&1')
+    os.system(f'git remote set-url origin https://{gh_token}:@github.com/tableau/TabPy.git > /dev/null 2>&1')
 
     # commit and push new version
     os.system(f'git add -u')
