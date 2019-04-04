@@ -239,6 +239,8 @@ class TestServiceClient(unittest.TestCase):
         self.sc.network_wrapper.DELETE.assert_called_once_with('endpoint/test',
                                                                None, None)
 
-    # TODO
     def test_set_credentials(self):
-        pass
+        username, password = 'username', 'password'
+        self.sc.set_credentials(username, password)
+        self.sc.network_wrapper.set_credentials.assert_called_once_with(
+            username, password)

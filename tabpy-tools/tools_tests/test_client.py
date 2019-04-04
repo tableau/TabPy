@@ -77,6 +77,5 @@ class TestClient(unittest.TestCase):
         self.assertEqual(self.client._get_endpoint_upload_destination(), "foo")
 
     # TODO
-    def test_set_credentials(selfs):
+    def test_set_credentials(self):
         pass
-
