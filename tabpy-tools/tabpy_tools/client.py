@@ -54,7 +54,6 @@ def _check_endpoint_name(name):
 
 
 class Client(object):
-
     def __init__(self,
                  endpoint,
                  query_timeout=1000):
@@ -66,13 +65,10 @@ class Client(object):
 
         Parameters
         ----------
-
         endpoint : str, optional
-
             The server URL.
 
         query_timeout : float, optional
-
             The timeout for query operations.
         """
         _check_hostname(endpoint)
@@ -104,7 +100,6 @@ class Client(object):
         -------
         dict
             Keys are:
-
             * name: The name of the service
             * creation_time: The creation time in seconds since 1970-01-01
             * description: Description of the service
@@ -126,7 +121,6 @@ class Client(object):
         Examples
         --------
         .. sourcecode:: python
-
             {
                 u'foo': {
                     u'status': u'LoadFailed',
@@ -135,7 +129,6 @@ class Client(object):
                     u'type': u'model',
                 },
             }
-
         '''
         return self._service.get_status()
 
@@ -157,32 +150,22 @@ class Client(object):
 
         Parameters
         ----------
-
         name : str
-
             The name of the endpoint.
 
         *args : list of anything
-
             Ordered parameters to the endpoint.
 
         **kwargs : dict of anything
-
             Named parameters to the endpoint.
 
         Returns
         -------
-
         dict
-
             Keys are:
-
                 model: the name of the endpoint
-
                 version: the version used.
-
                 response: the response to the query.
-
                 uuid : a unique id for the request.
         """
         return self._service.query(name, *args, **kwargs)
@@ -196,9 +179,7 @@ class Client(object):
 
         Examples
         --------
-
         .. sourcecode:: python
-
             {"clustering":
               {"description": "",
                "docstring": "-- no docstring found in query function --",
@@ -287,7 +268,6 @@ class Client(object):
             A unique identifier for the endpoint.
 
         obj :  function
-
             Refers to a user-defined function with any signature. However both
             input and output of the function need to be JSON serializable.
 
@@ -311,7 +291,6 @@ class Client(object):
         See Also
         --------
         remove, get_endpoints
-
         """
         endpoint = self.get_endpoints().get(name)
         if endpoint:
@@ -356,11 +335,8 @@ class Client(object):
 
         Returns
         -------
-
         dict
-
             Keys:
-
                 name : str
                     The name provided.
 
@@ -379,7 +355,6 @@ class Client(object):
 
         Raises
         ------
-
         TypeError
             When obj is not one of the expected types.
         '''
@@ -533,3 +508,18 @@ class Client(object):
                 endpoint: get_dependencies(endpoint)
                 for endpoint in endpoints
             }
+
+    def set_credentials(self, username, password):
+        '''
+        Set credentials for all the TabPy client-server communication
+        where client is tabpy-tools and server is tabpy-server.
+
+        Parameters
+        ----------
+        username : str
+            User name (login). Username is case insensitive.
+
+        password : str
+            Password in plain text.
+        '''
+        self._service.set_credentials(username, password)

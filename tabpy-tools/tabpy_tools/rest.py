@@ -1,6 +1,7 @@
 import abc
 import logging
 import requests
+from requests.auth import HTTPBasicAuth
 from re import compile
 
 from collections import MutableMapping as _MutableMapping
@@ -23,7 +24,9 @@ class ResponseError(Exception):
             r = response.json()
             self.info = r['info']
             self.message = response.json()['message']
-        except (json.JSONDecodeError, KeyError):
+        except (json.JSONDecodeError,
+                simplejson.errors.JSONDecodeError,
+                KeyError):
             self.info = None
             self.message = response.text
 
@@ -54,6 +57,7 @@ class RequestsNetworkWrapper(object):
             session = requests.session()
 
         self.session = session
+        self.auth = None
 
     def raise_error(self, response):
         logger.error("Error with server response. code=%s; text=%s",
@@ -82,7 +86,11 @@ class RequestsNetworkWrapper(object):
 
         logger.info("GET %s with %r", url, data)
 
-        response = self.session.get(url, params=data, timeout=timeout)
+        response = self.session.get(
+            url,
+            params=data,
+            timeout=timeout,
+            auth=self.auth)
         if response.status_code != 200:
             self.raise_error(response)
         logger.info("response=%r", response.text)
@@ -98,12 +106,14 @@ class RequestsNetworkWrapper(object):
         data = self._encode_request(data)
 
         logger.info("POST %s with %r", url, data)
-        response = self.session.post(url,
-                                     data=data,
-                                     headers={
-                                         'content-type': 'application/json',
-                                     },
-                                     timeout=timeout)
+        response = self.session.post(
+            url,
+            data=data,
+            headers={
+                'content-type': 'application/json',
+            },
+            timeout=timeout,
+            auth=self.auth)
 
         if response.status_code not in (200, 201):
             self.raise_error(response)
@@ -117,12 +127,14 @@ class RequestsNetworkWrapper(object):
 
         logger.info("PUT %s with %r", url, data)
 
-        response = self.session.put(url,
-                                    data=data,
-                                    headers={
-                                        'content-type': 'application/json',
-                                    },
-                                    timeout=timeout)
+        response = self.session.put(
+            url,
+            data=data,
+            headers={
+                'content-type': 'application/json',
+            },
+            timeout=timeout,
+            auth=self.auth)
         if response.status_code != 200:
             self.raise_error(response)
 
@@ -136,7 +148,11 @@ class RequestsNetworkWrapper(object):
 
         logger.info("DELETE %s with %r", url, data)
 
-        response = self.session.delete(url, data=data, timeout=timeout)
+        response = self.session.delete(
+            url,
+            data=data,
+            timeout=timeout,
+            auth=self.auth)
 
         if response.status_code <= 499 and response.status_code >= 400:
             raise RuntimeError(response.text)
@@ -145,15 +161,32 @@ class RequestsNetworkWrapper(object):
             raise RuntimeError(
                 "Error with server response code: %s", response.status_code)
 
+    def set_credentials(self, username, password):
+        """
+        Set credentials for all the TabPy client-server communication
+        where client is tabpy-tools and server is tabpy-server.
+
+        Parameters
+        ----------
+        username : str
+            User name (login). Username is case insensitive.
+
+        password : str
+            Password in plain text.
+        """
+        logger.info(f'Setting credentials (username: {username})')
+        self.auth = HTTPBasicAuth(username, password)
+
 
 class ServiceClient(object):
-    """A generic service client.
+    """
+    A generic service client.
 
     This will take an endpoint URL and a network_wrapper. You can use the
     RequestsNetworkWrapper if you want to use the requests module. The
     endpoint URL is prepended to all the requests and forwarded to the network
-    wrapper."""
-
+    wrapper.
+    """
     def __init__(self, endpoint, network_wrapper=None):
         if network_wrapper is None:
             network_wrapper = RequestsNetworkWrapper(
@@ -184,6 +217,21 @@ class ServiceClient(object):
     def DELETE(self, url, data=None, timeout=None):
         """Prepends self.endpoint to the url and issues a DELETE request."""
         self.network_wrapper.DELETE(self.endpoint + url, data, timeout)
+
+    def set_credentials(self, username, password):
+        '''
+        Set credentials for all the TabPy client-server communication
+        where client is tabpy-tools and server is tabpy-server.
+
+        Parameters
+        ----------
+        username : str
+            User name (login). Username is case insensitive.
+
+        password : str
+            Password in plain text.
+        '''
+        self.network_wrapper.set_credentials(username, password)
 
 
 class RESTProperty(object):
@@ -317,9 +365,8 @@ class RESTObject(_MutableMapping, metaclass=_RESTMetaclass):
         return result
 
     def __eq__(self, other):
-        return (
-                type(self) == type(other)
-                and all((
+        return (type(self) == type(other) and
+                all((
                     getattr(self, a) == getattr(other, a)
                     for a in self.__rest__
                 )))

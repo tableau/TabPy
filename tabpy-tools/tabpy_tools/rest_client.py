@@ -120,7 +120,6 @@ class AliasEndpoint(Endpoint):
 
 class RESTServiceClient(object):
     """A thin client for the REST Service."""
-
     def __init__(self, service_client):
         self.service_client = service_client
         self.query_timeout = None
@@ -147,7 +146,6 @@ class RESTServiceClient(object):
         -------
         dict
             Keys include:
-
             * path: a local file path.
 
         Note: In the future, other paths and parameters may be supported.
@@ -164,7 +162,6 @@ class RESTServiceClient(object):
         ----------
 
         type : str
-
             The type of endpoint to return. None will include all endpoints.
             Other options are 'model' and 'alias'.
         """
@@ -237,3 +234,18 @@ class RESTServiceClient(object):
         dict
         """
         return self.service_client.GET('status')
+
+    def set_credentials(self, username, password):
+        '''
+        Set credentials for all the TabPy client-server communication
+        where client is tabpy-tools and server is tabpy-server.
+
+        Parameters
+        ----------
+        username : str
+            User name (login). Username is case insensitive.
+
+        password : str
+            Password in plain text.
+        '''
+        self.service_client.set_credentials(username, password)
