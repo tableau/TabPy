@@ -103,7 +103,26 @@ class TestPasswordFile(unittest.TestCase):
             self.assertEqual('Failed to read password file {}'.format(
                 self.pwd_file.name), ex.args[0])
 
-    def test_given_one_login_many_times_in_pwd_file_expect_app_fails(self):
+    def test_given_duplicate_usernames_expect_parsing_fails(self):
+        self._set_file(self.config_file.name,
+                       "[TabPy]\n"
+                       "TABPY_PWD_FILE = {}".format(self.pwd_file.name))
+
+        login = 'user_name_123'
+        pwd = 'hashedpw'
+        self._set_file(self.pwd_file.name,
+                       "# passwords\n"
+                       "\n"
+                       "{} {}\n{} {}".format(login, pwd, login, pwd))
+
+        with self.assertRaises(RuntimeError) as cm:
+            app = TabPyApp(self.config_file.name)
+            ex = cm.exception
+            self.assertEqual('Failed to read password file {}'.format(
+                self.pwd_file.name), ex.args[0])
+
+
+    def test_given_one_line_with_too_many_params_in_pwd_file_expect_app_fails(self):
         self._set_file(self.config_file.name,
                        "[TabPy]\n"
                        "TABPY_PWD_FILE = {}".format(self.pwd_file.name))
