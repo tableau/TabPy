@@ -4,7 +4,6 @@ import requests
 from requests.auth import HTTPBasicAuth
 from re import compile
 import json
-import simplejson
 
 from collections import MutableMapping as _MutableMapping
 
@@ -25,7 +24,6 @@ class ResponseError(Exception):
             self.info = r['info']
             self.message = response.json()['message']
         except (json.JSONDecodeError,
-                simplejson.errors.JSONDecodeError,
                 KeyError):
             self.info = None
             self.message = response.text
@@ -59,14 +57,16 @@ class RequestsNetworkWrapper(object):
         self.session = session
         self.auth = None
 
-    def raise_error(self, response):
+    @staticmethod
+    def raise_error(response):
         logger.error("Error with server response. code=%s; text=%s",
                      response.status_code,
                      response.text)
 
         raise ResponseError(response)
 
-    def _remove_nones(self, data):
+    @staticmethod
+    def _remove_nones(data):
         if isinstance(data, dict):
             for k in [k for k, v in data.items() if v is None]:
                 del data[k]
@@ -187,6 +187,7 @@ class ServiceClient(object):
     endpoint URL is prepended to all the requests and forwarded to the network
     wrapper.
     """
+
     def __init__(self, endpoint, network_wrapper=None):
         if network_wrapper is None:
             network_wrapper = RequestsNetworkWrapper(
@@ -325,12 +326,12 @@ class RESTObject(_MutableMapping, metaclass=_RESTMetaclass):
 
     def __repr__(self):
         return (
-                "{" +
-                ", ".join([
-                    repr(k) + ": " + repr(v)
-                    for k, v in self.items()
-                ]) +
-                "}"
+            "{" +
+            ", ".join([
+                repr(k) + ": " + repr(v)
+                for k, v in self.items()
+            ]) +
+            "}"
         )
 
     @classmethod
@@ -365,7 +366,7 @@ class RESTObject(_MutableMapping, metaclass=_RESTMetaclass):
         return result
 
     def __eq__(self, other):
-        return (type(self) == type(other) and
+        return (isinstance(self, type(other)) and
                 all((
                     getattr(self, a) == getattr(other, a)
                     for a in self.__rest__
