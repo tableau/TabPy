@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Improvements
 
 - Added basic access authentication (all methods except /info)
-- tabpy-tools can deploy to TabPy with auth on
+- tabpy-tools can deploy models to TabPy with authentication on
 - Increased unit tests coverage
 - Travis CI for merge requests: unit tests executed, code style checking
 
