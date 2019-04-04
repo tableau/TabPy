@@ -33,8 +33,8 @@ more info can be found in the
 
 ## Authentication
 
-When TabPy is configured with authentication feature on client code
-has to specify credential to use during model deployment with
+When TabPy is configured with authentication feature on, client code
+has to specify the credentials to use during model deployment with
 `set_credentials` call for a client:
 
 ```python
