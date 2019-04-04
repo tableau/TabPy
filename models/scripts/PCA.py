@@ -9,12 +9,12 @@ import sys
 
 
 def PCA(component, _arg1, _arg2, *_argN):
-'''
-Principal Component Analysis is a technique that extracts the key
-distinct components from a high dimensional space whie attempting
-to capture as much of the variance as possible. For more information
-on the function and how to use it please refer to tabpy-tools.md
-'''
+    '''
+    Principal Component Analysis is a technique that extracts the key
+    distinct components from a high dimensional space whie attempting
+    to capture as much of the variance as possible. For more information
+    on the function and how to use it please refer to tabpy-tools.md
+    '''
     cols = [_arg1, _arg2] + list(_argN)
     encodedCols = []
     labelEncoder = LabelEncoder()

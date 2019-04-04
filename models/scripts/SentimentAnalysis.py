@@ -6,12 +6,12 @@ import sys
 
 
 def SentimentAnalysis(_arg1, library='nltk'):
-'''
-Sentiment Analysis is a procedure that assigns a score from -1 to 1
-for a piece of text with -1 being negative and 1 being positive. For
-more information on the function and how to use it please refer to
-tabpy-tools.md
-'''
+    '''
+    Sentiment Analysis is a procedure that assigns a score from -1 to 1
+    for a piece of text with -1 being negative and 1 being positive. For
+    more information on the function and how to use it please refer to
+    tabpy-tools.md
+    '''
     assert (type(_arg1[0]) is str)
 
     library = library.lower()
