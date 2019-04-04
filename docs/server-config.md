@@ -1,5 +1,19 @@
 # TabPy Server Configuration Instructions
 
+<!-- markdownlint-disable MD004 -->
+<!-- toc -->
+
+- [Configuring HTTP vs HTTPS](#configuring-http-vs-https)
+- [Authentication](#authentication)
+  * [Enabling Authentication](#enabling-authentication)
+  * [Password File](#password-file)
+  * [Adding an Account](#adding-an-account)
+  * [Updating an Account](#updating-an-account)
+  * [Deleting an Account](#deleting-an-account)
+
+<!-- tocstop -->
+<!-- markdownlint-enable MD004 -->
+
 Default settings for TabPy may be viewed in the
 tabpy_server/common/default.conf file. This file also contains a
 commented example of how to set up your TabPy server to only
