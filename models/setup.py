@@ -6,8 +6,9 @@ import platform
 # pip 10.0 introduced a breaking change that moves the location of main
 try:
     from pip import main
-except:
+except ImportError: 
     from pip._internal import main
+
 
 def install_dependencies(packages):
     pip_arg = ['install'] + packages + ['--no-cache-dir']
@@ -18,8 +19,8 @@ def install_dependencies(packages):
 
 
 if __name__ == '__main__':
-    install_dependencies(['sklearn', 'pandas', 'numpy', 'textblob', 'nltk', 'scipy'])
-    
+    install_dependencies(['sklearn', 'pandas', 'numpy',
+                          'textblob', 'nltk', 'scipy'])
     # Determine if we run python or python3
     if platform.system() == 'Windows':
         py = 'python '
@@ -31,9 +32,9 @@ if __name__ == '__main__':
         port = 9004
     else:
         port = sys.argv[1]
-    
     # Deploy each model in the scripts directory
-    directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'scripts/')
+    directory = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                             'scripts/')
     for filename in os.listdir(directory):
         path = py + directory + filename + ' ' + str(port)
         os.system(path)

@@ -19,14 +19,15 @@ class TestDeployModel(unittest.TestCase):
             self._py = 'python3'
 
     def setUp(self):
-        tabpy_root = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..')
+        tabpy_root = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                  '..', '..')
         os.chdir(tabpy_root)
-        
         # start TabPy server in the background
         if platform.system() == 'Windows':
             self._process = subprocess.Popen(['startup.cmd', '&'])
         else:
-            self._process = subprocess.Popen(['./startup.sh', '&'], preexec_fn=os.setsid)
+            self._process = subprocess.Popen(['./startup.sh', '&'],
+                                             preexec_fn=os.setsid)
         time.sleep(1)
 
     def tearDown(self):
@@ -34,7 +35,8 @@ class TestDeployModel(unittest.TestCase):
 
         # kill TabPy server
         if platform.system() == 'Windows':
-            subprocess.call(['taskkill', '/F', '/T', '/PID', str(self._process.pid)])
+            subprocess.call(['taskkill', '/F', '/T', '/PID',
+                             str(self._process.pid)])
         else:
             os.killpg(os.getpgid(self._process.pid), signal.SIGTERM)
         self._process.kill()
@@ -43,7 +45,8 @@ class TestDeployModel(unittest.TestCase):
         """
         Deploys a model using the provided deployment script.
 
-        Has side effects - modifies state.ini file. Only run in clean, testing environment.
+        Has side effects - modifies state.ini file. Only run in clean,
+        testing environment.
         :return:
         """
         # run script
@@ -52,6 +55,7 @@ class TestDeployModel(unittest.TestCase):
 
         # query endpoint
         PCA_req = requests.get('http://localhost:9004/endpoints/PCA')
-        SentimentAnalysis_req = requests.get('http://localhost:9004/endpoints/Sentiment Analysis')
+        SentimentAnalysis_req =requests.get('http://localhost:9004/endpoints/'
+                                            'Sentiment Analysis')
         self.assertEqual(PCA_req.status_code, 200)
         self.assertEqual(SentimentAnalysis_req.status_code, 200)

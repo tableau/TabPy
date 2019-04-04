@@ -29,7 +29,7 @@ def SentimentAnalysis(_arg1, library='nltk'):
 if __name__ == '__main__':
     port = sys.argv[1]
     connection = Client('http://localhost:' + port + '/')
-    connection.deploy('Sentiment Analysis',
-                      SentimentAnalysis,
-                      'Returns a sentiment score between -1 and 1 for a given string.', override=True)
+    connection.deploy('Sentiment Analysis', SentimentAnalysis,
+                      'Returns a sentiment score between -1 and '
+                      '1 for a given string.', override=True)
     print("Successfully deployed SentimentAnalysis")
