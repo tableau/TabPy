@@ -169,15 +169,16 @@ all the required dependencies manually.
 ### Principal Component Analysis (PCA)
 
 [Principal component analysis](https://en.wikipedia.org/wiki/Principal_component_analysis)
-is a statistical technique which extracts new, linearly uncorrelated, variables out of a
-dataset which capture the maximum variance in the data. In this way, `PCA` can
-be used to reduce the number of variables in a high dimensional dataset, a
-process that is called dimensionality reduction. The first principal component
-captures the largest amount of variance, while the second captures the largest
-portion of the remaining variance while remaining orthogonal to the first and
-so on. This allows the reduction of the number of dimensions while maintaining
-as much of the information from the original data as possible. `PCA` is useful
-in exploratory data analysis because complex relationships can be visualized
+is a statistical technique which extracts new, linearly uncorrelated,
+variables out of a dataset which capture the maximum variance in the
+data. In this way, `PCA` can be used to reduce the number of variables
+in a high dimensional dataset, a process that is called dimensionality
+reduction. The first principal component captures the largest amount of
+variance, while the second captures the largest portion of the remaining
+variance while remaining orthogonal to the first and so on. This allows the
+reduction of the number of dimensions while maintaining as much of the
+information from the original data as possible. `PCA` is useful in
+exploratory data analysis because complex relationships can be visualized
 in a 2D scatter plot of the first few principal components.
 
 TabPy’s implementation of `PCA` uses the scikit-learn
