@@ -195,8 +195,13 @@ class TestRequestsNetworkWrapper(unittest.TestCase):
 
     def test_POST_with_credentials(self):
         self._test_METHOD_with_credentials(
-            self.rnw.POST, self.rnw.session.post, headers={
-                'content-type': 'application/json'}, data=True, response='json')
+            self.rnw.POST,
+            self.rnw.session.post,
+            headers={
+                'content-type': 'application/json'
+            },
+            data=True,
+            response='json')
 
     def test_PUT_with_credentials(self):
         self._test_METHOD_with_credentials(
