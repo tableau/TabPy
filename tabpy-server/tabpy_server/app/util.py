@@ -93,7 +93,8 @@ def parse_pwd_file(pwd_file_name):
                 credentials[login] = row[1]
                 logger.debug('Found username {}'.format(login))
             else:
-                logger.warning('Found username {} but no password'.format(row[0]))
+                logger.warning('Found username {} but no password'
+                               .format(row[0]))
                 return False, {}
 
     return True, credentials
