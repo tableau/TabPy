@@ -91,7 +91,7 @@ class TestPasswordFile(unittest.TestCase):
                        "TABPY_PWD_FILE = {}".format(self.pwd_file.name))
 
         login = 'user_name_123'
-        pwd = ' '
+        pwd = ''
         self._set_file(self.pwd_file.name,
                        "# passwords\n"
                        "\n"
