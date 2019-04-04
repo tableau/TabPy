@@ -121,8 +121,7 @@ class TestPasswordFile(unittest.TestCase):
             self.assertEqual('Failed to read password file {}'.format(
                 self.pwd_file.name), ex.args[0])
 
-
-    def test_given_one_line_with_too_many_params_in_pwd_file_expect_app_fails(self):
+    def test_given_one_line_with_too_many_params_expect_app_fails(self):
         self._set_file(self.config_file.name,
                        "[TabPy]\n"
                        "TABPY_PWD_FILE = {}".format(self.pwd_file.name))
