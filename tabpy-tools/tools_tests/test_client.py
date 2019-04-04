@@ -1,8 +1,6 @@
 import unittest
 from unittest.mock import Mock
 
-import requests
-
 from tabpy_tools.client import Client
 
 
@@ -77,3 +75,8 @@ class TestClient(unittest.TestCase):
             {"path": "foo"}
 
         self.assertEqual(self.client._get_endpoint_upload_destination(), "foo")
+
+    # TODO
+    def test_set_credentials(selfs):
+        pass
+

@@ -3,10 +3,10 @@ import logging
 import requests
 from requests.auth import HTTPBasicAuth
 from re import compile
+import json
+import simplejson
 
 from collections import MutableMapping as _MutableMapping
-
-import json as json
 
 
 logger = logging.getLogger(__name__)
