@@ -37,7 +37,7 @@ def PCA(component, _arg1, _arg2, *_argN):
 
     if (component <= 0 or component > len(dataDict)):
         print('ERROR: Component specified must be >= 0 and '
-              '<= number of arguments') 
+              '<= number of arguments')
         assert (False)
 
     df = pd.DataFrame(data=dataDict, dtype=float)

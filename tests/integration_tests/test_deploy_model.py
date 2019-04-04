@@ -6,6 +6,7 @@ import time
 import platform
 import signal
 
+
 class TestDeployModel(unittest.TestCase):
     _cwd: str
     _py: str
@@ -55,7 +56,7 @@ class TestDeployModel(unittest.TestCase):
 
         # query endpoint
         PCA_req = requests.get('http://localhost:9004/endpoints/PCA')
-        SentimentAnalysis_req =requests.get('http://localhost:9004/endpoints/'
-                                            'Sentiment Analysis')
+        SentimentAnalysis_req = requests.get('http://localhost:9004/endpoints/'
+                                             'Sentiment Analysis')
         self.assertEqual(PCA_req.status_code, 200)
         self.assertEqual(SentimentAnalysis_req.status_code, 200)

@@ -6,7 +6,7 @@ import platform
 # pip 10.0 introduced a breaking change that moves the location of main
 try:
     from pip import main
-except ImportError: 
+except ImportError:
     from pip._internal import main
 
 
