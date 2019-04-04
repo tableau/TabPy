@@ -9,6 +9,12 @@ import sys
 
 
 def PCA(component, _arg1, _arg2, *_argN):
+'''
+Principal Component Analysis is a technique that extracts the key
+distinct components from a high dimensional space whie attempting
+to capture as much of the variance as possible. For more information
+on the function and how to use it please refer to tabpy-tools.md
+'''
     cols = [_arg1, _arg2] + list(_argN)
     encodedCols = []
     labelEncoder = LabelEncoder()
@@ -52,6 +58,7 @@ def PCA(component, _arg1, _arg2, *_argN):
 
 if __name__ == '__main__':
     port = sys.argv[1]
+    # to do: once auth is enabled in tabpy-tools this will need to be updated
     connection = Client('http://localhost:' + port + '/')
     connection.deploy('PCA', PCA,
                       'Returns the specified principal component.',

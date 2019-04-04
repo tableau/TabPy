@@ -61,11 +61,12 @@ install `pytest`:
 pip install pytest
 ```
 
-And then run `pytest` either for server or tools test, or even combined:
+And then run `pytest` either for server, tools, or integrations tests, or even combined:
 
 ```sh
 pytest tabpy-server/server_tests/ --cov=tabpy-server/tabpy_server
 pytest tabpy-tools/tools_tests/ --cov=tabpy-tools/tabpy_tools --cov-append
+pytest tabpy-tools/tests/integration_tests/ --cov=models --cov-append
 ```
 
 ## Linux and Mac Specific Steps
