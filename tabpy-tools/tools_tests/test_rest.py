@@ -3,6 +3,7 @@ import requests
 import sys
 import unittest
 from unittest.mock import Mock
+from requests.auth import HTTPBasicAuth
 
 from tabpy_tools.rest import (RequestsNetworkWrapper, ServiceClient)
 
@@ -148,6 +149,69 @@ class TestRequestsNetworkWrapper(unittest.TestCase):
             e = sys.exc_info()[0]
             self.assertEqual(e, TypeError)
 
+    def test_set_credentials(self):
+        expected_auth = None
+        self.assertEqual(self.rnw.auth, expected_auth)
+
+        username, password = 'username', 'password'
+        expected_auth = HTTPBasicAuth(username, password)
+        self.rnw.set_credentials(username, password)
+        self.assertEqual(self.rnw.auth, expected_auth)
+
+    def _test_METHOD_with_credentials(
+            self,
+            http_method_function,
+            http_session_method_function,
+            headers=None,
+            params=False,
+            data=False,
+            response=None):
+        username, password = 'username', 'password'
+        self.rnw.set_credentials(username, password)
+
+        url = 'url'
+        _data = {'foo': 'bar'}
+
+        self.assertEqual(http_method_function(url, _data), response)
+
+        pargs = {url}
+        kwargs = {'timeout': None, 'auth': self.rnw.auth}
+        if data:
+            kwargs['data'] = json.dumps(_data)
+        if headers:
+            kwargs['headers'] = headers
+        if params:
+            kwargs['params'] = _data
+
+        http_session_method_function.assert_called_once_with(*pargs, **kwargs)
+        self.assertEqual(self.rnw.auth, HTTPBasicAuth(username, password))
+
+    def test_GET_with_credentials(self):
+        self._test_METHOD_with_credentials(
+            self.rnw.GET,
+            self.rnw.session.get,
+            params=True,
+            response='json')
+
+    def test_POST_with_credentials(self):
+        self._test_METHOD_with_credentials(
+            self.rnw.POST,
+            self.rnw.session.post,
+            headers={
+                'content-type': 'application/json'
+            },
+            data=True,
+            response='json')
+
+    def test_PUT_with_credentials(self):
+        self._test_METHOD_with_credentials(
+            self.rnw.PUT, self.rnw.session.put, data=True, headers={
+                'content-type': 'application/json'}, response='json')
+
+    def test_DELETE_with_credentials(self):
+        self._test_METHOD_with_credentials(
+            self.rnw.DELETE, self.rnw.session.delete, data=True)
+
 
 class TestServiceClient(unittest.TestCase):
 
@@ -179,3 +243,9 @@ class TestServiceClient(unittest.TestCase):
         self.assertEqual(self.sc.DELETE('test'), None)
         self.sc.network_wrapper.DELETE.assert_called_once_with('endpoint/test',
                                                                None, None)
+
+    def test_set_credentials(self):
+        username, password = 'username', 'password'
+        self.sc.set_credentials(username, password)
+        self.sc.network_wrapper.set_credentials.assert_called_once_with(
+            username, password)
