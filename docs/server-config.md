@@ -15,9 +15,9 @@
 <!-- markdownlint-enable MD004 -->
 
 Default settings for TabPy may be viewed in the
-tabpy_server/common/default.conf file. This file also contains a
-commented example of how to set up your TabPy server to only
-serve HTTPS traffic.
+tabpy_server/common/default.conf file. This file also contains
+commented examples of how to set up your TabPy server to only
+serve HTTPS traffic and enable authentication.
 
 Change settings by:
 
@@ -64,8 +64,8 @@ for more details).
 
 ### Enabling Authentication
 
-To enable the feature specify `TABPY_PWD_FILE` parameter in TabPy
-configuration file with a fully qualified name:
+To enable the feature specify the `TABPY_PWD_FILE` parameter in the 
+TabPy configuration file with a fully qualified name:
 
 ```sh
 TABPY_PWD_FILE = c:\path\to\password\file.txt
@@ -74,14 +74,14 @@ TABPY_PWD_FILE = c:\path\to\password\file.txt
 ### Password File
 
 Password file is a text file containing usernames and hashed passwords
-per line separated by space. For username only ASCII characters
-supported.
+per line separated by single space. For username only ASCII characters
+are supported.
 
 **It is highly recommended to restrict access to the password file
 with hosting OS mechanisms. Ideally the file should only be accessible
-for reading with account TabPy runs as and TabPy admin account.**
+for reading with the account under which TabPy runs and TabPy admin account.**
 
-There is `utils/user_management.py` utility to operate with
+There is a `utils/user_management.py` utility to operate with
 accounts in the password file. Run `utils/user_management.py -h` to
 see how to use it.
 
@@ -96,20 +96,20 @@ command  providing user name, password (optional) and password file:
 python utils/user_management.py add -u <username> -p <password> -f <pwdfile>
 ```
 
-If `-p` agrument is not provided (recommended) password for the user name
-will be generated.
+If the (recommended) `-p` argument is not provided a password for the user name
+will be generated and displayed in the command line.
 
 ### Updating an Account
 
-To update password for an account run `utils/user_management.py` utility
+To update the password for an account run `utils/user_management.py` utility
 with `update` command:
 
 ```sh
 python utils/user_management.py update -u <username> -p <password> -f <pwdfile>
 ```
 
-If `-p` agrument is not provided (recommended) password for the user name
-will be generated.
+If the (recommended) `-p` agrument is not provided a password for the user name
+will be generated and displayed in the command line.
 
 ### Deleting an Account
 
