@@ -64,7 +64,7 @@ for more details).
 
 ### Enabling Authentication
 
-To enable the feature specify the `TABPY_PWD_FILE` parameter in the 
+To enable the feature specify the `TABPY_PWD_FILE` parameter in the
 TabPy configuration file with a fully qualified name:
 
 ```sh
