@@ -7,7 +7,7 @@ at endpoints_handler.py
 '''
 
 from tabpy_server.handlers import ManagementHandler
-import simplejson
+import json
 import logging
 import tornado.web
 from tornado import gen
@@ -34,10 +34,10 @@ class EndpointHandler(ManagementHandler):
 
         self._add_CORS_header()
         if not endpoint_name:
-            self.write(simplejson.dumps(self.tabpy_state.get_endpoints()))
+            self.write(json.dumps(self.tabpy_state.get_endpoints()))
         else:
             if endpoint_name in self.tabpy_state.get_endpoints():
-                self.write(simplejson.dumps(
+                self.write(json.dumps(
                     self.tabpy_state.get_endpoints()[endpoint_name]))
             else:
                 self.error_out(404, 'Unknown endpoint',
@@ -57,7 +57,7 @@ class EndpointHandler(ManagementHandler):
                 self.finish()
                 return
             try:
-                request_data = simplejson.loads(
+                request_data = json.loads(
                     self.request.body.decode('utf-8'))
             except BaseException as ex:
                 self.error_out(

@@ -1,4 +1,4 @@
-import simplejson
+import json
 import logging
 from tabpy_server.handlers import BaseHandler
 
@@ -27,6 +27,6 @@ class StatusHandler(BaseHandler):
                 'last_error': v['last_error']}
 
         logger.debug("Found models: {}".format(status_dict))
-        self.write(simplejson.dumps(status_dict))
+        self.write(json.dumps(status_dict))
         self.finish()
         return
