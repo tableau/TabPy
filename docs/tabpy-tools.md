@@ -139,12 +139,12 @@ client.remove('WillItDefault')
 
 ## Predeployed Functions
 
-To setup models download the latest version of TabPy and follow the instructions
+To setup models download the latest version of TabPy and follow the [instructions](server-download.md)
 to install and start up your server. Once your server is running, navigate to the
 models directory and run setup.py.  If your TabPy server is running on the default
 port (9004), you do not need to specify a port when launching the script. If your
 server is running on a port other than 9004 you can specify a different port in
-the command line like so
+the command line like so:
 
 ```sh
 
@@ -155,7 +155,7 @@ python setup.py 4047
 The setup file will install all of the necessary dependencies `(sklearn, nltk,
 textblob, pandas, & numpy)` and deploy all of the prebuilt models located in
 `./models/scripts`. For every model that is successfully deployed a message
-will be printed to the console
+will be printed to the console:
 
 ```sh
 "Successfully deployed PCA"
@@ -178,24 +178,24 @@ variance, while the second captures the largest portion of the remaining
 variance while remaining orthogonal to the first and so on. This allows the
 reduction of the number of dimensions while maintaining as much of the
 information from the original data as possible. `PCA` is useful in
-exploratory data analysis because complex relationships can be visualized
-in a 2D scatter plot of the first few principal components.
+exploratory data analysis because complex linear relationships can be
+visualized in a 2D scatter plot of the first few principal components.
 
 TabPy’s implementation of `PCA` uses the scikit-learn
 [decomposition.PCA](https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html)
-algorithm, which is further documented
-[here](https://scikit-learn.org/stable/modules/decomposition.html#pca).
-It requires the selected component to be > 0 and <= number of variables you
-pass in to the function. When passing categorical variables we perform the
-`scikit-learn` [One Hot Encoding](https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OneHotEncoder.html)
-to transform your non-numeric variables into a table of 0s and 1s. In order
-for `One Hot Encoding` to be performant we have limited the number of unique
-values your categorical column may contain to 25 and do not permit any nulls
-or empty strings in the column. Before `PCA` is performed, all variables are
-normalized to have a mean of 0 and unit variance using the `scikit-learn`
-[StandardScaler](https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.StandardScaler.html).
+algorithm, which is further documented [here](https://scikit-learn.org/stable/modules/decomposition.html#pca).
+In the Tableau script, after the function name `PCA`, you must specify a
+principal component to return. This integer input should be > 0 and <= the
+number of variables you pass in to the function. When passing categorical
+variables we perform the `scikit-learn` [One Hot Encoding](https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OneHotEncoder.html)
+to transform your non-numeric variables into a one-hot numeric array of 0s and
+1s. In order for `One Hot Encoding` to be performant we have limited the number
+of unique values your categorical column may contain to 25 and do not permit
+any nulls or empty strings in the column. In Tableau's implementation of `PCA`
+is performed, all variables are normalized to have a mean of 0 and unit
+variance using the `scikit-learn` [StandardScaler](https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.StandardScaler.html).
 
-A Tableau calculated field to perform PCA will look like
+A Tableau calculated field to perform PCA will look like:
 
 ```python
 
@@ -212,7 +212,7 @@ that into a numeric value. Our implementation of `sentiment analysis` returns a
 polarity score between -1 and 1 which rates the positivity of the string with
 1 being very positive and -1 being very negative. Calling the `Sentiment
 Analysis` function from TabPy in Tableau will look like the following,
-where \_arg1 is a dimension containing text
+where \_arg1 is a Tableau dimension containing text
 
 ```python
 

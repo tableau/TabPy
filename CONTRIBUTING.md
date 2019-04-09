@@ -69,6 +69,10 @@ pytest tabpy-tools/tools_tests/ --cov=tabpy-tools/tabpy_tools --cov-append
 pytest tabpy-tools/tests/integration_tests/ --cov=models --cov-append
 ```
 
+It should be noted that running the integration tests will install the following
+packages if the machine does not already have them: `sklearn, nltk, textblob,
+pandas, & numpy`
+
 ## Linux and Mac Specific Steps
 
 If you have downloaded Tabpy and would like to manually install Tabpy Server

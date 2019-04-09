@@ -5,54 +5,83 @@ import requests
 import time
 import platform
 import signal
+import tempfile
+import shutil
 
 
 class TestDeployModel(unittest.TestCase):
-    _cwd: str
-    _py: str
-
     def __init__(self, *args, **kwargs):
         super(TestDeployModel, self).__init__(*args, **kwargs)
-        self._cwd = os.getcwd()
+        self.cwd = os.getcwd()
+        self.tabpy_root = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..')
+        self.tabpy_server = os.path.join(self.tabpy_root, 'tabpy-server', 'tabpy_server')
         if platform.system() == 'Windows':
-            self._py = 'python'
+            self.py = 'python'
         else:
-            self._py = 'python3'
+            self.py = 'python3'
 
     def setUp(self):
-        tabpy_root = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                  '..', '..')
-        os.chdir(tabpy_root)
+        os.chdir(self.tabpy_server)
+        prefix = '_TestDeployModel_'
+        self.state_dir = tempfile.mkdtemp(prefix=prefix, dir=self.tabpy_server)
+        self.state_file = open(os.path.join(self.state_dir, 'state.ini'), 'w+')
+        self.state_file.write('[Service Info]\n'
+                             'Name = TabPy Serve\n'
+                             'Description = \n'
+                             'Creation Time = 0\n'
+                             'Access-Control-Allow-Origin = \n'
+                             'Access-Control-Allow-Headers = \n'
+                             'Access-Control-Allow-Methods = \n'
+                             '\n'
+                             '[Query Objects Service Versions]\n'
+                             '\n'
+                             '[Query Objects Docstrings]\n'
+                             '\n'
+                             '[Meta]\n'
+                             'Revision Number = 1\n')
+        self.state_file.close()
+
+        self.config_file = tempfile.NamedTemporaryFile(
+            mode='w+t', prefix=prefix, suffix='.conf', dir= self.tabpy_server, delete=False)
+        self.config_file.write('[TabPy]\n'
+            'TABPY_PORT= 9004\n'
+            'TABPY_STATE_PATH = {}'.format(self.state_dir))
+        self.config_file.close()
+
+        
+        os.chdir(self.tabpy_root)
         # start TabPy server in the background
         if platform.system() == 'Windows':
-            self._process = subprocess.Popen(['startup.cmd', '&'])
+            self.process = subprocess.Popen(['startup.cmd', os.path.basename(self.config_file.name), '&'])
         else:
-            self._process = subprocess.Popen(['./startup.sh', '&'],
+            self.process = subprocess.Popen(['./startup.sh', '--config=' + os.path.basename(self.config_file.name), '&'],
                                              preexec_fn=os.setsid)
-        time.sleep(1)
+        time.sleep(10)
 
     def tearDown(self):
-        os.chdir(self._cwd)
+        os.chdir(self.tabpy_server)
+        os.remove(self.config_file.name)
+        os.remove(self.state_file.name)
+        shutil.rmtree(self.state_dir)
 
+        os.chdir(self.cwd)
         # kill TabPy server
         if platform.system() == 'Windows':
             subprocess.call(['taskkill', '/F', '/T', '/PID',
-                             str(self._process.pid)])
+                             str(self.process.pid)])
         else:
-            os.killpg(os.getpgid(self._process.pid), signal.SIGTERM)
-        self._process.kill()
+            os.killpg(os.getpgid(self.process.pid), signal.SIGTERM)
+        self.process.kill()
 
     def test_deploy_model_with_script(self):
         """
         Deploys a model using the provided deployment script.
-
-        Has side effects - modifies state.ini file. Only run in clean,
-        testing environment.
+        
         :return:
         """
         # run script
-        path = os.path.join(os.getcwd(), 'models', 'setup.py')
-        os.system(self._py + ' ' + path)
+        path = os.path.join(self.tabpy_root, 'models', 'setup.py') #os.getcwd()
+        os.system(self.py + ' ' + path)
 
         # query endpoint
         PCA_req = requests.get('http://localhost:9004/endpoints/PCA')
