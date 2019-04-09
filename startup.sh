@@ -70,7 +70,7 @@ if [ -z $CONFIG ]; then
     echo Using default parameters.
     python3 tabpy-server/tabpy_server/tabpy.py
 else
-    python3 tabpy-server/tabpy_server/tabpy.py --config=$CONFIG
+    python3 tabpy-server/tabpy_server/tabpy.py --config=${TABPY_ROOT}/tabpy-server/tabpy_server/$CONFIG
 fi
 
 export PYTHONPATH=$SAVE_PYTHONPATH
