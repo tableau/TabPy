@@ -17,6 +17,7 @@ Change settings by:
 2. Modifying default.conf.
 3. Specifying your own config file as a command line parameter.
    - i.e. Running the command:
+   
      ```sh
      python tabpy.py --config=path\to\my\config
      ```
