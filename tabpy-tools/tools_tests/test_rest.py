@@ -223,6 +223,7 @@ class TestServiceClient(unittest.TestCase):
         nw.DELETE.return_value = 'DELETE'
 
         self.sc = ServiceClient('endpoint/', network_wrapper=nw)
+        self.scClientDoesNotEndWithSlash = ServiceClient('endpoint', network_wrapper=nw)
 
     def test_GET(self):
         self.assertEqual(self.sc.GET('test'), 'GET')
@@ -243,6 +244,11 @@ class TestServiceClient(unittest.TestCase):
         self.assertEqual(self.sc.DELETE('test'), None)
         self.sc.network_wrapper.DELETE.assert_called_once_with('endpoint/test',
                                                                None, None)
+
+    def test_FixEndpoint(self):
+        self.assertEqual(self.scClientDoesNotEndWithSlash.GET('test'), 'GET')
+        self.sc.network_wrapper.GET.assert_called_once_with('endpoint/test',
+                                                            None, None)
 
     def test_set_credentials(self):
         username, password = 'username', 'password'
