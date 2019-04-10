@@ -7,7 +7,7 @@ at endpoint_handler.py
 '''
 
 from tabpy_server.handlers import ManagementHandler
-import simplejson
+import json
 import tornado.web
 from tornado import gen
 import logging
@@ -27,7 +27,7 @@ class EndpointsHandler(ManagementHandler):
             return
 
         self._add_CORS_header()
-        self.write(simplejson.dumps(self.tabpy_state.get_endpoints()))
+        self.write(json.dumps(self.tabpy_state.get_endpoints()))
 
     @tornado.web.asynchronous
     @gen.coroutine
@@ -44,7 +44,7 @@ class EndpointsHandler(ManagementHandler):
                 return
 
             try:
-                request_data = simplejson.loads(
+                request_data = json.loads(
                     self.request.body.decode('utf-8'))
             except Exception as ex:
                 self.error_out(

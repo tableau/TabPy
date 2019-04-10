@@ -6,6 +6,7 @@ on TabPy server.
 <!-- toc -->
 
 - [Connecting to TabPy](#connecting-to-tabpy)
+- [Authentication](#authentication)
 - [Deploying a Function](#deploying-a-function)
 - [Predeployed Functions](#predeployed-functions)
 - [Providing Schema Metadata](#providing-schema-metadata)
@@ -30,6 +31,26 @@ client = Client('http://localhost:9004/')
 The URL and port are where the Tableau-Python-Server process has been started -
 more info can be found in the
 [server section](server-startup.md#Command-Line-Arguments) of the documentation.
+
+## Authentication
+
+When TabPy is configured with authentication feature on, client code
+has to specify the credentials to use during model deployment with
+`set_credentials` call for a client:
+
+```python
+
+client.set_credentials('username', 'P@ssw0rd')
+
+```
+
+Credentials only need to be set once for all futher client operations.
+
+In case credentials are not provided when required deployment will
+fail with "Unauthorized" code (401).
+
+For how to configure and enable authentication feature for TabPy see
+[TabPy Server Configuration Instructions](server-config.md).
 
 ## Deploying a Function
 

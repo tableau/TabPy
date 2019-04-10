@@ -13,17 +13,12 @@ from unittest.mock import patch, call
 
 class TestPasswordFile(unittest.TestCase):
     def setUp(self):
-        self.cwd = pathlib.Path.cwd()
-        self.tabpy_cwd = self.cwd / 'tabpy-server' / 'tabpy_server'
-        os.chdir(self.tabpy_cwd)
-
         self.config_file = NamedTemporaryFile(mode='w', delete=False)
         self.config_file.close()
         self.pwd_file = NamedTemporaryFile(mode='w', delete=False)
         self.pwd_file.close()
 
     def tearDown(self):
-        os.chdir(self.cwd)
         os.remove(self.config_file.name)
         self.config_file = None
         os.remove(self.pwd_file.name)
@@ -85,7 +80,43 @@ class TestPasswordFile(unittest.TestCase):
         self.assertIn(login, app.credentials)
         self.assertEqual(app.credentials[login], pwd)
 
-    def test_given_one_login_many_times_in_pwd_file_expect_app_fails(self):
+    def test_given_username_but_no_password_expect_parsing_fails(self):
+        self._set_file(self.config_file.name,
+                       "[TabPy]\n"
+                       "TABPY_PWD_FILE = {}".format(self.pwd_file.name))
+
+        login = 'user_name_123'
+        pwd = ''
+        self._set_file(self.pwd_file.name,
+                       "# passwords\n"
+                       "\n"
+                       "{} {}".format(login, pwd))
+
+        with self.assertRaises(RuntimeError) as cm:
+            app = TabPyApp(self.config_file.name)
+            ex = cm.exception
+            self.assertEqual('Failed to read password file {}'.format(
+                self.pwd_file.name), ex.args[0])
+
+    def test_given_duplicate_usernames_expect_parsing_fails(self):
+        self._set_file(self.config_file.name,
+                       "[TabPy]\n"
+                       "TABPY_PWD_FILE = {}".format(self.pwd_file.name))
+
+        login = 'user_name_123'
+        pwd = 'hashedpw'
+        self._set_file(self.pwd_file.name,
+                       "# passwords\n"
+                       "\n"
+                       "{} {}\n{} {}".format(login, pwd, login, pwd))
+
+        with self.assertRaises(RuntimeError) as cm:
+            app = TabPyApp(self.config_file.name)
+            ex = cm.exception
+            self.assertEqual('Failed to read password file {}'.format(
+                self.pwd_file.name), ex.args[0])
+
+    def test_given_one_line_with_too_many_params_expect_app_fails(self):
         self._set_file(self.config_file.name,
                        "[TabPy]\n"
                        "TABPY_PWD_FILE = {}".format(self.pwd_file.name))

@@ -87,7 +87,7 @@ or npm [markdownlint-cli](https://github.com/igorshubovych/markdownlint-cli).
 TOC for markdown file is built with [markdown-toc](https://www.npmjs.com/package/markdown-toc):
 
 ```sh
-markdownlint -i docs/server-startup.md
+markdown-toc -i docs/server-startup.md
 ```
 
 ## TabPy with Swagger

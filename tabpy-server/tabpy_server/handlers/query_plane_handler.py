@@ -5,7 +5,7 @@ from tabpy_server.common.messages import (
     Query, QuerySuccessful, QueryError, UnknownURI)
 from hashlib import md5
 import uuid
-import simplejson
+import json
 from tabpy_server.common.util import format_exception
 import urllib
 import sys
@@ -124,7 +124,7 @@ class QueryPlaneHandler(BaseHandler):
             request_json = self.request.body.decode('utf-8')
 
             # Sanitize input data
-            data = _sanitize_request_data(simplejson.loads(request_json))
+            data = _sanitize_request_data(json.loads(request_json))
         except Exception as e:
             err_msg = format_exception(e, "Invalid Input Data")
             self.error_out(400, err_msg)

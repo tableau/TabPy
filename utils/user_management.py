@@ -18,7 +18,7 @@ def build_cli_parser():
         description=__doc__,
         epilog='''
             For more information about how to configure and
-            use authentication for TabPy read documentation
+            use authentication for TabPy read the documentation
             at https://github.com/tableau/TabPy
             ''',
         argument_default=None,
@@ -38,7 +38,7 @@ def build_cli_parser():
     parser.add_argument(
         '-p',
         '--password',
-        help=('Password for the username. If not specified password will '
+        help=('Password for the username. If not specified a password will '
               'be generated'))
     return parser
 
@@ -61,10 +61,12 @@ def generate_password(pwd_len=16):
     # and for punctuation we want to exclude some characters
     # like inverted comma which can be hard to find and/or
     # type
+    # change this string if you are supporting an
+    # international keyboard with differing keys available
     punctuation = '!#$%&()*+,-./:;<=>?@[\\]^_{|}~'
 
-    # we also want to have more letters and digits in
-    # generated password than punctuations
+    # we also want to try to have more letters and digits in
+    # generated password than punctuation marks
     password_chars =\
         lower_case_letters + lower_case_letters +\
         upper_case_letters + upper_case_letters +\
@@ -88,7 +90,7 @@ def add_user(args, credentials):
 
     if username in credentials:
         logger.error('Can\'t add username {} as it is already present '
-                     'in passwords file. Do you want to run '
+                     'in passwords file. Do you want to run the '
                      '"update" command instead?'.format(username))
         return False
 
@@ -97,7 +99,12 @@ def add_user(args, credentials):
                 username, password))
     credentials[username] = hash_password(username, password)
 
-    return store_passwords_file(args.pwdfile, credentials)
+    if(store_passwords_file(args.pwdfile, credentials)):
+        logger.info('Added username "{}" with password "{}"  .'.format(
+            username, password))
+    else:
+        logger.info('Could not add username "{}" , password "{}"  .'.format(
+            username, password) + ' to file')
 
 
 def update_user(args, credentials):
@@ -111,7 +118,7 @@ def update_user(args, credentials):
         return False
 
     password = args.password
-    logger.info('Updating username "{}" password  to "{}"...'.format(
+    logger.info('Updating username "{}" password  to "{}"  .'.format(
                 username, password))
     credentials[username] = hash_password(username, password)
     return store_passwords_file(args.pwdfile, credentials)
@@ -123,7 +130,7 @@ def process_command(args, credentials):
     elif args.command == 'update':
         return update_user(args, credentials)
     else:
-        logger.error('Uknown command "{}"'.format(args.command))
+        logger.error('Unknown command "{}"'.format(args.command))
         return False
 
 

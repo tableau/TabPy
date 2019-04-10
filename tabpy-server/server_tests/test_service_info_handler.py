@@ -1,10 +1,10 @@
-from tornado.testing import AsyncHTTPTestCase
-from tabpy_server.app.app import TabPyApp
-import simplejson as json
-import tempfile
-import os
-from unittest.mock import patch
 from argparse import Namespace
+import json
+import os
+from tabpy_server.app.app import TabPyApp
+import tempfile
+from tornado.testing import AsyncHTTPTestCase
+from unittest.mock import patch
 
 
 def _create_expected_info_response(settings, tabpy_state):
