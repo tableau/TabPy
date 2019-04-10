@@ -34,7 +34,8 @@ class TestConfigEnvironmentCalls(unittest.TestCase):
 
         getenv_calls = [call('TABPY_PORT', 9004),
                         call('TABPY_QUERY_OBJECT_PATH', '/tmp/query_objects'),
-                        call('TABPY_STATE_PATH', './tabpy-server/tabpy_server')]
+                        call('TABPY_STATE_PATH',
+                             './tabpy-server/tabpy_server')]
         mock_os.getenv.assert_has_calls(getenv_calls, any_order=True)
         self.assertEqual(len(mock_file_exists.mock_calls), 2)
         self.assertEqual(len(mock_psws.mock_calls), 1)
