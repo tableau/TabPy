@@ -168,7 +168,7 @@ class TestServiceInfoHandlerWithoutAuth(AsyncHTTPTestCase):
         self.app = TabPyApp(self.config_file.name)
         return self.app._create_tornado_web_app()
 
-    def test_given_tabpy_server_with_no_auth_expect_correct_info_response(self):
+    def test_tabpy_server_with_no_auth_expect_correct_info_response(self):
         response = self.fetch('/info')
         self.assertEqual(response.code, 200)
         actual_response = json.loads(response.body)
