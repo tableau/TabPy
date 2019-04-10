@@ -49,7 +49,7 @@ ECHO Parsing parameters...
 SET PYTHONPATH=%TABPY_ROOT%\tabpy-server;%TABPY_ROOT%\tabpy-tools;%PYTHONPATH%
 SET STARTUP_CMD=python tabpy-server\tabpy_server\tabpy.py
 IF [%1] NEQ [] (
-    ECHO     Using config file at %TABPY_ROOT%\tabpy-server\tabpy_server\%1
+    ECHO     Using config file at %1
     SET STARTUP_CMD=%STARTUP_CMD% --config=%1
 )
 
