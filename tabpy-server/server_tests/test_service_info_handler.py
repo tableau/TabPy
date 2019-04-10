@@ -150,9 +150,11 @@ class TestServiceInfoHandlerWithoutAuth(AsyncHTTPTestCase):
         cls.config_file = tempfile.NamedTemporaryFile(
             prefix=prefix, suffix='.conf', delete=False)
         cls.config_file.write(
+            bytes(
                 '[TabPy]\n'
                 'TABPY_STATE_PATH = {}'.format(
-                    cls.state_dir))
+                    cls.state_dir),
+            'utf-8'))
         cls.config_file.close()
         cls.config_file.close()
 
