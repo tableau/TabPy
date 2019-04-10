@@ -96,6 +96,6 @@ def parse_pwd_file(pwd_file_name):
                 logger.warning('Found username {} but no password'
                                .format(row[0]))
                 return False, {}
-            
+
     logger.info("Authentication is enabled")
     return True, credentials
