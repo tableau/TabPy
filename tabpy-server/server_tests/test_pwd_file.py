@@ -13,17 +13,12 @@ from unittest.mock import patch, call
 
 class TestPasswordFile(unittest.TestCase):
     def setUp(self):
-        self.cwd = pathlib.Path.cwd()
-        self.tabpy_cwd = self.cwd / 'tabpy-server' / 'tabpy_server'
-        os.chdir(self.tabpy_cwd)
-
         self.config_file = NamedTemporaryFile(mode='w', delete=False)
         self.config_file.close()
         self.pwd_file = NamedTemporaryFile(mode='w', delete=False)
         self.pwd_file.close()
 
     def tearDown(self):
-        os.chdir(self.cwd)
         os.remove(self.config_file.name)
         self.config_file = None
         os.remove(self.pwd_file.name)

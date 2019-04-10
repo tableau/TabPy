@@ -206,7 +206,8 @@ class TabPyApp:
         # if state.ini does not exist try and create it - remove
         # last dependence on batch/shell script
         set_parameter('state_file_path', ConfigParameters.TABPY_STATE_PATH,
-                      default_val='./tabpy-server/tabpy_server', check_env_var=True)
+                      default_val='./tabpy-server/tabpy_server',
+                      check_env_var=True)
         self.settings['state_file_path'] = os.path.realpath(
             os.path.normpath(
                 os.path.expanduser(self.settings['state_file_path'])))
