@@ -240,7 +240,8 @@ class TabPyApp:
                               RuntimeError)
         else:
             logger.info(
-                "Password file is not specified: Authentication is not enabled")
+                "Password file is not specified: " + \
+                "Authentication is not enabled")
 
         features = self._get_features()
         self.settings['versions'] = {'v1': {'features': features}}
