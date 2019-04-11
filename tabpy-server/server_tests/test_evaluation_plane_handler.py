@@ -67,6 +67,20 @@ class TestEvaluationPlainHandlerWithAuth(AsyncHTTPTestCase):
             '"script":"res=[]\\nfor i in range(len(_arg1)):\\n  '\
             'res.append(_arg1[i] * _arg2[i])\\nreturn res"}'
 
+        cls.script_not_present =\
+            '{"data":{"_arg1":[2,3],"_arg2":[3,-1]},'\
+            '"":"res=[]\\nfor i in range(len(_arg1)):\\n  '\
+            'res.append(_arg1[i] * _arg2[i])\\nreturn res"}'
+
+        cls.args_not_present =\
+            '{"script":"res=[]\\nfor i in range(len(_arg1)):\\n  '\
+            'res.append(_arg1[i] * _arg2[i])\\nreturn res"}'
+
+        cls.args_not_sequential =\
+            '{"data":{"_arg1":[2,3],"_arg3":[3,-1]},'\
+            '"script":"res=[]\\nfor i in range(len(_arg1)):\\n  '\
+            'res.append(_arg1[i] * _arg3[i])\\nreturn res"}'
+
     @classmethod
     def tearDownClass(cls):
         cls.patcher.stop()
@@ -111,3 +125,46 @@ class TestEvaluationPlainHandlerWithAuth(AsyncHTTPTestCase):
                     decode('utf-8'))
             })
         self.assertEqual(200, response.code)
+
+    def test_null_request(self):
+        response = self.fetch('')
+        self.assertEqual(599, response.code)
+
+    def test_script_not_present(self):
+        response = self.fetch(
+            '/evaluate',
+            method='POST',
+            body=self.script_not_present,
+            headers={
+                'Authorization': 'Basic {}'.
+                format(
+                    base64.b64encode('username:password'.encode('utf-8')).
+                    decode('utf-8'))
+            })
+        self.assertEqual(400, response.code)
+
+    def test_arguments_not_present(self):
+        response = self.fetch(
+            '/evaluate',
+            method='POST',
+            body=self.args_not_present,
+            headers={
+                'Authorization': 'Basic {}'.
+                format(
+                    base64.b64encode('username:password'.encode('utf-8')).
+                    decode('utf-8'))
+            })
+        self.assertEqual(500, response.code)
+
+    def test_arguments_not_sequential(self):
+        response = self.fetch(
+            '/evaluate',
+            method='POST',
+            body=self.args_not_sequential,
+            headers={
+                'Authorization': 'Basic {}'.
+                format(
+                    base64.b64encode('username:password'.encode('utf-8')).
+                    decode('utf-8'))
+            })
+        self.assertEqual(400, response.code)
