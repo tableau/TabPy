@@ -129,31 +129,31 @@ class TestServiceInfoHandlerWithoutAuth(AsyncHTTPTestCase):
 
         # create state.ini dir and file
         cls.state_dir = tempfile.mkdtemp(prefix=prefix)
-        with open(os.path.join(cls.state_dir, 'state.ini'), 'w+')
-            as cls.state_file:
+        with open(os.path.join(cls.state_dir, 'state.ini'), 'w+')\
+                as cls.state_file:
             cls.state_file.write('[Service Info]\n'
-                             'Name = TabPy Serve\n'
-                             'Description = \n'
-                             'Creation Time = 0\n'
-                             'Access-Control-Allow-Origin = \n'
-                             'Access-Control-Allow-Headers = \n'
-                             'Access-Control-Allow-Methods = \n'
-                             '\n'
-                             '[Query Objects Service Versions]\n'
-                             '\n'
-                             '[Query Objects Docstrings]\n'
-                             '\n'
-                             '[Meta]\n'
-                             'Revision Number = 1\n')
+                                 'Name = TabPy Serve\n'
+                                 'Description = \n'
+                                 'Creation Time = 0\n'
+                                 'Access-Control-Allow-Origin = \n'
+                                 'Access-Control-Allow-Headers = \n'
+                                 'Access-Control-Allow-Methods = \n'
+                                 '\n'
+                                 '[Query Objects Service Versions]\n'
+                                 '\n'
+                                 '[Query Objects Docstrings]\n'
+                                 '\n'
+                                 '[Meta]\n'
+                                 'Revision Number = 1\n')
         cls.state_file.close()
 
         # create config file
         cls.config_file = tempfile.NamedTemporaryFile(
             prefix=prefix, suffix='.conf', delete=False, mode='w+')
         cls.config_file.write(
-                '[TabPy]\n'
-                'TABPY_STATE_PATH = {}'.format(
-                    cls.state_dir))
+            '[TabPy]\n'
+            'TABPY_STATE_PATH = {}'.format(
+                cls.state_dir))
         cls.config_file.close()
 
     @classmethod
