@@ -129,7 +129,8 @@ class TestServiceInfoHandlerWithoutAuth(AsyncHTTPTestCase):
 
         # create state.ini dir and file
         cls.state_dir = tempfile.mkdtemp(prefix=prefix)
-        with open(os.path.join(cls.state_dir, 'state.ini'), 'w+') as cls.state_file:
+        with open(os.path.join(cls.state_dir, 'state.ini'), 'w+')
+            as cls.state_file:
             cls.state_file.write('[Service Info]\n'
                              'Name = TabPy Serve\n'
                              'Description = \n'
