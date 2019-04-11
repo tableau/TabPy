@@ -17,7 +17,7 @@ class RestrictedTabPy:
 
     def query(self, name, *args, **kwargs):
         url = f'http://localhost:{self.port}/query/{name}'
-        logger.debug(f'Quering {url}...')
+        logger.debug(f'Querying {url}...')
         internal_data = {'data': args or kwargs}
         data = json.dumps(internal_data)
         headers = {'content-type': 'application/json'}
