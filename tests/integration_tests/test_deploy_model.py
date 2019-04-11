@@ -14,16 +14,14 @@ class TestDeployModel(unittest.TestCase):
         super(TestDeployModel, self).__init__(*args, **kwargs)
         self.cwd = os.getcwd()
         self.tabpy_root = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..')
-        self.tabpy_server = os.path.join(self.tabpy_root, 'tabpy-server', 'tabpy_server')
         if platform.system() == 'Windows':
             self.py = 'python'
         else:
             self.py = 'python3'
 
     def setUp(self):
-        os.chdir(self.tabpy_server)
         prefix = '_TestDeployModel_'
-        self.state_dir = tempfile.mkdtemp(prefix=prefix, dir=self.tabpy_server)
+        self.state_dir = tempfile.mkdtemp(prefix=prefix, dir=self.cwd)
         self.state_file = open(os.path.join(self.state_dir, 'state.ini'), 'w+')
         self.state_file.write('[Service Info]\n'
                              'Name = TabPy Serve\n'
@@ -42,7 +40,7 @@ class TestDeployModel(unittest.TestCase):
         self.state_file.close()
 
         self.config_file = tempfile.NamedTemporaryFile(
-            mode='w+t', prefix=prefix, suffix='.conf', dir= self.tabpy_server, delete=False)
+            mode='w+t', prefix=prefix, suffix='.conf', dir= self.cwd, delete=False)
         self.config_file.write('[TabPy]\n'
             'TABPY_PORT= 9004\n'
             'TABPY_STATE_PATH = {}'.format(self.state_dir))
@@ -56,15 +54,14 @@ class TestDeployModel(unittest.TestCase):
         else:
             self.process = subprocess.Popen(['./startup.sh', '--config=' + os.path.basename(self.config_file.name), '&'],
                                              preexec_fn=os.setsid)
-        time.sleep(10)
+        time.sleep(1)
 
     def tearDown(self):
-        os.chdir(self.tabpy_server)
+        os.chdir(self.cwd)
         os.remove(self.config_file.name)
         os.remove(self.state_file.name)
         shutil.rmtree(self.state_dir)
 
-        os.chdir(self.cwd)
         # kill TabPy server
         if platform.system() == 'Windows':
             subprocess.call(['taskkill', '/F', '/T', '/PID',
@@ -80,7 +77,7 @@ class TestDeployModel(unittest.TestCase):
         :return:
         """
         # run script
-        path = os.path.join(self.tabpy_root, 'models', 'setup.py') #os.getcwd()
+        path = os.path.join(self.tabpy_root, 'models', 'setup.py')
         os.system(self.py + ' ' + path)
 
         # query endpoint

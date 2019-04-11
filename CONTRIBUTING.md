@@ -70,8 +70,8 @@ pytest tabpy-tools/tests/integration_tests/ --cov=models --cov-append
 ```
 
 It should be noted that running the integration tests will install the following
-packages if the machine does not already have them: `sklearn, nltk, textblob,
-pandas, & numpy`
+packages on to the machine if it does not already have them: `sklearn, nltk,
+textblob, pandas, & numpy`
 
 ## Linux and Mac Specific Steps
 
