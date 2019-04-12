@@ -3,6 +3,11 @@
 This file list notable changes for TabPy project releases.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## v1.0
+
+### Improvements
+- Added a setup.py file to build and deploy PCA & Sentiment Analysis as pickled files
+
 ## v0.4
 
 ### Improvements
