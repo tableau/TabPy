@@ -4,6 +4,7 @@ from time import sleep
 
 from tornado import gen
 
+from tabpy_server.app.SettingsParameters import SettingsParameters
 from tabpy_server.common.messages import (
     LoadObject, DeleteObjects, ListObjects, ObjectList)
 from tabpy_server.common.endpoint_file_mgr import cleanup_endpoint_files
@@ -49,7 +50,7 @@ def init_ps_server(settings, tabpy_state):
         try:
             object_version = obj_info['version']
             get_query_object_path(
-                settings['state_file_path'],
+                settings[SettingsParameters.StateFilePath],
                 object_name, object_version)
         except Exception as e:
             logger.error('Exception encounted when downloading object: %s'
@@ -72,7 +73,7 @@ def init_model_evaluator(settings, tabpy_state, python_service):
         object_version = obj_info['version']
         object_type = obj_info['type']
         object_path = get_query_object_path(
-            settings['state_file_path'],
+            settings[SettingsParameters.StateFilePath],
             object_name, object_version)
 
         logger.info('Load endpoint: %s, version: %s, type: %s' %
@@ -113,7 +114,7 @@ def _get_latest_service_state(settings,
                 endpoint_info['version'] != existing_endpoint['version']:
             # Either a new endpoint or new endpoint version
             path_to_new_version = get_query_object_path(
-                settings['state_file_path'],
+                settings[SettingsParameters.StateFilePath],
                 endpoint_name, endpoint_info['version'])
             endpoint_type = endpoint_info.get('type', 'model')
             diff[endpoint_name] = (endpoint_type, endpoint_info['version'],
@@ -137,7 +138,8 @@ def _get_latest_service_state(settings,
 def on_state_change(settings, tabpy_state, python_service):
     try:
         logger.info("Loading state from state file")
-        config = util._get_state_from_file(settings['state_file_path'])
+        config = util._get_state_from_file(
+            settings[SettingsParameters.StateFilePath])
         new_ps_state = TabPyState(config=config, settings=settings)
 
         (has_changes, changes) = _get_latest_service_state(settings,
@@ -158,7 +160,7 @@ def on_state_change(settings, tabpy_state, python_service):
 
                 python_service.manage_request(DeleteObjects([object_name]))
 
-                cleanup_endpoint_files(object_name, settings['upload_dir'])
+                cleanup_endpoint_files(object_name, settings[SettingsParameters.UploadDir])
 
             else:
                 endpoint_info = new_endpoints[object_name]
@@ -177,7 +179,7 @@ def on_state_change(settings, tabpy_state, python_service):
                 # cleanup old version of endpoint files
                 if object_version > 2:
                     cleanup_endpoint_files(
-                        object_name, settings['upload_dir'], [
+                        object_name, settings[SettingsParameters.UploadDir], [
                             object_version, object_version - 1])
 
     except Exception as e:

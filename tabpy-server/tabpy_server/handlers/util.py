@@ -2,6 +2,7 @@ import base64
 import binascii
 from hashlib import pbkdf2_hmac
 import logging
+from tabpy_server.app.SettingsParameters import SettingsParameters
 
 logger = logging.getLogger(__name__)
 
@@ -157,11 +158,11 @@ def handle_basic_authentication(headers, api_version, settings, credentials):
         are valid returns True, otherwise False.
     '''
     logger.debug('Handling authentication for request')
-    if api_version not in settings['versions']:
+    if api_version not in settings[SettingsParameters.ApiVersions]:
         logger.critical('Unknown API version "{}"'.format(api_version))
         return False
 
-    version_settings = settings['versions'][api_version]
+    version_settings = settings[SettingsParameters.ApiVersions][api_version]
     if 'features' not in version_settings:
         logger.info('No features configured for API {}'.format(api_version))
         return True

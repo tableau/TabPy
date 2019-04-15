@@ -2,6 +2,7 @@ from argparse import Namespace
 import json
 import os
 from tabpy_server.app.app import TabPyApp
+from tabpy_server.app.SettingsParameters import SettingsParameters
 import tempfile
 from tornado.testing import AsyncHTTPTestCase
 from unittest.mock import patch
@@ -12,7 +13,7 @@ def _create_expected_info_response(settings, tabpy_state):
         'description': tabpy_state.get_description(),
         'creation_time': tabpy_state.creation_time,
         'state_path': settings['state_file_path'],
-        'server_version': settings['server_version'],
+        'server_version': settings[SettingsParameters.ServerVersion],
         'name': tabpy_state.name,
         'versions': settings['versions']
     }

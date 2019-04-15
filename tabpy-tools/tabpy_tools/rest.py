@@ -3,7 +3,7 @@ import logging
 import requests
 from requests.auth import HTTPBasicAuth
 from re import compile
-import json
+import json as json
 
 from collections import MutableMapping as _MutableMapping
 

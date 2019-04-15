@@ -3,6 +3,7 @@ import tornado.web
 import json
 import logging
 
+from tabpy_server.app.SettingsParameters import SettingsParameters
 from tabpy_server.handlers.util import handle_basic_authentication
 
 logger = logging.getLogger(__name__)
@@ -16,7 +17,7 @@ class BaseHandler(tornado.web.RequestHandler):
         self.tabpy_state = app.tabpy_state
         # set content type to application/json
         self.set_header("Content-Type", "application/json")
-        self.port = self.settings['port']
+        self.port = self.settings[SettingsParameters.Port]
         self.python_service = app.python_service
         self.credentials = app.credentials
         self.log_request_context = app.settings['log_request_context']
