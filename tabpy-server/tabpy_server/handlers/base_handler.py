@@ -19,6 +19,7 @@ class BaseHandler(tornado.web.RequestHandler):
         self.port = self.settings['port']
         self.python_service = app.python_service
         self.credentials = app.credentials
+        self.log_request_context = app.settings['log_request_context']
 
     def error_out(self, code, log_message, info=None):
         self.set_status(code)
@@ -96,3 +97,9 @@ class BaseHandler(tornado.web.RequestHandler):
             401,
             info="Unauthorized request.",
             log_message="Invalid credentials provided.")
+
+    def append_request_context(self, msg):
+        '''
+        Adds request context (caller info) to logged messages.
+        '''
+        pass

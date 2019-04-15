@@ -247,6 +247,12 @@ class TabPyApp:
         features = self._get_features()
         self.settings['versions'] = {'v1': {'features': features}}
 
+        set_parameter('log_request_context',
+                      ConfigParameters.TABPY_LOG_DETAILS,
+                      default_val='false')
+        if (self.settings['log_request_context'].lower() != 'false'):
+            self.settings['log_request_context'] = True
+
     def _validate_transfer_protocol_settings(self):
         if 'transfer_protocol' not in self.settings:
             log_and_raise(
