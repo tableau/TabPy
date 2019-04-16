@@ -208,7 +208,8 @@ class TabPyApp:
         # if state.ini does not exist try and create it - remove
         # last dependence on batch/shell script
         set_parameter('state_file_path', ConfigParameters.TABPY_STATE_PATH,
-                      default_val='./', check_env_var=True)
+                      default_val='./tabpy-server/tabpy_server',
+                      check_env_var=True)
         self.settings['state_file_path'] = os.path.realpath(
             os.path.normpath(
                 os.path.expanduser(self.settings['state_file_path'])))
@@ -239,7 +240,9 @@ class TabPyApp:
                               self.settings[ConfigParameters.TABPY_PWD_FILE],
                               RuntimeError)
         else:
-            logger.info("Password file is not specified")
+            logger.info(
+                "Password file is not specified: "
+                "Authentication is not enabled")
 
         features = self._get_features()
         self.settings['versions'] = {'v1': {'features': features}}

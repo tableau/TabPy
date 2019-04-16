@@ -1,7 +1,7 @@
 from tabpy_server.handlers import BaseHandler
 import tornado.web
 from tornado import gen
-import simplejson
+import json
 import logging
 from tabpy_server.common.util import format_exception
 import requests
@@ -17,9 +17,9 @@ class RestrictedTabPy:
 
     def query(self, name, *args, **kwargs):
         url = f'http://localhost:{self.port}/query/{name}'
-        logger.debug(f'Quering {url}...')
+        logger.debug(f'Querying {url}...')
         internal_data = {'data': args or kwargs}
-        data = simplejson.dumps(internal_data)
+        data = json.dumps(internal_data)
         headers = {'content-type': 'application/json'}
         response = requests.post(url=url, data=data, headers=headers,
                                  timeout=30)
@@ -46,7 +46,7 @@ class EvaluationPlaneHandler(BaseHandler):
 
         self._add_CORS_header()
         try:
-            body = simplejson.loads(self.request.body.decode('utf-8'))
+            body = json.loads(self.request.body.decode('utf-8'))
             if 'script' not in body:
                 self.error_out(400, 'Script is empty.')
                 return
@@ -74,8 +74,9 @@ class EvaluationPlaneHandler(BaseHandler):
                                             'the format _arg1, _arg2, _argN')
                         return
 
-            function_to_evaluate = ('def _user_script(tabpy'
-                                    + arguments_str + '):\n')
+            function_to_evaluate = (
+                'def _user_script(tabpy'
+                + arguments_str + '):\n')
             for u in user_code.splitlines():
                 function_to_evaluate += ' ' + u + '\n'
 
@@ -87,7 +88,7 @@ class EvaluationPlaneHandler(BaseHandler):
             if result is None:
                 self.error_out(400, 'Error running script. No return value')
             else:
-                self.write(simplejson.dumps(result))
+                self.write(json.dumps(result))
                 self.finish()
 
         except Exception as e:

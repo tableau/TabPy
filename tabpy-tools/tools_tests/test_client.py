@@ -1,8 +1,6 @@
 import unittest
 from unittest.mock import Mock
 
-import requests
-
 from tabpy_tools.client import Client
 
 
@@ -56,7 +54,7 @@ class TestClient(unittest.TestCase):
 
         self.assertEqual(self.client.query("foo", 1, 2, 3), "ok")
 
-        self.client._service.query.sssert_called_once_with("foo", 1, 2, 3)
+        self.client._service.query.assert_called_once_with("foo", 1, 2, 3)
 
         self.client._service.query.reset_mock()
 
@@ -77,3 +75,10 @@ class TestClient(unittest.TestCase):
             {"path": "foo"}
 
         self.assertEqual(self.client._get_endpoint_upload_destination(), "foo")
+
+    def test_set_credentials(self):
+        username, password = "username", "password"
+        self.client.set_credentials(username, password)
+
+        self.client._service.set_credentials.assert_called_once_with(
+            username, password)

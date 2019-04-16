@@ -44,7 +44,6 @@ setup(
         'pyopenssl',
         'python-dateutil',
         'requests',
-        'simplejson',
         'singledispatch',
         'six',
         'tornado==5.1.1',

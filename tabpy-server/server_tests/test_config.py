@@ -35,7 +35,8 @@ class TestConfigEnvironmentCalls(unittest.TestCase):
 
         getenv_calls = [call('TABPY_PORT', 9004),
                         call('TABPY_QUERY_OBJECT_PATH', '/tmp/query_objects'),
-                        call('TABPY_STATE_PATH', './')]
+                        call('TABPY_STATE_PATH',
+                             './tabpy-server/tabpy_server')]
         mock_os.getenv.assert_has_calls(getenv_calls, any_order=True)
         self.assertEqual(len(mock_file_exists.mock_calls), 2)
         self.assertEqual(len(mock_psws.mock_calls), 1)
@@ -113,15 +114,11 @@ class TestTransferProtocolValidation(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestTransferProtocolValidation, self).__init__(*args, **kwargs)
         self.fp = None
-        self.cwd = os.getcwd()
-        self.tabpy_cwd = os.path.join(self.cwd, 'tabpy-server', 'tabpy_server')
 
     def setUp(self):
-        os.chdir(self.tabpy_cwd)
         self.fp = NamedTemporaryFile(mode='w+t', delete=False)
 
     def tearDown(self):
-        os.chdir(self.cwd)
         os.remove(self.fp.name)
         self.fp = None
 

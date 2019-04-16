@@ -89,7 +89,13 @@ def parse_pwd_file(pwd_file_name):
                     'in password file'.format(login))
                 return False, {}
 
-            credentials[login] = row[1]
-            logger.debug('Found username {}'.format(login))
+            if(len(row[1]) > 0):
+                credentials[login] = row[1]
+                logger.debug('Found username {}'.format(login))
+            else:
+                logger.warning('Found username {} but no password'
+                               .format(row[0]))
+                return False, {}
 
+    logger.info("Authentication is enabled")
     return True, credentials

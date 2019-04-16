@@ -1,6 +1,6 @@
 import concurrent
 import tornado.web
-import simplejson
+import json
 import logging
 
 from tabpy_server.handlers.util import handle_basic_authentication
@@ -22,7 +22,7 @@ class BaseHandler(tornado.web.RequestHandler):
 
     def error_out(self, code, log_message, info=None):
         self.set_status(code)
-        self.write(simplejson.dumps(
+        self.write(json.dumps(
             {'message': log_message, 'info': info or {}}))
 
         # We want to duplicate error message in console for
@@ -92,3 +92,7 @@ class BaseHandler(tornado.web.RequestHandler):
         self.set_status(401)
         self.set_header('WWW-Authenticate',
                         'Basic realm="{}"'.format(self.tabpy_state.name))
+        self.error_out(
+            401,
+            info="Unauthorized request.",
+            log_message="Invalid credentials provided.")

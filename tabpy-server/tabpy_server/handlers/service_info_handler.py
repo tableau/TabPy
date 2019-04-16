@@ -1,4 +1,4 @@
-import simplejson
+import json
 from tabpy_server.handlers import ManagementHandler
 
 
@@ -18,4 +18,4 @@ class ServiceInfoHandler(ManagementHandler):
         info['server_version'] = self.settings['server_version']
         info['name'] = self.tabpy_state.name
         info['versions'] = self.settings['versions']
-        self.write(simplejson.dumps(info))
+        self.write(json.dumps(info))
