@@ -257,9 +257,9 @@ class TabPyApp:
         set_parameter(SettingsParameters.LogRequestContext,
                       ConfigParameters.TABPY_LOG_DETAILS,
                       default_val='false')
-        if (self.settings[SettingsParameters.LogRequestContext].lower() !=
-            'false'):
-            self.settings[SettingsParameters.LogRequestContext] = True
+        self.settings[SettingsParameters.LogRequestContext] = (
+            self.settings[SettingsParameters.LogRequestContext].lower() !=
+            'false')
 
     def _validate_transfer_protocol_settings(self):
         if SettingsParameters.TransferProtocol not in self.settings:
