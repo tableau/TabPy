@@ -1,6 +1,10 @@
 import json
+import logging
 from tabpy_server.app.SettingsParameters import SettingsParameters
 from tabpy_server.handlers import ManagementHandler
+
+
+logger = logging.getLogger(__name__)
 
 
 class ServiceInfoHandler(ManagementHandler):
@@ -11,6 +15,8 @@ class ServiceInfoHandler(ManagementHandler):
         # do not check for authentication - this method
         # is the only way for client to collect info about
         # supported API versions and required features
+        logger.debug(self.append_request_context(
+            'Processing GET for /info'))
         self._add_CORS_header()
         info = {}
         info['description'] = self.tabpy_state.get_description()

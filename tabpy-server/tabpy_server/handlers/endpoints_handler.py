@@ -32,7 +32,8 @@ class EndpointsHandler(ManagementHandler):
     @tornado.web.asynchronous
     @gen.coroutine
     def post(self):
-        logger.debug('Processing POST for /endpoints')
+        logger.debug(self.append_request_context(
+            'Processing POST for /endpoints'))
         if self.should_fail_with_not_authorized():
             self.fail_with_not_authorized()
             return
@@ -68,13 +69,15 @@ class EndpointsHandler(ManagementHandler):
                 self.finish()
                 return
 
-            logger.debug("Adding endpoint '{}'".format(name))
+            logger.debug(self.append_request_context(
+                "Adding endpoint '{}'".format(name)))
             err_msg = yield self._add_or_update_endpoint('add', name, 1,
                                                          request_data)
             if err_msg:
                 self.error_out(400, err_msg)
             else:
-                logger.debug("Endpoint {} successfully added".format(name))
+                logger.debug(self.append_request_context(
+                    "Endpoint {} successfully added".format(name)))
                 self.set_status(201)
                 self.write(self.tabpy_state.get_endpoints(name))
                 self.finish()

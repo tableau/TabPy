@@ -26,7 +26,6 @@ from tabpy_server.handlers import (EndpointHandler, EndpointsHandler,
                                    EvaluationPlaneHandler, QueryPlaneHandler,
                                    ServiceInfoHandler, StatusHandler,
                                    UploadDestinationHandler)
-
 from tornado_json.constants import TORNADO_MAJOR
 
 
@@ -260,6 +259,9 @@ class TabPyApp:
         self.settings[SettingsParameters.LogRequestContext] = (
             self.settings[SettingsParameters.LogRequestContext].lower() !=
             'false')
+        logger.info('Call context logging is {}'.format(
+            'enabled' if self.settings[SettingsParameters.LogRequestContext]
+            else 'disabled'))
 
     def _validate_transfer_protocol_settings(self):
         if SettingsParameters.TransferProtocol not in self.settings:

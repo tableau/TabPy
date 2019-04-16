@@ -14,8 +14,8 @@ class UploadDestinationHandler(ManagementHandler):
         super(UploadDestinationHandler, self).initialize(app)
 
     def get(self):
-        logger.debug(
-            'Processing GET for /configurations/endpoint_upload_destination')
+        logger.debug(self.append_request_context(
+            'Processing GET for /configurations/endpoint_upload_destination'))
         if self.should_fail_with_not_authorized():
             self.fail_with_not_authorized()
             return

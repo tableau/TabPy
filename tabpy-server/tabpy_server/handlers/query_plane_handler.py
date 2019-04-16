@@ -71,14 +71,16 @@ class QueryPlaneHandler(BaseHandler):
                 'utf-8')).hexdigest())
             return (QuerySuccessful, response.for_json(), gls_time)
         else:
-            logger.error("Failed query, response: {}".format(response))
+            logger.error(self.append_request_context(
+                f'Failed query, response: {response}'))
             return (type(response), response.for_json(), gls_time)
 
     # handle HTTP Options requests to support CORS
     # don't check API key (client does not send or receive data for OPTIONS,
     # it just allows the client to subsequently make a POST request)
     def options(self, pred_name):
-        logger.debug('Processing OPTIONS for /query/{}'.format(pred_name))
+        logger.debug(self.append_request_context(
+            f'Processing OPTIONS for /query/{pred_name}'))
         if self.should_fail_with_not_authorized():
             self.fail_with_not_authorized()
             return
@@ -150,8 +152,8 @@ class QueryPlaneHandler(BaseHandler):
                 return
 
             if po_name != endpoint_name:
-                logger.info(
-                    "Querying actual model: po_name={}".format(po_name))
+                logger.info(self.append_request_context(
+                    f'Querying actual model: po_name={po_name}'))
 
             uid = _get_uuid()
 
@@ -198,7 +200,8 @@ class QueryPlaneHandler(BaseHandler):
 
     @tornado.web.asynchronous
     def get(self, endpoint_name):
-        logger.debug('Processing GET for /query/{}'.format(endpoint_name))
+        logger.debug(self.append_request_context(
+            f'Processing GET for /query/{endpoint_name}'))
         if self.should_fail_with_not_authorized():
             self.fail_with_not_authorized()
             return
@@ -208,12 +211,12 @@ class QueryPlaneHandler(BaseHandler):
             endpoint_name = urllib.parse.unquote(endpoint_name)
         else:
             endpoint_name = urllib.unquote(endpoint_name)
-        logger.debug("GET /query/{}".format(endpoint_name))
         self._process_query(endpoint_name, start)
 
     @tornado.web.asynchronous
     def post(self, endpoint_name):
-        logger.debug('Processing POST for /query/{}'.format(endpoint_name))
+        logger.debug(self.append_request_context(
+            f'Processing POST for /query/{endpoint_name}'))
         if self.should_fail_with_not_authorized():
             self.fail_with_not_authorized()
             return
@@ -223,5 +226,4 @@ class QueryPlaneHandler(BaseHandler):
             endpoint_name = urllib.parse.unquote(endpoint_name)
         else:
             endpoint_name = urllib.unquote(endpoint_name)
-        logger.debug("POST /query/{}".format(endpoint_name))
         self._process_query(endpoint_name, start)

@@ -17,7 +17,8 @@ class StatusHandler(BaseHandler):
 
         self._add_CORS_header()
 
-        logger.debug("Obtaining service status")
+        logger.debug(self.append_request_context(
+            "Obtaining service status"))
         status_dict = {}
         for k, v in self.python_service.ps.query_objects.items():
             status_dict[k] = {
@@ -26,7 +27,8 @@ class StatusHandler(BaseHandler):
                 'status': v['status'],
                 'last_error': v['last_error']}
 
-        logger.debug("Found models: {}".format(status_dict))
+        logger.debug(self.append_request_context(
+            f'Found models: {status_dict}'))
         self.write(json.dumps(status_dict))
         self.finish()
         return
