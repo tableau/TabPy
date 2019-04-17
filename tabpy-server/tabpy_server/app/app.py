@@ -233,7 +233,8 @@ class TabPyApp:
                       default_val='./')
         self.settings[SettingsParameters.StaticPath] =\
             os.path.abspath(self.settings[SettingsParameters.StaticPath])
-        logger.debug(f'Static pages folder set to "{self.settings[SettingsParameters.StaticPath]}"')
+        logger.debug(f'Static pages folder set to '
+                     '"{self.settings[SettingsParameters.StaticPath]}"')
 
         # Set subdirectory from config if applicable
         if tabpy_state.has_option("Service Info", "Subdirectory"):

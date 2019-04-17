@@ -22,7 +22,9 @@ class BaseHandler(tornado.web.RequestHandler):
         self.port = self.settings[SettingsParameters.Port]
         self.python_service = app.python_service
         self.credentials = app.credentials
-        self.log_request_context = app.settings[SettingsParameters.LogRequestContext]
+        self.log_request_context =\
+            app.settings[SettingsParameters.LogRequestContext]
+        self.username = None
 
     def error_out(self, code, log_message, info=None):
         self.set_status(code)
@@ -94,7 +96,8 @@ class BaseHandler(tornado.web.RequestHandler):
             logger.critical(f'Unknown API version "{api_version}"')
             return False, ''
 
-        version_settings = self.settings[SettingsParameters.ApiVersions][api_version]
+        version_settings =\
+            self.settings[SettingsParameters.ApiVersions][api_version]
         if 'features' not in version_settings:
             logger.info(f'No features configured for API "{api_version}"')
             return True, ''
@@ -110,7 +113,8 @@ class BaseHandler(tornado.web.RequestHandler):
         auth_feature = features['authentication']
         if 'methods' not in auth_feature:
             logger.critical(
-                f'Authentication method is not configured for API "{api_version}"')
+                f'Authentication method is not configured for API '
+                '"{api_version}"')
 
         methods = auth_feature['methods']
         if 'basic-auth' in auth_feature['methods']:
@@ -238,7 +242,6 @@ class BaseHandler(tornado.web.RequestHandler):
             'for API "{api_version}"')
         return False
 
-
     def handle_authentication(self, api_version) -> bool:
         '''
         If authentication feature is configured checks provided
@@ -265,7 +268,7 @@ class BaseHandler(tornado.web.RequestHandler):
         if method == '':
             # Do not validate credentials
             return True
-        
+
         if not self._get_credentials(method):
             return False
 
@@ -309,10 +312,15 @@ class BaseHandler(tornado.web.RequestHandler):
         context = ''
         if self.log_request_context:
             # log request details
-            context = f'{self.request.remote_ip} calls {self.request.method} {self.request.full_url()}\n'
+            context = (f'{self.request.remote_ip} calls '
+                       '{self.request.method} {self.request.full_url()}')
             if 'TabPy-Client' in self.request.headers:
-                context += f'Client: {self.request.headers["TabPy-Client"]}\n'
+                context += f', Client: {self.request.headers["TabPy-Client"]}'
             if 'TabPy-User' in self.request.headers:
-                context += f'Tableau user: {self.request.headers["TabPy-User"]}\n'
+                context +=\
+                    f', Tableau user: {self.request.headers["TabPy-User"]}'
+            if self.username is not None and self.username != '':
+                context += f', TabPy user: {self.username}'
+            context += '\n'
 
         return context + msg

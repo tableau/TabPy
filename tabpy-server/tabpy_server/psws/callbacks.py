@@ -160,7 +160,8 @@ def on_state_change(settings, tabpy_state, python_service):
 
                 python_service.manage_request(DeleteObjects([object_name]))
 
-                cleanup_endpoint_files(object_name, settings[SettingsParameters.UploadDir])
+                cleanup_endpoint_files(object_name,
+                                       settings[SettingsParameters.UploadDir])
 
             else:
                 endpoint_info = new_endpoints[object_name]

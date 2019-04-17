@@ -27,11 +27,12 @@ class EndpointHandler(ManagementHandler):
         super(EndpointHandler, self).initialize(app)
 
     def get(self, endpoint_name):
-        logger.debug(self.append_request_context(
-            f'Processing GET for /endpoints/{endpoint_name}'))
         if self.should_fail_with_not_authorized():
             self.fail_with_not_authorized()
             return
+
+        logger.debug(self.append_request_context(
+            f'Processing GET for /endpoints/{endpoint_name}'))
 
         self._add_CORS_header()
         if not endpoint_name:
@@ -47,11 +48,12 @@ class EndpointHandler(ManagementHandler):
     @tornado.web.asynchronous
     @gen.coroutine
     def put(self, name):
-        logger.debug(self.append_request_context(
-            f'Processing PUT for /endpoints/{name}'))
         if self.should_fail_with_not_authorized():
             self.fail_with_not_authorized()
             return
+
+        logger.debug(self.append_request_context(
+            f'Processing PUT for /endpoints/{name}'))
 
         try:
             if not self.request.body:
@@ -97,11 +99,12 @@ class EndpointHandler(ManagementHandler):
     @tornado.web.asynchronous
     @gen.coroutine
     def delete(self, name):
-        logger.debug(self.append_request_context(
-            'Processing DELETE for /endpoints/{}'.format(name)))
         if self.should_fail_with_not_authorized():
             self.fail_with_not_authorized()
             return
+
+        logger.debug(self.append_request_context(
+            'Processing DELETE for /endpoints/{}'.format(name)))
 
         try:
             endpoints = self.tabpy_state.get_endpoints(name)

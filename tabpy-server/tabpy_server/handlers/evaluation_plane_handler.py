@@ -39,11 +39,12 @@ class EvaluationPlaneHandler(BaseHandler):
     @tornado.web.asynchronous
     @gen.coroutine
     def post(self):
-        logger.debug(self.append_request_context(
-            'Processing POST for /evaluate'))
         if self.should_fail_with_not_authorized():
             self.fail_with_not_authorized()
             return
+
+        logger.debug(self.append_request_context(
+            'Processing POST for /evaluate'))
 
         self._add_CORS_header()
         try:
