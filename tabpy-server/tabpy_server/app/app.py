@@ -118,8 +118,7 @@ class TabPyApp:
              dict(app=self)),
             (self.subdirectory + r'/(.*)', tornado.web.StaticFileHandler,
              dict(path=self.settings['static_path'],
-                  default_filename="index.html",
-                  app=self)),
+                  default_filename="index.html")),
         ], debug=False, **self.settings)
 
         return application
@@ -228,8 +227,12 @@ class TabPyApp:
         self.python_service = PythonServiceHandler(PythonService())
         self.settings['compress_response'] = True if TORNADO_MAJOR >= 4\
             else "gzip"
-        self.settings['static_path'] = os.path.join(
-            os.path.dirname(__file__), "static")
+
+        set_parameter(SettingsParameters.StaticPath,
+                      ConfigParameters.TABPY_STATIC_PATH)
+        self.settings[SettingsParameters.StaticPath] =\
+            os.path.abspath(self.settings[SettingsParameters.StaticPath])
+        logger.debug(f'Static pages folder set to "{self.settings[SettingsParameters.StaticPath]}"')
 
         # Set subdirectory from config if applicable
         if tabpy_state.has_option("Service Info", "Subdirectory"):

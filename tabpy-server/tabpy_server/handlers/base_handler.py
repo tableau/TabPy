@@ -1,10 +1,12 @@
+import base64
+import binascii
 import concurrent
 import tornado.web
 import json
 import logging
 
 from tabpy_server.app.SettingsParameters import SettingsParameters
-from tabpy_server.handlers.util import handle_basic_authentication
+from tabpy_server.handlers.util import hash_password
 
 logger = logging.getLogger(__name__)
 STAGING_THREAD = concurrent.futures.ThreadPoolExecutor(max_workers=3)
@@ -92,7 +94,7 @@ class BaseHandler(tornado.web.RequestHandler):
             logger.critical(f'Unknown API version "{api_version}"')
             return False, ''
 
-        version_settings = settings[SettingsParameters.ApiVersions][api_version]
+        version_settings = self.settings[SettingsParameters.ApiVersions][api_version]
         if 'features' not in version_settings:
             logger.info(f'No features configured for API "{api_version}"')
             return True, ''
@@ -133,12 +135,12 @@ class BaseHandler(tornado.web.RequestHandler):
             False otherwise.
         '''
         logger.debug('Checking request headers for authentication data')
-        if 'Authorization' not in headers:
+        if 'Authorization' not in self.request.headers:
             logger.info('Authorization header not found')
             return False
 
-        auth_header = headers['Authorization']
-        auth_header_list = headers['Authorization'].split(' ')
+        auth_header = self.request.headers['Authorization']
+        auth_header_list = auth_header.split(' ')
         if len(auth_header_list) != 2 or\
                 auth_header_list[0] != 'Basic':
             logger.error(f'Unknown authentication method "{auth_header}"')
@@ -199,13 +201,13 @@ class BaseHandler(tornado.web.RequestHandler):
         '''
         login = self.username.lower()
         logger.debug(f'Validating credentials for user name "{login}"')
-        if login not in credentials:
-            logger.error(f'User name "{username}" not found')
+        if login not in self.credentials:
+            logger.error(f'User name "{self.username}" not found')
             return False
 
-        hashed_pwd = hash_password(username, self.password)
-        if credentials[login].lower() != hashed_pwd.lower():
-            logger.error(f'Wrong password for user name "{username}"')
+        hashed_pwd = hash_password(self.username, self.password)
+        if self.credentials[login].lower() != hashed_pwd.lower():
+            logger.error(f'Wrong password for user name "{self.username}"')
             return False
 
         return True
@@ -256,7 +258,7 @@ class BaseHandler(tornado.web.RequestHandler):
             False otherwise.
         '''
         logger.debug('Handling authentication')
-        found, method = _get_auth_method()
+        found, method = self._get_auth_method(api_version)
         if not found:
             return False
 
@@ -264,10 +266,10 @@ class BaseHandler(tornado.web.RequestHandler):
             # Do not validate credentials
             return True
         
-        if not _get_credentials(method):
+        if not self._get_credentials(method):
             return False
 
-        return _validate_credentials(method)
+        return self._validate_credentials(method)
 
     def should_fail_with_not_authorized(self):
         '''
@@ -284,11 +286,7 @@ class BaseHandler(tornado.web.RequestHandler):
         '''
         logger.debug(self.append_request_context(
             'Checking if need to handle authentication'))
-        return not handle_authentication(
-            self.request.headers,
-            "v1",
-            self.settings,
-            self.credentials)
+        return not self.handle_authentication("v1")
 
     def fail_with_not_authorized(self):
         '''

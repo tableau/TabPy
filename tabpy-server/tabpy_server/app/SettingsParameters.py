@@ -11,3 +11,4 @@ class SettingsParameters:
     StateFilePath = 'state_file_path'
     ApiVersions = 'versions'
     LogRequestContext = 'log_request_context'
+    StaticPath = 'static_path'
