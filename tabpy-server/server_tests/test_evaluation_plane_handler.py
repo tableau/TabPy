@@ -128,7 +128,7 @@ class TestEvaluationPlainHandlerWithAuth(AsyncHTTPTestCase):
 
     def test_null_request(self):
         response = self.fetch('')
-        self.assertEqual(599, response.code)
+        self.assertEqual(404, response.code)
 
     def test_script_not_present(self):
         response = self.fetch(

@@ -117,7 +117,7 @@ class TabPyApp:
              UploadDestinationHandler,
              dict(app=self)),
             (self.subdirectory + r'/(.*)', tornado.web.StaticFileHandler,
-             dict(path=self.settings['static_path'],
+             dict(path=self.settings[SettingsParameters.StaticPath],
                   default_filename="index.html")),
         ], debug=False, **self.settings)
 
@@ -229,7 +229,8 @@ class TabPyApp:
             else "gzip"
 
         set_parameter(SettingsParameters.StaticPath,
-                      ConfigParameters.TABPY_STATIC_PATH)
+                      ConfigParameters.TABPY_STATIC_PATH,
+                      default_val='./')
         self.settings[SettingsParameters.StaticPath] =\
             os.path.abspath(self.settings[SettingsParameters.StaticPath])
         logger.debug(f'Static pages folder set to "{self.settings[SettingsParameters.StaticPath]}"')
