@@ -91,6 +91,9 @@ class BaseHandler(tornado.web.RequestHandler):
         str
             Name of authentication method used by client.
             If empty no authentication required.
+
+        (True, '') as result of this function means authentication
+        is not needed.
         '''
         if api_version not in self.settings[SettingsParameters.ApiVersions]:
             logger.critical(f'Unknown API version "{api_version}"')

@@ -70,16 +70,18 @@ class TabPyApp:
             self.tabpy_state,
             self.python_service)
 
-        if self.settings[SettingsParameters.TransferProtocol] == 'http':
+        protocol = self.settings[SettingsParameters.TransferProtocol]
+        if protocol == 'http':
             application.listen(self.settings[SettingsParameters.Port])
-        elif self.settings[SettingsParameters.TransferProtocol] == 'https':
+        elif protocol == 'https':
             application.listen(self.settings[SettingsParameters.Port],
                                ssl_options={
                 'certfile': self.settings[SettingsParameters.CertificateFile],
                 'keyfile': self.settings[SettingsParameters.KeyFile]
             })
         else:
-            log_and_raise('Unsupported transfer protocol.', RuntimeError)
+            log_and_raise(f'Unsupported transfer protocol {protocol}.',
+                          RuntimeError)
 
         logger.info('Web service listening on port {}'.format(
             str(self.settings[SettingsParameters.Port])))
