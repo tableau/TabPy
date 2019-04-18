@@ -1,6 +1,7 @@
 # TabPy Server Configuration Instructions
 
 <!-- markdownlint-disable MD004 -->
+
 <!-- toc -->
 
 - [Configuring HTTP vs HTTPS](#configuring-http-vs-https)
@@ -10,8 +11,11 @@
   * [Adding an Account](#adding-an-account)
   * [Updating an Account](#updating-an-account)
   * [Deleting an Account](#deleting-an-account)
+- [Logging](#logging)
+  * [Request Context Logging](#request-context-logging)
 
 <!-- tocstop -->
+
 <!-- markdownlint-enable MD004 -->
 
 Default settings for TabPy may be viewed in the
@@ -137,14 +141,15 @@ With the feature on additional information is logged for HTTP requests: caller i
 URL, client and user information:
 
 <!-- markdownlint-disable MD040 -->
-<!-- markdownlint-disable MD013 -->
 ```
-2019-04-17,15:20:37 [INFO] (evaluation_plane_handler.py:evaluation_plane_handler:86): ::1 calls POST http://localhost:9004/evaluate, Client: Postman for manual testing, Tableau user: ogolovatyi, TabPy user: user1
+2019-04-17,15:20:37 [INFO] (evaluation_plane_handler.py:evaluation_plane_handler:86):
+ ::1 calls POST http://localhost:9004/evaluate,
+  Client: Postman for manual testing, Tableau user: ogolovatyi,
+   TabPy user: user1
 function to evaluate=def _user_script(tabpy, _arg1, _arg2):
  res = []
  for i in range(len(_arg1)):
    res.append(_arg1[i] * _arg2[i])
  return res
 ```
-<!-- markdownlint-enable MD013 -->
 <!-- markdownlint-enable MD040 -->
