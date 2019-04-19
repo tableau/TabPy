@@ -138,14 +138,16 @@ For extended logging (e.g. for auditing purposes) additional logging can be turn
 on with setting `TABPY_LOG_DETAILS` configuration file parameter to `true`.
 
 With the feature on additional information is logged for HTTP requests: caller ip,
-URL, client and user information:
+URL, client infomation (Tableau Desktop\Server), Tableau user name (for Tableau Server)
+and TabPy user name as shown in the example below:
 
 <!-- markdownlint-disable MD040 -->
 ```
 2019-04-17,15:20:37 [INFO] (evaluation_plane_handler.py:evaluation_plane_handler:86):
  ::1 calls POST http://localhost:9004/evaluate,
-  Client: Postman for manual testing, Tableau user: ogolovatyi,
-   TabPy user: user1
+ Client: Tableau Server 2019.2,
+ Tableau user: ogolovatyi,
+ TabPy user: user1
 function to evaluate=def _user_script(tabpy, _arg1, _arg2):
  res = []
  for i in range(len(_arg1)):
