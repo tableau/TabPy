@@ -39,10 +39,12 @@ class EvaluationPlaneHandler(BaseHandler):
     @tornado.web.asynchronous
     @gen.coroutine
     def post(self):
-        logger.debug('Processing POST for /evaluate')
         if self.should_fail_with_not_authorized():
             self.fail_with_not_authorized()
             return
+
+        logger.debug(self.append_request_context(
+            'Processing POST for /evaluate'))
 
         self._add_CORS_header()
         try:
@@ -80,8 +82,8 @@ class EvaluationPlaneHandler(BaseHandler):
             for u in user_code.splitlines():
                 function_to_evaluate += ' ' + u + '\n'
 
-            logger.info(
-                "function to evaluate=%s" % function_to_evaluate)
+            logger.info(self.append_request_context(
+                f'function to evaluate={function_to_evaluate}'))
 
             result = yield self.call_subprocess(function_to_evaluate,
                                                 arguments)

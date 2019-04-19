@@ -8,6 +8,7 @@ from uuid import uuid4 as random_uuid
 
 from tornado import gen
 
+from tabpy_server.app.SettingsParameters import SettingsParameters
 from tabpy_server.handlers import MainHandler
 from tabpy_server.handlers.base_handler import STAGING_THREAD
 from tabpy_server.management.state import get_query_object_path
@@ -42,7 +43,7 @@ def copy_from_local(localpath, remotepath, is_dir=False):
 class ManagementHandler(MainHandler):
     def initialize(self, app):
         super(ManagementHandler, self).initialize(app)
-        self.port = self.settings['port']
+        self.port = self.settings[SettingsParameters.Port]
 
     def _get_protocol(self):
         return 'http://'
@@ -94,7 +95,7 @@ class ManagementHandler(MainHandler):
             src_path = (request_data['src_path'] if 'src_path' in request_data
                         else None)
             target_path = get_query_object_path(
-                self.settings['state_file_path'], name, version)
+                self.settings[SettingsParameters.StateFilePath], name, version)
             _path_checker = _compile('^[\\a-zA-Z0-9-_\\s/]+$')
             # copy from staging
             if src_path:

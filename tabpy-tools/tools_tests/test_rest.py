@@ -223,7 +223,8 @@ class TestServiceClient(unittest.TestCase):
         nw.DELETE.return_value = 'DELETE'
 
         self.sc = ServiceClient('endpoint/', network_wrapper=nw)
-        self.scClientDoesNotEndWithSlash = ServiceClient('endpoint', network_wrapper=nw)
+        self.scClientDoesNotEndWithSlash =\
+            ServiceClient('endpoint', network_wrapper=nw)
 
     def test_GET(self):
         self.assertEqual(self.sc.GET('test'), 'GET')
