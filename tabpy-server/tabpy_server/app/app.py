@@ -1,15 +1,10 @@
+from argparse import ArgumentParser
 import concurrent.futures
 import configparser
-import csv
 import logging
+from logging import config
 import multiprocessing
 import os
-import tornado
-
-from argparse import ArgumentParser
-
-from logging import config
-
 import tabpy_server
 from tabpy_server import __version__
 from tabpy_server.app.ConfigParameters import ConfigParameters
@@ -27,6 +22,7 @@ from tabpy_server.handlers import (EndpointHandler, EndpointsHandler,
                                    ServiceInfoHandler, StatusHandler,
                                    UploadDestinationHandler)
 from tornado_json.constants import TORNADO_MAJOR
+import tornado
 
 
 logger = logging.getLogger(__name__)
