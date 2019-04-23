@@ -4,8 +4,11 @@
 
 - [Environment Setup](#environment-setup)
 - [Prerequisites](#prerequisites)
-- [Windows Specific Steps](#windows-specific-steps)
-- [Linux and Mac Specific Steps](#linux-and-mac-specific-steps)
+- [Cloning TabPy Repository](#cloning-tabpy-repository)
+- [Setting Up Environment](#setting-up-environment)
+- [Unit Tests](#unit-tests)
+- [Code Coverage](#code-coverage)
+- [TabPy in Pythong Virtual Environment](#tabpy-in-pythong-virtual-environment)
 - [Documentation Updates](#documentation-updates)
 - [TabPy with Swagger](#tabpy-with-swagger)
 - [Code styling](#code-styling)
@@ -30,10 +33,10 @@ be able to work on TabPy changes:
   - Create a new branch for your changes.
   - When changes are ready push them on github and create merge request.
 
-## Windows Specific Steps
+## Cloning TabPy Repository
 
-1. Open a windows command prompt.
-2. In the command prompt, navigate to the folder in which you would like to save
+1. Open your OS shell.
+2. Navigate to the folder in which you would like to save
    your local TabPy repository.
 3. In the command prompt, enter the following commands:
 
@@ -42,36 +45,48 @@ be able to work on TabPy changes:
     cd TabPy
     ```
 
-To start a local TabPy instance:
+## Setting Up Environment
+
+Before making any code changes run environment setup script. For
+Windows the next command from the repository root folder:
 
 ```sh
-startup.cmd
+utils\set_env.cmd
 ```
 
-To run the unit test suite:
+and for Linux or Mac the next command from the repository root folder:
 
 ```sh
-python tests\runtests.py
+utils/set_env.sh
 ```
 
-Alternatively you can run unit tests to collect code coverage data. First
-install `pytest`:
+## Unit Tests
+
+TabPy has test suites for `tabpy-server` and `tabpy-tools` components.
+To run the unit test use `pytest` which you may need to install first
+(see [https://docs.pytest.org](https://docs.pytest.org) for details):
 
 ```sh
-pip install pytest
+pytest
 ```
 
-And then run `pytest` either for server or tools test, or even combined:
+Check `pytest` documentation for how to run individual tests or set of tests.
+
+## Code Coverage
+
+You can run unit tests to collect code coverage data. To do so run `pytest`
+either for server or tools test, or even combined:
 
 ```sh
-pytest tabpy-server/server_tests/ --cov=tabpy-server/tabpy_server
-pytest tabpy-tools/tools_tests/ --cov=tabpy-tools/tabpy_tools --cov-append
+pytest tests/server_tests/ --cov=tabpy-server/tabpy_server
+pytest tests/tools_tests/ --cov=tabpy-tools/tabpy_tools --cov-append
 ```
 
-## Linux and Mac Specific Steps
+## TabPy in Pythong Virtual Environment
 
 If you have downloaded Tabpy and would like to manually install Tabpy Server
-not using pip then follow the steps below [to run TabPy in Python virtual environment](docs/tabpy-virtualenv.md).
+not using pip then follow the steps below
+[to run TabPy in Python virtual environment](docs/tabpy-virtualenv.md).
 
 ## Documentation Updates
 

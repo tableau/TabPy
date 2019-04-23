@@ -316,7 +316,7 @@ class BaseHandler(tornado.web.RequestHandler):
         if self.log_request_context:
             # log request details
             context = (f'{self.request.remote_ip} calls '
-                       '{self.request.method} {self.request.full_url()}')
+                       f'{self.request.method} {self.request.full_url()}')
             if 'TabPy-Client' in self.request.headers:
                 context += f', Client: {self.request.headers["TabPy-Client"]}'
             if 'TabPy-User' in self.request.headers:
