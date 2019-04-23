@@ -48,6 +48,6 @@ setup(
         'six',
         'tornado==5.1.1',
         'Tornado-JSON',
-        'urllib3'
+        'urllib3==1.21.1'
     ]
 )
