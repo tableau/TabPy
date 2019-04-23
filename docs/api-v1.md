@@ -5,11 +5,11 @@
 <!-- toc -->
 
 - [Authentication](#authentication)
-  * [http:get:: /status](#httpget-status)
-  * [http:get:: /endpoints](#httpget-endpoints)
-  * [http:get:: /endpoints/:endpoint](#httpget-endpointsendpoint)
-  * [http:post:: /evaluate](#httppost-evaluate)
-  * [http:post:: /query/:endpoint](#httppost-queryendpoint)
+- [http:get:: /status](#httpget-status)
+- [http:get:: /endpoints](#httpget-endpoints)
+- [http:get:: /endpoints/:endpoint](#httpget-endpointsendpoint)
+- [http:post:: /evaluate](#httppost-evaluate)
+- [http:post:: /query/:endpoint](#httppost-queryendpoint)
 
 <!-- tocstop -->
 
