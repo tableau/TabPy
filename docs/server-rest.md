@@ -3,20 +3,27 @@
 The server process exposes several REST APIs to get status and to execute
 Python code and query deployed methods.
 
+<!-- markdownlint-disable MD004 -->
+
 <!-- toc -->
 
 - [http:get:: /info](#httpget-info)
-- [http:get:: /status](#httpget-status)
-- [http:get:: /endpoints](#httpget-endpoints)
-- [http:get:: /endpoints/:endpoint](#httpget-endpointsendpoint)
-- [http:post:: /evaluate](#httppost-evaluate)
-- [http:post:: /query/:endpoint](#httppost-queryendpoint)
+- [API v1](#api-v1)
+  * [http:get:: /status](#httpget-status)
+  * [http:get:: /endpoints](#httpget-endpoints)
+  * [http:get:: /endpoints/:endpoint](#httpget-endpointsendpoint)
+  * [http:post:: /evaluate](#httppost-evaluate)
+  * [http:post:: /query/:endpoint](#httppost-queryendpoint)
 
 <!-- tocstop -->
 
+<!-- markdownlint-enable MD004 -->
+
 ## http:get:: /info
 
-Get static information about the server.
+Get static information about the server. The method doesn't require any
+authentication and returns supported API versions client can use together
+with optional and required features.
 
 Example request:
 
@@ -26,39 +33,71 @@ Host: localhost:9004
 Accept: application/json
 ```
 
-Example response:
+Example response (JSON response body for HTTP 200 status):
 
-```HTTP
-HTTP/1.1 200 OK
-Content-Type: application/json
-
-{"description": "",
- "creation_time": "0",
- "state_path": "/Users/username/my-server-state-folder",
- "server_version": "dev",
- "name": "my-server-name"}
-
+```json
+{
+    "description": "",
+    "creation_time": "0",
+    "state_path": "e:\\dev\\TabPy\\tabpy-server\\tabpy_server",
+    "server_version": "0.4.1",
+    "name": "TabPy Server",
+    "versions": {
+        "v1": {
+            "features": {
+                "authentication": {
+                    "required": true,
+                    "methods": {
+                        "basic-auth": {}
+                    }
+                }
+            }
+        }
+    }
+}
 ```
 
+In the response above there are some key properties:
+
 - `description` is a string that is hardcoded in the `state.ini` file and
-   can be edited there.
+  can be edited there.
 - `creation_time` is the creation time in seconds since 1970-01-01, hardcoded
-   in the `state.ini` file, where it can be edited.
+  in the `state.ini` file, where it can be edited.
 - `state_path` is the state file path of the server (the value of the
-   TABPY_STATE_PATH at the time the server was started).
+  TABPY_STATE_PATH at the time the server was started).
 - `server_version` is the TabPy Server version tag. Clients can use this
-   information for compatibility checks.
+  information for compatibility checks.
+- `name` is a string to describe TabPy server instance. Can be edited in 
+  `state.ini` file.
+- `version` is a collection of API versions supported by the server. Each
+  entry in the collection is an API version which has corresponding list
+  of properties.
+
+For each API version there is set of properties, e.g. for v1 in the example
+abovefeatures are:
+
+- `authentiacation` - server has authentication feature enabled.
+- `required` is an property of authentication feature and is required to be
+  used by a client.
+- `methods` is a collection of supported authentication methods. In the
+  example above server only supports `basic-auth` which is for basic
+  access authentication (see 
+  [TabPy Server Configuration Instructions](server-config.md) for how to
+  confire TabPy for authentication.
+
 
 See [TabPy Configuration](#tabpy-configuration) section for more information
 on modifying the settings.
 
-Using curl:
+You can  the method for a server with curl:
 
 ```bash
 curl -X GET http://localhost:9004/info
 ```
 
-## http:get:: /status
+## API v1
+
+### http:get:: /status
 
 Gets runtime status of deployed endpoints. If no endpoints are deployed in
 the server, the returned data is an empty JSON object.
@@ -96,7 +135,7 @@ Using curl:
 curl -X GET http://localhost:9004/status
 ```
 
-## http:get:: /endpoints
+### http:get:: /endpoints
 
 Gets a list of deployed endpoints and their static information. If no
 endpoints are deployed in the server, the returned data is an empty JSON object.
@@ -142,7 +181,7 @@ Using curl:
 curl -X GET http://localhost:9004/endpoints
 ```
 
-## http:get:: /endpoints/:endpoint
+### http:get:: /endpoints/:endpoint
 
 Gets the description of a specific deployed endpoint. The endpoint must first
 be deployed in the server (see the [TabPy Tools documentation](tabpy-tools.md)).
@@ -172,7 +211,7 @@ Using curl:
 curl -X GET http://localhost:9004/endpoints/add
 ```
 
-## http:post:: /evaluate
+### http:post:: /evaluate
 
 Executes a block of Python code, replacing named parameters with their provided
 values.
@@ -243,7 +282,7 @@ curl -X POST http://localhost:9004/evaluate \
      "script": "return tabpy.query(\"add\", x=_arg1, y=_arg2)[\"response\"]"}'
 ```
 
-## http:post:: /query/:endpoint
+### http:post:: /query/:endpoint
 
 Executes a function at the specified endpoint. The function must first be
 deployed (see the [TabPy Tools documentation](tabpy-tools.md)).

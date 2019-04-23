@@ -67,10 +67,14 @@ To run the unit test use `pytest` which you may need to install first
 (see [https://docs.pytest.org](https://docs.pytest.org) for details):
 
 ```sh
-pytest
+pytest tests/unit
 ```
 
 Check `pytest` documentation for how to run individual tests or set of tests.
+
+## Integration Tests
+
+...
 
 ## Code Coverage
 
@@ -78,8 +82,7 @@ You can run unit tests to collect code coverage data. To do so run `pytest`
 either for server or tools test, or even combined:
 
 ```sh
-pytest tests/server_tests/ --cov=tabpy-server/tabpy_server
-pytest tests/tools_tests/ --cov=tabpy-tools/tabpy_tools --cov-append
+pytest tests --cov=tabpy-server/tabpy_server --cov=tabpy-tools/tabpy_tools --cov-append
 ```
 
 ## TabPy in Pythong Virtual Environment
