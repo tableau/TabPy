@@ -1,5 +1,5 @@
 '''
-Utility for managing user names and passwords for TabPy.
+Utility for managing user names and passwords for TabPy
 '''
 
 from argparse import ArgumentParser
