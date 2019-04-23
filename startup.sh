@@ -21,12 +21,12 @@ INSTALL_LOG=${TABPY_ROOT}/tabpy-server/install.log
 echo Installing TabPy-server requirements.
 echo Read the logs at ${INSTALL_LOG}
 
-cd ${TABPY_ROOT}/tabpy-server
+cd TABPY_ROOT/tabpy-server
 echo -e "\nInstalling tabpy-server dependencies..." > ${INSTALL_LOG}
 python3 setup.py install >> ${INSTALL_LOG} 2>&1
 check_status
 
-cd ${TABPY_ROOT}/tabpy-tools
+cd TABPY_ROOT/tabpy-tools
 echo -e "\nInstalling tabpy-tools dependencies..." >> ${INSTALL_LOG}
 python3 setup.py install >> ${INSTALL_LOG} 2>&1
 check_status
