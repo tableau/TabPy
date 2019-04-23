@@ -8,7 +8,8 @@ install:
    - pip install coveralls
    - npm install -g markdownlint-cli
 script:
-   - pytest tests --cov=tabpy-server/tabpy_server --cov=tabpy-tools/tabpy_tools --cov-append
+   - pytest tests/unit --cov=tabpy-server/tabpy_server --cov=tabpy-tools/tabpy_tools --cov-append
+   - pytest tests/integration
    - markdownlint .
 after_success:
    - coveralls
