@@ -76,6 +76,8 @@ For successful call:
 
 Response fields:
 
+<!-- markdownlint-disable MD013 -->
+
 Property | Description
 --- | ---
 `description` | String that is hardcoded in the `state.ini` file and can be edited there.
@@ -89,17 +91,10 @@ Property | Description
 `version.`*`<ver>.features.<feature>`* | Set of a features properties. For specific details for property meaning of a feature check documentation for specific API version.
 `version.`*`<ver>.features.<feature>.required`* | If true the feature is required to be used by client.
 
+<!-- markdownlint-enable MD013 -->
+
 For each API version there is set of properties, e.g. for v1 in the example
 abovefeatures are:
-
-- `authentiacation` - server has authentication feature enabled.
-- `required` is an property of authentication feature and is required to be
-  used by a client.
-- `methods` is a collection of supported authentication methods. In the
-  example above server only supports `basic-auth` which is for basic
-  access authentication (see
-  [TabPy Server Configuration Instructions](server-config.md) for how to
-  confire TabPy for authentication.
 
 See [TabPy Configuration](#tabpy-configuration) section for more information
 on modifying the settings.

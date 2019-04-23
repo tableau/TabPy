@@ -1,14 +1,8 @@
-import logging
-import pathlib
 import os
 import unittest
-from argparse import Namespace
 from tempfile import NamedTemporaryFile
 
 from tabpy_server.app.app import TabPyApp
-from tabpy_server.app.ConfigParameters import ConfigParameters
-
-from unittest.mock import patch, call
 
 
 class TestPasswordFile(unittest.TestCase):
@@ -93,7 +87,7 @@ class TestPasswordFile(unittest.TestCase):
                        "{} {}".format(login, pwd))
 
         with self.assertRaises(RuntimeError) as cm:
-            app = TabPyApp(self.config_file.name)
+            _ = TabPyApp(self.config_file.name)
             ex = cm.exception
             self.assertEqual('Failed to read password file {}'.format(
                 self.pwd_file.name), ex.args[0])
@@ -111,7 +105,7 @@ class TestPasswordFile(unittest.TestCase):
                        "{} {}\n{} {}".format(login, pwd, login, pwd))
 
         with self.assertRaises(RuntimeError) as cm:
-            app = TabPyApp(self.config_file.name)
+            _ = TabPyApp(self.config_file.name)
             ex = cm.exception
             self.assertEqual('Failed to read password file {}'.format(
                 self.pwd_file.name), ex.args[0])
