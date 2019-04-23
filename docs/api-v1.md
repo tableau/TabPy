@@ -54,7 +54,7 @@ Property | Description
 
 <!-- markdownlint-enable MD013 -->
 
-### http:get:: /status
+## http:get:: /status
 
 Gets runtime status of deployed endpoints. If no endpoints are deployed in
 the server, the returned data is an empty JSON object.
@@ -92,7 +92,7 @@ Using curl:
 curl -X GET http://localhost:9004/status
 ```
 
-### http:get:: /endpoints
+## http:get:: /endpoints
 
 Gets a list of deployed endpoints and their static information. If no
 endpoints are deployed in the server, the returned data is an empty JSON object.
@@ -138,7 +138,7 @@ Using curl:
 curl -X GET http://localhost:9004/endpoints
 ```
 
-### http:get:: /endpoints/:endpoint
+## http:get:: /endpoints/:endpoint
 
 Gets the description of a specific deployed endpoint. The endpoint must first
 be deployed in the server (see the [TabPy Tools documentation](tabpy-tools.md)).
@@ -168,7 +168,7 @@ Using curl:
 curl -X GET http://localhost:9004/endpoints/add
 ```
 
-### http:post:: /evaluate
+## http:post:: /evaluate
 
 Executes a block of Python code, replacing named parameters with their provided
 values.
@@ -239,7 +239,7 @@ curl -X POST http://localhost:9004/evaluate \
      "script": "return tabpy.query(\"add\", x=_arg1, y=_arg2)[\"response\"]"}'
 ```
 
-### http:post:: /query/:endpoint
+## http:post:: /query/:endpoint
 
 Executes a function at the specified endpoint. The function must first be
 deployed (see the [TabPy Tools documentation](tabpy-tools.md)).
