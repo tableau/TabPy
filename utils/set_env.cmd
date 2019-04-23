@@ -1,0 +1,1 @@
+set PYTHONPATH=%PYTHONPATH%;./tabpy-server;./tabpy-tools
