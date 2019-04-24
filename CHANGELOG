@@ -8,6 +8,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Improvements
 - Scripts & documentation for models
 
+## v0.4.1
+
+- Added request context logging as a feature controlled with
+  TABPY_LOG_DETAILS configuration setting.
+
 ## v0.4
 
 ### Improvements
