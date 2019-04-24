@@ -94,7 +94,7 @@ Property | Description
 <!-- markdownlint-enable MD013 -->
 
 For each API version there is set of properties, e.g. for v1 in the example
-abovefeatures are:
+above features are:
 
 See [TabPy Configuration](#tabpy-configuration) section for more information
 on modifying the settings.

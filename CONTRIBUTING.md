@@ -7,8 +7,9 @@
 - [Cloning TabPy Repository](#cloning-tabpy-repository)
 - [Setting Up Environment](#setting-up-environment)
 - [Unit Tests](#unit-tests)
+- [Integration Tests](#integration-tests)
 - [Code Coverage](#code-coverage)
-- [TabPy in Pythong Virtual Environment](#tabpy-in-pythong-virtual-environment)
+- [TabPy in Python Virtual Environment](#tabpy-in-python-virtual-environment)
 - [Documentation Updates](#documentation-updates)
 - [TabPy with Swagger](#tabpy-with-swagger)
 - [Code styling](#code-styling)
@@ -85,7 +86,7 @@ either for server or tools test, or even combined:
 pytest tests --cov=tabpy-server/tabpy_server --cov=tabpy-tools/tabpy_tools --cov-append
 ```
 
-## TabPy in Pythong Virtual Environment
+## TabPy in Python Virtual Environment
 
 If you have downloaded Tabpy and would like to manually install Tabpy Server
 not using pip then follow the steps below

@@ -50,7 +50,7 @@ Property | Description
 --- | ---
 `required` | Authentication is never optional for client to use if it is mentioned in features list.
 `methods` | List of supported authentication methods with their properties.
-`methods.basic-auth` | TabPy requires to use basic access authenticatio, see [TabPy Server Configuration Instructions](server-config.md#authentication) for how to configure authentication.
+`methods.basic-auth` | TabPy requires to use basic access authentication, see [TabPy Server Configuration Instructions](server-config.md#authentication) for how to configure authentication.
 
 <!-- markdownlint-enable MD013 -->
 

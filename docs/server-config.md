@@ -8,7 +8,7 @@
 - [Authentication](#authentication)
   * [Enabling Authentication](#enabling-authentication)
   * [Password File](#password-file)
-  * [setting Up Environmnet](#setting-up-environmnet)
+  * [Setting Up Environmnet](#setting-up-environmnet)
   * [Adding an Account](#adding-an-account)
   * [Updating an Account](#updating-an-account)
   * [Deleting an Account](#deleting-an-account)
@@ -95,7 +95,7 @@ see how to use it.
 
 After making any changes to the password file, TabPy needs to be restarted.
 
-### setting Up Environmnet
+### Setting Up Environmnet
 
 Before making any code changes run environment setup script. For
 Windows run the next command from the repository root folder:
