@@ -11,6 +11,9 @@ class TestAuth(integ_test_base.IntegTestBase):
                 "script": "return [x * 2 for x in _arg1]"
             }''')
 
+    def _get_pwd_file(self) -> str:
+        return './tests/integration/resources/pwdfile.txt'
+
     def test_missing_credentials_fails(self):
         headers = {
             'Content-Type': "application/json",

@@ -7,11 +7,11 @@
     "python.linting.pylintEnabled": false,
     "python.linting.flake8Enabled": true,
     "python.linting.enabled": true,
-    "python.unitTest.autoTestDiscoverOnSaveEnabled": true,
-    "python.unitTest.pyTestArgs": [
+    "python.testing.autoTestDiscoverOnSaveEnabled": true,
+    "python.testing.pyTestArgs": [
         "tests"
     ],
-    "python.unitTest.unittestEnabled": false,
-    "python.unitTest.nosetestsEnabled": false,
-    "python.unitTest.pyTestEnabled": true
+    "python.testing.unittestEnabled": true,
+    "python.testing.nosetestsEnabled": false,
+    "python.testing.pyTestEnabled": true
 }
