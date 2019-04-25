@@ -8,6 +8,7 @@
 - [Authentication](#authentication)
   * [Enabling Authentication](#enabling-authentication)
   * [Password File](#password-file)
+  * [Setting Up Environmnet](#setting-up-environmnet)
   * [Adding an Account](#adding-an-account)
   * [Updating an Account](#updating-an-account)
   * [Deleting an Account](#deleting-an-account)
@@ -94,6 +95,21 @@ see how to use it.
 
 After making any changes to the password file, TabPy needs to be restarted.
 
+### Setting Up Environmnet
+
+Before making any code changes run environment setup script. For
+Windows run the next command from the repository root folder:
+
+```sh
+utils\set_env.cmd
+```
+
+and for Linux or Mac the next command from the repository root folder:
+
+```sh
+utils/set_env.sh
+```
+
 ### Adding an Account
 
 To add an account run `utils/user_management.py` utility with `add`
@@ -145,6 +161,7 @@ URL, client infomation (Tableau Desktop\Server), Tableau user name (for Tableau 
 and TabPy user name as shown in the example below:
 
 <!-- markdownlint-disable MD040 -->
+
 ```
 2019-04-17,15:20:37 [INFO] (evaluation_plane_handler.py:evaluation_plane_handler:86):
  ::1 calls POST http://localhost:9004/evaluate,
@@ -157,4 +174,5 @@ function to evaluate=def _user_script(tabpy, _arg1, _arg2):
    res.append(_arg1[i] * _arg2[i])
  return res
 ```
+
 <!-- markdownlint-enable MD040 -->
