@@ -150,27 +150,28 @@ class IntegTestBase(unittest.TestCase):
         config_file = open(os.path.join(self.tmp_dir, 'test.conf'), 'w+')
         config_file.write(
             '[TabPy]\n'
-            f'TABPY_PORT={self._get_port()}\n'
+            f'TABPY_PORT = {self._get_port()}\n'
             f'TABPY_STATE_PATH = {self.tmp_dir}\n')
 
         pwd_file = self._get_pwd_file()
         if pwd_file is not None:
             pwd_file = os.path.abspath(pwd_file)
-            config_file.write(f'TABPY_PWD_FILE={pwd_file}\n')
+            config_file.write(f'TABPY_PWD_FILE = {pwd_file}\n')
 
         transfer_protocol = self._get_transfer_protocol()
         if transfer_protocol is not None:
-            config_file.write(f'TABPY_TRANSFER_PROTOCOL={transfer_protocol}\n')
+            config_file.write(
+                f'TABPY_TRANSFER_PROTOCOL = {transfer_protocol}\n')
 
         cert_file_name = self._get_certificate_file_name()
         if cert_file_name is not None:
             cert_file_name = os.path.abspath(cert_file_name)
-            config_file.write(f'TABPY_CERTIFICATE_FILE={cert_file_name}\n')
+            config_file.write(f'TABPY_CERTIFICATE_FILE = {cert_file_name}\n')
 
         key_file_name = self._get_key_file_name()
         if key_file_name is not None:
             key_file_name = os.path.abspath(key_file_name)
-            config_file.write(f'TABPY_KEY_FILE={key_file_name}\n')
+            config_file.write(f'TABPY_KEY_FILE = {key_file_name}\n')
 
         config_file.close()
 
@@ -199,20 +200,22 @@ class IntegTestBase(unittest.TestCase):
 
         # Platform specific - for integration tests we want to engage
         # startup script
-        if platform.system() == 'Windows':
-            self.process = subprocess.Popen(
-                ['startup.cmd',
-                 self.config_file_name,
-                 f'>{self.tmp_dir}/log.txt',
-                 '2>&1',
-                 '&'])
-        else:
-            self.process = subprocess.Popen(
-                ['./startup.sh',
-                 '--config=' + self.config_file_name, '&'],
-                preexec_fn=os.setsid)
-        # give the app some time to start up...
-        time.sleep(3)
+        with open(self.tmp_dir + '/output.txt', 'w') as outfile:
+            if platform.system() == 'Windows':
+                self.process = subprocess.Popen(
+                    ['startup.cmd', self.config_file_name],
+                    stdout=outfile,
+                    stderr=outfile)
+            else:
+                self.process = subprocess.Popen(
+                    ['./startup.sh',
+                     '--config=' + self.config_file_name],
+                    preexec_fn=os.setsid,
+                    stdout=outfile,
+                    stderr=outfile)
+
+            # give the app some time to start up...
+            time.sleep(5)
 
     def tearDown(self):
         # stop TabPy
@@ -224,12 +227,12 @@ class IntegTestBase(unittest.TestCase):
                 os.killpg(os.getpgid(self.process.pid), signal.SIGTERM)
             self.process.kill()
 
-        # after shutting down TabPy and before we start it again
-        # for next test give it some time to terminate...
-        time.sleep(1)
+            # after shutting down TabPy and before we start it again
+            # for next test give it some time to terminate.
+            time.sleep(5)
 
         # remove temporary files
-        if self.delete_state_file:
+        if self.delete_temp_folder:
             os.remove(self.state_file_name)
             os.remove(self.config_file_name)
             shutil.rmtree(self.tmp_dir)
@@ -237,10 +240,12 @@ class IntegTestBase(unittest.TestCase):
         super(IntegTestBase, self).tearDown()
 
     def _get_connection(self) -> http.client.HTTPConnection:
-        url = ''
         protocol = self._get_transfer_protocol()
-        if protocol is not None:
-            url = protocol + '://'
-        url += 'localhost:' + self._get_port()
-        connection = http.client.HTTPConnection(url)
+        url = 'localhost:' + self._get_port()
+
+        if protocol is not None and protocol.lower() == 'https':
+            connection = http.client.HTTPSConnection(url)
+        else:
+            connection = http.client.HTTPConnection(url)
+
         return connection

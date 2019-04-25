@@ -6,7 +6,7 @@ import integ_test_base
 
 
 class TestURL(integ_test_base.IntegTestBase):
-    def test_notexistant_url(self):
+    def test_notexistent_url(self):
         conn = self._get_connection()
         conn.request("GET", "/unicorn")
         res = conn.getresponse()

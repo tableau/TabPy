@@ -75,7 +75,11 @@ Check `pytest` documentation for how to run individual tests or set of tests.
 
 ## Integration Tests
 
-...
+Integration tests can be executed with the next command:
+
+```sh
+pytest tests/integration
+```
 
 ## Code Coverage
 
@@ -88,9 +92,9 @@ pytest tests --cov=tabpy-server/tabpy_server --cov=tabpy-tools/tabpy_tools --cov
 
 ## TabPy in Python Virtual Environment
 
-If you have downloaded Tabpy and would like to manually install Tabpy Server
-not using pip then follow the steps below
-[to run TabPy in Python virtual environment](docs/tabpy-virtualenv.md).
+It is possible (and recommended) to run TabPy in a virtual environment, more
+details are on
+[TabPy in Python virtual environment](docs/tabpy-virtualenv.md) page.
 
 ## Documentation Updates
 

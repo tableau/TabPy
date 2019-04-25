@@ -87,7 +87,7 @@ class TestPasswordFile(unittest.TestCase):
                        "{} {}".format(login, pwd))
 
         with self.assertRaises(RuntimeError) as cm:
-            _ = TabPyApp(self.config_file.name)
+            TabPyApp(self.config_file.name)
             ex = cm.exception
             self.assertEqual('Failed to read password file {}'.format(
                 self.pwd_file.name), ex.args[0])
@@ -105,7 +105,7 @@ class TestPasswordFile(unittest.TestCase):
                        "{} {}\n{} {}".format(login, pwd, login, pwd))
 
         with self.assertRaises(RuntimeError) as cm:
-            _ = TabPyApp(self.config_file.name)
+            TabPyApp(self.config_file.name)
             ex = cm.exception
             self.assertEqual('Failed to read password file {}'.format(
                 self.pwd_file.name), ex.args[0])

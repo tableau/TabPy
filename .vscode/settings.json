@@ -2,10 +2,12 @@
     "git.enabled": true,
     "files.exclude": {
         "**/__pycache__": true,
-        "**/.pytest_cache": true
+        "**/.pytest_cache": true,
+        "**/*.egg-info": true,
+        "**/*.pyc": true
     },
     "python.linting.pylintEnabled": false,
-    "python.linting.flake8Enabled": true,
+    "python.linting.flake8Enabled": false,
     "python.linting.enabled": true,
     "python.testing.autoTestDiscoverOnSaveEnabled": true,
     "python.testing.pyTestArgs": [
@@ -13,5 +15,6 @@
     ],
     "python.testing.unittestEnabled": true,
     "python.testing.nosetestsEnabled": false,
-    "python.testing.pyTestEnabled": true
+    "python.testing.pyTestEnabled": true,
+    "python.linting.pep8Enabled": true
 }
