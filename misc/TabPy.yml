@@ -31,6 +31,9 @@ consumes:
   - application/json
 produces:
   - application/json
+securityDefinitions:
+  basicAuth:
+    type: basic
 schemes:
 - http
 paths:
@@ -53,6 +56,8 @@ paths:
       summary: Evaluate Python script
       description: Executes a block of Python code, replacing named parameters with their provided values.
       operationId: evaluate
+      security:
+        - basicAuth: []
       parameters:
       - in: body
         name: body
@@ -84,6 +89,8 @@ paths:
             items:
               type: object
             example: [1, 2, 3]
+        401:
+          $ref: '#/definitions/UnauthorizedError'
         500:
           description: Internal server error
           schema:
@@ -95,11 +102,15 @@ paths:
       summary: Runtime status of deployed models
       description: Get runtime status of delployed endpoints. Returns empty result if no models are deployed.
       operationId: status
+      security:
+        - basicAuth: []
       responses:
         200:
           description: Successful operation
           schema:
             $ref: "#/definitions/Status"
+        401:
+          $ref: '#/definitions/UnauthorizedError'
   /endpoints:
     get:
       tags:
@@ -107,11 +118,15 @@ paths:
       summary: List of deployed models
       description: Gets a list of deployed endpoints and their static information. If no endpoints are deployed in the server, the returned data is an empty JSON object.
       operationId: endpoints
+      security:
+        - basicAuth: []
       responses:
         200:
           description: Successful operation
           schema:
             $ref: "#/definitions/Status"
+        401:
+          $ref: '#/definitions/UnauthorizedError'
   /endpoints/{model}:
     get:
       tags:
@@ -119,7 +134,9 @@ paths:
       summary: Gets the description of a specific deployed endpoint. 
       description: Gets the description of a specific deployed endpoint. 
       operationId: model_description
-      parameters: 
+      security:
+        - basicAuth: []
+      parameters:
       - name: model
         in: path
         type: string
@@ -129,6 +146,8 @@ paths:
           description: Successful operation
           schema:
             $ref: "#/definitions/Status"
+        401:
+          $ref: '#/definitions/UnauthorizedError'
   /query/{model}:
     post:
       tags: 
@@ -136,7 +155,9 @@ paths:
       summary: Executes a function at the specified endpoint.
       description: Executes a function at the specified endpoint. The function must first be deployed.
       operationId: model_query
-      parameters: 
+      security:
+        - basicAuth: []
+      parameters:
       - name: model
         in: path
         type: string
@@ -163,6 +184,8 @@ paths:
           description: Successful operation
           schema:
             $ref: "#/definitions/ModelResponse"
+        401:
+          $ref: '#/definitions/UnauthorizedError'
         500:
           description: Internal server error
           schema:
@@ -261,6 +284,11 @@ definitions:
         type: array
         items:
           type: object
+  UnauthorizedError:
+    description: Authentication information is missing or invalid
+    headers:
+      WWW_Authenticate:
+        type: string
       
 externalDocs:
   description: Find out more about TabPy

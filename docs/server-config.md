@@ -83,7 +83,10 @@ TABPY_PWD_FILE = c:\path\to\password\file.txt
 
 Password file is a text file containing usernames and hashed passwords
 per line separated by single space. For username only ASCII characters
-are supported.
+are supported. Usernames are case-insensitive.
+
+Passords in the password file are hashed with PBKDF2, [see source code
+for implementation details](../tabpy-server/tabpy_server/handlers/util.py).
 
 **It is highly recommended to restrict access to the password file
 with hosting OS mechanisms. Ideally the file should only be accessible
