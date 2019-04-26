@@ -89,6 +89,8 @@ paths:
             items:
               type: object
             example: [1, 2, 3]
+        401:
+          $ref: '#/definitions/UnathorizedError'
         500:
           description: Internal server error
           schema:
@@ -107,6 +109,8 @@ paths:
           description: Successful operation
           schema:
             $ref: "#/definitions/Status"
+        401:
+          $ref: '#/definitions/UnathorizedError'
   /endpoints:
     get:
       tags:
@@ -121,6 +125,8 @@ paths:
           description: Successful operation
           schema:
             $ref: "#/definitions/Status"
+        401:
+          $ref: '#/definitions/UnathorizedError'
   /endpoints/{model}:
     get:
       tags:
@@ -140,6 +146,8 @@ paths:
           description: Successful operation
           schema:
             $ref: "#/definitions/Status"
+        401:
+          $ref: '#/definitions/UnathorizedError'
   /query/{model}:
     post:
       tags: 
@@ -176,6 +184,8 @@ paths:
           description: Successful operation
           schema:
             $ref: "#/definitions/ModelResponse"
+        401:
+          $ref: '#/definitions/UnathorizedError'
         500:
           description: Internal server error
           schema:
@@ -274,6 +284,11 @@ definitions:
         type: array
         items:
           type: object
+  UnathorizedError:
+    description: Authentication information is missing or invalid
+    headers:
+      WWW_Authenticate:
+        type: string
       
 externalDocs:
   description: Find out more about TabPy
