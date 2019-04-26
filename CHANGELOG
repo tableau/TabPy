@@ -7,8 +7,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Added request context logging as a feature controlled with
   TABPY_LOG_DETAILS configuration setting.
-- Updated documentation for /info method
-- Added integration tests
+- Updated documentation for /info method and v1 API.
+- Added integration tests.
 
 ## v0.4
 
