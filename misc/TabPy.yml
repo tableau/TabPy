@@ -90,7 +90,7 @@ paths:
               type: object
             example: [1, 2, 3]
         401:
-          $ref: '#/definitions/UnathorizedError'
+          $ref: '#/definitions/UnauthorizedError'
         500:
           description: Internal server error
           schema:
@@ -110,7 +110,7 @@ paths:
           schema:
             $ref: "#/definitions/Status"
         401:
-          $ref: '#/definitions/UnathorizedError'
+          $ref: '#/definitions/UnauthorizedError'
   /endpoints:
     get:
       tags:
@@ -126,7 +126,7 @@ paths:
           schema:
             $ref: "#/definitions/Status"
         401:
-          $ref: '#/definitions/UnathorizedError'
+          $ref: '#/definitions/UnauthorizedError'
   /endpoints/{model}:
     get:
       tags:
@@ -147,7 +147,7 @@ paths:
           schema:
             $ref: "#/definitions/Status"
         401:
-          $ref: '#/definitions/UnathorizedError'
+          $ref: '#/definitions/UnauthorizedError'
   /query/{model}:
     post:
       tags: 
@@ -185,7 +185,7 @@ paths:
           schema:
             $ref: "#/definitions/ModelResponse"
         401:
-          $ref: '#/definitions/UnathorizedError'
+          $ref: '#/definitions/UnauthorizedError'
         500:
           description: Internal server error
           schema:
@@ -284,7 +284,7 @@ definitions:
         type: array
         items:
           type: object
-  UnathorizedError:
+  UnauthorizedError:
     description: Authentication information is missing or invalid
     headers:
       WWW_Authenticate:
