@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "${file}",
             "console": "externalTerminal",
-            "env": {"${PYTHONTPATH}": "${PYTHONPATH};${workspaceRoot}/tabpy-server;${workspaceRoot}/tabpy-tools"}
+            "env": {"${PYTHONPATH}": "${PYTHONPATH};${workspaceRoot}/tabpy-server;${workspaceRoot}/tabpy-tools"}
         }
     ]
 }
