@@ -45,11 +45,8 @@ be able to work on TabPy changes:
     git clone https://github.com/tableau/TabPy.git
     cd TabPy
     ```
-
-## Setting Up Environment
-
-Before making any code changes run environment setup script. For
-Windows run the next command from the repository root folder:
+Before making any code changes run environment setup script.
+For Windows run this command from the repository root folder:
 
 ```sh
 utils\set_env.cmd
@@ -64,7 +61,7 @@ source utils/set_env.sh
 ## Unit Tests
 
 TabPy has test suites for `tabpy-server` and `tabpy-tools` components.
-To run the unit test use `pytest` which you may need to install first
+To run the unit tests use `pytest` which you may need to install first
 (see [https://docs.pytest.org](https://docs.pytest.org) for details):
 
 ```sh
@@ -92,7 +89,7 @@ pytest tests --cov=tabpy-server/tabpy_server --cov=tabpy-tools/tabpy_tools --cov
 
 ## TabPy in Python Virtual Environment
 
-It is possible (and recommended) to run TabPy in a virtual environment, more
+It is possible (and recommended) to run TabPy in a virtual environment. More
 details are on
 [TabPy in Python virtual environment](docs/tabpy-virtualenv.md) page.
 
@@ -108,9 +105,11 @@ TOC for markdown file is built with [markdown-toc](https://www.npmjs.com/package
 markdown-toc -i docs/server-startup.md
 ```
 
+These checks will run as part of the build if you submit a pull request.
+
 ## TabPy with Swagger
 
-You can invoke TabPy Server API against running TabPy instance with Swagger:
+You can invoke the TabPy Server API against a running TabPy instance with Swagger.
 
 - Make CORS related changes in TabPy configuration file: update `tabpy-server\state.ini`
   file in your local repository to have the next settings:
@@ -122,24 +121,23 @@ Access-Control-Allow-Headers = Origin, X-Requested-with, Content-Type
 Access-Control-Allow-Methods = GET, OPTIONS, POST
 ```
 
-- Start local instance of TabPy server following [TabPy Server Startup Guide](docs/server-startup.md).
-- Run local copy of Swagger editor with steps provided at
+- Start a local instance of TabPy server following [TabPy Server Startup Guide](docs/server-startup.md).
+- Run a local copy of Swagger editor with steps provided at
   [https://github.com/swagger-api/swagger-editor](https://github.com/swagger-api/swagger-editor).
 - Open `misc/TabPy.yml` in Swagger editor.
-- In case your TabPy server runs not on `localhost:9004` update
+- In case your TabPy server does not run on `localhost:9004` update
   `host` value in `TabPy.yml` accordingly.
 
 ## Code styling
 
-On github repo for merge request `pycodestyle` is used to check Python code
-against our style conventions. You can run install it and run locally for
-file where modifications were made:
+`pycodestyle` is used to check Python code against our style conventions.
+You can run install it and run locally for files where modifications were made:
 
 ```sh
 pip install pycodestyle
 ```
 
-And then run it for file where modifications were made, e.g.:
+And then run it for files where modifications were made, e.g.:
 
 ```sh
 pycodestyle tabpy-server/server_tests/test_pwd_file.py
@@ -154,9 +152,9 @@ To install `autopep8` run the next command:
 pip install autopep8
 ```
 
-And then you can run the tool for a file. In the example below `-i`
+Then you can run the tool for a file. In the example below `-i`
 option tells `autopep8` to update the file. Without the option it
-outputs formated code to console.
+outputs formatted code to the console.
 
 ```sh
 autopep8 -i tabpy-server/server_tests/test_pwd_file.py

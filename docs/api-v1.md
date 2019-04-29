@@ -17,8 +17,8 @@
 
 ## Authentication
 
-When authentication feature is enabled for v1 API [`/info` call](server-rest.md#get-info)
-response contains authentication feature parameters, e.g.:
+When authentication is enabled for v1 API [`/info` call](server-rest.md#get-info),
+the response contains authentication feature parameters, e.g.:
 
   ```json
   {
@@ -48,9 +48,9 @@ v1 authentication specific features (see the example above):
 
 Property | Description
 --- | ---
-`required` | Authentication is never optional for client to use if it is mentioned in features list.
+`required` | Authentication is never optional for a client to use if it is in the features list.
 `methods` | List of supported authentication methods with their properties.
-`methods.basic-auth` | TabPy requires to use basic access authentication, see [TabPy Server Configuration Instructions](server-config.md#authentication) for how to configure authentication.
+`methods.basic-auth` | TabPy requires basic access authentication. See [TabPy Server Configuration Instructions](server-config.md#authentication) for how to configure authentication.
 
 <!-- markdownlint-enable MD013 -->
 
@@ -208,7 +208,7 @@ curl -X POST http://localhost:9004/evaluate \
 -d '{"data": {"_arg1": 1, "_arg2": 2}, "script": "return _arg1 + _arg2"}'
 ```
 
-It is possible to call a deployed function from within the code block, through
+It is possible to call a deployed function from within the code block through
 the predefined function `tabpy.query`. This function works like the client
 library's `query` method, and returns the corresponding data structure. The
 function must first be deployed as an endpoint in the server (for more details
@@ -229,7 +229,7 @@ Accept: application/json
   "script": "return tabpy.query('clustering', x=_arg1, y=_arg2)"}
 ```
 
-The next example shows how to call `evaluate` from a terminal using curl; this
+The next example shows how to call `evaluate` from a terminal using curl. This
 code queries the method `add` that was deployed in the section
 [deploy-function](tabpy-tools.md#deploying-a-function):
 
