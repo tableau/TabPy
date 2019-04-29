@@ -8,7 +8,7 @@
 - [Authentication](#authentication)
   * [Enabling Authentication](#enabling-authentication)
   * [Password File](#password-file)
-  * [Setting Up Environmnet](#setting-up-environmnet)
+  * [Setting Up Environment](#setting-up-environment)
   * [Adding an Account](#adding-an-account)
   * [Updating an Account](#updating-an-account)
   * [Deleting an Account](#deleting-an-account)
@@ -85,7 +85,7 @@ Password file is a text file containing usernames and hashed passwords
 per line separated by single space. For username only ASCII characters
 are supported. Usernames are case-insensitive.
 
-Passwords in the password file are hashed with PBKDF2, [see source code
+Passwords in the password file are hashed with PBKDF2. [See source code
 for implementation details](../tabpy-server/tabpy_server/handlers/util.py).
 
 **It is highly recommended to restrict access to the password file
@@ -98,16 +98,16 @@ see how to use it.
 
 After making any changes to the password file, TabPy needs to be restarted.
 
-### Setting Up Environmnet
+### Setting Up Environment
 
-Before making any code changes run environment setup script. For
-Windows run the next command from the repository root folder:
+Before making any code changes run the environment setup script. For
+Windows run this command from the repository root folder:
 
 ```sh
 utils\set_env.cmd
 ```
 
-and for Linux or Mac the next command from the repository root folder:
+and for Linux or Mac run this command from the repository root folder:
 
 ```sh
 source utils/set_env.sh
@@ -144,14 +144,14 @@ line with the user name.
 
 ## Logging
 
-Logging for TabPy is implemented with standard Python logger and can be configured
+Logging for TabPy is implemented with Python's standard logger and can be configured
 as explained in Python documentation at
 [Logging Configuration page](https://docs.python.org/3.6/library/logging.config.html).
 
-Default config provided with TabPy is
+A default config provided with TabPy is at
 [`tabpy-server/tabpy_server/common/default.conf`](tabpy-server/tabpy_server/common/default.conf)
-and has configuration for console and file loggers. With changing the config
-user can modify log level, format of the logges messages and add or remove
+and has a configuration for console and file loggers. Changing the config file
+allows the user to modify the log level, format of the logged messages and add or remove
 loggers.
 
 ### Request Context Logging
@@ -179,3 +179,5 @@ function to evaluate=def _user_script(tabpy, _arg1, _arg2):
 ```
 
 <!-- markdownlint-enable MD040 -->
+
+No passwords are logged.
