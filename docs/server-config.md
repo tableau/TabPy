@@ -110,7 +110,7 @@ utils\set_env.cmd
 and for Linux or Mac the next command from the repository root folder:
 
 ```sh
-utils/set_env.sh
+source utils/set_env.sh
 ```
 
 ### Adding an Account
