@@ -151,8 +151,8 @@ as explained in Python documentation at
 A default config provided with TabPy is at
 [`tabpy-server/tabpy_server/common/default.conf`](tabpy-server/tabpy_server/common/default.conf)
 and has a configuration for console and file loggers. Changing the config file
-allows the user to modify the log level, format of the logged messages and add or remove
-loggers.
+allows the user to modify the log level, format of the logged messages and
+add or remove loggers.
 
 ### Request Context Logging
 
