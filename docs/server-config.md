@@ -148,7 +148,7 @@ Logging for TabPy is implemented with standart Python logger and can be configur
 as explained in Python documentation at
 [Logging Configuration page](https://docs.python.org/3.6/library/logging.config.html).
 
-Default config proveded with TabPy is
+Default config provided with TabPy is
 [`tabpy-server/tabpy_server/common/default.conf`](tabpy-server/tabpy_server/common/default.conf)
 and has configuration for console and file loggers. With changing the config
 user can modify log level, format of the logges messages and add or remove
