@@ -3,7 +3,7 @@ import logging
 import requests
 from requests.auth import HTTPBasicAuth
 from re import compile
-import json
+import json as json
 
 from collections import MutableMapping as _MutableMapping
 
@@ -141,8 +141,10 @@ class RequestsNetworkWrapper(object):
         return response.json()
 
     def DELETE(self, url, data, timeout=None):
-        """Issues a DELETE request to the URL with the data specified. Returns an
-        object that is parsed from the response JSON."""
+        '''
+        Issues a DELETE request to the URL with the data specified. Returns an
+        object that is parsed from the response JSON.
+        '''
         if data is not None:
             data = json.dumps(data)
 

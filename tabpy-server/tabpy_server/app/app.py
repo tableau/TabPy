@@ -1,18 +1,14 @@
+from argparse import ArgumentParser
 import concurrent.futures
 import configparser
-import csv
 import logging
+from logging import config
 import multiprocessing
 import os
-import tornado
-
-from argparse import ArgumentParser
-
-from logging import config
-
 import tabpy_server
 from tabpy_server import __version__
 from tabpy_server.app.ConfigParameters import ConfigParameters
+from tabpy_server.app.SettingsParameters import SettingsParameters
 from tabpy_server.app.util import (
     log_and_raise,
     parse_pwd_file)
@@ -25,8 +21,8 @@ from tabpy_server.handlers import (EndpointHandler, EndpointsHandler,
                                    EvaluationPlaneHandler, QueryPlaneHandler,
                                    ServiceInfoHandler, StatusHandler,
                                    UploadDestinationHandler)
-
 from tornado_json.constants import TORNADO_MAJOR
+import tornado
 
 
 logger = logging.getLogger(__name__)
@@ -70,19 +66,21 @@ class TabPyApp:
             self.tabpy_state,
             self.python_service)
 
-        if self.settings['transfer_protocol'] == 'http':
-            application.listen(self.settings['port'])
-        elif self.settings['transfer_protocol'] == 'https':
-            application.listen(self.settings['port'],
+        protocol = self.settings[SettingsParameters.TransferProtocol]
+        if protocol == 'http':
+            application.listen(self.settings[SettingsParameters.Port])
+        elif protocol == 'https':
+            application.listen(self.settings[SettingsParameters.Port],
                                ssl_options={
-                'certfile': self.settings['certificate_file'],
-                'keyfile': self.settings['key_file']
+                'certfile': self.settings[SettingsParameters.CertificateFile],
+                'keyfile': self.settings[SettingsParameters.KeyFile]
             })
         else:
-            log_and_raise('Unsupported transfer protocol.', RuntimeError)
+            log_and_raise(f'Unsupported transfer protocol {protocol}.',
+                          RuntimeError)
 
         logger.info('Web service listening on port {}'.format(
-            str(self.settings['port'])))
+            str(self.settings[SettingsParameters.Port])))
         tornado.ioloop.IOLoop.instance().start()
 
     def _create_tornado_web_app(self):
@@ -117,9 +115,8 @@ class TabPyApp:
              UploadDestinationHandler,
              dict(app=self)),
             (self.subdirectory + r'/(.*)', tornado.web.StaticFileHandler,
-             dict(path=self.settings['static_path'],
-                  default_filename="index.html",
-                  app=self)),
+             dict(path=self.settings[SettingsParameters.StaticPath],
+                  default_filename="index.html")),
         ], debug=False, **self.settings)
 
         return application
@@ -184,36 +181,41 @@ class TabPyApp:
             elif default_val is not None:
                 self.settings[settings_key] = default_val
 
-        set_parameter('port', ConfigParameters.TABPY_PORT,
+        set_parameter(SettingsParameters.Port, ConfigParameters.TABPY_PORT,
                       default_val=9004, check_env_var=True)
-        set_parameter('server_version', None, default_val=__version__)
+        set_parameter(SettingsParameters.ServerVersion, None,
+                      default_val=__version__)
 
-        set_parameter('upload_dir', ConfigParameters.TABPY_QUERY_OBJECT_PATH,
+        set_parameter(SettingsParameters.UploadDir,
+                      ConfigParameters.TABPY_QUERY_OBJECT_PATH,
                       default_val='/tmp/query_objects', check_env_var=True)
-        if not os.path.exists(self.settings['upload_dir']):
-            os.makedirs(self.settings['upload_dir'])
+        if not os.path.exists(self.settings[SettingsParameters.UploadDir]):
+            os.makedirs(self.settings[SettingsParameters.UploadDir])
 
         # set and validate transfer protocol
-        set_parameter('transfer_protocol',
+        set_parameter(SettingsParameters.TransferProtocol,
                       ConfigParameters.TABPY_TRANSFER_PROTOCOL,
                       default_val='http')
-        self.settings['transfer_protocol'] =\
-            self.settings['transfer_protocol'].lower()
+        self.settings[SettingsParameters.TransferProtocol] =\
+            self.settings[SettingsParameters.TransferProtocol].lower()
 
-        set_parameter('certificate_file',
+        set_parameter(SettingsParameters.CertificateFile,
                       ConfigParameters.TABPY_CERTIFICATE_FILE)
-        set_parameter('key_file', ConfigParameters.TABPY_KEY_FILE)
+        set_parameter(SettingsParameters.KeyFile,
+                      ConfigParameters.TABPY_KEY_FILE)
         self._validate_transfer_protocol_settings()
 
         # if state.ini does not exist try and create it - remove
         # last dependence on batch/shell script
-        set_parameter('state_file_path', ConfigParameters.TABPY_STATE_PATH,
+        set_parameter(SettingsParameters.StateFilePath,
+                      ConfigParameters.TABPY_STATE_PATH,
                       default_val='./tabpy-server/tabpy_server',
                       check_env_var=True)
-        self.settings['state_file_path'] = os.path.realpath(
+        self.settings[SettingsParameters.StateFilePath] = os.path.realpath(
             os.path.normpath(
-                os.path.expanduser(self.settings['state_file_path'])))
-        state_file_path = self.settings['state_file_path']
+                os.path.expanduser(
+                    self.settings[SettingsParameters.StateFilePath])))
+        state_file_path = self.settings[SettingsParameters.StateFilePath]
         logger.info("Loading state from state file %s" %
                     os.path.join(state_file_path, "state.ini"))
         tabpy_state = _get_state_from_file(state_file_path)
@@ -223,8 +225,14 @@ class TabPyApp:
         self.python_service = PythonServiceHandler(PythonService())
         self.settings['compress_response'] = True if TORNADO_MAJOR >= 4\
             else "gzip"
-        self.settings['static_path'] = os.path.join(
-            os.path.dirname(__file__), "static")
+
+        set_parameter(SettingsParameters.StaticPath,
+                      ConfigParameters.TABPY_STATIC_PATH,
+                      default_val='./')
+        self.settings[SettingsParameters.StaticPath] =\
+            os.path.abspath(self.settings[SettingsParameters.StaticPath])
+        logger.debug(f'Static pages folder set to '
+                     f'"{self.settings[SettingsParameters.StaticPath]}"')
 
         # Set subdirectory from config if applicable
         if tabpy_state.has_option("Service Info", "Subdirectory"):
@@ -245,14 +253,25 @@ class TabPyApp:
                 "Authentication is not enabled")
 
         features = self._get_features()
-        self.settings['versions'] = {'v1': {'features': features}}
+        self.settings[SettingsParameters.ApiVersions] =\
+            {'v1': {'features': features}}
+
+        set_parameter(SettingsParameters.LogRequestContext,
+                      ConfigParameters.TABPY_LOG_DETAILS,
+                      default_val='false')
+        self.settings[SettingsParameters.LogRequestContext] = (
+            self.settings[SettingsParameters.LogRequestContext].lower() !=
+            'false')
+        logger.info('Call context logging is {}'.format(
+            'enabled' if self.settings[SettingsParameters.LogRequestContext]
+            else 'disabled'))
 
     def _validate_transfer_protocol_settings(self):
-        if 'transfer_protocol' not in self.settings:
+        if SettingsParameters.TransferProtocol not in self.settings:
             log_and_raise(
                 'Missing transfer protocol information.', RuntimeError)
 
-        protocol = self.settings['transfer_protocol']
+        protocol = self.settings[SettingsParameters.TransferProtocol]
 
         if protocol == 'http':
             return
@@ -261,16 +280,17 @@ class TabPyApp:
             log_and_raise('Unsupported transfer protocol: {}.'.format(
                 protocol), RuntimeError)
 
-        self._validate_cert_key_state('The parameter(s) {} must be set.',
-                                      'certificate_file' in self.settings,
-                                      'key_file' in self.settings)
-        cert = self.settings['certificate_file']
+        self._validate_cert_key_state(
+            'The parameter(s) {} must be set.',
+            SettingsParameters.CertificateFile in self.settings,
+            SettingsParameters.KeyFile in self.settings)
+        cert = self.settings[SettingsParameters.CertificateFile]
 
         self._validate_cert_key_state(
             'The parameter(s) {} must point to '
             'an existing file.',
             os.path.isfile(cert),
-            os.path.isfile(self.settings['key_file']))
+            os.path.isfile(self.settings[SettingsParameters.KeyFile]))
         tabpy_server.app.util.validate_cert(cert)
 
     @staticmethod

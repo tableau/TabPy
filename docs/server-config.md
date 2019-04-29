@@ -1,17 +1,22 @@
 # TabPy Server Configuration Instructions
 
 <!-- markdownlint-disable MD004 -->
+
 <!-- toc -->
 
 - [Configuring HTTP vs HTTPS](#configuring-http-vs-https)
 - [Authentication](#authentication)
   * [Enabling Authentication](#enabling-authentication)
   * [Password File](#password-file)
+  * [Setting Up Environmnet](#setting-up-environmnet)
   * [Adding an Account](#adding-an-account)
   * [Updating an Account](#updating-an-account)
   * [Deleting an Account](#deleting-an-account)
+- [Logging](#logging)
+  * [Request Context Logging](#request-context-logging)
 
 <!-- tocstop -->
+
 <!-- markdownlint-enable MD004 -->
 
 Default settings for TabPy may be viewed in the
@@ -78,7 +83,10 @@ TABPY_PWD_FILE = c:\path\to\password\file.txt
 
 Password file is a text file containing usernames and hashed passwords
 per line separated by single space. For username only ASCII characters
-are supported.
+are supported. Usernames are case-insensitive.
+
+Passwords in the password file are hashed with PBKDF2, [see source code
+for implementation details](../tabpy-server/tabpy_server/handlers/util.py).
 
 **It is highly recommended to restrict access to the password file
 with hosting OS mechanisms. Ideally the file should only be accessible
@@ -89,6 +97,21 @@ accounts in the password file. Run `utils/user_management.py -h` to
 see how to use it.
 
 After making any changes to the password file, TabPy needs to be restarted.
+
+### Setting Up Environmnet
+
+Before making any code changes run environment setup script. For
+Windows run the next command from the repository root folder:
+
+```sh
+utils\set_env.cmd
+```
+
+and for Linux or Mac the next command from the repository root folder:
+
+```sh
+source utils/set_env.sh
+```
 
 ### Adding an Account
 
@@ -118,3 +141,41 @@ will be generated and displayed in the command line.
 
 To delete an account open password file in any text editor and delete the
 line with the user name.
+
+## Logging
+
+Logging for TabPy is implemented with standard Python logger and can be configured
+as explained in Python documentation at
+[Logging Configuration page](https://docs.python.org/3.6/library/logging.config.html).
+
+Default config provided with TabPy is
+[`tabpy-server/tabpy_server/common/default.conf`](tabpy-server/tabpy_server/common/default.conf)
+and has configuration for console and file loggers. With changing the config
+user can modify log level, format of the logges messages and add or remove
+loggers.
+
+### Request Context Logging
+
+For extended logging (e.g. for auditing purposes) additional logging can be turned
+on with setting `TABPY_LOG_DETAILS` configuration file parameter to `true`.
+
+With the feature on additional information is logged for HTTP requests: caller ip,
+URL, client infomation (Tableau Desktop\Server), Tableau user name (for Tableau Server)
+and TabPy user name as shown in the example below:
+
+<!-- markdownlint-disable MD040 -->
+
+```
+2019-04-17,15:20:37 [INFO] (evaluation_plane_handler.py:evaluation_plane_handler:86):
+ ::1 calls POST http://localhost:9004/evaluate,
+ Client: Tableau Server 2019.2,
+ Tableau user: ogolovatyi,
+ TabPy user: user1
+function to evaluate=def _user_script(tabpy, _arg1, _arg2):
+ res = []
+ for i in range(len(_arg1)):
+   res.append(_arg1[i] * _arg2[i])
+ return res
+```
+
+<!-- markdownlint-enable MD040 -->

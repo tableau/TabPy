@@ -6,6 +6,7 @@ except ImportError:
     from configparser import ConfigParser as _ConfigParser
 from datetime import datetime, timedelta, tzinfo
 from tabpy_server.app.ConfigParameters import ConfigParameters
+from tabpy_server.app.SettingsParameters import SettingsParameters
 from tabpy_server.app.util import log_and_raise
 from time import mktime
 
@@ -13,8 +14,8 @@ logger = logging.getLogger(__name__)
 
 
 def write_state_config(state, settings):
-    if 'state_file_path' in settings:
-        state_path = settings['state_file_path']
+    if SettingsParameters.StateFilePath in settings:
+        state_path = settings[SettingsParameters.StateFilePath]
     else:
         log_and_raise(
             '{} is not set'.format(
