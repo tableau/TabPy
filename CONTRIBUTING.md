@@ -49,7 +49,7 @@ be able to work on TabPy changes:
 ## Setting Up Environment
 
 Before making any code changes run environment setup script. For
-Windows the next command from the repository root folder:
+Windows run the next command from the repository root folder:
 
 ```sh
 utils\set_env.cmd

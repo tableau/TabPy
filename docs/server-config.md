@@ -85,7 +85,7 @@ Password file is a text file containing usernames and hashed passwords
 per line separated by single space. For username only ASCII characters
 are supported. Usernames are case-insensitive.
 
-Passords in the password file are hashed with PBKDF2, [see source code
+Passwords in the password file are hashed with PBKDF2, [see source code
 for implementation details](../tabpy-server/tabpy_server/handlers/util.py).
 
 **It is highly recommended to restrict access to the password file
@@ -144,7 +144,7 @@ line with the user name.
 
 ## Logging
 
-Logging for TabPy is implemented with standart Python logger and can be configured
+Logging for TabPy is implemented with standard Python logger and can be configured
 as explained in Python documentation at
 [Logging Configuration page](https://docs.python.org/3.6/library/logging.config.html).
 
