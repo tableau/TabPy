@@ -17,8 +17,8 @@
 
 ## Authentication
 
-When authentication is enabled for v1 API [`/info` call](server-rest.md#get-info), the
-response contains authentication feature parameters, e.g.:
+When authentication is enabled for v1 API [`/info` call](server-rest.md#get-info),
+the response contains authentication feature parameters, e.g.:
 
   ```json
   {
