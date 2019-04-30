@@ -46,23 +46,19 @@ class TestRequestsNetworkWrapper(unittest.TestCase):
             timeout=None,
             auth=None)
 
+    @unittest.expectedFailure
     def test_GET_InvalidData(self):
         url = 'abc'
         data = {'cat'}
-        try:
-            self.assertEqual(self.rnw.GET(url, data), 'json')
-        except Exception:  # TODO: refactor this...
-            e = sys.exc_info()[0]
-            self.assertEquals(e, TypeError)
+        with self.assertRaises(TypeError):
+            self.rnw.GET(url, data)
 
+    @unittest.expectedFailure
     def test_GET_InvalidURL(self):
         url = ''
         data = {'foo': 'bar'}
-        try:
-            self.assertEqual(self.rnw.GET(url, data), 'json')
-        except Exception:  # TODO: refactor this...
-            e = sys.exc_info()[0]
-            self.assertEquals(e, TypeError)
+        with self.assertRaises(TypeError):
+            self.rnw.GET(url, data)
 
     def test_POST(self):
         url = 'abc'
@@ -74,23 +70,18 @@ class TestRequestsNetworkWrapper(unittest.TestCase):
             timeout=None,
             auth=None)
 
+    @unittest.expectedFailure
     def test_POST_InvalidURL(self):
         url = ''
         data = {'foo': 'bar'}
-        try:
-            self.assertEqual(self.rnw.POST(url, data), 'json')
-        except Exception:  # TODO: refactor this...
-            e = sys.exc_info()[0]
-            self.assertEqual(e, TypeError)
+        with self.assertRaises(TypeError):
+            self.rnw.POST(url, data)
 
     def test_POST_InvalidData(self):
         url = 'url'
         data = {'cat'}
-        try:
-            self.assertEqual(self.rnw.POST(url, data), 'json')
-        except Exception:  # TODO: refactor this...
-            e = sys.exc_info()[0]
-            self.assertEqual(e, TypeError)
+        with self.assertRaises(TypeError):
+            self.rnw.POST(url, data)
 
     def test_PUT(self):
         url = 'abc'
@@ -106,20 +97,14 @@ class TestRequestsNetworkWrapper(unittest.TestCase):
     def test_PUT_InvalidData(self):
         url = 'url'
         data = {'cat'}
-        try:
-            self.assertEqual(self.rnw.PUT(url, data), 'json')
-        except Exception:  # TODO: refactor this...
-            e = sys.exc_info()[0]
-            self.assertEqual(e, TypeError)
+        with self.assertRaises(TypeError):
+            self.rnw.PUT(url, data)
 
     def test_PUT_InvalidURL(self):
         url = ''
         data = {'foo:bar'}
-        try:
-            self.assertEqual(self.rnw.PUT(url, data), 'json')
-        except Exception:  # TODO: refactor this...
-            e = sys.exc_info()[0]
-            self.assertEqual(e, TypeError)
+        with self.assertRaises(TypeError):
+            self.rnw.PUT(url, data)
 
     def test_DELETE(self):
         url = 'abc'
@@ -134,20 +119,14 @@ class TestRequestsNetworkWrapper(unittest.TestCase):
     def test_DELETE_InvalidData(self):
         url = 'abc'
         data = {'cat'}
-        try:
-            self.assertEqual(self.rnw.DELETE(url, data), 'json')
-        except Exception:  # TODO: refactor this...
-            e = sys.exc_info()[0]
-            self.assertEqual(e, TypeError)
+        with self.assertRaises(TypeError):
+            self.rnw.DELETE(url, data)
 
     def test_DELETE_InvalidURL(self):
         url = ''
         data = {'foo:bar'}
-        try:
-            self.assertEqual(self.rnw.DELETE(url, data), 'json')
-        except Exception:  # TODO: refactor this...
-            e = sys.exc_info()[0]
-            self.assertEqual(e, TypeError)
+        with self.assertRaises(TypeError):
+            self.rnw.DELETE(url, data)
 
     def test_set_credentials(self):
         expected_auth = None

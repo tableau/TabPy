@@ -9,7 +9,7 @@ SET SAVE_PYTHONPATH=%PYTHONPATH%
 
 
 ECHO Checking for presence of Python in the system path variable.
-python --version >nul 2>&1
+python --version
 IF %ERRORLEVEL% NEQ 0 (
     ECHO     Cannot find Python.exe.  Check that Python is installed and is in the system PATH environment variable.
     SET RET=1

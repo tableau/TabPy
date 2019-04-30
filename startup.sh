@@ -27,7 +27,7 @@ function install_dependencies() {
 
 # Check for Python in PATH
 echo Checking for presence of Python in the system path variable.
-python --version &>-
+python3 --version
 check_status "Cannot find Python.  Check that Python is installed and is in the system PATH environment variable."
 
 # Setting local variables

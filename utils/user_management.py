@@ -155,11 +155,4 @@ def main():
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG, format="%(message)s")
 
-    # add tabpy-tools and tabpy-server folders to
-    # PYTHONPATH so code from there can be found when
-    # modules are imported
-    for dir_ in {'tabpy-tools', 'tabpy-server'}:
-        sys.path.insert(0, os.path.join(
-            os.path.abspath(os.path.dirname(__file__)), dir_))
-
     main()
