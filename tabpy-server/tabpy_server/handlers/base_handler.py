@@ -76,7 +76,7 @@ class ContextLoggerWrapper(object):
             context += f', Method: {self.method}'
 
         if self.url is not None:
-            context += f', Resource: {self.url}'
+            context += f', URL: {self.url}'
 
         if self.client is not None:
             context += f', Client: {self.client}'
@@ -87,10 +87,10 @@ class ContextLoggerWrapper(object):
         if self.tabpy_username is not None:
             context += f', TabPy user: {self.tabpy_username}'
 
-        logger.info(context)
+        logging.getLogger(__name__).log(logging.INFO, context)
         self.request_context_logged = True
 
-    def log(self, level: int, msg: str, *args, **kwargs):
+    def log(self, level: int, msg: str):
         '''
         Log message with or without call ID. If call context is logged and
         call ID added to any log entry is specified by if context logging
@@ -113,11 +113,11 @@ class ContextLoggerWrapper(object):
         extended_msg = msg
         if self.log_request_context:
             if not self.request_context_logged:
-                self.log_request_context()
+                self._log_context_info()
 
             extended_msg += f', <<call ID: {self.call_id}>>'
 
-        logging.getLogger(__name__).log(level, extended_msg, args, kwargs)
+        logging.getLogger(__name__).log(level, extended_msg)
 
 
 class BaseHandler(tornado.web.RequestHandler):
@@ -205,7 +205,8 @@ class BaseHandler(tornado.web.RequestHandler):
         is not needed.
         '''
         if api_version not in self.settings[SettingsParameters.ApiVersions]:
-            self.logger.log(logging.CRITICAL, f'Unknown API version "{api_version}"')
+            self.logger.log(logging.CRITICAL,
+                            f'Unknown API version "{api_version}"')
             return False, ''
 
         version_settings =\
@@ -271,7 +272,8 @@ class BaseHandler(tornado.web.RequestHandler):
         try:
             cred = base64.b64decode(auth_header_list[1]).decode('utf-8')
         except (binascii.Error, UnicodeDecodeError) as ex:
-            self.logger.log(logging.CRITICAL, f'Cannot decode credentials: {str(ex)}')
+            self.logger.log(logging.CRITICAL,
+                            f'Cannot decode credentials: {str(ex)}')
             return False
 
         login_pwd = cred.split(':')
