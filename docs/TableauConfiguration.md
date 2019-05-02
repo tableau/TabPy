@@ -37,8 +37,8 @@ To configure a non secure connection to TabPy server set `vizqlserver.extsvc.hos
 and `vizqlserver.extsvc.port` parameters:
 
 ```sh
-tsm set vizqlserver.extsvc.host <ip address or host name of the machine hosting TabPy>
-tsm set vizqlserver.extsvc.port <port for TabPy>
+tsm configuration set -k vizqlserver.extsvc.host -v <ip address or host name of the machine hosting TabPy>
+tsm configuration set -k vizqlserver.extsvc.port -v <port for TabPy>
 ```
 
 To configure a secure connection to TabPy server use `tsm security vizql-extsvc enable`
