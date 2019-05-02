@@ -84,7 +84,7 @@ def cleanup_endpoint_files(name, query_path,
     else:
         retain_folders = [os.path.join(local_dir, str(version))
                           for version in retain_versions]
-        logger.log(logging.INFO, f'Retain folder: {retain_folders}')
+        logger.log(logging.INFO, f'Retain folders: {retain_folders}')
 
         for file_or_dir in os.listdir(local_dir):
             candidate_dir = os.path.join(local_dir, file_or_dir)

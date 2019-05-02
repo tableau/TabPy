@@ -104,7 +104,7 @@ class QueryPlaneHandler(BaseHandler):
 
     def _sanitize_request_data(self, data):
         if not isinstance(data, dict):
-            msg = 'Expect input data to be a dictionary'
+            msg = 'Input data must be a dictionary'
             self.logger.log(logging.CRITICAL, msg)
             raise RuntimeError(msg)
 
@@ -113,8 +113,7 @@ class QueryPlaneHandler(BaseHandler):
         elif "data" in data:
             return data.get("data")
         else:
-            msg = ('Expect input data is a dictionary with at least a '
-                   'key called "data"')
+            msg = 'Input data must be a dictionary with a key called "data"'
             self.logger.log(logging.CRITICAL, msg)
             raise RuntimeError(msg)
 
