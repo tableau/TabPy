@@ -4,8 +4,6 @@ from tabpy_server.handlers import ManagementHandler
 import os
 
 
-logger = logging.getLogger(__name__)
-
 _QUERY_OBJECT_STAGING_FOLDER = 'staging'
 
 
@@ -17,9 +15,6 @@ class UploadDestinationHandler(ManagementHandler):
         if self.should_fail_with_not_authorized():
             self.fail_with_not_authorized()
             return
-
-        logger.debug(self.append_request_context(
-            'Processing GET for /configurations/endpoint_upload_destination'))
 
         path = self.settings[SettingsParameters.StateFilePath]
         path = os.path.join(path, _QUERY_OBJECT_STAGING_FOLDER)

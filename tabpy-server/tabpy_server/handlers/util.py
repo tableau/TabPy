@@ -1,10 +1,7 @@
 import base64
 import binascii
 from hashlib import pbkdf2_hmac
-import logging
 from tabpy_server.app.SettingsParameters import SettingsParameters
-
-logger = logging.getLogger(__name__)
 
 
 def hash_password(username, pwd):

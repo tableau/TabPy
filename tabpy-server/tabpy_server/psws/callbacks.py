@@ -1,17 +1,14 @@
 import logging
 import sys
-from time import sleep
-
-from tornado import gen
-
 from tabpy_server.app.SettingsParameters import SettingsParameters
 from tabpy_server.common.messages import (
     LoadObject, DeleteObjects, ListObjects, ObjectList)
 from tabpy_server.common.endpoint_file_mgr import cleanup_endpoint_files
 from tabpy_server.common.util import format_exception
 from tabpy_server.management.state import TabPyState, get_query_object_path
-
 from tabpy_server.management import util
+from time import sleep
+from tornado import gen
 
 logger = logging.getLogger(__name__)
 
@@ -135,11 +132,13 @@ def _get_latest_service_state(settings,
 
 
 @gen.coroutine
-def on_state_change(settings, tabpy_state, python_service):
+def on_state_change(settings, tabpy_state, python_service,
+                    logger=logging.getLogger(__name__)):
     try:
         logger.info("Loading state from state file")
         config = util._get_state_from_file(
-            settings[SettingsParameters.StateFilePath])
+            settings[SettingsParameters.StateFilePath],
+            logger=logger)
         new_ps_state = TabPyState(config=config, settings=settings)
 
         (has_changes, changes) = _get_latest_service_state(settings,
@@ -161,7 +160,8 @@ def on_state_change(settings, tabpy_state, python_service):
                 python_service.manage_request(DeleteObjects([object_name]))
 
                 cleanup_endpoint_files(object_name,
-                                       settings[SettingsParameters.UploadDir])
+                                       settings[SettingsParameters.UploadDir],
+                                       logger=logger)
 
             else:
                 endpoint_info = new_endpoints[object_name]
@@ -180,8 +180,9 @@ def on_state_change(settings, tabpy_state, python_service):
                 # cleanup old version of endpoint files
                 if object_version > 2:
                     cleanup_endpoint_files(
-                        object_name, settings[SettingsParameters.UploadDir], [
-                            object_version, object_version - 1])
+                        object_name, settings[SettingsParameters.UploadDir],
+                        logger=logger,
+                        retain_versions=[object_version, object_version - 1])
 
     except Exception as e:
         err_msg = format_exception(e, 'on_state_change')

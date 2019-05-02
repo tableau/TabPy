@@ -56,16 +56,19 @@ class ManagementHandler(MainHandler):
         logging.debug("Adding/updating model {}...".format(name))
         _name_checker = _compile('^[a-zA-Z0-9-_\\s]+$')
         if not isinstance(name, (str, unicode)):
-            log_and_raise(
-                "Endpoint name must be a string or unicode", TypeError)
+            msg = 'Endpoint name must be a string or unicode'
+            self.logger.log(logging.CRITICAL, msg)
+            raise TypeError(msg)
 
         if not _name_checker.match(name):
             raise gen.Return('endpoint name can only contain: a-z, A-Z, 0-9,'
                              ' underscore, hyphens and spaces.')
 
         if self.settings.get('add_or_updating_endpoint'):
-            log_and_raise("Another endpoint update is already in progress"
-                          ", please wait a while and try again", RuntimeError)
+            msg = ('Another endpoint update is already in progress'
+                   ', please wait a while and try again')
+            self.logger.log(logging.CRITICAL, msg)
+            raise RuntimeError(msg)
 
         request_uuid = random_uuid()
         self.settings['add_or_updating_endpoint'] = request_uuid
@@ -145,7 +148,8 @@ class ManagementHandler(MainHandler):
 
             on_state_change(self.settings,
                             self.tabpy_state,
-                            self.python_service)
+                            self.python_service,
+                            self)
 
         finally:
             self.settings['add_or_updating_endpoint'] = None

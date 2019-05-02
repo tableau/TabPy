@@ -7,22 +7,18 @@ except ImportError:
 from datetime import datetime, timedelta, tzinfo
 from tabpy_server.app.ConfigParameters import ConfigParameters
 from tabpy_server.app.SettingsParameters import SettingsParameters
-from tabpy_server.app.util import log_and_raise
 from time import mktime
 
-logger = logging.getLogger(__name__)
 
-
-def write_state_config(state, settings):
+def write_state_config(state, settings, logger=logging.getLogger(__name__)):
     if SettingsParameters.StateFilePath in settings:
         state_path = settings[SettingsParameters.StateFilePath]
     else:
-        log_and_raise(
-            '{} is not set'.format(
-                ConfigParameters.TABPY_STATE_PATH),
-            ValueError)
+        msg = f'{ConfigParameters.TABPY_STATE_PATH} is not set'
+        logger.log(logging.CRITICAL, msg)
+        raise ValueError(msg)
 
-    logger.debug("State path is {}".format(state_path))
+    logger.log(logging.DEBUG, f'State path is {state_path}')
     state_key = os.path.join(state_path, 'state.ini')
     tmp_state_file = state_key
 
@@ -30,23 +26,24 @@ def write_state_config(state, settings):
         state.write(f)
 
 
-def _get_state_from_file(state_path):
+def _get_state_from_file(state_path, logger=logging.getLogger(__name__)):
     state_key = os.path.join(state_path, 'state.ini')
     tmp_state_file = state_key
 
     if not os.path.exists(tmp_state_file):
-        log_and_raise(
-            "Missing config file at %r" %
-            (tmp_state_file,), ValueError)
+        msg = f'Missing config file at {tmp_state_file}'
+        logger.log(logging.CRITICAL, msg)
+        raise ValueError(msg)
 
     config = _ConfigParser(allow_no_value=True)
     config.optionxform = str
     config.read(tmp_state_file)
 
     if not config.has_section('Service Info'):
-        log_and_raise(
-            "Config error: Expected 'Service Info' section in %s" %
-            (tmp_state_file,), ValueError)
+        msg = ('Config error: Expected [Service Info] section in '
+               f'{tmp_state_file}')
+        logger.log(logging.CRITICAL, msg)
+        raise ValueError(msg)
 
     return config
 
@@ -82,15 +79,3 @@ class _UTC(tzinfo):
 
     def __str__(self):
         return "UTC"
-
-
-_utc = _UTC()
-
-
-def _dt_to_utc_timestamp(t):
-    if t.tzname() == 'UTC':
-        return (t - datetime(1970, 1, 1, tzinfo=_utc)).total_seconds()
-    elif not t.tzinfo:
-        return mktime(t.timetuple())
-    else:
-        log_and_raise('Only local time and UTC time is supported', ValueError)
