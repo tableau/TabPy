@@ -15,10 +15,6 @@ from tabpy_server.common.messages import (
 logger = logging.getLogger(__name__)
 
 
-if sys.version_info.major == 3:
-    unicode = str
-
-
 class PythonServiceHandler:
     """
     A wrapper around PythonService object that receives requests and calls the
@@ -151,7 +147,7 @@ class PythonService(object):
             for uri in object_uris:
                 deleted.extend(self.delete_objects(uri).uris)
             return ObjectsDeleted(deleted)
-        elif isinstance(object_uris, str) or isinstance(object_uris, unicode):
+        elif isinstance(object_uris, str):
             deleted_obj = self.query_objects.pop(object_uris, None)
             if deleted_obj:
                 return ObjectsDeleted([object_uris])

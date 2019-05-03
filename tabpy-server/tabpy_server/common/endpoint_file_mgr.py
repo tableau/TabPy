@@ -21,7 +21,7 @@ def _check_endpoint_name(name, logger=logging.getLogger(__name__)):
     """Checks that the endpoint name is valid by comparing it with an RE and
     checking that it is not reserved."""
     if not isinstance(name, str):
-        msg = 'Endpoint name must be a string or unicode'
+        msg = 'Endpoint name must be a string'
         logger.log(logging.CRITICAL, msg)
         raise TypeError(msg)
 

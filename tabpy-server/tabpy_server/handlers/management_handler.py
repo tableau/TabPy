@@ -15,10 +15,6 @@ from tabpy_server.management.state import get_query_object_path
 from tabpy_server.psws.callbacks import on_state_change
 
 
-if sys.version_info.major == 3:
-    unicode = str
-
-
 def copy_from_local(localpath, remotepath, is_dir=False):
     if is_dir:
         if not os.path.exists(remotepath):
@@ -55,8 +51,8 @@ class ManagementHandler(MainHandler):
         '''
         logging.debug("Adding/updating model {}...".format(name))
         _name_checker = _compile('^[a-zA-Z0-9-_\\s]+$')
-        if not isinstance(name, (str, unicode)):
-            msg = 'Endpoint name must be a string or unicode'
+        if not isinstance(name, str):
+            msg = 'Endpoint name must be a string'
             self.logger.log(logging.CRITICAL, msg)
             raise TypeError(msg)
 
@@ -102,7 +98,7 @@ class ManagementHandler(MainHandler):
             _path_checker = _compile('^[\\a-zA-Z0-9-_\\s/]+$')
             # copy from staging
             if src_path:
-                if not isinstance(request_data['src_path'], (str, unicode)):
+                if not isinstance(request_data['src_path'], str):
                     raise gen.Return("src_path must be a string.")
                 if not _path_checker.match(src_path):
                     raise gen.Return('Endpoint name can only contain: a-z, A-'

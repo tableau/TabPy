@@ -26,7 +26,7 @@ _name_checker = compile(r'^[\w -]+$')
 
 def _check_endpoint_type(name):
     if not isinstance(name, str):
-        raise TypeError("Endpoint name must be a string or unicode")
+        raise TypeError("Endpoint name must be a string")
 
     if name == '':
         raise ValueError("Endpoint name cannot be empty")
