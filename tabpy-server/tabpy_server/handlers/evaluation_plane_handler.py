@@ -106,10 +106,7 @@ class EvaluationPlaneHandler(BaseHandler):
     def call_subprocess(self, function_to_evaluate, arguments):
         restricted_tabpy = RestrictedTabPy(self.port, self)
         # Exec does not run the function, so it does not block.
-        if sys.version_info > (3, 0):
-            exec(function_to_evaluate, globals())
-        else:
-            exec(function_to_evaluate)
+        exec(function_to_evaluate, globals())
 
         if arguments is None:
             future = self.executor.submit(_user_script, restricted_tabpy)

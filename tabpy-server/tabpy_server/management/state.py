@@ -132,11 +132,8 @@ class TabPyState(object):
         if name:
             endpoint_info = json.loads(endpoint_names)
             docstring = self._get_config_value(_QUERY_OBJECT_DOCSTRING, name)
-            if sys.version_info > (3, 0):
-                endpoint_info['docstring'] = str(
-                    bytes(docstring, "utf-8").decode('unicode_escape'))
-            else:
-                endpoint_info['docstring'] = docstring.decode('string_escape')
+            endpoint_info['docstring'] = str(
+                bytes(docstring, "utf-8").decode('unicode_escape'))
             endpoints = {name: endpoint_info}
         else:
             for endpoint_name in endpoint_names:
@@ -144,12 +141,8 @@ class TabPyState(object):
                     _DEPLOYMENT_SECTION_NAME, endpoint_name))
                 docstring = self._get_config_value(_QUERY_OBJECT_DOCSTRING,
                                                    endpoint_name, True, '')
-                if sys.version_info > (3, 0):
-                    endpoint_info['docstring'] = str(
-                        bytes(docstring, "utf-8").decode('unicode_escape'))
-                else:
-                    endpoint_info['docstring'] = docstring.decode(
-                        'string_escape')
+                endpoint_info['docstring'] = str(
+                    bytes(docstring, "utf-8").decode('unicode_escape'))
                 endpoints[endpoint_name] = endpoint_info
         return endpoints
 
@@ -228,11 +221,8 @@ class TabPyState(object):
         for endpoint_name in endpoints:
             try:
                 info = endpoints[endpoint_name]
-                if sys.version_info > (3, 0):
-                    dstring = str(bytes(info['docstring'], "utf-8").decode(
-                        'unicode_escape'))
-                else:
-                    dstring = info['docstring'].decode('string_escape')
+                dstring = str(bytes(info['docstring'], "utf-8").decode(
+                    'unicode_escape'))
                 self._set_config_value(_QUERY_OBJECT_DOCSTRING,
                                        endpoint_name,
                                        dstring,

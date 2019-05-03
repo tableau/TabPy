@@ -26,9 +26,7 @@ def wait_for_endpoint_loaded(python_service, object_uri):
                 object_uri, list_object_msg))
             return
 
-        for (uri, info) in (
-                list_object_msg.objects.items() if sys.version_info > (3, 0)
-                else list_object_msg.objects.iteritems()):
+        for (uri, info) in (list_object_msg.objects.items()):
             if uri == object_uri:
                 if info['status'] != 'LoadInProgress':
                     logger.info("Object load status: %s" % info['status'])
@@ -41,9 +39,7 @@ def wait_for_endpoint_loaded(python_service, object_uri):
 def init_ps_server(settings, tabpy_state):
     logger.info("Initializing TabPy Server...")
     existing_pos = tabpy_state.get_endpoints()
-    for (object_name, obj_info) in (
-            existing_pos.items() if sys.version_info > (3, 0)
-            else existing_pos.iteritems()):
+    for (object_name, obj_info) in (existing_pos.items()):
         try:
             object_version = obj_info['version']
             get_query_object_path(
@@ -64,9 +60,7 @@ def init_model_evaluator(settings, tabpy_state, python_service):
 
     existing_pos = tabpy_state.get_endpoints()
 
-    for (object_name, obj_info) in (
-            existing_pos.items() if sys.version_info > (3, 0)
-            else existing_pos.iteritems()):
+    for (object_name, obj_info) in (existing_pos.items()):
         object_version = obj_info['version']
         object_type = obj_info['type']
         object_path = get_query_object_path(

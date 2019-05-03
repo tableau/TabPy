@@ -208,10 +208,7 @@ class QueryPlaneHandler(BaseHandler):
             return
 
         start = time.time()
-        if sys.version_info > (3, 0):
-            endpoint_name = urllib.parse.unquote(endpoint_name)
-        else:
-            endpoint_name = urllib.unquote(endpoint_name)
+        endpoint_name = urllib.parse.unquote(endpoint_name)
         self._process_query(endpoint_name, start)
 
     @tornado.web.asynchronous
@@ -221,8 +218,5 @@ class QueryPlaneHandler(BaseHandler):
             return
 
         start = time.time()
-        if sys.version_info > (3, 0):
-            endpoint_name = urllib.parse.unquote(endpoint_name)
-        else:
-            endpoint_name = urllib.unquote(endpoint_name)
+        endpoint_name = urllib.parse.unquote(endpoint_name)
         self._process_query(endpoint_name, start)
