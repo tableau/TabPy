@@ -8,14 +8,6 @@ from OpenSSL import crypto
 logger = logging.getLogger(__name__)
 
 
-def log_and_raise(msg, exception_type):
-    '''
-    Log the message and raise an exception of specified type
-    '''
-    logger.fatal(msg)
-    raise exception_type(msg)
-
-
 def validate_cert(cert_file_path):
     with open(cert_file_path, 'r') as f:
         cert_buf = f.read()
@@ -31,13 +23,15 @@ def validate_cert(cert_file_path):
 
     https_error = 'Error using HTTPS: '
     if now < not_before:
-        log_and_raise(https_error +
-                      'The certificate provided is not valid until {}.'.format(
-                          not_before), RuntimeError)
+        msg = (https_error +
+               f'The certificate provided is not valid until {not_before}.')
+        logger.critical(msg)
+        raise RuntimeError(msg)
     if now > not_after:
-        log_and_raise(https_error +
-                      f'The certificate provided expired on {not_after}.',
-                      RuntimeError)
+        msg = (https_error +
+               f'The certificate provided expired on {not_after}.')
+        logger.critical(msg)
+        raise RuntimeError(msg)
 
 
 def parse_pwd_file(pwd_file_name):
@@ -58,10 +52,10 @@ def parse_pwd_file(pwd_file_name):
     credentials : dict
         Credentials from the file. Empty if succeeded is False.
     '''
-    logger.info('Parsing passwords file {}...'.format(pwd_file_name))
+    logger.info(f'Parsing passwords file {pwd_file_name}...')
 
     if not os.path.isfile(pwd_file_name):
-        logger.fatal('Passwords file {} not found'.format(pwd_file_name))
+        logger.critical(f'Passwords file {pwd_file_name} not found')
         return False, {}
 
     credentials = {}

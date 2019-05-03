@@ -12,25 +12,9 @@ import sys
 import tornado.web
 
 
-logger = logging.getLogger(__name__)
-
-
 def _get_uuid():
     """Generate a unique identifier string"""
     return str(uuid.uuid4())
-
-
-def _sanitize_request_data(data):
-    if not isinstance(data, dict):
-        log_and_raise("Expect input data to be a dictionary", RuntimeError)
-
-    if "method" in data:
-        return {"data": data.get("data"), "method": data.get("method")}
-    elif "data" in data:
-        return data.get("data")
-    else:
-        log_and_raise("Expect input data is a dictionary with at least a "
-                      "key called 'data'", RuntimeError)
 
 
 class QueryPlaneHandler(BaseHandler):
@@ -71,8 +55,9 @@ class QueryPlaneHandler(BaseHandler):
                 'utf-8')).hexdigest())
             return (QuerySuccessful, response.for_json(), gls_time)
         else:
-            logger.error(self.append_request_context(
-                f'Failed query, response: {response}'))
+            self.logger.log(
+                logging.ERROR,
+                f'Failed query, response: {response}')
             return (type(response), response.for_json(), gls_time)
 
     # handle HTTP Options requests to support CORS
@@ -83,8 +68,9 @@ class QueryPlaneHandler(BaseHandler):
             self.fail_with_not_authorized()
             return
 
-        logger.debug(self.append_request_context(
-            f'Processing OPTIONS for /query/{pred_name}'))
+        self.logger.log(
+            logging.DEBUG,
+            f'Processing OPTIONS for /query/{pred_name}')
 
         # add CORS headers if TabPy has a cors_origin specified
         self._add_CORS_header()
@@ -116,6 +102,21 @@ class QueryPlaneHandler(BaseHandler):
 
             return (None, None)
 
+    def _sanitize_request_data(self, data):
+        if not isinstance(data, dict):
+            msg = 'Input data must be a dictionary'
+            self.logger.log(logging.CRITICAL, msg)
+            raise RuntimeError(msg)
+
+        if "method" in data:
+            return {"data": data.get("data"), "method": data.get("method")}
+        elif "data" in data:
+            return data.get("data")
+        else:
+            msg = 'Input data must be a dictionary with a key called "data"'
+            self.logger.log(logging.CRITICAL, msg)
+            raise RuntimeError(msg)
+
     def _process_query(self, endpoint_name, start):
         try:
             self._add_CORS_header()
@@ -127,7 +128,7 @@ class QueryPlaneHandler(BaseHandler):
             request_json = self.request.body.decode('utf-8')
 
             # Sanitize input data
-            data = _sanitize_request_data(json.loads(request_json))
+            data = self._sanitize_request_data(json.loads(request_json))
         except Exception as e:
             err_msg = format_exception(e, "Invalid Input Data")
             self.error_out(400, err_msg)
@@ -153,8 +154,9 @@ class QueryPlaneHandler(BaseHandler):
                 return
 
             if po_name != endpoint_name:
-                logger.info(self.append_request_context(
-                    f'Querying actual model: po_name={po_name}'))
+                self.logger.log(
+                    logging.INFO,
+                    f'Querying actual model: po_name={po_name}')
 
             uid = _get_uuid()
 
@@ -205,9 +207,6 @@ class QueryPlaneHandler(BaseHandler):
             self.fail_with_not_authorized()
             return
 
-        logger.debug(self.append_request_context(
-            f'Processing GET for /query/{endpoint_name}'))
-
         start = time.time()
         if sys.version_info > (3, 0):
             endpoint_name = urllib.parse.unquote(endpoint_name)
@@ -220,9 +219,6 @@ class QueryPlaneHandler(BaseHandler):
         if self.should_fail_with_not_authorized():
             self.fail_with_not_authorized()
             return
-
-        logger.debug(self.append_request_context(
-            f'Processing POST for /query/{endpoint_name}'))
 
         start = time.time()
         if sys.version_info > (3, 0):

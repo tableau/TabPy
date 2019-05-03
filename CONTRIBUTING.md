@@ -45,6 +45,7 @@ be able to work on TabPy changes:
     git clone https://github.com/tableau/TabPy.git
     cd TabPy
     ```
+
 Before making any code changes run environment setup script.
 For Windows run this command from the repository root folder:
 

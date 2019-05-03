@@ -19,9 +19,6 @@ import concurrent
 import shutil
 
 
-logger = logging.getLogger(__name__)
-
-
 class EndpointHandler(ManagementHandler):
     def initialize(self, app):
         super(EndpointHandler, self).initialize(app)
@@ -31,8 +28,8 @@ class EndpointHandler(ManagementHandler):
             self.fail_with_not_authorized()
             return
 
-        logger.debug(self.append_request_context(
-            f'Processing GET for /endpoints/{endpoint_name}'))
+        self.logger.log(logging.DEBUG,
+                        f'Processing GET for /endpoints/{endpoint_name}')
 
         self._add_CORS_header()
         if not endpoint_name:
@@ -52,8 +49,8 @@ class EndpointHandler(ManagementHandler):
             self.fail_with_not_authorized()
             return
 
-        logger.debug(self.append_request_context(
-            f'Processing PUT for /endpoints/{name}'))
+        self.logger.log(logging.DEBUG,
+                        f'Processing PUT for /endpoints/{name}')
 
         try:
             if not self.request.body:
@@ -80,8 +77,9 @@ class EndpointHandler(ManagementHandler):
                 return
 
             new_version = int(endpoints[name]['version']) + 1
-            logger.info(self.append_request_context(
-                'Endpoint info: %s' % request_data))
+            self.logger.log(
+                logging.INFO,
+                f'Endpoint info: {request_data}')
             err_msg = yield self._add_or_update_endpoint(
                 'update', name, new_version, request_data)
             if err_msg:
@@ -103,8 +101,9 @@ class EndpointHandler(ManagementHandler):
             self.fail_with_not_authorized()
             return
 
-        logger.debug(self.append_request_context(
-            'Processing DELETE for /endpoints/{}'.format(name)))
+        self.logger.log(
+            logging.DEBUG,
+            f'Processing DELETE for /endpoints/{name}')
 
         try:
             endpoints = self.tabpy_state.get_endpoints(name)
@@ -143,7 +142,8 @@ class EndpointHandler(ManagementHandler):
             self.error_out(500, err_msg)
             self.finish()
 
-        on_state_change(self.settings, self.tabpy_state, self.python_service)
+        on_state_change(self.settings, self.tabpy_state, self.python_service,
+                        self)
 
     @gen.coroutine
     def _delete_po_future(self, delete_path):

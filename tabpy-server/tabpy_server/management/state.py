@@ -49,40 +49,6 @@ def state_lock(func):
     return wrapper
 
 
-def load_state_from_str(state_string):
-    '''
-    Convert from String to ConfigParser
-    '''
-    if state_string:
-        try:
-            config = ConfigParser(allow_no_value=True)
-            config.optionxform = str
-            config.readfp(StringIO(state_string))
-            return config
-        except Exception as e:
-            log_and_raise("Invalid state string %s" % str(e), ValueError)
-    else:
-        log_and_raise("State string is empty!", ValueError)
-
-
-def save_state_to_str(config):
-    '''
-    Convert from ConfigParser to String
-    '''
-    if not config:
-        log_and_raise("Invalid config", ValueError)
-    value = None
-    try:
-        string_f = StringIO()
-        config.write(string_f)
-        value = string_f.getvalue()
-    except Exception:
-        logger.error("Cannot convert config to string")
-    finally:
-        string_f.close()
-    return value
-
-
 def _get_root_path(state_path):
     if state_path[-1] != '/':
         return state_path + '/'
@@ -127,7 +93,9 @@ class TabPyState(object):
         self.set_config(config, _update=False)
 
     @state_lock
-    def set_config(self, config, _update=True):
+    def set_config(self, config,
+                   logger=logging.getLogger(__name__),
+                   _update=True):
         '''
         Set the local ConfigParser manually.
         This new ConfigParser will be used as current state.
@@ -136,7 +104,7 @@ class TabPyState(object):
             raise ValueError("Invalid config")
         self.config = config
         if _update:
-            self._write_state()
+            self._write_state(logger)
 
     def get_endpoints(self, name=None):
         '''
@@ -559,6 +527,7 @@ class TabPyState(object):
             logger.error("Unable to set revision number: %s" % e)
 
     def _remove_config_option(self, section_name, option_name,
+                              logger=logging.getLogger(__name__),
                               _update_revision=True):
         if not self.config:
             raise ValueError("State configuration not yet loaded.")
@@ -566,7 +535,7 @@ class TabPyState(object):
         # update revision number
         if _update_revision:
             self._increase_revision_number()
-        self._write_state()
+        self._write_state(logger=logger)
 
     def _has_config_value(self, section_name, option_name):
         if not self.config:
@@ -581,19 +550,20 @@ class TabPyState(object):
                         str(cur_rev + 1))
 
     def _set_config_value(self, section_name, option_name, option_value,
+                          logger=logging.getLogger(__name__),
                           _update_revision=True):
         if not self.config:
             raise ValueError("State configuration not yet loaded.")
 
         if not self.config.has_section(section_name):
-            logger.debug("Adding config section {}".format(section_name))
+            logger.log(logging.DEBUG, f'Adding config section {section_name}')
             self.config.add_section(section_name)
 
         self.config.set(section_name, option_name, option_value)
         # update revision number
         if _update_revision:
             self._increase_revision_number()
-        self._write_state()
+        self._write_state(logger=logger)
 
     def _get_config_items(self, section_name):
         if not self.config:
@@ -616,9 +586,9 @@ class TabPyState(object):
             raise ValueError("Cannot find option name %s under section %s"
                              % (option_name, section_name))
 
-    def _write_state(self):
+    def _write_state(self, logger=logging.getLogger(__name__)):
         '''
         Write state (ConfigParser) to Consul
         '''
-        logger.info("Writing state to config")
-        write_state_config(self.config, self.settings)
+        logger.log(logging.INFO, 'Writing state to config')
+        write_state_config(self.config, self.settings, logger=logger)

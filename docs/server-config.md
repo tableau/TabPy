@@ -163,21 +163,32 @@ With the feature on additional information is logged for HTTP requests: caller i
 URL, client infomation (Tableau Desktop\Server), Tableau user name (for Tableau Server)
 and TabPy user name as shown in the example below:
 
+<!-- markdownlint-disable MD013 -->
 <!-- markdownlint-disable MD040 -->
 
 ```
-2019-04-17,15:20:37 [INFO] (evaluation_plane_handler.py:evaluation_plane_handler:86):
- ::1 calls POST http://localhost:9004/evaluate,
- Client: Tableau Server 2019.2,
- Tableau user: ogolovatyi,
- TabPy user: user1
-function to evaluate=def _user_script(tabpy, _arg1, _arg2):
+2019-05-02,13:50:08 [INFO] (base_handler.py:base_handler:90): Call ID: 934073bd-0d29-46d3-b693-b1e4b1efa9e4, Caller: ::1, Method: POST, Resource: http://localhost:9004/evaluate, Client: Postman for manual testing, Tableau user: ogolovatyi
+2019-05-02,13:50:08 [DEBUG] (base_handler.py:base_handler:120): Checking if need to handle authentication, <<
+call ID: 934073bd-0d29-46d3-b693-b1e4b1efa9e4>>
+2019-05-02,13:50:08 [DEBUG] (base_handler.py:base_handler:120): Handling authentication, <<call ID: 934073bd-
+0d29-46d3-b693-b1e4b1efa9e4>>
+2019-05-02,13:50:08 [DEBUG] (base_handler.py:base_handler:120): Checking request headers for authentication d
+ata, <<call ID: 934073bd-0d29-46d3-b693-b1e4b1efa9e4>>
+2019-05-02,13:50:08 [DEBUG] (base_handler.py:base_handler:120): Validating credentials for user name "user1",
+ <<call ID: 934073bd-0d29-46d3-b693-b1e4b1efa9e4>>
+2019-05-02,13:50:08 [DEBUG] (state.py:state:484): Collecting Access-Control-Allow-Origin from state file...  
+2019-05-02,13:50:08 [INFO] (base_handler.py:base_handler:120): function to evaluate=def _user_script(tabpy, _
+arg1, _arg2):
  res = []
  for i in range(len(_arg1)):
    res.append(_arg1[i] * _arg2[i])
  return res
+, <<call ID: 934073bd-0d29-46d3-b693-b1e4b1efa9e4>>
 ```
 
 <!-- markdownlint-enable MD040 -->
+<!-- markdownlint-enable MD013 -->
 
 No passwords are logged.
+
+NOTE the request context details are logged with INFO level.
