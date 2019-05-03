@@ -78,7 +78,7 @@ class PythonService(object):
             elif object_type == 'alias':
                 po = object_url
             else:
-                raise RuntimeError('Unknown object type: %s' % object_type)
+                raise RuntimeError(f'Unknown object type: {object_type}')
 
             self.query_objects[object_uri] = {'version': object_version,
                                               'type': object_type,
@@ -94,7 +94,7 @@ class PythonService(object):
                 'type': object_type,
                 'endpoint_obj': None,
                 'status': 'LoadFailed',
-                'last_error': 'Load failed: %s' % str(e)}
+                'last_error': f'Load failed: {str(e)}'}
 
     def load_object(self, object_uri, object_url, object_version, is_update,
                     object_type):
@@ -159,8 +159,8 @@ class PythonService(object):
         else:
             logger.error(
                 "Unexpected input to delete objects: input={}, info={}".format(
-                    object_uris, "Input should be list or str. "
-                    "Type: %s" % type(object_uris)))
+                    object_uris,
+                    f'Input should be list or str. Type: {type(object_uris)}'))
             return ObjectsDeleted([])
 
     def flush_objects(self):
@@ -196,8 +196,8 @@ class PythonService(object):
             if not isinstance(params, dict) and not isinstance(params, list):
                 return QueryFailed(
                     uri=object_uri,
-                    error=("Query parameter needs to be a dictionary or a list"
-                           ". Given value is of type %s." % type(params)))
+                    error=('Query parameter needs to be a dictionary or a list'
+                           f'. Given value is of type {type(params)}'))
 
             obj_info = self.query_objects.get(object_uri)
             if obj_info:
@@ -208,7 +208,7 @@ class PythonService(object):
                     return QueryFailed(
                         uri=object_uri,
                         error=("There is no query object associated to the "
-                               "endpoint: %s" % object_uri))
+                               f'endpoint: {object_uri}'))
 
                 if isinstance(params, dict):
                     result = pred_obj.query(**params)

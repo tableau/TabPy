@@ -37,7 +37,7 @@ def _generate_schema_from_example_and_description(input, description):
                         'description'] = description[key]
         else:
             if isinstance(description, dict):
-                raise Exception('%s and %s do not match', input, description)
+                raise Exception(f'{input} and {description} do not match')
             else:
                 input_schema['description'] = description
 

@@ -215,8 +215,8 @@ class TabPyApp:
                 os.path.expanduser(
                     self.settings[SettingsParameters.StateFilePath])))
         state_file_path = self.settings[SettingsParameters.StateFilePath]
-        logger.info("Loading state from state file %s" %
-                    os.path.join(state_file_path, "state.ini"))
+        logger.info('Loading state from state file '
+                    f'{os.path.join(state_file_path, "state.ini")}')
         tabpy_state = _get_state_from_file(state_file_path)
         self.tabpy_state = TabPyState(
             config=tabpy_state, settings=self.settings)

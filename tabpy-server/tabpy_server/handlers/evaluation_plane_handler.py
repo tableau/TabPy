@@ -88,8 +88,7 @@ class EvaluationPlaneHandler(BaseHandler):
                 self.finish()
 
         except Exception as e:
-            err_msg = "%s : " % e.__class__.__name__
-            err_msg += "%s" % str(e)
+            err_msg = f'{e.__class__.__name__} : {str(e)}'
             if err_msg != "KeyError : 'response'":
                 err_msg = format_exception(e, 'POST /evaluate')
                 self.error_out(500, 'Error processing script', info=err_msg)

@@ -60,7 +60,7 @@ class EndpointsHandler(ManagementHandler):
 
             # check if endpoint already exist
             if name in self.tabpy_state.get_endpoints():
-                self.error_out(400, "endpoint %s already exists." % name)
+                self.error_out(400, f'endpoint {name} already exists.')
                 self.finish()
                 return
 

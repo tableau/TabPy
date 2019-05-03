@@ -126,7 +126,7 @@ class TabPyState(object):
             endpoint_names = self._get_config_value(
                 _DEPLOYMENT_SECTION_NAME, name)
         except Exception as e:
-            logger.error("error in get_endpoints: %s" % str(e))
+            logger.error(f'error in get_endpoints: {str(e)}')
             return {}
 
         if name:
@@ -179,7 +179,7 @@ class TabPyState(object):
                 raise ValueError(
                     "name of the endpoint must be a valid string.")
             elif name in endpoints:
-                raise ValueError("endpoint %s already exists." % name)
+                raise ValueError(f'endpoint {name} already exists.')
             if description and not isinstance(description, str):
                 raise ValueError("description must be a string.")
             elif not description:
@@ -212,7 +212,7 @@ class TabPyState(object):
             endpoints[name] = endpoint_info
             self._add_update_endpoints_config(endpoints)
         except Exception as e:
-            logger.error("Error in add_endpoint: %s" % e)
+            logger.error(f'Error in add_endpoint: {e}')
             raise
 
     def _add_update_endpoints_config(self, endpoints):
@@ -231,7 +231,7 @@ class TabPyState(object):
                 self._set_config_value(_DEPLOYMENT_SECTION_NAME,
                                        endpoint_name, json.dumps(info))
             except Exception as e:
-                logger.error("Unable to write endpoints config: %s" % e)
+                logger.error(f'Unable to write endpoints config: {e}')
                 raise
 
     @state_lock
@@ -270,7 +270,7 @@ class TabPyState(object):
             if not name or not isinstance(name, str):
                 raise ValueError("name of the endpoint must be string.")
             elif name not in endpoints:
-                raise ValueError("endpoint %s does not exist." % name)
+                raise ValueError(f'endpoint {name} does not exist.')
 
             endpoint_info = endpoints[name]
 
@@ -316,7 +316,7 @@ class TabPyState(object):
             endpoints[name] = endpoint_info
             self._add_update_endpoints_config(endpoints)
         except Exception as e:
-            logger.error("Error in update_endpoint: %s" % e)
+            logger.error(f'Error in update_endpoint: {e}')
             raise
 
     @state_lock
@@ -342,7 +342,7 @@ class TabPyState(object):
             raise ValueError("Name of the endpoint must be a valid string.")
         endpoints = self.get_endpoints()
         if name not in endpoints:
-            raise ValueError("Endpoint %s does not exist." % name)
+            raise ValueError(f'Endpoint {name} does not exist.')
 
         endpoint_to_delete = endpoints[name]
 
@@ -356,8 +356,9 @@ class TabPyState(object):
 
         # check if other endpoints are depending on this endpoint
         if len(deps) > 0:
-            raise ValueError("Cannot remove endpoint %s, it is currently "
-                             "used by %s endpoints." % (name, list(deps)))
+            raise ValueError(
+                f'Cannot remove endpoint {name}, it is currently '
+                f'used by {list(deps)} endpoints.')
 
         del endpoints[name]
 
@@ -369,8 +370,8 @@ class TabPyState(object):
 
             return endpoint_to_delete
         except Exception as e:
-            logger.error("Unable to delete endpoint %s" % e)
-            raise ValueError("Unable to delete endpoint: %s" % e)
+            logger.error(f'Unable to delete endpoint {e}')
+            raise ValueError(f'Unable to delete endpoint: {e}')
 
     @property
     def name(self):
@@ -381,7 +382,7 @@ class TabPyState(object):
         try:
             name = self._get_config_value(_SERVICE_INFO_SECTION_NAME, 'Name')
         except Exception as e:
-            logger.error("Unable to get name: %s" % e)
+            logger.error(f'Unable to get name: {e}')
         return name
 
     @property
@@ -394,7 +395,7 @@ class TabPyState(object):
             creation_time = self._get_config_value(
                 _SERVICE_INFO_SECTION_NAME, 'Creation Time')
         except Exception as e:
-            logger.error("Unable to get name: %s" % e)
+            logger.error(f'Unable to get name: {e}')
         return creation_time
 
     @state_lock
@@ -412,7 +413,7 @@ class TabPyState(object):
         try:
             self._set_config_value(_SERVICE_INFO_SECTION_NAME, 'Name', name)
         except Exception as e:
-            logger.error("Unable to set name: %s" % e)
+            logger.error(f'Unable to set name: {e}')
 
     def get_description(self):
         '''
@@ -423,7 +424,7 @@ class TabPyState(object):
             description = self._get_config_value(
                 _SERVICE_INFO_SECTION_NAME, 'Description')
         except Exception as e:
-            logger.error("Unable to get description: %s" % e)
+            logger.error(f'Unable to get description: {e}')
         return description
 
     @state_lock
@@ -442,7 +443,7 @@ class TabPyState(object):
             self._set_config_value(
                 _SERVICE_INFO_SECTION_NAME, 'Description', description)
         except Exception as e:
-            logger.error("Unable to set description: %s" % e)
+            logger.error(f'Unable to set description: {e}')
 
     def get_revision_number(self):
         '''
@@ -453,7 +454,7 @@ class TabPyState(object):
             rev = int(self._get_config_value(
                 _META_SECTION_NAME, 'Revision Number'))
         except Exception as e:
-            logger.error("Unable to get revision number: %s" % e)
+            logger.error(f'Unable to get revision number: {e}')
         return rev
 
     def get_access_control_allow_origin(self):
@@ -505,7 +506,7 @@ class TabPyState(object):
             self._set_config_value(_META_SECTION_NAME,
                                    'Revision Number', revision_number)
         except Exception as e:
-            logger.error("Unable to set revision number: %s" % e)
+            logger.error(f'Unable to set revision number: {e}')
 
     def _remove_config_option(self, section_name, option_name,
                               logger=logging.getLogger(__name__),
@@ -564,8 +565,9 @@ class TabPyState(object):
         elif optional:
             return default_value
         else:
-            raise ValueError("Cannot find option name %s under section %s"
-                             % (option_name, section_name))
+            raise ValueError(
+                f'Cannot find option name {option_name} '
+                f'under section {section_name}')
 
     def _write_state(self, logger=logging.getLogger(__name__)):
         '''

@@ -22,14 +22,14 @@ def wait_for_endpoint_loaded(python_service, object_uri):
         msg = ListObjects()
         list_object_msg = python_service.manage_request(msg)
         if not isinstance(list_object_msg, ObjectList):
-            logger.error("Error loading endpoint %s: %s" % (
-                object_uri, list_object_msg))
+            logger.error(
+                f'Error loading endpoint {object_uri}: {list_object_msg}')
             return
 
         for (uri, info) in (list_object_msg.objects.items()):
             if uri == object_uri:
                 if info['status'] != 'LoadInProgress':
-                    logger.info("Object load status: %s" % info['status'])
+                    logger.info(f'Object load status: {info["status"]}')
                     return
 
         sleep(0.1)
@@ -46,8 +46,9 @@ def init_ps_server(settings, tabpy_state):
                 settings[SettingsParameters.StateFilePath],
                 object_name, object_version)
         except Exception as e:
-            logger.error('Exception encounted when downloading object: %s'
-                         ', error: %s' % (object_name, e))
+            logger.error(
+                f'Exception encounted when downloading object: {object_name}'
+                f', error: {e}')
 
 
 @gen.coroutine
@@ -67,8 +68,10 @@ def init_model_evaluator(settings, tabpy_state, python_service):
             settings[SettingsParameters.StateFilePath],
             object_name, object_version)
 
-        logger.info('Load endpoint: %s, version: %s, type: %s' %
-                    (object_name, object_version, object_type))
+        logger.info(
+            f'Load endpoint: {object_name}, '
+            f'version: {object_version}, '
+            f'type: {object_type}')
         if object_type == 'alias':
             msg = LoadObject(object_name, obj_info['target'],
                              object_version, False, 'alias')

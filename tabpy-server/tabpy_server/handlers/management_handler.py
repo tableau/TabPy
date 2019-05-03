@@ -72,12 +72,8 @@ class ManagementHandler(MainHandler):
             description = (request_data['description']
                            if 'description' in request_data else None)
             if 'docstring' in request_data:
-                if sys.version_info > (3, 0):
-                    docstring = str(bytes(request_data['docstring'],
-                                          "utf-8").decode('unicode_escape'))
-                else:
-                    docstring = request_data['docstring'].decode(
-                        'string_escape')
+                docstring = str(bytes(request_data['docstring'],
+                                        "utf-8").decode('unicode_escape'))
             else:
                 docstring = None
             endpoint_type = (request_data['type'] if 'type' in request_data
@@ -140,7 +136,7 @@ class ManagementHandler(MainHandler):
                         version=version)
 
             except Exception as e:
-                raise gen.Return("Error when changing TabPy state: %s" % e)
+                raise gen.Return(f'Error when changing TabPy state: {e}')
 
             on_state_change(self.settings,
                             self.tabpy_state,

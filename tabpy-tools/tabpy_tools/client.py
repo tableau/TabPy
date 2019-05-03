@@ -226,7 +226,7 @@ class Client(object):
         _check_endpoint_name(alias)
 
         if not description:
-            description = 'Alias for %s' % existing_endpoint_name
+            description = f'Alias for {existing_endpoint_name}'
 
         if existing_endpoint_name not in self.get_endpoints():
             raise ValueError(
