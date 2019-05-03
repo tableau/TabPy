@@ -43,7 +43,6 @@ def grab_files(directory):
     '''
     if not os.path.isdir(directory):
         return
-        yield
     else:
         for name in os.listdir(directory):
             full_path = os.path.join(directory, name)

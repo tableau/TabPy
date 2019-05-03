@@ -21,15 +21,17 @@ def _generate_schema_from_example_and_description(input, description):
         if 'properties' in input_schema:
             # Case for input = {'x':1}, input_description='not a dict'
             if not isinstance(description, dict):
-                raise Exception('%s and %s do not match', input, description)
-                logger.error('%s and %s do not match', input, description)
+                msg = f'{input} and {description} do not match'
+                logger.error(msg)
+                raise Exception(msg)
 
             for key in description:
                 # Case for input = {'x':1},
                 # input_description={'x':'x value', 'y':'y value'}
                 if key not in input_schema['properties']:
-                    raise Exception('%s not found in %s', key, input)
-                    logger.error('%s not found in %s', key, input)
+                    msg = f'{key} not found in {input}'
+                    logger.error(msg)
+                    raise Exception(msg)
                 else:
                     input_schema['properties'][key][
                         'description'] = description[key]

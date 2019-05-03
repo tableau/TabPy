@@ -1,9 +1,9 @@
 import csv
+from datetime import datetime
 import logging
+from OpenSSL import crypto
 import os
 
-from datetime import datetime
-from OpenSSL import crypto
 
 logger = logging.getLogger(__name__)
 

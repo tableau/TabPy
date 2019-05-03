@@ -250,8 +250,7 @@ class RESTProperty(object):
     def __get__(self, instance, owner):
         if instance:
             try:
-                return getattr(instance,
-                               self.name)
+                return getattr(instance, self.name)
             except AttributeError:
                 raise AttributeError("%s has not been set yet." % (
                     self.name))

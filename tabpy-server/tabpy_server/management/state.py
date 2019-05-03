@@ -3,10 +3,6 @@ try:
     from ConfigParser import ConfigParser
 except ImportError:
     from configparser import ConfigParser
-try:
-    from StringIO import StringIO
-except ImportError:
-    from io import StringIO
 import json
 from threading import Lock
 from time import time
