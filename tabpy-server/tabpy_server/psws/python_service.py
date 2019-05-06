@@ -15,10 +15,6 @@ from tabpy_server.common.messages import (
 logger = logging.getLogger(__name__)
 
 
-if sys.version_info.major == 3:
-    unicode = str
-
-
 class PythonServiceHandler:
     """
     A wrapper around PythonService object that receives requests and calls the
@@ -29,7 +25,7 @@ class PythonServiceHandler:
 
     def manage_request(self, msg):
         try:
-            logger.debug("Received request {}".format(type(msg).__name__))
+            logger.debug(f'Received request {type(msg).__name__}')
             if isinstance(msg, LoadObject):
                 response = self.ps.load_object(*msg)
             elif isinstance(msg, DeleteObjects):
@@ -43,10 +39,10 @@ class PythonServiceHandler:
             else:
                 response = UnknownMessage(msg)
 
-            logger.debug("Returning response {}".format(response))
+            logger.debug(f'Returning response {response}')
             return response
         except Exception as e:
-            logger.error("Error processing request: {}".format(e.message))
+            logger.error(f'Error processing request: {e.message}')
             return UnknownMessage(e.message)
 
 
@@ -74,15 +70,16 @@ class PythonService(object):
     def _load_object(self, object_uri, object_url, object_version, is_update,
                      object_type):
         try:
-            logger.info("Loading object:, URI={}, URL={}, version={}, "
-                        "is_updated={}".format(
-                            object_uri, object_url, object_version, is_update))
+            logger.info(
+                f'Loading object:, URI={object_uri}, '
+                f'URL={object_url}, version={object_version}, '
+                f'is_updated={is_update}')
             if object_type == 'model':
                 po = QueryObject.load(object_url)
             elif object_type == 'alias':
                 po = object_url
             else:
-                raise RuntimeError('Unknown object type: %s' % object_type)
+                raise RuntimeError(f'Unknown object type: {object_type}')
 
             self.query_objects[object_uri] = {'version': object_version,
                                               'type': object_type,
@@ -90,15 +87,15 @@ class PythonService(object):
                                               'status': 'LoadSuccessful',
                                               'last_error': None}
         except Exception as e:
-            logger.error("Unable to load QueryObject: path={}, "
-                         "error={}".format(object_url, str(e)))
+            logger.error(f'Unable to load QueryObject: path={object_url}, '
+                         f'error={str(e)}')
 
             self.query_objects[object_uri] = {
                 'version': object_version,
                 'type': object_type,
                 'endpoint_obj': None,
                 'status': 'LoadFailed',
-                'last_error': 'Load failed: %s' % str(e)}
+                'last_error': f'Load failed: {str(e)}'}
 
     def load_object(self, object_uri, object_url, object_version, is_update,
                     object_type):
@@ -132,8 +129,8 @@ class PythonService(object):
                     object_uri, object_url, object_version, is_update,
                     object_type)
         except Exception as e:
-            logger.error("Unable to load QueryObject: path={}, "
-                         "error={}".format(object_url, str(e)))
+            logger.error(f'Unable to load QueryObject: path={object_url}, '
+                         f'error={str(e)}')
 
             self.query_objects[object_uri] = {
                 'version': object_version,
@@ -151,20 +148,20 @@ class PythonService(object):
             for uri in object_uris:
                 deleted.extend(self.delete_objects(uri).uris)
             return ObjectsDeleted(deleted)
-        elif isinstance(object_uris, str) or isinstance(object_uris, unicode):
+        elif isinstance(object_uris, str):
             deleted_obj = self.query_objects.pop(object_uris, None)
             if deleted_obj:
                 return ObjectsDeleted([object_uris])
             else:
-                logger.warning("Received message to delete query object "
-                               "that doesn't exist: object_uris={}".format(
-                                   object_uris))
+                logger.warning(f'Received message to delete query object '
+                               f'that doesn\'t exist: '
+                               f'object_uris={object_uris}')
                 return ObjectsDeleted([])
         else:
             logger.error(
-                "Unexpected input to delete objects: input={}, info={}".format(
-                    object_uris, "Input should be list or str. "
-                    "Type: %s" % type(object_uris)))
+                f'Unexpected input to delete objects: input={object_uris}, '
+                f'info="Input should be list or str. '
+                f'Type: {type(object_uris)}"')
             return ObjectsDeleted([])
 
     def flush_objects(self):
@@ -177,8 +174,7 @@ class PythonService(object):
     def count_objects(self):
         """Count the number of Loaded QueryObjects stored in memory"""
         count = 0
-        for uri, po in (self.query_objects.items() if sys.version_info > (3, 0)
-                        else self.query_objects.iteritems()):
+        for uri, po in (self.query_objects.items()):
             if po['endpoint_obj'] is not None:
                 count += 1
         return ObjectCount(count)
@@ -187,9 +183,7 @@ class PythonService(object):
         """List the objects as (URI, version) pairs"""
 
         objects = {}
-        for (uri, obj_info) in (
-                self.query_objects.items() if sys.version_info > (3, 0)
-                else self.query_objects.iteritems()):
+        for (uri, obj_info) in (self.query_objects.items()):
             objects[uri] = {'version': obj_info['version'],
                             'type': obj_info['type'],
                             'status': obj_info['status'],
@@ -203,8 +197,8 @@ class PythonService(object):
             if not isinstance(params, dict) and not isinstance(params, list):
                 return QueryFailed(
                     uri=object_uri,
-                    error=("Query parameter needs to be a dictionary or a list"
-                           ". Given value is of type %s." % type(params)))
+                    error=('Query parameter needs to be a dictionary or a list'
+                           f'. Given value is of type {type(params)}'))
 
             obj_info = self.query_objects.get(object_uri)
             if obj_info:
@@ -215,7 +209,7 @@ class PythonService(object):
                     return QueryFailed(
                         uri=object_uri,
                         error=("There is no query object associated to the "
-                               "endpoint: %s" % object_uri))
+                               f'endpoint: {object_uri}'))
 
                 if isinstance(params, dict):
                     result = pred_obj.query(**params)

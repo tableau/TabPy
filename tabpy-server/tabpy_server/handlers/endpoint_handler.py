@@ -40,7 +40,7 @@ class EndpointHandler(ManagementHandler):
                     self.tabpy_state.get_endpoints()[endpoint_name]))
             else:
                 self.error_out(404, 'Unknown endpoint',
-                               info='Endpoint %s is not found' % endpoint_name)
+                               info=f'Endpoint {endpoint_name} is not found')
 
     @tornado.web.asynchronous
     @gen.coroutine
@@ -72,7 +72,7 @@ class EndpointHandler(ManagementHandler):
             endpoints = self.tabpy_state.get_endpoints(name)
             if len(endpoints) == 0:
                 self.error_out(404,
-                               "endpoint %s does not exist." % name)
+                               f'endpoint {name} does not exist.')
                 self.finish()
                 return
 
@@ -109,7 +109,7 @@ class EndpointHandler(ManagementHandler):
             endpoints = self.tabpy_state.get_endpoints(name)
             if len(endpoints) == 0:
                 self.error_out(404,
-                               "endpoint %s does not exist." % name)
+                               f'endpoint {name} does not exist.')
                 self.finish()
                 return
 
@@ -118,7 +118,7 @@ class EndpointHandler(ManagementHandler):
                 endpoint_info = self.tabpy_state.delete_endpoint(name)
             except Exception as e:
                 self.error_out(400,
-                               "Error when removing endpoint: %s" % e.message)
+                               f'Error when removing endpoint: {e.message}')
                 self.finish()
                 return
 
@@ -130,7 +130,7 @@ class EndpointHandler(ManagementHandler):
                     yield self._delete_po_future(delete_path)
                 except Exception as e:
                     self.error_out(400,
-                                   "Error while deleting: %s" % e)
+                                   f'Error while deleting: {e}')
                     self.finish()
                     return
 

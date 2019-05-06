@@ -73,53 +73,50 @@ def generate_password(pwd_len=16):
         digits + digits +\
         punctuation
     pwd = ''.join(secrets.choice(password_chars) for i in range(pwd_len))
-    logger.info('Generated password: "{}"'.format(pwd))
+    logger.info(f'Generated password: "{pwd}"')
     return pwd
 
 
 def store_passwords_file(pwdfile, credentials):
     with open(pwdfile, 'wt') as f:
         for username, pwd in credentials.items():
-            f.write('{} {}\n'.format(username, pwd))
+            f.write(f'{username} {pwd}\n')
     return True
 
 
 def add_user(args, credentials):
     username = args.username.lower()
-    logger.info('Adding username "{}"'.format(username))
+    logger.info(f'Adding username "{username}"')
 
     if username in credentials:
-        logger.error('Can\'t add username {} as it is already present '
-                     'in passwords file. Do you want to run the '
-                     '"update" command instead?'.format(username))
+        logger.error(f'Can\'t add username {username} as it is already present'
+                     ' in passwords file. Do you want to run the '
+                     '"update" command instead?')
         return False
 
     password = args.password
-    logger.info('Adding username "{}" with password "{}"...'.format(
-                username, password))
+    logger.info(f'Adding username "{username}" with password "{password}"...')
     credentials[username] = hash_password(username, password)
 
     if(store_passwords_file(args.pwdfile, credentials)):
-        logger.info('Added username "{}" with password "{}"  .'.format(
-            username, password))
+        logger.info(f'Added username "{username}" with password "{password}"')
     else:
-        logger.info('Could not add username "{}" , password "{}"  .'.format(
-            username, password) + ' to file')
+        logger.info(
+            f'Could not add username "{username}" , '
+            f'password "{password}" to file')
 
 
 def update_user(args, credentials):
     username = args.username.lower()
-    logger.info('Updating username "{}"'.format(username))
+    logger.info(f'Updating username "{username}"')
 
     if username not in credentials:
-        logger.error('Username "{}" not found in passwords file. '
-                     'Do you want to run "add" command instead?'.
-                     format(username))
+        logger.error(f'Username "{username}" not found in passwords file. '
+                     'Do you want to run "add" command instead?')
         return False
 
     password = args.password
-    logger.info('Updating username "{}" password  to "{}"  .'.format(
-                username, password))
+    logger.info(f'Updating username "{username}" password  to "{password}"')
     credentials[username] = hash_password(username, password)
     return store_passwords_file(args.pwdfile, credentials)
 
@@ -130,7 +127,7 @@ def process_command(args, credentials):
     elif args.command == 'update':
         return update_user(args, credentials)
     else:
-        logger.error('Unknown command "{}"'.format(args.command))
+        logger.error(f'Unknown command "{args.command}"')
         return False
 
 

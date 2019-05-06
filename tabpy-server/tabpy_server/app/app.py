@@ -78,8 +78,9 @@ class TabPyApp:
             logger.critical(msg)
             raise RuntimeError(msg)
 
-        logger.info('Web service listening on port {}'.format(
-            str(self.settings[SettingsParameters.Port])))
+        logger.info(
+            'Web service listening on port '
+            f'{str(self.settings[SettingsParameters.Port])}')
         tornado.ioloop.IOLoop.instance().start()
 
     def _create_tornado_web_app(self):
@@ -164,8 +165,8 @@ class TabPyApp:
                 parser.read_string(f.read())
         else:
             logger.warning(
-                "Unable to find config file at '{}', "
-                "using default settings.".format(config_file))
+                f'Unable to find config file at {config_file}, '
+                'using default settings.')
 
         def set_parameter(settings_key,
                           config_key,
@@ -215,8 +216,8 @@ class TabPyApp:
                 os.path.expanduser(
                     self.settings[SettingsParameters.StateFilePath])))
         state_file_path = self.settings[SettingsParameters.StateFilePath]
-        logger.info("Loading state from state file %s" %
-                    os.path.join(state_file_path, "state.ini"))
+        logger.info('Loading state from state file '
+                    f'{os.path.join(state_file_path, "state.ini")}')
         tabpy_state = _get_state_from_file(state_file_path)
         self.tabpy_state = TabPyState(
             config=tabpy_state, settings=self.settings)
@@ -262,9 +263,10 @@ class TabPyApp:
         self.settings[SettingsParameters.LogRequestContext] = (
             self.settings[SettingsParameters.LogRequestContext].lower() !=
             'false')
-        logger.info('Call context logging is {}'.format(
-            'enabled' if self.settings[SettingsParameters.LogRequestContext]
-            else 'disabled'))
+        call_context_state =\
+            'enabled' if self.settings[SettingsParameters.LogRequestContext]\
+            else 'disabled'
+        logger.info(f'Call context logging is {call_context_state}')
 
     def _validate_transfer_protocol_settings(self):
         if SettingsParameters.TransferProtocol not in self.settings:
@@ -297,9 +299,9 @@ class TabPyApp:
 
     @staticmethod
     def _validate_cert_key_state(msg, cert_valid, key_valid):
-        cert_and_key_param = '{} and {}'.format(
-            ConfigParameters.TABPY_CERTIFICATE_FILE,
-            ConfigParameters.TABPY_KEY_FILE)
+        cert_and_key_param = (
+            f'{ConfigParameters.TABPY_CERTIFICATE_FILE} and '
+            f'{ConfigParameters.TABPY_KEY_FILE}')
         https_error = 'Error using HTTPS: '
         err = None
         if not cert_valid and not key_valid:

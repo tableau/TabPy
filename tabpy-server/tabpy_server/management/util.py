@@ -7,7 +7,6 @@ except ImportError:
 from datetime import datetime, timedelta, tzinfo
 from tabpy_server.app.ConfigParameters import ConfigParameters
 from tabpy_server.app.SettingsParameters import SettingsParameters
-from time import mktime
 
 
 def write_state_config(state, settings, logger=logging.getLogger(__name__)):

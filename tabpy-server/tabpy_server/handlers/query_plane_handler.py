@@ -51,8 +51,8 @@ class QueryPlaneHandler(BaseHandler):
 
         if isinstance(response, QuerySuccessful):
             response_json = response.to_json()
-            self.set_header("Etag", '"%s"' % md5(response_json.encode(
-                'utf-8')).hexdigest())
+            md5_tag = md5(response_json.encode('utf-8')).hexdigest()
+            self.set_header("Etag", f'"{md5_tag}"')
             return (QuerySuccessful, response.for_json(), gls_time)
         else:
             self.logger.log(
@@ -93,8 +93,8 @@ class QueryPlaneHandler(BaseHandler):
         else:
             if response_type == UnknownURI:
                 self.error_out(404, 'UnknownURI',
-                               info="No query object has been registered"
-                                    " with the name '%s'" % po_name)
+                               info=('No query object has been registered'
+                                     f' with the name "{po_name}"'))
             elif response_type == QueryError:
                 self.error_out(400, 'QueryError', info=response)
             else:
@@ -141,16 +141,17 @@ class QueryPlaneHandler(BaseHandler):
             # po_name is None if self.python_service.ps.query_objects.get(
             # endpoint_name) is None
             if not po_name:
-                self.error_out(404, 'UnknownURI',
-                               info="Endpoint '%s' does not exist"
-                                    % endpoint_name)
+                self.error_out(
+                    404,
+                    'UnknownURI',
+                    info=f'Endpoint "{endpoint_name}" does not exist')
                 return
 
             po_obj = self.python_service.ps.query_objects.get(po_name)
 
             if not po_obj:
                 self.error_out(404, 'UnknownURI',
-                               info="Endpoint '%s' does not exist" % po_name)
+                               info=f'Endpoint "{po_name}" does not exist')
                 return
 
             if po_name != endpoint_name:
@@ -194,9 +195,10 @@ class QueryPlaneHandler(BaseHandler):
             elif endpoint_type == 'model':
                 break
             else:
-                self.error_out(500, 'Unknown endpoint type',
-                               info="Endpoint type '%s' does not exist"
-                                    % endpoint_type)
+                self.error_out(
+                    500,
+                    'Unknown endpoint type',
+                    info=f'Endpoint type "{endpoint_type}" does not exist')
                 return
 
         return (endpoint_name, all_endpoint_names)
@@ -208,10 +210,7 @@ class QueryPlaneHandler(BaseHandler):
             return
 
         start = time.time()
-        if sys.version_info > (3, 0):
-            endpoint_name = urllib.parse.unquote(endpoint_name)
-        else:
-            endpoint_name = urllib.unquote(endpoint_name)
+        endpoint_name = urllib.parse.unquote(endpoint_name)
         self._process_query(endpoint_name, start)
 
     @tornado.web.asynchronous
@@ -221,8 +220,5 @@ class QueryPlaneHandler(BaseHandler):
             return
 
         start = time.time()
-        if sys.version_info > (3, 0):
-            endpoint_name = urllib.parse.unquote(endpoint_name)
-        else:
-            endpoint_name = urllib.unquote(endpoint_name)
+        endpoint_name = urllib.parse.unquote(endpoint_name)
         self._process_query(endpoint_name, start)
