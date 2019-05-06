@@ -1,0 +1,16 @@
+[run]
+# Measure branch coverage in addition to statement coverage.
+branch = True
+
+# Files to omit in coverage report as they are not achievable
+# to cover with unit tests.
+omit = 
+    tabpy-server/tabpy_server/tabpy.py
+
+[report]
+# Exclude lines that match patterns from coverage report.
+exclude_lines = 
+    if __name__ == .__main__.:
+
+# Only show one number after decimal point in report.
+precision = 1
