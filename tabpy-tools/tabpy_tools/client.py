@@ -231,7 +231,7 @@ class Client(object):
 
         if existing_endpoint_name not in self.get_endpoints():
             raise ValueError(
-                "Endpoint '{}' does not exist.".format(existing_endpoint_name))
+                f'Endpoint "{existing_endpoint_name}" does not exist.')
 
         # Can only overwrite existing alias
         existing_endpoint = self.get_endpoints().get(alias)
@@ -247,8 +247,8 @@ class Client(object):
         if existing_endpoint:
             if existing_endpoint.type != 'alias':
                 raise RuntimeError(
-                    'Name "{}" is already in use by another '
-                    'endpoint.'.format(alias))
+                    f'Name "{alias}" is already in use by another '
+                    'endpoint.')
 
             endpoint.version = existing_endpoint.version + 1
 
@@ -297,9 +297,9 @@ class Client(object):
         if endpoint:
             if not override:
                 raise RuntimeError(
-                    "An endpoint with that name ({}) already"
-                    " exists. Use 'override = True' to force update "
-                    "an existing endpoint.".format(name))
+                    f'An endpoint with that name ({name}) already'
+                    ' exists. Use "override = True" to force update '
+                    'an existing endpoint.')
 
             version = endpoint.version + 1
         else:

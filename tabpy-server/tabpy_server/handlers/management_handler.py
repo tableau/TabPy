@@ -49,7 +49,7 @@ class ManagementHandler(MainHandler):
         '''
         Add or update an endpoint
         '''
-        logging.debug("Adding/updating model {}...".format(name))
+        logging.debug(f'Adding/updating model {name}...')
         _name_checker = _compile('^[a-zA-Z0-9-_\\s]+$')
         if not isinstance(name, str):
             msg = 'Endpoint name must be a string'

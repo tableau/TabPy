@@ -425,7 +425,7 @@ class BaseHandler(tornado.web.RequestHandler):
             'Failing with 401 for unauthorized request')
         self.set_status(401)
         self.set_header('WWW-Authenticate',
-                        'Basic realm="{}"'.format(self.tabpy_state.name))
+                        f'Basic realm="{self.tabpy_state.name}"')
         self.error_out(
             401,
             info="Unauthorized request.",

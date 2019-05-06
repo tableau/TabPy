@@ -46,8 +46,7 @@ def _generate_schema_from_example_and_description(input, description):
         # jsonschema.
         _validate(input, input_schema)
     except Exception as e:
-        logger.error(
-            'Internal error validating schema: {}'.format(str(e)))
+        logger.error(f'Internal error validating schema: {str(e)}')
         raise
 
     return input_schema

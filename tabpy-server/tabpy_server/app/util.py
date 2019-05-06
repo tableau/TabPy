@@ -72,23 +72,21 @@ def parse_pwd_file(pwd_file_name):
 
             if len(row) != 2:
                 logger.error(
-                    'Incorrect entry "{}" '
-                    'in password file'.format(row))
+                    f'Incorrect entry "{row}" in password file')
                 return False, {}
 
             login = row[0].lower()
             if login in credentials:
                 logger.error(
-                    'Multiple entries for username {} '
-                    'in password file'.format(login))
+                    f'Multiple entries for username {login} '
+                    'in password file')
                 return False, {}
 
             if(len(row[1]) > 0):
                 credentials[login] = row[1]
-                logger.debug('Found username {}'.format(login))
+                logger.debug(f'Found username {login}')
             else:
-                logger.warning('Found username {} but no password'
-                               .format(row[0]))
+                logger.warning(f'Found username {row[0]} but no password')
                 return False, {}
 
     logger.info("Authentication is enabled")

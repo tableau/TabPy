@@ -95,8 +95,8 @@ class QueryObject(abc.ABC):
             json.dumps(result)
         except TypeError:
             raise TypeError(
-                "Result from object query is not json serializable: "
-                "{}".format(result))
+                'Result from object query is not json serializable: '
+                f'{result}')
 
         return result
 

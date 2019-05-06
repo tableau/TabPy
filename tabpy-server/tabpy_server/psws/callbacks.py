@@ -152,7 +152,7 @@ def on_state_change(settings, tabpy_state, python_service,
                 object_name]
 
             if not object_path and not object_version:  # removal
-                logger.info("Removing object: URI={}".format(object_name))
+                logger.info(f'Removing object: URI={object_name}')
 
                 python_service.manage_request(DeleteObjects([object_name]))
 
@@ -184,4 +184,4 @@ def on_state_change(settings, tabpy_state, python_service,
     except Exception as e:
         err_msg = format_exception(e, 'on_state_change')
         logger.error(
-            "Error submitting update model request: error={}".format(err_msg))
+            f'Error submitting update model request: error={err_msg}')

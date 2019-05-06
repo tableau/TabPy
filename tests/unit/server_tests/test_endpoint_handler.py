@@ -24,9 +24,7 @@ class TestEndpointHandlerWithAuth(AsyncHTTPTestCase):
             mode='w+t', prefix=prefix, suffix='.txt', delete=False)
         username = 'username'
         password = 'password'
-        cls.pwd_file.write('{} {}'.format(
-            username,
-            hash_password(username, password)))
+        cls.pwd_file.write(f'{username} {hash_password(username, password)}')
         cls.pwd_file.close()
 
         # create state.ini dir and file
@@ -53,10 +51,8 @@ class TestEndpointHandlerWithAuth(AsyncHTTPTestCase):
             mode='w+t', prefix=prefix, suffix='.conf', delete=False)
         cls.config_file.write(
             '[TabPy]\n'
-            'TABPY_PWD_FILE = {}\n'
-            'TABPY_STATE_PATH = {}'.format(
-                cls.pwd_file.name,
-                cls.state_dir))
+            f'TABPY_PWD_FILE = {cls.pwd_file.name}\n'
+            f'TABPY_STATE_PATH = {cls.state_dir}')
         cls.config_file.close()
 
     @classmethod

@@ -34,16 +34,17 @@ class TestPasswordFile(unittest.TestCase):
 
     def test_given_empty_pwd_file_expect_app_fails(self):
         self._set_file(self.config_file.name,
-                       "[TabPy]\n"
-                       "TABPY_PWD_FILE = {}".format(self.pwd_file.name))
+                       '[TabPy]\n'
+                       f'TABPY_PWD_FILE = {self.pwd_file.name}')
 
         self._set_file(self.pwd_file.name, "# just a comment")
 
         with self.assertRaises(RuntimeError) as cm:
             TabPyApp(self.config_file.name)
             ex = cm.exception
-            self.assertEqual('Failed to read password file {}'.format(
-                self.pwd_file.name), ex.args[0])
+            self.assertEqual(
+                f'Failed to read password file {self.pwd_file.name}',
+                ex.args[0])
 
     def test_given_missing_pwd_file_expect_app_fails(self):
         self._set_file(self.config_file.name,
@@ -53,20 +54,21 @@ class TestPasswordFile(unittest.TestCase):
         with self.assertRaises(RuntimeError) as cm:
             TabPyApp(self.config_file.name)
             ex = cm.exception
-            self.assertEqual('Failed to read password file {}'.format(
-                self.pwd_file.name), ex.args[0])
+            self.assertEqual(
+                f'Failed to read password file {self.pwd_file.name}',
+                ex.args[0])
 
     def test_given_one_password_in_pwd_file_expect_one_credentials_entry(self):
         self._set_file(self.config_file.name,
                        "[TabPy]\n"
-                       "TABPY_PWD_FILE = {}".format(self.pwd_file.name))
+                       f'TABPY_PWD_FILE = {self.pwd_file.name}')
 
         login = 'user_name_123'
         pwd = 'someting@something_else'
         self._set_file(self.pwd_file.name,
                        "# passwords\n"
                        "\n"
-                       "{} {}".format(login, pwd))
+                       f'{login} {pwd}')
 
         app = TabPyApp(self.config_file.name)
 
@@ -77,43 +79,45 @@ class TestPasswordFile(unittest.TestCase):
     def test_given_username_but_no_password_expect_parsing_fails(self):
         self._set_file(self.config_file.name,
                        "[TabPy]\n"
-                       "TABPY_PWD_FILE = {}".format(self.pwd_file.name))
+                       f'TABPY_PWD_FILE = {self.pwd_file.name}')
 
         login = 'user_name_123'
         pwd = ''
         self._set_file(self.pwd_file.name,
                        "# passwords\n"
                        "\n"
-                       "{} {}".format(login, pwd))
+                       f'{login} {pwd}')
 
         with self.assertRaises(RuntimeError) as cm:
             TabPyApp(self.config_file.name)
             ex = cm.exception
-            self.assertEqual('Failed to read password file {}'.format(
-                self.pwd_file.name), ex.args[0])
+            self.assertEqual(
+                f'Failed to read password file {self.pwd_file.name}',
+                ex.args[0])
 
     def test_given_duplicate_usernames_expect_parsing_fails(self):
         self._set_file(self.config_file.name,
                        "[TabPy]\n"
-                       "TABPY_PWD_FILE = {}".format(self.pwd_file.name))
+                       f'TABPY_PWD_FILE = {self.pwd_file.name}')
 
         login = 'user_name_123'
         pwd = 'hashedpw'
         self._set_file(self.pwd_file.name,
                        "# passwords\n"
                        "\n"
-                       "{} {}\n{} {}".format(login, pwd, login, pwd))
+                       f'{login} {pwd}\n{login} {pwd}')
 
         with self.assertRaises(RuntimeError) as cm:
             TabPyApp(self.config_file.name)
             ex = cm.exception
-            self.assertEqual('Failed to read password file {}'.format(
-                self.pwd_file.name), ex.args[0])
+            self.assertEqual(
+                f'Failed to read password file {self.pwd_file.name}',
+                ex.args[0])
 
     def test_given_one_line_with_too_many_params_expect_app_fails(self):
         self._set_file(self.config_file.name,
                        "[TabPy]\n"
-                       "TABPY_PWD_FILE = {}".format(self.pwd_file.name))
+                       f'TABPY_PWD_FILE = {self.pwd_file.name}')
 
         self._set_file(self.pwd_file.name,
                        "# passwords\n"
@@ -124,13 +128,14 @@ class TestPasswordFile(unittest.TestCase):
         with self.assertRaises(RuntimeError) as cm:
             TabPyApp(self.config_file.name)
             ex = cm.exception
-            self.assertEqual('Failed to read password file {}'.format(
-                self.pwd_file.name), ex.args[0])
+            self.assertEqual(
+                f'Failed to read password file {self.pwd_file.name}',
+                ex.args[0])
 
     def test_given_different_cases_in_pwd_file_expect_app_fails(self):
         self._set_file(self.config_file.name,
                        "[TabPy]\n"
-                       "TABPY_PWD_FILE = {}".format(self.pwd_file.name))
+                       f'TABPY_PWD_FILE = {self.pwd_file.name}')
 
         self._set_file(self.pwd_file.name,
                        "# passwords\n"
@@ -141,13 +146,14 @@ class TestPasswordFile(unittest.TestCase):
         with self.assertRaises(RuntimeError) as cm:
             TabPyApp(self.config_file.name)
             ex = cm.exception
-            self.assertEqual('Failed to read password file {}'.format(
-                self.pwd_file.name), ex.args[0])
+            self.assertEqual(
+                f'Failed to read password file {self.pwd_file.name}',
+                ex.args[0])
 
     def test_given_multiple_credentials_expect_all_parsed(self):
         self._set_file(self.config_file.name,
                        "[TabPy]\n"
-                       "TABPY_PWD_FILE = {}".format(self.pwd_file.name))
+                       f'TABPY_PWD_FILE = {self.pwd_file.name}')
         creds = {
             'user_1': 'pwd_1',
             'user@2': 'pwd@2',
@@ -156,7 +162,7 @@ class TestPasswordFile(unittest.TestCase):
 
         pwd_file_context = ""
         for login in creds:
-            pwd_file_context += '{} {}\n'.format(login, creds[login])
+            pwd_file_context += f'{login} {creds[login]}\n'
 
         self._set_file(self.pwd_file.name, pwd_file_context)
         app = TabPyApp(self.config_file.name)
