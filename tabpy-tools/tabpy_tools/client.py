@@ -38,9 +38,9 @@ def _check_hostname(name):
         r'^http(s)?://[a-zA-Z0-9-_\.]+(/)?(:[0-9]+)?(/)?$')
 
     if not hostname_checker.match(name):
-        raise ValueError('endpoint name {} should be in http(s)://<hostname>'
+        raise ValueError(f'endpoint name {name} should be in http(s)://<hostname>'
                          '[:<port>] and hostname may consist only of: '
-                         'a-z, A-Z, 0-9, underscore and hyphens.'.format(name))
+                         'a-z, A-Z, 0-9, underscore and hyphens.')
 
 
 def _check_endpoint_name(name):
@@ -49,8 +49,9 @@ def _check_endpoint_name(name):
     _check_endpoint_type(name)
 
     if not _name_checker.match(name):
-        raise ValueError('endpoint name %r can only contain: a-z, A-Z, 0-9,'
-                         ' underscore, hyphens and spaces.' % name)
+        raise ValueError(
+            f'endpoint name {name} can only contain: a-z, A-Z, 0-9,'
+            ' underscore, hyphens and spaces.')
 
 
 class Client(object):
@@ -412,23 +413,23 @@ class Client(object):
         version. If all the versions are equal to or greater than the version
         expected, then it will return. Uses time.sleep().
         """
-        logger.info("Waiting for endpoint %r to deploy to version %r",
-                    endpoint_name, version)
+        logger.info(
+            f'Waiting for endpoint {endpoint_name} to deploy to '
+            f'version {version}')
         start = time.time()
         while True:
             ep_status = self.get_status()
             try:
                 ep = ep_status[endpoint_name]
             except KeyError:
-                logger.info("Endpoint %r doesn't exist in endpoints yet",
-                            endpoint_name)
+                logger.info(f'Endpoint {endpoint_name} doesn\'t '
+                            'exist in endpoints yet')
             else:
-                logger.info("ep=%r", ep)
+                logger.info(f'ep={ep}')
 
                 if ep['status'] == 'LoadFailed':
-                    raise RuntimeError("LoadFailed: %r" % (
-                        ep['last_error'],
-                    ))
+                    raise RuntimeError(
+                        f'LoadFailed: {ep["last_error"]}')
 
                 elif ep['status'] == 'LoadSuccessful':
                     if ep['version'] >= version:
@@ -440,7 +441,7 @@ class Client(object):
             if time.time() - start > 10:
                 raise RuntimeError("Waited more then 10s for deployment")
 
-            logger.info("Sleeping %r", interval)
+            logger.info(f'Sleeping {interval}...')
             time.sleep(interval)
 
     def remove(self, name):

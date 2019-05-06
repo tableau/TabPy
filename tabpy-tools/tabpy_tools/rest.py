@@ -92,7 +92,7 @@ class RequestsNetworkWrapper(object):
             auth=self.auth)
         if response.status_code != 200:
             self.raise_error(response)
-        logger.info("response=%r", response.text)
+        logger.info(f'response={response.text}')
 
         if response.text == '':
             return dict()
@@ -437,9 +437,8 @@ def enum(*values, **kwargs):
     def __new__(cls, value):
         if value not in cls.values:
             raise ValueError(
-                "%r is an unexpected value. Expected one of %r" % (
-                    value,
-                    cls.values))
+                f'{value} is an unexpected value. '
+                f'Expected one of {cls.values}')
 
         return super(enum, cls).__new__(cls, value)
 
