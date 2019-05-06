@@ -33,7 +33,7 @@ In Tableau Desktop version 10.1 or later:
 To configure Tableau Server 2018.2 and newer versions to connect to TabPy server
 use [TSM command line tool](https://onlinehelp.tableau.com/current/server/en-us/tsm.htm).
 
-To configure a non secure connection to TabPy server configuration set -k vizqlserver.extsvc.host and vizqlserver.extsvc.port parameters:
+To configure a non secure connection to TabPy server configuration:
 
 ```sh
 tsm configuration set -k vizqlserver.extsvc.host -v <ip address or hostname>
