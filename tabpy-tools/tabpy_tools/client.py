@@ -38,9 +38,10 @@ def _check_hostname(name):
         r'^http(s)?://[a-zA-Z0-9-_\.]+(/)?(:[0-9]+)?(/)?$')
 
     if not hostname_checker.match(name):
-        raise ValueError(f'endpoint name {name} should be in http(s)://<hostname>'
-                         '[:<port>] and hostname may consist only of: '
-                         'a-z, A-Z, 0-9, underscore and hyphens.')
+        raise ValueError(
+            f'endpoint name {name} should be in http(s)://<hostname>'
+            '[:<port>] and hostname may consist only of: '
+            'a-z, A-Z, 0-9, underscore and hyphens.')
 
 
 def _check_endpoint_name(name):

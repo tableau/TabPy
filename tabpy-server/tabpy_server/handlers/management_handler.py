@@ -73,7 +73,7 @@ class ManagementHandler(MainHandler):
                            if 'description' in request_data else None)
             if 'docstring' in request_data:
                 docstring = str(bytes(request_data['docstring'],
-                                        "utf-8").decode('unicode_escape'))
+                                      "utf-8").decode('unicode_escape'))
             else:
                 docstring = None
             endpoint_type = (request_data['type'] if 'type' in request_data
