@@ -1,11 +1,11 @@
 [run]
 # Measure branch coverage in addition to statement coverage.
-branch = True
+#branch = True
 
 # Files to omit in coverage report as they are not achievable
 # to cover with unit tests.
-omit = 
-    tabpy-server/tabpy_server/tabpy.py
+#omit = 
+#    tabpy-server/tabpy_server/tabpy.py
 
 [report]
 # Exclude lines that match patterns from coverage report.
