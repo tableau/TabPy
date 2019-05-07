@@ -16,8 +16,8 @@ function install_dependencies() {
         echo -e "\nInstalling ${1} dependencies..."
         python3 setup.py install
     elif [ "$2" = false ]; then
-        echo -e "\nInstalling ${1} dependencies..." >> ${3}
-        python3 setup.py install >> ${3} 2>&1
+        echo -e "\nInstalling ${1} dependencies..." >> "${3}"
+        python3 setup.py install >> "${3}" 2>&1
     else
         echo Invalid startup environment.
         exit 1
@@ -32,9 +32,9 @@ check_status "Cannot find Python.  Check that Python is installed and is in the 
 
 # Setting local variables
 echo Setting TABPY_ROOT to current working directory.
-TABPY_ROOT=$PWD
-INSTALL_LOG=${TABPY_ROOT}/tabpy-server/install.log
-echo "" > ${INSTALL_LOG}
+TABPY_ROOT="$PWD"
+INSTALL_LOG="${TABPY_ROOT}/tabpy-server/install.log"
+echo "" > "${INSTALL_LOG}"
 PRINT_INSTALL_LOGS=false
 
 # Parse CLI parameters
@@ -64,13 +64,13 @@ if [ "$PRINT_INSTALL_LOGS" = false ]; then
     echo Read the logs at ${INSTALL_LOG}
 fi
 
-cd ${TABPY_ROOT}/tabpy-server
+cd "${TABPY_ROOT}/tabpy-server"
 install_dependencies "tabpy-server" ${PRINT_INSTALL_LOGS} ${INSTALL_LOG}
 
-cd ${TABPY_ROOT}/tabpy-tools
+cd "${TABPY_ROOT}/tabpy-tools"
 install_dependencies "tabpy-tools" ${PRINT_INSTALL_LOGS} ${INSTALL_LOG}
 
-cd ${TABPY_ROOT}
+cd "${TABPY_ROOT}"
 check_status
 
 if [ ! -z ${CONFIG} ]; then
@@ -87,7 +87,7 @@ fi
 echo
 echo Starting TabPy server...
 SAVE_PYTHONPATH=$PYTHONPATH
-export PYTHONPATH=${TABPY_ROOT}/tabpy-server:${TABPY_ROOT}/tabpy-tools:$PYTHONPATH
+export PYTHONPATH="${TABPY_ROOT}/tabpy-server:${TABPY_ROOT}/tabpy-tools:$PYTHONPATH"
 if [ -z $CONFIG ]; then
     echo Using default parameters.
     python3 tabpy-server/tabpy_server/tabpy.py
