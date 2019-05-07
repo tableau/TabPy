@@ -202,11 +202,13 @@ class IntegTestBase(unittest.TestCase):
         # startup script
         with open(self.tmp_dir + '/output.txt', 'w') as outfile:
             if platform.system() == 'Windows':
+                self.py = 'python'
                 self.process = subprocess.Popen(
                     ['startup.cmd', self.config_file_name],
                     stdout=outfile,
                     stderr=outfile)
             else:
+                self.py = 'python3'
                 self.process = subprocess.Popen(
                     ['./startup.sh',
                      '--config=' + self.config_file_name],

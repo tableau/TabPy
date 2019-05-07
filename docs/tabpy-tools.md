@@ -163,13 +163,13 @@ client.remove('WillItDefault')
 To setup models download the latest version of TabPy and follow the [instructions](server-download.md)
 to install and start up your server. Once your server is running, navigate to the
 models directory and run setup.py.  If your TabPy server is running on the default
-port (9004), you do not need to specify a port when launching the script. If your
-server is running on a port other than 9004 you can specify a different port in
-the command line like so:
+config (default.conf), you do not need to specify a config file when launching the
+script. If your server is running using a custom config you can specify the config
+in the command line like so:
 
 ```sh
 
-python setup.py 4047
+python setup.py custom.conf
 
 ```
 
@@ -186,6 +186,18 @@ If you would like to deploy additional models using the deploy script, you can
 copy any python file to the `./models/scripts` directory and modify setup.py to
 include all necessary packages when installing dependencies or alternatively install
 all the required dependencies manually.
+
+You can deploy models individually by navigating to models/scripts/ and running
+each file in isolation like so:
+
+```sh
+
+python PCA.py
+
+```
+
+Similarly to the setup script, if your server is running using a custom config,
+you can specify the config's file path through the command line.
 
 ### Principal Component Analysis (PCA)
 

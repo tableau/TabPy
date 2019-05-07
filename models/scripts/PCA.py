@@ -6,7 +6,9 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import OneHotEncoder
 import sys
-
+import getpass
+from pathlib import Path
+import configparser
 
 def PCA(component, _arg1, _arg2, *_argN):
     '''
@@ -21,7 +23,7 @@ def PCA(component, _arg1, _arg2, *_argN):
     oneHotEncoder = OneHotEncoder(categories='auto', sparse=False)
 
     for col in cols:
-        if (type(col[0]) is int or type(col[0]) is float):
+        if isinstance(col[0], (int,float)):
             encodedCols.append(col)
         elif (type(col[0]) is bool):
             intCol = array(col)
@@ -39,7 +41,7 @@ def PCA(component, _arg1, _arg2, *_argN):
 
     dataDict = {}
     for i in range(len(encodedCols)):
-        dataDict['col' + str(1 + i)] = list(encodedCols[i])
+        dataDict[f'col{1 + i}'] = list(encodedCols[i])
 
     if (component <= 0 or component > len(dataDict)):
         print('ERROR: Component specified must be >= 0 and '
@@ -57,9 +59,33 @@ def PCA(component, _arg1, _arg2, *_argN):
 
 
 if __name__ == '__main__':
-    port = sys.argv[1]
-    # to do: once auth is enabled in tabpy-tools this will need to be updated
-    connection = Client('http://localhost:' + port + '/')
+    #running from setup.py
+    if (len(sys.argv) > 1):
+        config_file_path = sys.argv[1]
+    else: 
+        config_file_path = str(Path(__file__).resolve().parent.parent.parent
+                               / 'tabpy-server' / 'tabpy_server' / 'common'
+                               / 'default.conf')
+    config = configparser.ConfigParser()
+    config.read(config_file_path)
+    tabpy_config = config['TabPy']
+    port = tabpy_config['TABPY_PORT']
+    auth_on = 'TABPY_PWD_FILE' in tabpy_config
+    ssl_on = 'TABPY_TRANSFER_PROTOCOL' in tabpy_config and 'TABPY_CERTIFICATE_FILE' in tabpy_config and 'TABPY_KEY_FILE' in tabpy_config
+    prefix = "https" if ssl_on else "http"
+
+    connection = Client(f'{prefix}://localhost:{port}/')
+
+    if(auth_on):
+        #credentials are passed in from setup.py
+        if(len(sys.argv) == 4):
+            user, passwd = sys.argv[2], sys.argv[3]
+        #running PCA independently 
+        else:
+            user = input("Username: ")
+            passwd = getpass.getpass("Password: ")
+        connection.set_credentials(user, passwd)
+
     connection.deploy('PCA', PCA,
                       'Returns the specified principal component.',
                       override=True)

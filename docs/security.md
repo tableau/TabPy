@@ -2,6 +2,8 @@
 
 The following security issues should be kept in mind as you use TabPy with Tableau:
 
+- tabpy_tools client does not validate that the tabpy server cert is signed
+  by a trusted CA
 - REST server and Python execution context are the same meaning they share
   Python session, e.g. HTTP requests are served in the same space where
   user scripts are evaluated.

@@ -8,7 +8,7 @@ class TestDeployModelSSLOffAuthOn(integ_test_base.IntegTestBase):
     def _get_pwd_file(self) -> str:
         return './tests/integration/resources/pwdfile.txt'
 
-    def test_deploy_ssl_off_auth_on_valid_credentials(self):
+    def test_deploy_ssl_off_auth_on(self):
         path = str(Path('models', 'setup.py'))
         p = subprocess.run([self.py, path, self._get_config_file_name()],
                            input=b'user1\nP@ssw0rd\n')
