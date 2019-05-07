@@ -3,8 +3,8 @@ SETLOCAL
 
 
 REM Set environment variables.
-SET TABPY_ROOT=%CD%
-SET INSTALL_LOG=%TABPY_ROOT%\tabpy-server\install.log
+SET "TABPY_ROOT=%CD%"
+SET "INSTALL_LOG=%TABPY_ROOT%\tabpy-server\install.log"
 SET SAVE_PYTHONPATH=%PYTHONPATH%
 
 
@@ -19,21 +19,19 @@ IF %ERRORLEVEL% NEQ 0 (
 REM Install requirements using Python setup tools.
 ECHO Installing any missing dependencies...
 
-CD %TABPY_ROOT%\tabpy-server
-ECHO Installing tabpy-server dependencies...>%INSTALL_LOG%	
-python setup.py install>>%INSTALL_LOG% 2>&1
+CD "%TABPY_ROOT%\tabpy-server"
+ECHO Installing tabpy-server dependencies...>"%INSTALL_LOG%"	
+python setup.py install>>"%INSTALL_LOG%" 2>&1
 
-CD %TABPY_ROOT%\tabpy-tools
-ECHO: >> %INSTALL_LOG%
-ECHO Installing tabpy-tools dependencies...>>%INSTALL_LOG%
-python setup.py install>>%INSTALL_LOG% 2>&1
+CD "%TABPY_ROOT%\tabpy-tools"
+ECHO: >> "%INSTALL_LOG%"
+ECHO Installing tabpy-tools dependencies...>>"%INSTALL_LOG%"
+python setup.py install>>"%INSTALL_LOG%" 2>&1
 
-CD %TABPY_ROOT%
+CD "%TABPY_ROOT%"
 SET INSTALL_LOG_MESSAGE=    Check %INSTALL_LOG% for details.
 IF %ERRORLEVEL% NEQ 0 (
-    IF %CD% NEQ %TABPY_ROOT% (
-        CD %TABPY_ROOT%
-    )
+    CD "%TABPY_ROOT%"
     ECHO     failed
     ECHO %INSTALL_LOG_MESSAGE%
     SET RET=1
@@ -46,7 +44,7 @@ IF %ERRORLEVEL% NEQ 0 (
 
 REM Parse optional CLI arguments: config file
 ECHO Parsing parameters...
-SET PYTHONPATH=%TABPY_ROOT%\tabpy-server;%TABPY_ROOT%\tabpy-tools;%PYTHONPATH%
+SET PYTHONPATH="%TABPY_ROOT%\tabpy-server;%TABPY_ROOT%\tabpy-tools;%PYTHONPATH%"
 SET STARTUP_CMD=python tabpy-server\tabpy_server\tabpy.py
 IF [%1] NEQ [] (
     ECHO     Using config file at %1
@@ -70,7 +68,7 @@ GOTO:END
 
 :END
     SET PYTHONPATH=%SAVE_PYTHONPATH%
-    CD %TABPY_ROOT%
+    CD "%TABPY_ROOT%"
     EXIT /B %RET%
     ENDLOCAL
 
