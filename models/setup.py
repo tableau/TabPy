@@ -28,9 +28,9 @@ if __name__ == '__main__':
     print('===================================================================')
     # Determine if we run python or python3
     if platform.system() == 'Windows':
-        py = 'python '
+        py = 'python'
     else:
-        py = 'python3 '
+        py = 'python3'
 
     if (len(sys.argv) > 1):
         config_file_path = sys.argv[1]
