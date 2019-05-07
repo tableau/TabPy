@@ -1,10 +1,7 @@
 import base64
 import binascii
 from hashlib import pbkdf2_hmac
-import logging
 from tabpy_server.app.SettingsParameters import SettingsParameters
-
-logger = logging.getLogger(__name__)
 
 
 def hash_password(username, pwd):
@@ -29,7 +26,7 @@ def hash_password(username, pwd):
         Sting representation (hexidecimal) for PBKDF2 hash
         for the password.
     '''
-    salt = '_$salt@tabpy:%s$_' % username.lower()
+    salt = f'_$salt@tabpy:{username.lower()}$_'
 
     hash = pbkdf2_hmac(hash_name='sha512',
                        password=pwd.encode(),

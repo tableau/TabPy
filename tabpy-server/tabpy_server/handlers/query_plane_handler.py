@@ -12,25 +12,9 @@ import sys
 import tornado.web
 
 
-logger = logging.getLogger(__name__)
-
-
 def _get_uuid():
     """Generate a unique identifier string"""
     return str(uuid.uuid4())
-
-
-def _sanitize_request_data(data):
-    if not isinstance(data, dict):
-        log_and_raise("Expect input data to be a dictionary", RuntimeError)
-
-    if "method" in data:
-        return {"data": data.get("data"), "method": data.get("method")}
-    elif "data" in data:
-        return data.get("data")
-    else:
-        log_and_raise("Expect input data is a dictionary with at least a "
-                      "key called 'data'", RuntimeError)
 
 
 class QueryPlaneHandler(BaseHandler):
@@ -67,12 +51,13 @@ class QueryPlaneHandler(BaseHandler):
 
         if isinstance(response, QuerySuccessful):
             response_json = response.to_json()
-            self.set_header("Etag", '"%s"' % md5(response_json.encode(
-                'utf-8')).hexdigest())
+            md5_tag = md5(response_json.encode('utf-8')).hexdigest()
+            self.set_header("Etag", f'"{md5_tag}"')
             return (QuerySuccessful, response.for_json(), gls_time)
         else:
-            logger.error(self.append_request_context(
-                f'Failed query, response: {response}'))
+            self.logger.log(
+                logging.ERROR,
+                f'Failed query, response: {response}')
             return (type(response), response.for_json(), gls_time)
 
     # handle HTTP Options requests to support CORS
@@ -83,8 +68,9 @@ class QueryPlaneHandler(BaseHandler):
             self.fail_with_not_authorized()
             return
 
-        logger.debug(self.append_request_context(
-            f'Processing OPTIONS for /query/{pred_name}'))
+        self.logger.log(
+            logging.DEBUG,
+            f'Processing OPTIONS for /query/{pred_name}')
 
         # add CORS headers if TabPy has a cors_origin specified
         self._add_CORS_header()
@@ -107,14 +93,29 @@ class QueryPlaneHandler(BaseHandler):
         else:
             if response_type == UnknownURI:
                 self.error_out(404, 'UnknownURI',
-                               info="No query object has been registered"
-                                    " with the name '%s'" % po_name)
+                               info=('No query object has been registered'
+                                     f' with the name "{po_name}"'))
             elif response_type == QueryError:
                 self.error_out(400, 'QueryError', info=response)
             else:
                 self.error_out(500, 'Error querying GLS', info=response)
 
             return (None, None)
+
+    def _sanitize_request_data(self, data):
+        if not isinstance(data, dict):
+            msg = 'Input data must be a dictionary'
+            self.logger.log(logging.CRITICAL, msg)
+            raise RuntimeError(msg)
+
+        if "method" in data:
+            return {"data": data.get("data"), "method": data.get("method")}
+        elif "data" in data:
+            return data.get("data")
+        else:
+            msg = 'Input data must be a dictionary with a key called "data"'
+            self.logger.log(logging.CRITICAL, msg)
+            raise RuntimeError(msg)
 
     def _process_query(self, endpoint_name, start):
         try:
@@ -127,7 +128,7 @@ class QueryPlaneHandler(BaseHandler):
             request_json = self.request.body.decode('utf-8')
 
             # Sanitize input data
-            data = _sanitize_request_data(json.loads(request_json))
+            data = self._sanitize_request_data(json.loads(request_json))
         except Exception as e:
             err_msg = format_exception(e, "Invalid Input Data")
             self.error_out(400, err_msg)
@@ -140,21 +141,23 @@ class QueryPlaneHandler(BaseHandler):
             # po_name is None if self.python_service.ps.query_objects.get(
             # endpoint_name) is None
             if not po_name:
-                self.error_out(404, 'UnknownURI',
-                               info="Endpoint '%s' does not exist"
-                                    % endpoint_name)
+                self.error_out(
+                    404,
+                    'UnknownURI',
+                    info=f'Endpoint "{endpoint_name}" does not exist')
                 return
 
             po_obj = self.python_service.ps.query_objects.get(po_name)
 
             if not po_obj:
                 self.error_out(404, 'UnknownURI',
-                               info="Endpoint '%s' does not exist" % po_name)
+                               info=f'Endpoint "{po_name}" does not exist')
                 return
 
             if po_name != endpoint_name:
-                logger.info(self.append_request_context(
-                    f'Querying actual model: po_name={po_name}'))
+                self.logger.log(
+                    logging.INFO,
+                    f'Querying actual model: po_name={po_name}')
 
             uid = _get_uuid()
 
@@ -192,9 +195,10 @@ class QueryPlaneHandler(BaseHandler):
             elif endpoint_type == 'model':
                 break
             else:
-                self.error_out(500, 'Unknown endpoint type',
-                               info="Endpoint type '%s' does not exist"
-                                    % endpoint_type)
+                self.error_out(
+                    500,
+                    'Unknown endpoint type',
+                    info=f'Endpoint type "{endpoint_type}" does not exist')
                 return
 
         return (endpoint_name, all_endpoint_names)
@@ -205,14 +209,8 @@ class QueryPlaneHandler(BaseHandler):
             self.fail_with_not_authorized()
             return
 
-        logger.debug(self.append_request_context(
-            f'Processing GET for /query/{endpoint_name}'))
-
         start = time.time()
-        if sys.version_info > (3, 0):
-            endpoint_name = urllib.parse.unquote(endpoint_name)
-        else:
-            endpoint_name = urllib.unquote(endpoint_name)
+        endpoint_name = urllib.parse.unquote(endpoint_name)
         self._process_query(endpoint_name, start)
 
     @tornado.web.asynchronous
@@ -221,12 +219,6 @@ class QueryPlaneHandler(BaseHandler):
             self.fail_with_not_authorized()
             return
 
-        logger.debug(self.append_request_context(
-            f'Processing POST for /query/{endpoint_name}'))
-
         start = time.time()
-        if sys.version_info > (3, 0):
-            endpoint_name = urllib.parse.unquote(endpoint_name)
-        else:
-            endpoint_name = urllib.unquote(endpoint_name)
+        endpoint_name = urllib.parse.unquote(endpoint_name)
         self._process_query(endpoint_name, start)

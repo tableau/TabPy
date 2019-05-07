@@ -15,10 +15,6 @@ from tabpy_server.management.state import get_query_object_path
 from tabpy_server.psws.callbacks import on_state_change
 
 
-if sys.version_info.major == 3:
-    unicode = str
-
-
 def copy_from_local(localpath, remotepath, is_dir=False):
     if is_dir:
         if not os.path.exists(remotepath):
@@ -53,19 +49,22 @@ class ManagementHandler(MainHandler):
         '''
         Add or update an endpoint
         '''
-        logging.debug("Adding/updating model {}...".format(name))
+        logging.debug(f'Adding/updating model {name}...')
         _name_checker = _compile('^[a-zA-Z0-9-_\\s]+$')
-        if not isinstance(name, (str, unicode)):
-            log_and_raise(
-                "Endpoint name must be a string or unicode", TypeError)
+        if not isinstance(name, str):
+            msg = 'Endpoint name must be a string'
+            self.logger.log(logging.CRITICAL, msg)
+            raise TypeError(msg)
 
         if not _name_checker.match(name):
             raise gen.Return('endpoint name can only contain: a-z, A-Z, 0-9,'
                              ' underscore, hyphens and spaces.')
 
         if self.settings.get('add_or_updating_endpoint'):
-            log_and_raise("Another endpoint update is already in progress"
-                          ", please wait a while and try again", RuntimeError)
+            msg = ('Another endpoint update is already in progress'
+                   ', please wait a while and try again')
+            self.logger.log(logging.CRITICAL, msg)
+            raise RuntimeError(msg)
 
         request_uuid = random_uuid()
         self.settings['add_or_updating_endpoint'] = request_uuid
@@ -73,12 +72,8 @@ class ManagementHandler(MainHandler):
             description = (request_data['description']
                            if 'description' in request_data else None)
             if 'docstring' in request_data:
-                if sys.version_info > (3, 0):
-                    docstring = str(bytes(request_data['docstring'],
-                                          "utf-8").decode('unicode_escape'))
-                else:
-                    docstring = request_data['docstring'].decode(
-                        'string_escape')
+                docstring = str(bytes(request_data['docstring'],
+                                      "utf-8").decode('unicode_escape'))
             else:
                 docstring = None
             endpoint_type = (request_data['type'] if 'type' in request_data
@@ -99,7 +94,7 @@ class ManagementHandler(MainHandler):
             _path_checker = _compile('^[\\a-zA-Z0-9-_\\s/]+$')
             # copy from staging
             if src_path:
-                if not isinstance(request_data['src_path'], (str, unicode)):
+                if not isinstance(request_data['src_path'], str):
                     raise gen.Return("src_path must be a string.")
                 if not _path_checker.match(src_path):
                     raise gen.Return('Endpoint name can only contain: a-z, A-'
@@ -141,11 +136,12 @@ class ManagementHandler(MainHandler):
                         version=version)
 
             except Exception as e:
-                raise gen.Return("Error when changing TabPy state: %s" % e)
+                raise gen.Return(f'Error when changing TabPy state: {e}')
 
             on_state_change(self.settings,
                             self.tabpy_state,
-                            self.python_service)
+                            self.python_service,
+                            self)
 
         finally:
             self.settings['add_or_updating_endpoint'] = None

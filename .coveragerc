@@ -1,0 +1,7 @@
+[report]
+# Exclude lines that match patterns from coverage report.
+exclude_lines = 
+    if __name__ == .__main__.:
+
+# Only show one number after decimal point in report.
+precision = 1

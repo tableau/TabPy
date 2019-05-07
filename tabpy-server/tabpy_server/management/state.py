@@ -1,24 +1,16 @@
-import logging
 try:
     from ConfigParser import ConfigParser
 except ImportError:
     from configparser import ConfigParser
-try:
-    from StringIO import StringIO
-except ImportError:
-    from io import StringIO
 import json
+import logging
+import sys
+from tabpy_server.management.util import write_state_config
 from threading import Lock
 from time import time
-import sys
 
-
-from tabpy_server.management.util import write_state_config
 
 logger = logging.getLogger(__name__)
-
-if sys.version_info.major == 3:
-    unicode = str
 
 # State File Config Section Names
 _DEPLOYMENT_SECTION_NAME = 'Query Objects Service Versions'
@@ -47,40 +39,6 @@ def state_lock(func):
             # ALWAYS RELEASE LOCK
             _PS_STATE_LOCK.release()
     return wrapper
-
-
-def load_state_from_str(state_string):
-    '''
-    Convert from String to ConfigParser
-    '''
-    if state_string:
-        try:
-            config = ConfigParser(allow_no_value=True)
-            config.optionxform = str
-            config.readfp(StringIO(state_string))
-            return config
-        except Exception as e:
-            log_and_raise("Invalid state string %s" % str(e), ValueError)
-    else:
-        log_and_raise("State string is empty!", ValueError)
-
-
-def save_state_to_str(config):
-    '''
-    Convert from ConfigParser to String
-    '''
-    if not config:
-        log_and_raise("Invalid config", ValueError)
-    value = None
-    try:
-        string_f = StringIO()
-        config.write(string_f)
-        value = string_f.getvalue()
-    except Exception:
-        logger.error("Cannot convert config to string")
-    finally:
-        string_f.close()
-    return value
 
 
 def _get_root_path(state_path):
@@ -127,7 +85,9 @@ class TabPyState(object):
         self.set_config(config, _update=False)
 
     @state_lock
-    def set_config(self, config, _update=True):
+    def set_config(self, config,
+                   logger=logging.getLogger(__name__),
+                   _update=True):
         '''
         Set the local ConfigParser manually.
         This new ConfigParser will be used as current state.
@@ -136,7 +96,7 @@ class TabPyState(object):
             raise ValueError("Invalid config")
         self.config = config
         if _update:
-            self._write_state()
+            self._write_state(logger)
 
     def get_endpoints(self, name=None):
         '''
@@ -166,17 +126,14 @@ class TabPyState(object):
             endpoint_names = self._get_config_value(
                 _DEPLOYMENT_SECTION_NAME, name)
         except Exception as e:
-            logger.error("error in get_endpoints: %s" % str(e))
+            logger.error(f'error in get_endpoints: {str(e)}')
             return {}
 
         if name:
             endpoint_info = json.loads(endpoint_names)
             docstring = self._get_config_value(_QUERY_OBJECT_DOCSTRING, name)
-            if sys.version_info > (3, 0):
-                endpoint_info['docstring'] = str(
-                    bytes(docstring, "utf-8").decode('unicode_escape'))
-            else:
-                endpoint_info['docstring'] = docstring.decode('string_escape')
+            endpoint_info['docstring'] = str(
+                bytes(docstring, "utf-8").decode('unicode_escape'))
             endpoints = {name: endpoint_info}
         else:
             for endpoint_name in endpoint_names:
@@ -184,12 +141,8 @@ class TabPyState(object):
                     _DEPLOYMENT_SECTION_NAME, endpoint_name))
                 docstring = self._get_config_value(_QUERY_OBJECT_DOCSTRING,
                                                    endpoint_name, True, '')
-                if sys.version_info > (3, 0):
-                    endpoint_info['docstring'] = str(
-                        bytes(docstring, "utf-8").decode('unicode_escape'))
-                else:
-                    endpoint_info['docstring'] = docstring.decode(
-                        'string_escape')
+                endpoint_info['docstring'] = str(
+                    bytes(docstring, "utf-8").decode('unicode_escape'))
                 endpoints[endpoint_name] = endpoint_info
         return endpoints
 
@@ -222,27 +175,26 @@ class TabPyState(object):
         try:
             endpoints = self.get_endpoints()
             if name is None or not isinstance(
-                    name, (str, unicode)) or len(name) == 0:
+                    name, str) or len(name) == 0:
                 raise ValueError(
                     "name of the endpoint must be a valid string.")
             elif name in endpoints:
-                raise ValueError("endpoint %s already exists." % name)
-            if description and not isinstance(description, (str, unicode)):
+                raise ValueError(f'endpoint {name} already exists.')
+            if description and not isinstance(description, str):
                 raise ValueError("description must be a string.")
             elif not description:
                 description = ''
-            if docstring and not isinstance(docstring, (str, unicode)):
+            if docstring and not isinstance(docstring, str):
                 raise ValueError("docstring must be a string.")
             elif not docstring:
                 docstring = '-- no docstring found in query function --'
-            if not endpoint_type or not isinstance(
-                    endpoint_type, (str, unicode)):
+            if not endpoint_type or not isinstance(endpoint_type, str):
                 raise ValueError("endpoint type must be a string.")
             if dependencies and not isinstance(dependencies, list):
                 raise ValueError("dependencies must be a list.")
             elif not dependencies:
                 dependencies = []
-            if target and not isinstance(target, (str, unicode)):
+            if target and not isinstance(target, str):
                 raise ValueError("target must be a string.")
             elif target and target not in endpoints:
                 raise ValueError("target endpoint is not valid.")
@@ -260,7 +212,7 @@ class TabPyState(object):
             endpoints[name] = endpoint_info
             self._add_update_endpoints_config(endpoints)
         except Exception as e:
-            logger.error("Error in add_endpoint: %s" % e)
+            logger.error(f'Error in add_endpoint: {e}')
             raise
 
     def _add_update_endpoints_config(self, endpoints):
@@ -269,11 +221,8 @@ class TabPyState(object):
         for endpoint_name in endpoints:
             try:
                 info = endpoints[endpoint_name]
-                if sys.version_info > (3, 0):
-                    dstring = str(bytes(info['docstring'], "utf-8").decode(
-                        'unicode_escape'))
-                else:
-                    dstring = info['docstring'].decode('string_escape')
+                dstring = str(bytes(info['docstring'], "utf-8").decode(
+                    'unicode_escape'))
                 self._set_config_value(_QUERY_OBJECT_DOCSTRING,
                                        endpoint_name,
                                        dstring,
@@ -282,7 +231,7 @@ class TabPyState(object):
                 self._set_config_value(_DEPLOYMENT_SECTION_NAME,
                                        endpoint_name, json.dumps(info))
             except Exception as e:
-                logger.error("Unable to write endpoints config: %s" % e)
+                logger.error(f'Unable to write endpoints config: {e}')
                 raise
 
     @state_lock
@@ -318,22 +267,22 @@ class TabPyState(object):
         '''
         try:
             endpoints = self.get_endpoints()
-            if not name or not isinstance(name, (str, unicode)):
+            if not name or not isinstance(name, str):
                 raise ValueError("name of the endpoint must be string.")
             elif name not in endpoints:
-                raise ValueError("endpoint %s does not exist." % name)
+                raise ValueError(f'endpoint {name} does not exist.')
 
             endpoint_info = endpoints[name]
 
-            if description and not isinstance(description, (str, unicode)):
+            if description and not isinstance(description, str):
                 raise ValueError("description must be a string.")
             elif not description:
                 description = endpoint_info['description']
-            if docstring and not isinstance(docstring, (str, unicode)):
+            if docstring and not isinstance(docstring, str):
                 raise ValueError("docstring must be a string.")
             elif not docstring:
                 docstring = endpoint_info['docstring']
-            if endpoint_type and not isinstance(endpoint_type, (str, unicode)):
+            if endpoint_type and not isinstance(endpoint_type, str):
                 raise ValueError("endpoint type must be a string.")
             elif not endpoint_type:
                 endpoint_type = endpoint_info['type']
@@ -348,7 +297,7 @@ class TabPyState(object):
                     dependencies = endpoint_info['dependencies']
                 else:
                     dependencies = []
-            if target and not isinstance(target, (str, unicode)):
+            if target and not isinstance(target, str):
                 raise ValueError("target must be a string.")
             elif target and target not in endpoints:
                 raise ValueError("target endpoint is not valid.")
@@ -367,7 +316,7 @@ class TabPyState(object):
             endpoints[name] = endpoint_info
             self._add_update_endpoints_config(endpoints)
         except Exception as e:
-            logger.error("Error in update_endpoint: %s" % e)
+            logger.error(f'Error in update_endpoint: {e}')
             raise
 
     @state_lock
@@ -393,7 +342,7 @@ class TabPyState(object):
             raise ValueError("Name of the endpoint must be a valid string.")
         endpoints = self.get_endpoints()
         if name not in endpoints:
-            raise ValueError("Endpoint %s does not exist." % name)
+            raise ValueError(f'Endpoint {name} does not exist.')
 
         endpoint_to_delete = endpoints[name]
 
@@ -407,8 +356,9 @@ class TabPyState(object):
 
         # check if other endpoints are depending on this endpoint
         if len(deps) > 0:
-            raise ValueError("Cannot remove endpoint %s, it is currently "
-                             "used by %s endpoints." % (name, list(deps)))
+            raise ValueError(
+                f'Cannot remove endpoint {name}, it is currently '
+                f'used by {list(deps)} endpoints.')
 
         del endpoints[name]
 
@@ -420,8 +370,8 @@ class TabPyState(object):
 
             return endpoint_to_delete
         except Exception as e:
-            logger.error("Unable to delete endpoint %s" % e)
-            raise ValueError("Unable to delete endpoint: %s" % e)
+            logger.error(f'Unable to delete endpoint {e}')
+            raise ValueError(f'Unable to delete endpoint: {e}')
 
     @property
     def name(self):
@@ -432,7 +382,7 @@ class TabPyState(object):
         try:
             name = self._get_config_value(_SERVICE_INFO_SECTION_NAME, 'Name')
         except Exception as e:
-            logger.error("Unable to get name: %s" % e)
+            logger.error(f'Unable to get name: {e}')
         return name
 
     @property
@@ -445,7 +395,7 @@ class TabPyState(object):
             creation_time = self._get_config_value(
                 _SERVICE_INFO_SECTION_NAME, 'Creation Time')
         except Exception as e:
-            logger.error("Unable to get name: %s" % e)
+            logger.error(f'Unable to get name: {e}')
         return creation_time
 
     @state_lock
@@ -458,12 +408,12 @@ class TabPyState(object):
         name : str
             Name of TabPy service.
         '''
-        if not isinstance(name, (str, unicode)):
+        if not isinstance(name, str):
             raise ValueError("name must be a string.")
         try:
             self._set_config_value(_SERVICE_INFO_SECTION_NAME, 'Name', name)
         except Exception as e:
-            logger.error("Unable to set name: %s" % e)
+            logger.error(f'Unable to set name: {e}')
 
     def get_description(self):
         '''
@@ -474,7 +424,7 @@ class TabPyState(object):
             description = self._get_config_value(
                 _SERVICE_INFO_SECTION_NAME, 'Description')
         except Exception as e:
-            logger.error("Unable to get description: %s" % e)
+            logger.error(f'Unable to get description: {e}')
         return description
 
     @state_lock
@@ -487,13 +437,13 @@ class TabPyState(object):
         description : str
             Description of TabPy service.
         '''
-        if not isinstance(description, (str, unicode)):
+        if not isinstance(description, str):
             raise ValueError("Description must be a string.")
         try:
             self._set_config_value(
                 _SERVICE_INFO_SECTION_NAME, 'Description', description)
         except Exception as e:
-            logger.error("Unable to set description: %s" % e)
+            logger.error(f'Unable to set description: {e}')
 
     def get_revision_number(self):
         '''
@@ -504,7 +454,7 @@ class TabPyState(object):
             rev = int(self._get_config_value(
                 _META_SECTION_NAME, 'Revision Number'))
         except Exception as e:
-            logger.error("Unable to get revision number: %s" % e)
+            logger.error(f'Unable to get revision number: {e}')
         return rev
 
     def get_access_control_allow_origin(self):
@@ -556,9 +506,10 @@ class TabPyState(object):
             self._set_config_value(_META_SECTION_NAME,
                                    'Revision Number', revision_number)
         except Exception as e:
-            logger.error("Unable to set revision number: %s" % e)
+            logger.error(f'Unable to set revision number: {e}')
 
     def _remove_config_option(self, section_name, option_name,
+                              logger=logging.getLogger(__name__),
                               _update_revision=True):
         if not self.config:
             raise ValueError("State configuration not yet loaded.")
@@ -566,7 +517,7 @@ class TabPyState(object):
         # update revision number
         if _update_revision:
             self._increase_revision_number()
-        self._write_state()
+        self._write_state(logger=logger)
 
     def _has_config_value(self, section_name, option_name):
         if not self.config:
@@ -581,19 +532,20 @@ class TabPyState(object):
                         str(cur_rev + 1))
 
     def _set_config_value(self, section_name, option_name, option_value,
+                          logger=logging.getLogger(__name__),
                           _update_revision=True):
         if not self.config:
             raise ValueError("State configuration not yet loaded.")
 
         if not self.config.has_section(section_name):
-            logger.debug("Adding config section {}".format(section_name))
+            logger.log(logging.DEBUG, f'Adding config section {section_name}')
             self.config.add_section(section_name)
 
         self.config.set(section_name, option_name, option_value)
         # update revision number
         if _update_revision:
             self._increase_revision_number()
-        self._write_state()
+        self._write_state(logger=logger)
 
     def _get_config_items(self, section_name):
         if not self.config:
@@ -613,12 +565,13 @@ class TabPyState(object):
         elif optional:
             return default_value
         else:
-            raise ValueError("Cannot find option name %s under section %s"
-                             % (option_name, section_name))
+            raise ValueError(
+                f'Cannot find option name {option_name} '
+                f'under section {section_name}')
 
-    def _write_state(self):
+    def _write_state(self, logger=logging.getLogger(__name__)):
         '''
         Write state (ConfigParser) to Consul
         '''
-        logger.info("Writing state to config")
-        write_state_config(self.config, self.settings)
+        logger.log(logging.INFO, 'Writing state to config')
+        write_state_config(self.config, self.settings, logger=logger)

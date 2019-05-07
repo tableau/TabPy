@@ -29,10 +29,9 @@ class ResponseError(Exception):
             self.message = response.text
 
     def __str__(self):
-        return "(%s) %s %r" % (
-            self.status_code,
-            self.message,
-            self.info)
+        return (f'({self.status_code}) '
+                f'{self.message} '
+                f'{self.info}')
 
 
 class RequestsNetworkWrapper(object):
@@ -59,9 +58,9 @@ class RequestsNetworkWrapper(object):
 
     @staticmethod
     def raise_error(response):
-        logger.error("Error with server response. code=%s; text=%s",
-                     response.status_code,
-                     response.text)
+        logger.error(
+            f'Error with server response. code={response.status_code}; '
+            f'text={response.text}')
 
         raise ResponseError(response)
 
@@ -84,7 +83,7 @@ class RequestsNetworkWrapper(object):
         object that is parsed from the response JSON."""
         self._remove_nones(data)
 
-        logger.info("GET %s with %r", url, data)
+        logger.info(f'GET {url} with {data}')
 
         response = self.session.get(
             url,
@@ -93,7 +92,7 @@ class RequestsNetworkWrapper(object):
             auth=self.auth)
         if response.status_code != 200:
             self.raise_error(response)
-        logger.info("response=%r", response.text)
+        logger.info(f'response={response.text}')
 
         if response.text == '':
             return dict()
@@ -105,7 +104,7 @@ class RequestsNetworkWrapper(object):
         object that is parsed from the response JSON."""
         data = self._encode_request(data)
 
-        logger.info("POST %s with %r", url, data)
+        logger.info(f'POST {url} with {data}')
         response = self.session.post(
             url,
             data=data,
@@ -125,7 +124,7 @@ class RequestsNetworkWrapper(object):
         object that is parsed from the response JSON."""
         data = self._encode_request(data)
 
-        logger.info("PUT %s with %r", url, data)
+        logger.info(f'PUT {url} with {data}')
 
         response = self.session.put(
             url,
@@ -148,7 +147,7 @@ class RequestsNetworkWrapper(object):
         if data is not None:
             data = json.dumps(data)
 
-        logger.info("DELETE %s with %r", url, data)
+        logger.info(f'DELETE {url} with {data}')
 
         response = self.session.delete(
             url,
@@ -161,7 +160,7 @@ class RequestsNetworkWrapper(object):
 
         if response.status_code not in (200, 201, 204):
             raise RuntimeError(
-                "Error with server response code: %s", response.status_code)
+                f'Error with server response code: {response.status_code}')
 
     def set_credentials(self, username, password):
         """
@@ -199,8 +198,8 @@ class ServiceClient(object):
 
         pattern = compile('.*(:[0-9]+)$')
         if not endpoint.endswith('/') and not pattern.match(endpoint):
-            logger.warning("endpoint %s does not end with '/': appending.",
-                           endpoint)
+            logger.warning(
+                f'endpoint {endpoint} does not end with \'/\': appending.')
             endpoint = endpoint + '/'
 
         self.endpoint = endpoint
@@ -250,11 +249,10 @@ class RESTProperty(object):
     def __get__(self, instance, owner):
         if instance:
             try:
-                return getattr(instance,
-                               self.name)
+                return getattr(instance, self.name)
             except AttributeError:
-                raise AttributeError("%s has not been set yet." % (
-                    self.name))
+                raise AttributeError(
+                    f'{self.name} has not been set yet.')
         else:
             return self
 
@@ -320,8 +318,8 @@ class RESTObject(_MutableMapping, metaclass=_RESTMetaclass):
         are ignored.
 
         """
-        logger.info("Initializing %s from %r",
-                    self.__class__.__name__, kwargs)
+        logger.info(
+            f'Initializing {self.__class__.__name__} from {kwargs}')
         for attr in self.__rest__:
             if attr in kwargs:
                 setattr(self, attr, kwargs.pop(attr))
@@ -433,15 +431,14 @@ def enum(*values, **kwargs):
         raise ValueError("At least one value is required.")
     enum_type = kwargs.pop('type', str)
     if kwargs:
-        raise TypeError("Unexpected parameters: %s" % (
-            ", ".join(kwargs.keys())))
+        raise TypeError(
+            f'Unexpected parameters: {", ".join(kwargs.keys())}')
 
     def __new__(cls, value):
         if value not in cls.values:
             raise ValueError(
-                "%r is an unexpected value. Expected one of %r" % (
-                    value,
-                    cls.values))
+                f'{value} is an unexpected value. '
+                f'Expected one of {cls.values}')
 
         return super(enum, cls).__new__(cls, value)
 

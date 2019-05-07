@@ -1,6 +1,8 @@
 {
     "git.enabled": true,
     "files.exclude": {
+        "**/build": true,
+        "**/dist": true,
         "**/__pycache__": true,
         "**/.pytest_cache": true,
         "**/*.egg-info": true,

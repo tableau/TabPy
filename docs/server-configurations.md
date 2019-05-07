@@ -7,6 +7,9 @@ To download specific release of TabPy find it on
 
  TabPy release | Python | Operating System | Owner | When confirmed to work | Comments
 -------------- |------- |----------------- |------ |----------------------- |----------
+0.4.0 | 3.6.5 | Windows 10 | @tableau | 2019-05-02 | Win 10 x64, Python 3.7.2 x64
+0.4.0 | 3.6.5 | centOS 7.6-1810 | @tableau | 2019-05-02 |
+0.4.0 | 3.6.5 | macOS Sierra | @tableau | 2019-05-02 |
 0.3.2 | 3.6.5 | Windows 10 | @tableau | 2019-01-29 | Win 10 x64, Python 3.5.6 x64
 0.3.2 | 3.6.5 | centOS 7.6-1810 | @tableau | 2019-01-30 |
 0.3.2 | 3.6.5 | macOS Sierra | @tableau | 2019-01-29 |
@@ -16,4 +19,5 @@ tested with TabPy instances, but are not guaranteed to be 100% supported.
 
  TabPy release | Python | Operating System | Owner | When confirmed to work | Comments
 -------------- |------- |----------------- |------ |----------------------- |----------
+0.4.1 | 3.6.7 | Ubuntu 18.04 | @tableau | 2019-05-03
 0.3.2 | 3.6.7 | Ubuntu 18.04 | @tableau | 2019-03-26 | Ubuntu ships Python 3.6.7

@@ -14,9 +14,6 @@ import logging
 from tabpy_server.common.util import format_exception
 
 
-logger = logging.getLogger(__name__)
-
-
 class EndpointsHandler(ManagementHandler):
     def initialize(self, app):
         super(EndpointsHandler, self).initialize(app)
@@ -35,9 +32,6 @@ class EndpointsHandler(ManagementHandler):
         if self.should_fail_with_not_authorized():
             self.fail_with_not_authorized()
             return
-
-        logger.debug(self.append_request_context(
-            'Processing POST for /endpoints'))
 
         try:
             if not self.request.body:
@@ -66,19 +60,21 @@ class EndpointsHandler(ManagementHandler):
 
             # check if endpoint already exist
             if name in self.tabpy_state.get_endpoints():
-                self.error_out(400, "endpoint %s already exists." % name)
+                self.error_out(400, f'endpoint {name} already exists.')
                 self.finish()
                 return
 
-            logger.debug(self.append_request_context(
-                "Adding endpoint '{}'".format(name)))
+            self.logger.log(
+                logging.DEBUG,
+                f'Adding endpoint "{name}"')
             err_msg = yield self._add_or_update_endpoint('add', name, 1,
                                                          request_data)
             if err_msg:
                 self.error_out(400, err_msg)
             else:
-                logger.debug(self.append_request_context(
-                    "Endpoint {} successfully added".format(name)))
+                self.logger.log(
+                    logging.DEBUG,
+                    f'Endpoint {name} successfully added')
                 self.set_status(201)
                 self.write(self.tabpy_state.get_endpoints(name))
                 self.finish()

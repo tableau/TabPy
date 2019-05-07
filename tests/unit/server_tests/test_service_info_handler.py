@@ -81,10 +81,8 @@ class TestServiceInfoHandlerWithAuth(AsyncHTTPTestCase):
         cls.config_file.write(
             bytes(
                 '[TabPy]\n'
-                'TABPY_PWD_FILE = {}\n'
-                'TABPY_STATE_PATH = {}'.format(
-                    cls.pwd_file.name,
-                    cls.state_dir),
+                f'TABPY_PWD_FILE = {cls.pwd_file.name}\n'
+                f'TABPY_STATE_PATH = {cls.state_dir}',
                 'utf-8'))
         cls.config_file.close()
 
@@ -153,8 +151,7 @@ class TestServiceInfoHandlerWithoutAuth(AsyncHTTPTestCase):
             prefix=prefix, suffix='.conf', delete=False, mode='w+')
         cls.config_file.write(
             '[TabPy]\n'
-            'TABPY_STATE_PATH = {}'.format(
-                cls.state_dir))
+            f'TABPY_STATE_PATH = {cls.state_dir}')
         cls.config_file.close()
 
     @classmethod
