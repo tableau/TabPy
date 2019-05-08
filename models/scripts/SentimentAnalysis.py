@@ -1,11 +1,8 @@
 from tabpy_tools.client import Client
-import pandas as pd
 from textblob import TextBlob
 from nltk.sentiment import SentimentIntensityAnalyzer
 import sys
-import configparser
-import getpass
-from pathlib import Path
+from utils import setup_utils
 
 
 def SentimentAnalysis(_arg1, library='nltk'):
@@ -28,7 +25,7 @@ def SentimentAnalysis(_arg1, library='nltk'):
             sentimentResults = sid.polarity_scores(text)
             score = sentimentResults['compound']
             scores.append(score)
-    elif libary == 'textblob':
+    elif library == 'textblob':
         for text in _arg1:
             currScore = TextBlob(text)
             scores.append(currScore.sentiment.polarity)
@@ -37,30 +34,21 @@ def SentimentAnalysis(_arg1, library='nltk'):
 
 if __name__ == '__main__':
     #running from setup.py
-    if (len(sys.argv) > 1):
+    if len(sys.argv) > 1:
         config_file_path = sys.argv[1]
     else: 
-        config_file_path = str(Path(__file__).resolve().parent.parent.parent
-                               / 'tabpy-server' / 'tabpy_server' / 'common'
-                               / 'default.conf')
-    config = configparser.ConfigParser()
-    config.read(config_file_path)
-    tabpy_config = config['TabPy']
-    port = tabpy_config['TABPY_PORT']
-    auth_on = 'TABPY_PWD_FILE' in tabpy_config
-    ssl_on = 'TABPY_TRANSFER_PROTOCOL' in tabpy_config and 'TABPY_CERTIFICATE_FILE' in tabpy_config and 'TABPY_KEY_FILE' in tabpy_config
-    prefix = "https" if ssl_on else "http"
+        config_file_path = setup_utils.get_default_config_file_path()
+    port, auth_on, prefix = setup_utils.parse_config(config_file_path)
 
     connection = Client(f'{prefix}://localhost:{port}/')
 
-    if(auth_on):
+    if auth_on:
         #credentials are passed in from setup.py
-        if(len(sys.argv) == 4):
+        if len(sys.argv) == 4:
             user, passwd = sys.argv[2], sys.argv[3]
         #running Sentiment Analysis independently 
         else:
-            user = input("Username: ")
-            passwd = getpass.getpass("Password: ")
+            user, passwd = setup_utils.get_creds()
         connection.set_credentials(user, passwd)
 
     connection.deploy('Sentiment Analysis', SentimentAnalysis,

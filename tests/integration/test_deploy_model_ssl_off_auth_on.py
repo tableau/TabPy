@@ -1,6 +1,5 @@
 import integ_test_base
 import base64
-import requests
 import subprocess
 from pathlib import Path
 

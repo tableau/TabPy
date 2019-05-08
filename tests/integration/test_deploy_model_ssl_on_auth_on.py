@@ -3,7 +3,6 @@ import base64
 import requests
 import subprocess
 from pathlib import Path
-import sys
 
 class TestDeployModelSSLOnAuthOn(integ_test_base.IntegTestBase):
     def _get_transfer_protocol(self) -> str:

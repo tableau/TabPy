@@ -3,9 +3,8 @@ import os
 import sys
 import platform
 import subprocess
-import getpass
 from pathlib import Path
-import configparser
+from utils import setup_utils
 
 # pip 10.0 introduced a breaking change that moves the location of main
 try:
@@ -32,24 +31,14 @@ if __name__ == '__main__':
     else:
         py = 'python3'
 
-    if (len(sys.argv) > 1):
+    if len(sys.argv) > 1:
         config_file_path = sys.argv[1]
     else:  
-        config_file_path = str(Path(__file__).resolve().parent.parent
-                               / 'tabpy-server' / 'tabpy_server'
-                               / 'common' / 'default.conf')
+        config_file_path = setup_utils.get_default_config_file_path()
     print(f'Using config file at {config_file_path}')
-    config = configparser.ConfigParser()
-    config.read(config_file_path)
-    auth_on = 'TABPY_PWD_FILE' in config['TabPy']
-    if (auth_on):
-        if sys.stdin.isatty():
-            user = input("Username: ")
-            passwd = getpass.getpass("Password: ")
-        else:
-            user = sys.stdin.readline().rstrip()
-            passwd = sys.stdin.readline().rstrip()
-        auth_args = [user, passwd]
+    port, auth_on, prefix = setup_utils.parse_config(config_file_path)
+    if auth_on:
+        auth_args = setup_utils.get_creds()
     else:
         auth_args = []
 

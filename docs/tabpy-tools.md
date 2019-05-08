@@ -8,7 +8,6 @@ on TabPy server.
 - [Connecting to TabPy](#connecting-to-tabpy)
 - [Authentication](#authentication)
 - [Deploying a Function](#deploying-a-function)
-- [Predeployed Functions](#predeployed-functions)
 - [Providing Schema Metadata](#providing-schema-metadata)
 - [Querying an Endpoint](#querying-an-endpoint)
 - [Evaluating Arbitrary Python Scripts](#evaluating-arbitrary-python-scripts)
@@ -173,10 +172,10 @@ python setup.py custom.conf
 
 ```
 
-The setup file will install all of the necessary dependencies `(sklearn, nltk,
-textblob, pandas, & numpy)` and deploy all of the prebuilt models located in
-`./models/scripts`. For every model that is successfully deployed a message
-will be printed to the console:
+The setup file will install all of the necessary dependencies `(eg. sklearn,
+nltk, textblob, pandas, & numpy)` and deploy all of the prebuilt models
+located in `./models/scripts`. For every model that is successfully deployed
+a message will be printed to the console:
 
 ```sh
 "Successfully deployed PCA"

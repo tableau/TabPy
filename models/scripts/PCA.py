@@ -6,9 +6,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import OneHotEncoder
 import sys
-import getpass
-from pathlib import Path
-import configparser
+from utils import setup_utils
 
 def PCA(component, _arg1, _arg2, *_argN):
     '''
@@ -23,13 +21,13 @@ def PCA(component, _arg1, _arg2, *_argN):
     oneHotEncoder = OneHotEncoder(categories='auto', sparse=False)
 
     for col in cols:
-        if isinstance(col[0], (int,float)):
+        if isinstance(col[0], (int, float)):
             encodedCols.append(col)
-        elif (type(col[0]) is bool):
+        elif type(col[0]) is bool:
             intCol = array(col)
             encodedCols.append(intCol.astype(int))
         else:
-            if (len(set(col)) > 25):
+            if len(set(col)) > 25:
                 print('ERROR: Non-numeric arguments cannot have more than '
                       '25 unique values')
                 assert (False)
@@ -43,7 +41,7 @@ def PCA(component, _arg1, _arg2, *_argN):
     for i in range(len(encodedCols)):
         dataDict[f'col{1 + i}'] = list(encodedCols[i])
 
-    if (component <= 0 or component > len(dataDict)):
+    if component <= 0 or component > len(dataDict):
         print('ERROR: Component specified must be >= 0 and '
               '<= number of arguments')
         assert (False)
@@ -60,30 +58,21 @@ def PCA(component, _arg1, _arg2, *_argN):
 
 if __name__ == '__main__':
     #running from setup.py
-    if (len(sys.argv) > 1):
+    if len(sys.argv) > 1:
         config_file_path = sys.argv[1]
     else: 
-        config_file_path = str(Path(__file__).resolve().parent.parent.parent
-                               / 'tabpy-server' / 'tabpy_server' / 'common'
-                               / 'default.conf')
-    config = configparser.ConfigParser()
-    config.read(config_file_path)
-    tabpy_config = config['TabPy']
-    port = tabpy_config['TABPY_PORT']
-    auth_on = 'TABPY_PWD_FILE' in tabpy_config
-    ssl_on = 'TABPY_TRANSFER_PROTOCOL' in tabpy_config and 'TABPY_CERTIFICATE_FILE' in tabpy_config and 'TABPY_KEY_FILE' in tabpy_config
-    prefix = "https" if ssl_on else "http"
+        config_file_path = setup_utils.get_default_config_file_path()
+    port, auth_on, prefix = setup_utils.parse_config(config_file_path)
 
     connection = Client(f'{prefix}://localhost:{port}/')
 
-    if(auth_on):
+    if auth_on:
         #credentials are passed in from setup.py
-        if(len(sys.argv) == 4):
+        if len(sys.argv) == 4:
             user, passwd = sys.argv[2], sys.argv[3]
         #running PCA independently 
         else:
-            user = input("Username: ")
-            passwd = getpass.getpass("Password: ")
+            user, passwd = setup_utils.get_creds()
         connection.set_credentials(user, passwd)
 
     connection.deploy('PCA', PCA,
