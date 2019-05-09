@@ -143,7 +143,7 @@ class EndpointHandler(ManagementHandler):
             self.finish()
 
         on_state_change(self.settings, self.tabpy_state, self.python_service,
-                        self)
+                        self.logger)
 
     @gen.coroutine
     def _delete_po_future(self, delete_path):

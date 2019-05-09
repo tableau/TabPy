@@ -1,1 +1,1 @@
-export PYTHONPATH=./tabpy-server:./tabpy-tools:./models:$PYTHONPATH
+export PYTHONPATH=./tabpy-server:./tabpy-tools:$PYTHONPATH

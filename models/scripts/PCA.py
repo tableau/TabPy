@@ -6,6 +6,8 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import OneHotEncoder
 import sys
+from pathlib import Path
+sys.path.append(str(Path(__file__).resolve().parent.parent.parent / 'models'))
 from utils import setup_utils
 
 def PCA(component, _arg1, _arg2, *_argN):

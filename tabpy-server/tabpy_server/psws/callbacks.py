@@ -132,7 +132,7 @@ def _get_latest_service_state(settings,
 def on_state_change(settings, tabpy_state, python_service,
                     logger=logging.getLogger(__name__)):
     try:
-        logger.info("Loading state from state file")
+        logger.log(logging.INFO, "Loading state from state file")
         config = util._get_state_from_file(
             settings[SettingsParameters.StateFilePath],
             logger=logger)
@@ -183,5 +183,5 @@ def on_state_change(settings, tabpy_state, python_service,
 
     except Exception as e:
         err_msg = format_exception(e, 'on_state_change')
-        logger.error(
-            f'Error submitting update model request: error={err_msg}')
+        logger.log(logging.ERROR,
+                   f'Error submitting update model request: error={err_msg}')

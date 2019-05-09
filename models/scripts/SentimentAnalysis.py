@@ -2,6 +2,8 @@ from tabpy_tools.client import Client
 from textblob import TextBlob
 from nltk.sentiment import SentimentIntensityAnalyzer
 import sys
+from pathlib import Path
+sys.path.append(str(Path(__file__).resolve().parent.parent.parent / 'models'))
 from utils import setup_utils
 
 
