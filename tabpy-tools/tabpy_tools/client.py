@@ -78,6 +78,8 @@ class Client(object):
         self._endpoint = endpoint
 
         session = requests.session()
+        session.verify = False
+        requests.packages.urllib3.disable_warnings()
 
         # Setup the communications layer.
         network_wrapper = RequestsNetworkWrapper(session)

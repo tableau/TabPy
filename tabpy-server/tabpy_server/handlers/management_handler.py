@@ -141,7 +141,7 @@ class ManagementHandler(MainHandler):
             on_state_change(self.settings,
                             self.tabpy_state,
                             self.python_service,
-                            self)
+                            self.logger)
 
         finally:
             self.settings['add_or_updating_endpoint'] = None
