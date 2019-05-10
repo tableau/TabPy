@@ -5,8 +5,7 @@ import sys
 
 def get_default_config_file_path():
     config_file_path = str(Path(__file__).resolve().parent.parent.parent
-                           / 'tabpy-server' / 'tabpy_server' / 'common'
-                           / 'default.conf')
+                           / 'tabpy-server/tabpy_server/common/default.conf')
     return config_file_path
 
 def parse_config(config_file_path):

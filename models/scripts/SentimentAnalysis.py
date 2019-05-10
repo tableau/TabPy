@@ -14,12 +14,15 @@ def SentimentAnalysis(_arg1, library='nltk'):
     more information on the function and how to use it please refer to
     tabpy-tools.md
     '''
-    assert (type(_arg1[0]) is str)
+    if not (isinstance(_arg1[0], str)):
+        raise TypeError
 
     library = library.lower()
     supportedLibraries = {'nltk', 'textblob'}
 
-    assert (library in supportedLibraries)
+    if library not in supportedLibraries:
+        raise ValueError
+
     scores = []
     if library == 'nltk':
         sid = SentimentIntensityAnalyzer()

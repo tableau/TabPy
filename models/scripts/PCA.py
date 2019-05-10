@@ -32,7 +32,7 @@ def PCA(component, _arg1, _arg2, *_argN):
             if len(set(col)) > 25:
                 print('ERROR: Non-numeric arguments cannot have more than '
                       '25 unique values')
-                assert (False)
+                raise ValueError
             integerEncoded = labelEncoder.fit_transform(array(col))
             integerEncoded = integerEncoded.reshape(len(col), 1)
             oneHotEncoded = oneHotEncoder.fit_transform(integerEncoded)
@@ -46,7 +46,7 @@ def PCA(component, _arg1, _arg2, *_argN):
     if component <= 0 or component > len(dataDict):
         print('ERROR: Component specified must be >= 0 and '
               '<= number of arguments')
-        assert (False)
+        raise ValueError
 
     df = pd.DataFrame(data=dataDict, dtype=float)
     scale = StandardScaler()

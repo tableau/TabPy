@@ -2,6 +2,7 @@ import pip
 import os
 import sys
 import platform
+import runpy
 import subprocess
 from pathlib import Path
 from utils import setup_utils
@@ -45,6 +46,6 @@ if __name__ == '__main__':
     directory = str(Path(__file__).resolve().parent / 'scripts')
     # Deploy each model in the scripts directory
     for filename in os.listdir(directory):
-        subprocess.call([py, f'{directory}/{filename}', config_file_path]
+        subprocess.run([py, f'{directory}/{filename}', config_file_path]
                         + auth_args)
 
