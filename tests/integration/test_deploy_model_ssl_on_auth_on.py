@@ -28,7 +28,7 @@ class TestDeployModelSSLOnAuthOn(integ_test_base.IntegTestBase):
             'TabPy-Client': "Integration test for deploying models with auth",
             'Authorization': 'Basic ' +
             base64.b64encode('user1:P@ssw0rd'.encode('utf-8')).decode('utf-8')
-            }
+        }
 
         session = requests.Session()
         # Do not verify servers' cert to be signed by trusted CA
@@ -41,8 +41,8 @@ class TestDeployModelSSLOnAuthOn(integ_test_base.IntegTestBase):
                                    headers=headers)
         self.assertEqual(200, PCA_response.status_code)
 
-        SentimentAnalysis_response = session.get(url=f'{self._get_transfer_protocol()}'
-                                                 '://localhost:9004/endpoints/'
-                                                 'Sentiment Analysis',
-                                                 headers=headers)
+        SentimentAnalysis_response = session.get(
+            url=f'{self._get_transfer_protocol()}'
+            '://localhost:9004/endpoints/'
+            'Sentiment Analysis', headers=headers)
         self.assertEqual(200, SentimentAnalysis_response.status_code)
