@@ -22,7 +22,7 @@ function install_dependencies() {
         echo Invalid startup environment.
         exit 1
     fi
-    check_status
+    check_status "Cannot install dependecies."
 }
 
 # Check for Python in PATH

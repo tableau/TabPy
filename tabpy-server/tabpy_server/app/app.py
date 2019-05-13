@@ -9,9 +9,7 @@ import tabpy_server
 from tabpy_server import __version__
 from tabpy_server.app.ConfigParameters import ConfigParameters
 from tabpy_server.app.SettingsParameters import SettingsParameters
-from tabpy_server.app.util import (
-    log_and_raise,
-    parse_pwd_file)
+from tabpy_server.app.util import parse_pwd_file
 from tabpy_server.management.state import TabPyState
 from tabpy_server.management.util import _get_state_from_file
 from tabpy_server.psws.callbacks import (init_model_evaluator, init_ps_server)
@@ -76,11 +74,13 @@ class TabPyApp:
                 'keyfile': self.settings[SettingsParameters.KeyFile]
             })
         else:
-            log_and_raise(f'Unsupported transfer protocol {protocol}.',
-                          RuntimeError)
+            msg = f'Unsupported transfer protocol {protocol}.'
+            logger.critical(msg)
+            raise RuntimeError(msg)
 
-        logger.info('Web service listening on port {}'.format(
-            str(self.settings[SettingsParameters.Port])))
+        logger.info(
+            'Web service listening on port '
+            f'{str(self.settings[SettingsParameters.Port])}')
         tornado.ioloop.IOLoop.instance().start()
 
     def _create_tornado_web_app(self):
@@ -165,8 +165,8 @@ class TabPyApp:
                 parser.read_string(f.read())
         else:
             logger.warning(
-                "Unable to find config file at '{}', "
-                "using default settings.".format(config_file))
+                f'Unable to find config file at {config_file}, '
+                'using default settings.')
 
         def set_parameter(settings_key,
                           config_key,
@@ -216,8 +216,8 @@ class TabPyApp:
                 os.path.expanduser(
                     self.settings[SettingsParameters.StateFilePath])))
         state_file_path = self.settings[SettingsParameters.StateFilePath]
-        logger.info("Loading state from state file %s" %
-                    os.path.join(state_file_path, "state.ini"))
+        logger.info('Loading state from state file '
+                    f'{os.path.join(state_file_path, "state.ini")}')
         tabpy_state = _get_state_from_file(state_file_path)
         self.tabpy_state = TabPyState(
             config=tabpy_state, settings=self.settings)
@@ -244,9 +244,10 @@ class TabPyApp:
                       ConfigParameters.TABPY_PWD_FILE)
         if ConfigParameters.TABPY_PWD_FILE in self.settings:
             if not self._parse_pwd_file():
-                log_and_raise('Failed to read passwords file %s' %
-                              self.settings[ConfigParameters.TABPY_PWD_FILE],
-                              RuntimeError)
+                msg = ('Failed to read passwords file '
+                       f'{self.settings[ConfigParameters.TABPY_PWD_FILE]}')
+                logger.critical(msg)
+                raise RuntimeError(msg)
         else:
             logger.info(
                 "Password file is not specified: "
@@ -262,14 +263,16 @@ class TabPyApp:
         self.settings[SettingsParameters.LogRequestContext] = (
             self.settings[SettingsParameters.LogRequestContext].lower() !=
             'false')
-        logger.info('Call context logging is {}'.format(
-            'enabled' if self.settings[SettingsParameters.LogRequestContext]
-            else 'disabled'))
+        call_context_state =\
+            'enabled' if self.settings[SettingsParameters.LogRequestContext]\
+            else 'disabled'
+        logger.info(f'Call context logging is {call_context_state}')
 
     def _validate_transfer_protocol_settings(self):
         if SettingsParameters.TransferProtocol not in self.settings:
-            log_and_raise(
-                'Missing transfer protocol information.', RuntimeError)
+            msg = 'Missing transfer protocol information.'
+            logger.critical(msg)
+            raise RuntimeError(msg)
 
         protocol = self.settings[SettingsParameters.TransferProtocol]
 
@@ -277,8 +280,9 @@ class TabPyApp:
             return
 
         if protocol != 'https':
-            log_and_raise('Unsupported transfer protocol: {}.'.format(
-                protocol), RuntimeError)
+            msg = f'Unsupported transfer protocol: {protocol}'
+            logger.critical(msg)
+            raise RuntimeError(msg)
 
         self._validate_cert_key_state(
             'The parameter(s) {} must be set.',
@@ -295,9 +299,9 @@ class TabPyApp:
 
     @staticmethod
     def _validate_cert_key_state(msg, cert_valid, key_valid):
-        cert_and_key_param = '{} and {}'.format(
-            ConfigParameters.TABPY_CERTIFICATE_FILE,
-            ConfigParameters.TABPY_KEY_FILE)
+        cert_and_key_param = (
+            f'{ConfigParameters.TABPY_CERTIFICATE_FILE} and '
+            f'{ConfigParameters.TABPY_KEY_FILE}')
         https_error = 'Error using HTTPS: '
         err = None
         if not cert_valid and not key_valid:
@@ -309,7 +313,8 @@ class TabPyApp:
             err = https_error + msg.format(ConfigParameters.TABPY_KEY_FILE)
 
         if err is not None:
-            log_and_raise(err, RuntimeError)
+            logger.critical(err)
+            raise RuntimeError(err)
 
     def _parse_pwd_file(self):
         succeeded, self.credentials = parse_pwd_file(

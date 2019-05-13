@@ -8,16 +8,14 @@ import requests
 import sys
 
 
-logger = logging.getLogger(__name__)
-
-
 class RestrictedTabPy:
-    def __init__(self, port):
+    def __init__(self, port, logger):
         self.port = port
+        self.logger = logger
 
     def query(self, name, *args, **kwargs):
         url = f'http://localhost:{self.port}/query/{name}'
-        logger.debug(f'Querying {url}...')
+        self.logger.log(logging.DEBUG, f'Querying {url}...')
         internal_data = {'data': args or kwargs}
         data = json.dumps(internal_data)
         headers = {'content-type': 'application/json'}
@@ -42,9 +40,6 @@ class EvaluationPlaneHandler(BaseHandler):
         if self.should_fail_with_not_authorized():
             self.fail_with_not_authorized()
             return
-
-        logger.debug(self.append_request_context(
-            'Processing POST for /evaluate'))
 
         self._add_CORS_header()
         try:
@@ -76,14 +71,13 @@ class EvaluationPlaneHandler(BaseHandler):
                                             'the format _arg1, _arg2, _argN')
                         return
 
-            function_to_evaluate = (
-                'def _user_script(tabpy'
-                + arguments_str + '):\n')
+            function_to_evaluate = f'def _user_script(tabpy{arguments_str}):\n'
             for u in user_code.splitlines():
                 function_to_evaluate += ' ' + u + '\n'
 
-            logger.info(self.append_request_context(
-                f'function to evaluate={function_to_evaluate}'))
+            self.logger.log(
+                logging.INFO,
+                f'function to evaluate={function_to_evaluate}')
 
             result = yield self.call_subprocess(function_to_evaluate,
                                                 arguments)
@@ -94,8 +88,7 @@ class EvaluationPlaneHandler(BaseHandler):
                 self.finish()
 
         except Exception as e:
-            err_msg = "%s : " % e.__class__.__name__
-            err_msg += "%s" % str(e)
+            err_msg = f'{e.__class__.__name__} : {str(e)}'
             if err_msg != "KeyError : 'response'":
                 err_msg = format_exception(e, 'POST /evaluate')
                 self.error_out(500, 'Error processing script', info=err_msg)
@@ -110,12 +103,9 @@ class EvaluationPlaneHandler(BaseHandler):
 
     @gen.coroutine
     def call_subprocess(self, function_to_evaluate, arguments):
-        restricted_tabpy = RestrictedTabPy(self.port)
+        restricted_tabpy = RestrictedTabPy(self.port, self)
         # Exec does not run the function, so it does not block.
-        if sys.version_info > (3, 0):
-            exec(function_to_evaluate, globals())
-        else:
-            exec(function_to_evaluate)
+        exec(function_to_evaluate, globals())
 
         if arguments is None:
             future = self.executor.submit(_user_script, restricted_tabpy)

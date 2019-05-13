@@ -26,7 +26,7 @@ _name_checker = compile(r'^[\w -]+$')
 
 def _check_endpoint_type(name):
     if not isinstance(name, str):
-        raise TypeError("Endpoint name must be a string or unicode")
+        raise TypeError("Endpoint name must be a string")
 
     if name == '':
         raise ValueError("Endpoint name cannot be empty")
@@ -38,9 +38,10 @@ def _check_hostname(name):
         r'^http(s)?://[a-zA-Z0-9-_\.]+(/)?(:[0-9]+)?(/)?$')
 
     if not hostname_checker.match(name):
-        raise ValueError('endpoint name {} should be in http(s)://<hostname>'
-                         '[:<port>] and hostname may consist only of: '
-                         'a-z, A-Z, 0-9, underscore and hyphens.'.format(name))
+        raise ValueError(
+            f'endpoint name {name} should be in http(s)://<hostname>'
+            '[:<port>] and hostname may consist only of: '
+            'a-z, A-Z, 0-9, underscore and hyphens.')
 
 
 def _check_endpoint_name(name):
@@ -49,8 +50,9 @@ def _check_endpoint_name(name):
     _check_endpoint_type(name)
 
     if not _name_checker.match(name):
-        raise ValueError('endpoint name %r can only contain: a-z, A-Z, 0-9,'
-                         ' underscore, hyphens and spaces.' % name)
+        raise ValueError(
+            f'endpoint name {name} can only contain: a-z, A-Z, 0-9,'
+            ' underscore, hyphens and spaces.')
 
 
 class Client(object):
@@ -76,6 +78,8 @@ class Client(object):
         self._endpoint = endpoint
 
         session = requests.session()
+        session.verify = False
+        requests.packages.urllib3.disable_warnings()
 
         # Setup the communications layer.
         network_wrapper = RequestsNetworkWrapper(session)
@@ -226,11 +230,11 @@ class Client(object):
         _check_endpoint_name(alias)
 
         if not description:
-            description = 'Alias for %s' % existing_endpoint_name
+            description = f'Alias for {existing_endpoint_name}'
 
         if existing_endpoint_name not in self.get_endpoints():
             raise ValueError(
-                "Endpoint '{}' does not exist.".format(existing_endpoint_name))
+                f'Endpoint "{existing_endpoint_name}" does not exist.')
 
         # Can only overwrite existing alias
         existing_endpoint = self.get_endpoints().get(alias)
@@ -246,8 +250,8 @@ class Client(object):
         if existing_endpoint:
             if existing_endpoint.type != 'alias':
                 raise RuntimeError(
-                    'Name "{}" is already in use by another '
-                    'endpoint.'.format(alias))
+                    f'Name "{alias}" is already in use by another '
+                    'endpoint.')
 
             endpoint.version = existing_endpoint.version + 1
 
@@ -296,9 +300,9 @@ class Client(object):
         if endpoint:
             if not override:
                 raise RuntimeError(
-                    "An endpoint with that name ({}) already"
-                    " exists. Use 'override = True' to force update "
-                    "an existing endpoint.".format(name))
+                    f'An endpoint with that name ({name}) already'
+                    ' exists. Use "override = True" to force update '
+                    'an existing endpoint.')
 
             version = endpoint.version + 1
         else:
@@ -412,23 +416,23 @@ class Client(object):
         version. If all the versions are equal to or greater than the version
         expected, then it will return. Uses time.sleep().
         """
-        logger.info("Waiting for endpoint %r to deploy to version %r",
-                    endpoint_name, version)
+        logger.info(
+            f'Waiting for endpoint {endpoint_name} to deploy to '
+            f'version {version}')
         start = time.time()
         while True:
             ep_status = self.get_status()
             try:
                 ep = ep_status[endpoint_name]
             except KeyError:
-                logger.info("Endpoint %r doesn't exist in endpoints yet",
-                            endpoint_name)
+                logger.info(f'Endpoint {endpoint_name} doesn\'t '
+                            'exist in endpoints yet')
             else:
-                logger.info("ep=%r", ep)
+                logger.info(f'ep={ep}')
 
                 if ep['status'] == 'LoadFailed':
-                    raise RuntimeError("LoadFailed: %r" % (
-                        ep['last_error'],
-                    ))
+                    raise RuntimeError(
+                        f'LoadFailed: {ep["last_error"]}')
 
                 elif ep['status'] == 'LoadSuccessful':
                     if ep['version'] >= version:
@@ -440,7 +444,7 @@ class Client(object):
             if time.time() - start > 10:
                 raise RuntimeError("Waited more then 10s for deployment")
 
-            logger.info("Sleeping %r", interval)
+            logger.info(f'Sleeping {interval}...')
             time.sleep(interval)
 
     def remove(self, name):

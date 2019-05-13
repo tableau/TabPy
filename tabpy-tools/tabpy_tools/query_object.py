@@ -47,8 +47,8 @@ class QueryObject(abc.ABC):
           The location to save the query object to
         """
         if os.path.exists(path):
-            logger.warning("Overwriting existing file '%s' when saving query "
-                           "object" % path)
+            logger.warning(
+                f'Overwriting existing file "{path}" when saving query object')
             rm_fn = os.remove if os.path.isfile(path) else shutil.rmtree
             rm_fn(path)
         self._save_local(path)
@@ -75,8 +75,8 @@ class QueryObject(abc.ABC):
         new_po = None
         new_po = cls._load_local(path)
 
-        logger.info('Loaded query object "%s" successfully' %
-                    type(new_po).__name__)
+        logger.info(
+            f'Loaded query object "{type(new_po).__name__}" successfully')
 
         return new_po
 
@@ -95,8 +95,8 @@ class QueryObject(abc.ABC):
             json.dumps(result)
         except TypeError:
             raise TypeError(
-                "Result from object query is not json serializable: "
-                "{}".format(result))
+                'Result from object query is not json serializable: '
+                f'{result}')
 
         return result
 

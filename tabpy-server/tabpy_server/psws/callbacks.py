@@ -1,17 +1,14 @@
 import logging
 import sys
-from time import sleep
-
-from tornado import gen
-
 from tabpy_server.app.SettingsParameters import SettingsParameters
 from tabpy_server.common.messages import (
     LoadObject, DeleteObjects, ListObjects, ObjectList)
 from tabpy_server.common.endpoint_file_mgr import cleanup_endpoint_files
 from tabpy_server.common.util import format_exception
 from tabpy_server.management.state import TabPyState, get_query_object_path
-
 from tabpy_server.management import util
+from time import sleep
+from tornado import gen
 
 logger = logging.getLogger(__name__)
 
@@ -25,16 +22,14 @@ def wait_for_endpoint_loaded(python_service, object_uri):
         msg = ListObjects()
         list_object_msg = python_service.manage_request(msg)
         if not isinstance(list_object_msg, ObjectList):
-            logger.error("Error loading endpoint %s: %s" % (
-                object_uri, list_object_msg))
+            logger.error(
+                f'Error loading endpoint {object_uri}: {list_object_msg}')
             return
 
-        for (uri, info) in (
-                list_object_msg.objects.items() if sys.version_info > (3, 0)
-                else list_object_msg.objects.iteritems()):
+        for (uri, info) in (list_object_msg.objects.items()):
             if uri == object_uri:
                 if info['status'] != 'LoadInProgress':
-                    logger.info("Object load status: %s" % info['status'])
+                    logger.info(f'Object load status: {info["status"]}')
                     return
 
         sleep(0.1)
@@ -44,17 +39,16 @@ def wait_for_endpoint_loaded(python_service, object_uri):
 def init_ps_server(settings, tabpy_state):
     logger.info("Initializing TabPy Server...")
     existing_pos = tabpy_state.get_endpoints()
-    for (object_name, obj_info) in (
-            existing_pos.items() if sys.version_info > (3, 0)
-            else existing_pos.iteritems()):
+    for (object_name, obj_info) in (existing_pos.items()):
         try:
             object_version = obj_info['version']
             get_query_object_path(
                 settings[SettingsParameters.StateFilePath],
                 object_name, object_version)
         except Exception as e:
-            logger.error('Exception encounted when downloading object: %s'
-                         ', error: %s' % (object_name, e))
+            logger.error(
+                f'Exception encounted when downloading object: {object_name}'
+                f', error: {e}')
 
 
 @gen.coroutine
@@ -67,17 +61,17 @@ def init_model_evaluator(settings, tabpy_state, python_service):
 
     existing_pos = tabpy_state.get_endpoints()
 
-    for (object_name, obj_info) in (
-            existing_pos.items() if sys.version_info > (3, 0)
-            else existing_pos.iteritems()):
+    for (object_name, obj_info) in (existing_pos.items()):
         object_version = obj_info['version']
         object_type = obj_info['type']
         object_path = get_query_object_path(
             settings[SettingsParameters.StateFilePath],
             object_name, object_version)
 
-        logger.info('Load endpoint: %s, version: %s, type: %s' %
-                    (object_name, object_version, object_type))
+        logger.info(
+            f'Load endpoint: {object_name}, '
+            f'version: {object_version}, '
+            f'type: {object_type}')
         if object_type == 'alias':
             msg = LoadObject(object_name, obj_info['target'],
                              object_version, False, 'alias')
@@ -135,11 +129,13 @@ def _get_latest_service_state(settings,
 
 
 @gen.coroutine
-def on_state_change(settings, tabpy_state, python_service):
+def on_state_change(settings, tabpy_state, python_service,
+                    logger=logging.getLogger(__name__)):
     try:
-        logger.info("Loading state from state file")
+        logger.log(logging.INFO, "Loading state from state file")
         config = util._get_state_from_file(
-            settings[SettingsParameters.StateFilePath])
+            settings[SettingsParameters.StateFilePath],
+            logger=logger)
         new_ps_state = TabPyState(config=config, settings=settings)
 
         (has_changes, changes) = _get_latest_service_state(settings,
@@ -156,12 +152,13 @@ def on_state_change(settings, tabpy_state, python_service):
                 object_name]
 
             if not object_path and not object_version:  # removal
-                logger.info("Removing object: URI={}".format(object_name))
+                logger.info(f'Removing object: URI={object_name}')
 
                 python_service.manage_request(DeleteObjects([object_name]))
 
                 cleanup_endpoint_files(object_name,
-                                       settings[SettingsParameters.UploadDir])
+                                       settings[SettingsParameters.UploadDir],
+                                       logger=logger)
 
             else:
                 endpoint_info = new_endpoints[object_name]
@@ -180,10 +177,11 @@ def on_state_change(settings, tabpy_state, python_service):
                 # cleanup old version of endpoint files
                 if object_version > 2:
                     cleanup_endpoint_files(
-                        object_name, settings[SettingsParameters.UploadDir], [
-                            object_version, object_version - 1])
+                        object_name, settings[SettingsParameters.UploadDir],
+                        logger=logger,
+                        retain_versions=[object_version, object_version - 1])
 
     except Exception as e:
         err_msg = format_exception(e, 'on_state_change')
-        logger.error(
-            "Error submitting update model request: error={}".format(err_msg))
+        logger.log(logging.ERROR,
+                   f'Error submitting update model request: error={err_msg}')

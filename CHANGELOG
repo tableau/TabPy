@@ -1,7 +1,14 @@
 # TabPy Changelog
 
-This file list notable changes for TabPy project releases.
+This file lists notable changes for TabPy project releases.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+
+## v0.5
+
+### Improvements
+
+- Scripts, documentation, and integration tests for models
+- Small bug fixes 
 
 ## v0.4.1
 

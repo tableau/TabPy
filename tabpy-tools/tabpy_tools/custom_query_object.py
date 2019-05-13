@@ -54,14 +54,14 @@ class CustomQueryObject(_QueryObject):
         except Exception as e:
             logger.exception(
                 'Exception hit when running custom query, error: '
-                '%s' % e.message)
+                f'{e.message}')
             raise
 
         try:
             return self._make_serializable(ret)
         except Exception as e:
             logger.exception('Cannot properly serialize custom query result, '
-                             'error: %s' % e.message)
+                             f'error: {e.message}')
             raise
 
     def get_doc_string(self):

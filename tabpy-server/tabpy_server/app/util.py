@@ -1,19 +1,11 @@
 import csv
+from datetime import datetime
 import logging
+from OpenSSL import crypto
 import os
 
-from datetime import datetime
-from OpenSSL import crypto
 
 logger = logging.getLogger(__name__)
-
-
-def log_and_raise(msg, exception_type):
-    '''
-    Log the message and raise an exception of specified type
-    '''
-    logger.fatal(msg)
-    raise exception_type(msg)
 
 
 def validate_cert(cert_file_path):
@@ -31,13 +23,15 @@ def validate_cert(cert_file_path):
 
     https_error = 'Error using HTTPS: '
     if now < not_before:
-        log_and_raise(https_error +
-                      'The certificate provided is not valid until {}.'.format(
-                          not_before), RuntimeError)
+        msg = (https_error +
+               f'The certificate provided is not valid until {not_before}.')
+        logger.critical(msg)
+        raise RuntimeError(msg)
     if now > not_after:
-        log_and_raise(https_error +
-                      f'The certificate provided expired on {not_after}.',
-                      RuntimeError)
+        msg = (https_error +
+               f'The certificate provided expired on {not_after}.')
+        logger.critical(msg)
+        raise RuntimeError(msg)
 
 
 def parse_pwd_file(pwd_file_name):
@@ -58,10 +52,10 @@ def parse_pwd_file(pwd_file_name):
     credentials : dict
         Credentials from the file. Empty if succeeded is False.
     '''
-    logger.info('Parsing passwords file {}...'.format(pwd_file_name))
+    logger.info(f'Parsing passwords file {pwd_file_name}...')
 
     if not os.path.isfile(pwd_file_name):
-        logger.fatal('Passwords file {} not found'.format(pwd_file_name))
+        logger.critical(f'Passwords file {pwd_file_name} not found')
         return False, {}
 
     credentials = {}
@@ -78,23 +72,21 @@ def parse_pwd_file(pwd_file_name):
 
             if len(row) != 2:
                 logger.error(
-                    'Incorrect entry "{}" '
-                    'in password file'.format(row))
+                    f'Incorrect entry "{row}" in password file')
                 return False, {}
 
             login = row[0].lower()
             if login in credentials:
                 logger.error(
-                    'Multiple entries for username {} '
-                    'in password file'.format(login))
+                    f'Multiple entries for username {login} '
+                    'in password file')
                 return False, {}
 
             if(len(row[1]) > 0):
                 credentials[login] = row[1]
-                logger.debug('Found username {}'.format(login))
+                logger.debug(f'Found username {login}')
             else:
-                logger.warning('Found username {} but no password'
-                               .format(row[0]))
+                logger.warning(f'Found username {row[0]} but no password')
                 return False, {}
 
     logger.info("Authentication is enabled")

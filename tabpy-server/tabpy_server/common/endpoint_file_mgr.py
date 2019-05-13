@@ -13,25 +13,28 @@ import os
 import shutil
 from re import compile as _compile
 
-logger = logging.getLogger(__name__)
 
 _name_checker = _compile(r'^[a-zA-Z0-9-_\s]+$')
 
 
-def _check_endpoint_name(name):
+def _check_endpoint_name(name, logger=logging.getLogger(__name__)):
     """Checks that the endpoint name is valid by comparing it with an RE and
     checking that it is not reserved."""
     if not isinstance(name, str):
-        log_and_raise("Endpoint name must be a string or unicode", TypeError)
+        msg = 'Endpoint name must be a string'
+        logger.log(logging.CRITICAL, msg)
+        raise TypeError(msg)
 
     if name == '':
-        log_and_raise("Endpoint name cannot be empty", ValueError)
+        msg = 'Endpoint name cannot be empty'
+        logger.log(logging.CRITICAL, msg)
+        raise ValueError(msg)
 
     if not _name_checker.match(name):
-        log_and_raise(
-            'Endpoint name can only contain: a-z, A-Z, 0-9,'
-            ' underscore, hyphens and spaces.',
-            ValueError)
+        msg = ('Endpoint name can only contain: a-z, A-Z, 0-9,'
+               ' underscore, hyphens and spaces.')
+        logger.log(logging.CRITICAL, msg)
+        raise ValueError(msg)
 
 
 def grab_files(directory):
@@ -40,7 +43,6 @@ def grab_files(directory):
     '''
     if not os.path.isdir(directory):
         return
-        yield
     else:
         for name in os.listdir(directory):
             full_path = os.path.join(directory, name)
@@ -51,12 +53,9 @@ def grab_files(directory):
                 yield full_path
 
 
-def get_local_endpoint_file_path(name, version, query_path):
-    _check_endpoint_name(name)
-    return os.path.join(query_path, name, str(version))
-
-
-def cleanup_endpoint_files(name, query_path, retain_versions=None):
+def cleanup_endpoint_files(name, query_path,
+                           logger=logging.getLogger(__name__),
+                           retain_versions=None):
     '''
     Cleanup the disk space a certain endpiont uses.
 
@@ -70,7 +69,7 @@ def cleanup_endpoint_files(name, query_path, retain_versions=None):
         folder for the given version, otherwise, all files for that endpoint
         are removed.
     '''
-    _check_endpoint_name(name)
+    _check_endpoint_name(name, logger=logger)
     local_dir = os.path.join(query_path, name)
 
     # nothing to clean, this is true for state file path where we load
@@ -84,7 +83,7 @@ def cleanup_endpoint_files(name, query_path, retain_versions=None):
     else:
         retain_folders = [os.path.join(local_dir, str(version))
                           for version in retain_versions]
-        logger.info("Retain folder: %s" % retain_folders)
+        logger.log(logging.INFO, f'Retain folders: {retain_folders}')
 
         for file_or_dir in os.listdir(local_dir):
             candidate_dir = os.path.join(local_dir, file_or_dir)
