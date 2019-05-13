@@ -3,6 +3,7 @@ import base64
 import subprocess
 from pathlib import Path
 
+
 class TestDeployModelSSLOffAuthOn(integ_test_base.IntegTestBase):
     def _get_pwd_file(self) -> str:
         return './tests/integration/resources/pwdfile.txt'
@@ -17,9 +18,10 @@ class TestDeployModelSSLOffAuthOn(integ_test_base.IntegTestBase):
             'TabPy-Client': "Integration test for deploying models with auth",
             'Authorization':
                 'Basic ' +
-                base64.b64encode('user1:P@ssw0rd'.encode('utf-8')).decode('utf-8')
+                base64.b64encode('user1:P@ssw0rd'.
+                                 encode('utf-8')).decode('utf-8')
             }
-        
+
         conn = self._get_connection()
         conn.request("GET", "/endpoints/PCA", headers=headers)
         PCA_request = conn.getresponse()

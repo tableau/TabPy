@@ -25,7 +25,7 @@ def install_dependencies(packages):
 if __name__ == '__main__':
     install_dependencies(['sklearn', 'pandas', 'numpy',
                           'textblob', 'nltk', 'scipy'])
-    print('===================================================================')
+    print('==================================================================')
     # Determine if we run python or python3
     if platform.system() == 'Windows':
         py = 'python'
@@ -34,7 +34,7 @@ if __name__ == '__main__':
 
     if len(sys.argv) > 1:
         config_file_path = sys.argv[1]
-    else:  
+    else:
         config_file_path = setup_utils.get_default_config_file_path()
     print(f'Using config file at {config_file_path}')
     port, auth_on, prefix = setup_utils.parse_config(config_file_path)
@@ -47,5 +47,4 @@ if __name__ == '__main__':
     # Deploy each model in the scripts directory
     for filename in os.listdir(directory):
         subprocess.run([py, f'{directory}/{filename}', config_file_path]
-                        + auth_args)
-
+                       + auth_args)

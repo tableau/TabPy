@@ -10,6 +10,7 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).resolve().parent.parent.parent / 'models'))
 from utils import setup_utils
 
+
 def PCA(component, _arg1, _arg2, *_argN):
     '''
     Principal Component Analysis is a technique that extracts the key
@@ -59,20 +60,20 @@ def PCA(component, _arg1, _arg2, *_argN):
 
 
 if __name__ == '__main__':
-    #running from setup.py
+    # running from setup.py
     if len(sys.argv) > 1:
         config_file_path = sys.argv[1]
-    else: 
+    else:
         config_file_path = setup_utils.get_default_config_file_path()
     port, auth_on, prefix = setup_utils.parse_config(config_file_path)
 
     connection = Client(f'{prefix}://localhost:{port}/')
 
     if auth_on:
-        #credentials are passed in from setup.py
+        # credentials are passed in from setup.py
         if len(sys.argv) == 4:
             user, passwd = sys.argv[2], sys.argv[3]
-        #running PCA independently 
+        # running PCA independently
         else:
             user, passwd = setup_utils.get_creds()
         connection.set_credentials(user, passwd)

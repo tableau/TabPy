@@ -4,6 +4,7 @@ import requests
 import subprocess
 from pathlib import Path
 
+
 class TestDeployModelSSLOnAuthOn(integ_test_base.IntegTestBase):
     def _get_transfer_protocol(self) -> str:
         return 'https'
@@ -38,13 +39,11 @@ class TestDeployModelSSLOnAuthOn(integ_test_base.IntegTestBase):
 
         PCA_response = session.get(url=f'{self._get_transfer_protocol()}'
                                    '://localhost:9004/endpoints/PCA',
-                                   headers= headers)
+                                   headers=headers)
         self.assertEqual(200, PCA_response.status_code)
 
         SentimentAnalysis_response = session.get(url=f'{self._get_transfer_protocol()}'
                                    '://localhost:9004/endpoints/'
                                    'Sentiment Analysis',
-                                   headers= headers)
+                                   headers=headers)
         self.assertEqual(200, SentimentAnalysis_response.status_code)
-        
-        
