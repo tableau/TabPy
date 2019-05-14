@@ -14,6 +14,14 @@ IF %ERRORLEVEL% NEQ 0 (
     ECHO     Cannot find Python.exe.  Check that Python is installed and is in the system PATH environment variable.
     SET RET=1
     GOTO:END
+) ELSE (
+    FOR /F "TOKENS=2" %%a IN ('python --version') DO (
+        IF %%a LSS 3.6.5 (
+            ECHO Python 3.6.5 or higher is needed.
+            SET RET=1
+            GOTO:END
+        )
+    )
 )
 
 REM Install requirements using Python setup tools.
