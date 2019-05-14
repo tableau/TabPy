@@ -12,7 +12,7 @@
 TabPy (Tableau Python Server) is external server implementation which allows
 expanding Tableau with executing Python scripts in table calculation.
 
-All documentation is in the [docs](docs) folder. Consider reading it the next
+All documentation is in the [docs](docs) folder. Consider reading it in this
 order:
 
 * [About TabPy](docs/about.md)
@@ -39,4 +39,3 @@ Other useful resources:
 * [Building advanced analytics applications with TabPy](https://www.tableau.com/about/blog/2017/1/building-advanced-analytics-applications-tabpy-64916)
 * [Building Data Science Applications with TabPy Video Tutorial](https://youtu.be/nRtOMTnBz_Y)
 * [TabPy Tutorial on TabWiki](https://community.tableau.com/docs/DOC-10856)
-* [Running TabPy in Docker containers](https://hub.docker.com/r/emhemh/tabpy/)
