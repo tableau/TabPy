@@ -41,3 +41,8 @@ Other useful resources:
 * [Building advanced analytics applications with TabPy](https://www.tableau.com/about/blog/2017/1/building-advanced-analytics-applications-tabpy-64916)
 * [Building Data Science Applications with TabPy Video Tutorial](https://youtu.be/nRtOMTnBz_Y)
 * [TabPy Tutorial on TabWiki](https://community.tableau.com/docs/DOC-10856)
+
+
+![GitHub commit activity](https://img.shields.io/github/commit-activity/m/tableau/TabPy.svg)
+![GitHub forks](https://img.shields.io/github/forks/tableau/TabPy.svg?label=Forks&style=social)
+![GitHub stars](https://img.shields.io/github/stars/tableau/TabPy.svg?style=social)
