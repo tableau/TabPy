@@ -4,6 +4,7 @@
 [![GitHub](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://raw.githubusercontent.com/Tableau/TabPy/master/LICENSE)
 [![Build Status](https://img.shields.io/travis/com/tableau/TabPy.svg?branch=master)](https://travis-ci.com/tableau/TabPy)
 [![Coverage Status](https://img.shields.io/coveralls/github/tableau/TabPy.svg)](https://coveralls.io/github/tableau/TabPy)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/tableau/TabPy/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/tableau/TabPy/?branch=master)
 
 [![Python 3.6](https://img.shields.io/badge/python-3.6-blue.svg)](https://www.python.org/downloads/release/python-360/)
 
