@@ -15,7 +15,7 @@ function check_python_version() {
     check_status $1
 
     py_ver=($(python3 --version 2>&1) \| tr ' ' ' ')
-    if [ "${py_ver[1]}" \< "min_py_ver" ]; then
+    if [ "${py_ver[1]}" \< "$min_py_ver" ]; then
         echo Fatal Error : $1
         exit 1
     elif [ "${py_ver[1]}" \< "$desired_py_ver" ]; then
