@@ -5,13 +5,13 @@ import json
 import logging
 from tabpy_server.common.util import format_exception
 import requests
-import sys
 
 
 class RestrictedTabPy:
-    def __init__(self, port, logger):
+    def __init__(self, port, logger, timeout):
         self.port = port
         self.logger = logger
+        self.timeout = timeout
 
     def query(self, name, *args, **kwargs):
         url = f'http://localhost:{self.port}/query/{name}'
@@ -20,7 +20,7 @@ class RestrictedTabPy:
         data = json.dumps(internal_data)
         headers = {'content-type': 'application/json'}
         response = requests.post(url=url, data=data, headers=headers,
-                                 timeout=30)
+                                 timeout=self.timeout)
 
         return response.json()
 
@@ -103,7 +103,7 @@ class EvaluationPlaneHandler(BaseHandler):
 
     @gen.coroutine
     def call_subprocess(self, function_to_evaluate, arguments):
-        restricted_tabpy = RestrictedTabPy(self.port, self)
+        restricted_tabpy = RestrictedTabPy(self.port, self.eval_timeout)
         # Exec does not run the function, so it does not block.
         exec(function_to_evaluate, globals())
 

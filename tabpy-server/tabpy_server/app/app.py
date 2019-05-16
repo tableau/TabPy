@@ -186,6 +186,9 @@ class TabPyApp:
         set_parameter(SettingsParameters.ServerVersion, None,
                       default_val=__version__)
 
+        set_parameter(SettingsParameters.EvaluateTimeout, ConfigParameters.TABPY_EVALUATE_TIMEOUT,
+                      default_val=30)
+
         set_parameter(SettingsParameters.UploadDir,
                       ConfigParameters.TABPY_QUERY_OBJECT_PATH,
                       default_val='/tmp/query_objects', check_env_var=True)

@@ -1,4 +1,3 @@
-from tabpy_server import __version__
 from tabpy_server.app.app import TabPyApp
 
 
