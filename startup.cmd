@@ -24,7 +24,7 @@ IF %ERRORLEVEL% NEQ 0 (
             SET RET=1
             GOTO:END
         ) ELSE IF %%a LSS %DESIRED_PY_VER% (
-            ECHO Important Warning : Python %%a% is not supported. Please upgrade Python to 3.6.5 or higher.
+            ECHO Warning : Python %%a% is not supported. Please upgrade Python to 3.6.5 or higher.
             SET RET=1
         )
     )

@@ -19,7 +19,7 @@ function check_python_version() {
         echo Fatal Error : $1
         exit 1
     elif [ "${py_ver[1]}" \< "$desired_py_ver" ]; then
-        echo Important Warning : Python ${py_ver[1]} is not supported. Please upgrade Python to 3.6.5 or higher.
+        echo Warning : Python ${py_ver[1]} is not supported. Please upgrade Python to 3.6.5 or higher.
     fi
 }
 
