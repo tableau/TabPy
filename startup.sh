@@ -1,9 +1,25 @@
 #!/bin/bash
 
+min_py_ver=3.6
+desired_py_ver=3.6.5
+
 function check_status() {
     if [ $? -ne 0 ]; then
-        echo TabPy startup failed. $1
+        echo $1
         exit 1
+    fi
+}
+
+function check_python_version() {
+    python3 --version
+    check_status $1
+
+    py_ver=($(python3 --version 2>&1) \| tr ' ' ' ')
+    if [ "${py_ver[1]}" \< "$min_py_ver" ]; then
+        echo Fatal Error : $1
+        exit 1
+    elif [ "${py_ver[1]}" \< "$desired_py_ver" ]; then
+        echo Warning : Python ${py_ver[1]} is not supported. Please upgrade Python to 3.6.5 or higher.
     fi
 }
 
@@ -22,13 +38,12 @@ function install_dependencies() {
         echo Invalid startup environment.
         exit 1
     fi
-    check_status "Cannot install dependecies."
+    check_status "Cannot install dependencies."
 }
 
 # Check for Python in PATH
 echo Checking for presence of Python in the system path variable.
-python3 --version
-check_status "Cannot find Python.  Check that Python is installed and is in the system PATH environment variable."
+check_python_version "TabPy startup failed. Check that Python 3.6.5 or higher is installed and is in the system PATH environment variable."
 
 # Setting local variables
 echo Setting TABPY_ROOT to current working directory.

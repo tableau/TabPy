@@ -6,14 +6,28 @@ REM Set environment variables.
 SET TABPY_ROOT="%CD%"
 SET INSTALL_LOG=%TABPY_ROOT%\tabpy-server\install.log
 SET SAVE_PYTHONPATH=%PYTHONPATH%
+SET MIN_PY_VER=3.6
+SET DESIRED_PY_VER=3.6.5
 
 
 ECHO Checking for presence of Python in the system path variable.
+SET PYTHON_ERROR=Fatal Error : TabPy startup failed. Check that Python 3.6.5 or higher is installed and is in the system PATH environment variable.
 python --version
 IF %ERRORLEVEL% NEQ 0 (
-    ECHO     Cannot find Python.exe.  Check that Python is installed and is in the system PATH environment variable.
+    ECHO %PYTHON_ERROR%
     SET RET=1
     GOTO:END
+) ELSE (
+    FOR /F "TOKENS=2" %%a IN ('python --version 2^>^&1') DO (
+        IF %%a LSS %MIN_PY_VER% (
+            ECHO %PYTHON_ERROR%
+            SET RET=1
+            GOTO:END
+        ) ELSE IF %%a LSS %DESIRED_PY_VER% (
+            ECHO Warning : Python %%a% is not supported. Please upgrade Python to 3.6.5 or higher.
+            SET RET=1
+        )
+    )
 )
 
 REM Install requirements using Python setup tools.
