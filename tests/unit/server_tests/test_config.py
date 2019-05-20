@@ -62,6 +62,13 @@ class TestConfigEnvironmentCalls(unittest.TestCase):
 
 
 class TestPartialConfigFile(unittest.TestCase):
+    def setUp(self):
+        self.config_file = NamedTemporaryFile(delete=False)
+
+    def tearDown(self):
+        os.remove(self.config_file.name)
+        self.config_file = None
+
     @patch('tabpy_server.app.app.TabPyApp._parse_cli_arguments')
     @patch('tabpy_server.app.app.TabPyState')
     @patch('tabpy_server.app.app._get_state_from_file')
@@ -71,11 +78,11 @@ class TestPartialConfigFile(unittest.TestCase):
     def test_config_file_present(self, mock_os, mock_path_exists,
                                  mock_psws, mock_management_util,
                                  mock_tabpy_state, mock_parse_arguments):
-        config_file = NamedTemporaryFile(delete=False)
-
-        config_file.write("[TabPy]\n"
-                          "TABPY_QUERY_OBJECT_PATH = foo\n"
-                          "TABPY_STATE_PATH = bar\n".encode())
+        self.assertTrue(self.config_file is not None)
+        config_file = self.config_file
+        config_file.write('[TabPy]\n'
+                          'TABPY_QUERY_OBJECT_PATH = foo\n'
+                          'TABPY_STATE_PATH = bar\n'.encode())
         config_file.close()
 
         mock_parse_arguments.return_value = Namespace(config=config_file.name)
@@ -96,8 +103,20 @@ class TestPartialConfigFile(unittest.TestCase):
         self.assertTrue('certificate_file' not in app.settings)
         self.assertTrue('key_file' not in app.settings)
         self.assertEqual(app.settings['log_request_context'], False)
+        self.assertEqual(app.settings['evaluate_timeout'], 30)
 
-        os.remove(config_file.name)
+    @patch('tabpy_server.app.app.os.path.exists', return_value=True)
+    @patch('tabpy_server.app.app._get_state_from_file')
+    @patch('tabpy_server.app.app.TabPyState')
+    def test_custom_evaluate_timeout(self, mock_state, mock_get_state_from_file, mock_path_exists):
+        self.assertTrue(self.config_file is not None)
+        config_file = self.config_file
+        config_file.write('[TabPy]\n'
+                          'TABPY_EVALUATE_TIMEOUT = 1996'.encode())
+        config_file.close()
+
+        app = TabPyApp(self.config_file.name)
+        self.assertEqual(app.settings['evaluate_timeout'], '1996')
 
 
 class TestTransferProtocolValidation(unittest.TestCase):
