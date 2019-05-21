@@ -13,6 +13,7 @@ class IntegTestBase(unittest.TestCase):
     '''
     Base class for integration tests.
     '''
+
     def __init__(self, methodName="runTest"):
         super(IntegTestBase, self).__init__(methodName)
         self.process = None
@@ -241,7 +242,7 @@ class IntegTestBase(unittest.TestCase):
         if self.process is not None:
             if platform.system() == 'Windows':
                 subprocess.call(['taskkill', '/F', '/T', '/PID',
-                                str(self.process.pid)])
+                                 str(self.process.pid)])
             else:
                 os.killpg(os.getpgid(self.process.pid), signal.SIGTERM)
             self.process.kill()
@@ -268,5 +269,3 @@ class IntegTestBase(unittest.TestCase):
             connection = http.client.HTTPConnection(url)
 
         return connection
-
-

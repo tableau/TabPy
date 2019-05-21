@@ -105,7 +105,8 @@ class EvaluationPlaneHandler(BaseHandler):
 
     @gen.coroutine
     def call_subprocess(self, function_to_evaluate, arguments):
-        restricted_tabpy = RestrictedTabPy(self.port, self.logger, self.eval_timeout)
+        restricted_tabpy = RestrictedTabPy(
+            self.port, self.logger, self.eval_timeout)
         # Exec does not run the function, so it does not block.
         exec(function_to_evaluate, globals())
 
