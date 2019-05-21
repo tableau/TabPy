@@ -137,6 +137,19 @@ class IntegTestBase(unittest.TestCase):
         '''
         return None
 
+    def _get_evaluate_timeout(self) -> str:
+        '''
+        Returns the configured timeout for the /evaluate method.
+        Default implementation returns None, which means that the timeout will default to 30.
+
+        Returns
+        -------
+        str
+            Timeout for calling /evaluate.
+            If None, defaults TABPY_EVALUATE_TIMEOUT setting will default to '30'.
+        '''
+        return None
+
     def _get_config_file_name(self) -> str:
         '''
         Generates config file. Overwrite this function for tests to
@@ -172,6 +185,10 @@ class IntegTestBase(unittest.TestCase):
         if key_file_name is not None:
             key_file_name = os.path.abspath(key_file_name)
             config_file.write(f'TABPY_KEY_FILE = {key_file_name}\n')
+
+        evaluate_timeout = self._get_evaluate_timeout()
+        if evaluate_timeout is not None:
+            config_file.write(f'TABPY_EVALUATE_TIMEOUT = {evaluate_timeout}\n')
 
         config_file.close()
 
@@ -251,3 +268,5 @@ class IntegTestBase(unittest.TestCase):
             connection = http.client.HTTPConnection(url)
 
         return connection
+
+

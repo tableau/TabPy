@@ -108,7 +108,7 @@ class TestPartialConfigFile(unittest.TestCase):
     @patch('tabpy_server.app.app.os.path.exists', return_value=True)
     @patch('tabpy_server.app.app._get_state_from_file')
     @patch('tabpy_server.app.app.TabPyState')
-    def test_custom_evaluate_timeout(self, mock_state, mock_get_state_from_file, mock_path_exists):
+    def test_custom_evaluate_timeout_valid(self, mock_state, mock_get_state_from_file, mock_path_exists):
         self.assertTrue(self.config_file is not None)
         config_file = self.config_file
         config_file.write('[TabPy]\n'
@@ -116,7 +116,20 @@ class TestPartialConfigFile(unittest.TestCase):
         config_file.close()
 
         app = TabPyApp(self.config_file.name)
-        self.assertEqual(app.settings['evaluate_timeout'], '1996')
+        self.assertEqual(app.settings['evaluate_timeout'], 1996.0)
+
+    @patch('tabpy_server.app.app.os.path.exists', return_value=True)
+    @patch('tabpy_server.app.app._get_state_from_file')
+    @patch('tabpy_server.app.app.TabPyState')
+    def test_custom_evaluate_timeout_invalid(self, mock_state, mock_get_state_from_file, mock_path_exists):
+        self.assertTrue(self.config_file is not None)
+        config_file = self.config_file
+        config_file.write('[TabPy]\n'
+                          'TABPY_EVALUATE_TIMEOUT = "im not a float"'.encode())
+        config_file.close()
+
+        app = TabPyApp(self.config_file.name)
+        self.assertEqual(app.settings['evaluate_timeout'], 30.0)
 
 
 class TestTransferProtocolValidation(unittest.TestCase):

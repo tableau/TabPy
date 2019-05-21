@@ -19,6 +19,8 @@ class RestrictedTabPy:
         internal_data = {'data': args or kwargs}
         data = json.dumps(internal_data)
         headers = {'content-type': 'application/json'}
+
+        print(f'timeout = {self.timeout}')
         response = requests.post(url=url, data=data, headers=headers,
                                  timeout=self.timeout)
 
@@ -103,7 +105,7 @@ class EvaluationPlaneHandler(BaseHandler):
 
     @gen.coroutine
     def call_subprocess(self, function_to_evaluate, arguments):
-        restricted_tabpy = RestrictedTabPy(self.port, self.eval_timeout)
+        restricted_tabpy = RestrictedTabPy(self.port, self.logger, self.eval_timeout)
         # Exec does not run the function, so it does not block.
         exec(function_to_evaluate, globals())
 
@@ -112,5 +114,6 @@ class EvaluationPlaneHandler(BaseHandler):
         else:
             future = self.executor.submit(_user_script, restricted_tabpy,
                                           **arguments)
-        ret = yield future
+
+        ret = future.result(timeout=self.eval_timeout)
         raise gen.Return(ret)

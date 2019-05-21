@@ -8,7 +8,6 @@ import uuid
 import json
 from tabpy_server.common.util import format_exception
 import urllib
-import sys
 import tornado.web
 
 

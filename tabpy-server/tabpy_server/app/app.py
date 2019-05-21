@@ -188,6 +188,11 @@ class TabPyApp:
 
         set_parameter(SettingsParameters.EvaluateTimeout, ConfigParameters.TABPY_EVALUATE_TIMEOUT,
                       default_val=30)
+        try:
+            self.settings[SettingsParameters.EvaluateTimeout] = float(self.settings[SettingsParameters.EvaluateTimeout])
+        except ValueError:
+            logger.warning('Evaluate timeout must be a float type. Defaulting to evaluate timeout of 30 seconds.')
+            self.settings[SettingsParameters.EvaluateTimeout] = 30
 
         set_parameter(SettingsParameters.UploadDir,
                       ConfigParameters.TABPY_QUERY_OBJECT_PATH,
