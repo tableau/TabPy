@@ -199,6 +199,6 @@ NOTE the request context details are logged with INFO level.
 By default, all custom scripts execute through `POST /evaluate` may run for up
 to 30.0 s before being terminated. To configure this timeout, uncomment
 `TABPY_EVALUATE_TIMEOUT = 30` in the default config under
-`tabpy-server/common/default.conf` and replace `30` with the float value of
-your choice representing the timeout time in seconds, or add an such an entry
-to your custom config.
+`tabpy-server/tabpy_server/common/default.conf` and replace `30` with the float
+value of your choice representing the timeout time in seconds, or add an such
+an entry to your custom config.
