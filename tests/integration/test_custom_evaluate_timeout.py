@@ -53,5 +53,4 @@ class TestCustomEvaluateTimeout(integ_test_base.IntegTestBase):
         res_bytes = res.read().decode('utf-8')
 
         self.assertEqual(500, res.status)
-        print('res_bytes: ' + res_bytes)
         self.assertTrue('TimeoutError' in res_bytes)
