@@ -5,6 +5,7 @@ import json
 import logging
 from tabpy_server.common.util import format_exception
 import requests
+from concurrent.futures import TimeoutError
 
 
 class RestrictedTabPy:
@@ -19,11 +20,8 @@ class RestrictedTabPy:
         internal_data = {'data': args or kwargs}
         data = json.dumps(internal_data)
         headers = {'content-type': 'application/json'}
-
-        print(f'timeout = {self.timeout}')
         response = requests.post(url=url, data=data, headers=headers,
                                  timeout=self.timeout)
-
         return response.json()
 
 
@@ -116,5 +114,11 @@ class EvaluationPlaneHandler(BaseHandler):
             future = self.executor.submit(_user_script, restricted_tabpy,
                                           **arguments)
 
-        ret = future.result(timeout=self.eval_timeout)
+        try:
+            ret = future.result(timeout=self.eval_timeout)
+        except TimeoutError:
+            error_message = f'User defined script timed out. Timeout is set to {self.eval_timeout} s.'
+            self.logger.log(logging.ERROR, error_message)
+            ret = {"info": "TimeoutError", "message": error_message}
+
         raise gen.Return(ret)
