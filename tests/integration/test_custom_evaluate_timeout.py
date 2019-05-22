@@ -5,10 +5,11 @@ from tabpy_tools.client import Client
 class TestCustomEvaluateTimeout(integ_test_base.IntegTestBase):
     def __init__(self, *args, **kwargs):
         super(TestCustomEvaluateTimeout, self).__init__(*args, **kwargs)
-        self.headers = {
+        self._headers = {
             'Content-Type': "application/json",
             'TabPy-Client': "Integration test for testing custom evaluate timeouts."
         }
+        self._expected_error_message = '{"message": "User defined script timed out. Timeout is set to 5.0 s.", "info": {}}'
 
     def _get_evaluate_timeout(self) -> str:
         return '5'
@@ -48,9 +49,9 @@ class TestCustomEvaluateTimeout(integ_test_base.IntegTestBase):
 
     def _run_test(self, payload):
         conn = self._get_connection()
-        conn.request('POST', '/evaluate', payload, self.headers)
+        conn.request('POST', '/evaluate', payload, self._headers)
         res = conn.getresponse()
-        res_bytes = res.read().decode('utf-8')
+        actual_error_message = res.read().decode('utf-8')
 
-        self.assertEqual(500, res.status)
-        self.assertTrue('TimeoutError' in res_bytes)
+        self.assertEqual(408, res.status)
+        self.assertEqual(self._expected_error_message, actual_error_message)

@@ -33,6 +33,7 @@ class EvaluationPlaneHandler(BaseHandler):
     def initialize(self, executor, app):
         super(EvaluationPlaneHandler, self).initialize(app)
         self.executor = executor
+        self._error_message_timeout = f'User defined script timed out. Timeout is set to {self.eval_timeout} s.'
 
     @tornado.web.asynchronous
     @gen.coroutine
@@ -79,8 +80,12 @@ class EvaluationPlaneHandler(BaseHandler):
                 logging.INFO,
                 f'function to evaluate={function_to_evaluate}')
 
-            result = yield self.call_subprocess(function_to_evaluate,
-                                                arguments)
+            try:
+                result = yield self.call_subprocess(function_to_evaluate, arguments)
+            except TimeoutError:
+                self.error_out(408, self._error_message_timeout)
+                return
+
             if result is None:
                 self.error_out(400, 'Error running script. No return value')
             else:
@@ -117,8 +122,6 @@ class EvaluationPlaneHandler(BaseHandler):
         try:
             ret = future.result(timeout=self.eval_timeout)
         except TimeoutError:
-            error_message = f'User defined script timed out. Timeout is set to {self.eval_timeout} s.'
-            self.logger.log(logging.ERROR, error_message)
-            ret = {"info": "TimeoutError", "message": error_message}
-
+            self.logger.log(logging.ERROR, self._error_message_timeout)
+            raise TimeoutError
         raise gen.Return(ret)
