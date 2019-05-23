@@ -12,3 +12,4 @@ class SettingsParameters:
     ApiVersions = 'versions'
     LogRequestContext = 'log_request_context'
     StaticPath = 'static_path'
+    EvaluateTimeout = 'evaluate_timeout'

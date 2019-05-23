@@ -14,6 +14,7 @@
   * [Deleting an Account](#deleting-an-account)
 - [Logging](#logging)
   * [Request Context Logging](#request-context-logging)
+- [Custom Script Timeout](#custom-script-timeout)
 
 <!-- tocstop -->
 
@@ -192,3 +193,12 @@ arg1, _arg2):
 No passwords are logged.
 
 NOTE the request context details are logged with INFO level.
+
+## Custom Script Timeout
+
+By default, all custom scripts executed through `POST /evaluate` may run for up
+to 30.0 s before being terminated. To configure this timeout, uncomment
+`TABPY_EVALUATE_TIMEOUT = 30` in the default config under
+`tabpy-server/tabpy_server/common/default.conf` and replace `30` with the float
+value of your choice representing the timeout time in seconds, or add such an
+entry to your custom config.
