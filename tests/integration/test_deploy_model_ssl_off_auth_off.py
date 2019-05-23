@@ -11,7 +11,8 @@ class TestDeployModelSSLOffAuthOff(integ_test_base.IntegTestBase):
         payload = (
             '''{
                 "data": { "_arg1": ["happy", "sad", "neutral"] },
-                "script": "return tabpy.query('Sentiment Analysis',_arg1)['response']"
+                "script": "return tabpy.query('Sentiment Analysis',_arg1)
+                ['response']"
             }''')
 
         conn = self._get_connection()
