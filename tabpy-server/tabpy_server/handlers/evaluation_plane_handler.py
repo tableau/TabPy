@@ -120,5 +120,5 @@ class EvaluationPlaneHandler(BaseHandler):
             future = self.executor.submit(_user_script, restricted_tabpy,
                                           **arguments)
 
-        ret = yield gen.with_timeout(timeout=timedelta(self.eval_timeout), future=future)
+        ret = yield gen.with_timeout(timeout=timedelta(seconds=self.eval_timeout), future=future)
         raise gen.Return(ret)
