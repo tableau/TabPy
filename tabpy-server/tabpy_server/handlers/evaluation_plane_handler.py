@@ -5,7 +5,7 @@ import json
 import logging
 from tabpy_server.common.util import format_exception
 import requests
-from concurrent.futures import TimeoutError
+from datetime import timedelta
 
 
 class RestrictedTabPy:
@@ -82,7 +82,8 @@ class EvaluationPlaneHandler(BaseHandler):
 
             try:
                 result = yield self.call_subprocess(function_to_evaluate, arguments)
-            except TimeoutError:
+            except gen.TimeoutError:
+                self.logger.log(logging.ERROR, self._error_message_timeout)
                 self.error_out(408, self._error_message_timeout)
                 return
 
@@ -119,9 +120,5 @@ class EvaluationPlaneHandler(BaseHandler):
             future = self.executor.submit(_user_script, restricted_tabpy,
                                           **arguments)
 
-        try:
-            ret = future.result(timeout=self.eval_timeout)
-        except TimeoutError:
-            self.logger.log(logging.ERROR, self._error_message_timeout)
-            raise TimeoutError
+        ret = yield gen.with_timeout(timeout=timedelta(self.eval_timeout), future=future)
         raise gen.Return(ret)
