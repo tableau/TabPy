@@ -1,6 +1,9 @@
 from tabpy_tools.client import Client
 from textblob import TextBlob
-from nltk.sentiment import SentimentIntensityAnalyzer
+import nltk
+nltk.download('vader_lexicon')
+nltk.download('punkt')
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
 import sys
 from pathlib import Path
 sys.path.append(str(Path(__file__).resolve().parent.parent.parent / 'models'))
@@ -17,9 +20,9 @@ def SentimentAnalysis(_arg1, library='nltk'):
     if not (isinstance(_arg1[0], str)):
         raise TypeError
 
-    library = library.lower()
     supportedLibraries = {'nltk', 'textblob'}
 
+    library = library.lower()
     if library not in supportedLibraries:
         raise ValueError
 

@@ -42,8 +42,11 @@ class PythonServiceHandler:
             logger.debug(f'Returning response {response}')
             return response
         except Exception as e:
-            logger.error(f'Error processing request: {e.message}')
-            return UnknownMessage(e.message)
+            msg = e
+            if hasattribute(e, 'message'):
+                msg = e.message
+            logger.error(f'Error processing request: {msg}')
+            return UnknownMessage(msg)
 
 
 class PythonService(object):
@@ -193,6 +196,7 @@ class PythonService(object):
 
     def query(self, object_uri, params, uid):
         """Execute a QueryObject query"""
+        logger.debug(f'Querying Python service {object_uri}...')
         try:
             if not isinstance(params, dict) and not isinstance(params, list):
                 return QueryFailed(
@@ -201,6 +205,7 @@ class PythonService(object):
                            f'. Given value is of type {type(params)}'))
 
             obj_info = self.query_objects.get(object_uri)
+            logger.debug(f'Found object {obj_info}')
             if obj_info:
                 pred_obj = obj_info['endpoint_obj']
                 version = obj_info['version']
@@ -211,6 +216,7 @@ class PythonService(object):
                         error=("There is no query object associated to the "
                                f'endpoint: {object_uri}'))
 
+                logger.debug(f'Qurying endpoint with params ({params})...')
                 if isinstance(params, dict):
                     result = pred_obj.query(**params)
                 else:
