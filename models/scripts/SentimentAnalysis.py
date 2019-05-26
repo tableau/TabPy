@@ -1,13 +1,15 @@
 from tabpy_tools.client import Client
 from textblob import TextBlob
 import nltk
-nltk.download('vader_lexicon')
-nltk.download('punkt')
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 import sys
 from pathlib import Path
-sys.path.append(str(Path(__file__).resolve().parent.parent.parent / 'models'))
 from utils import setup_utils
+
+
+nltk.download('vader_lexicon')
+nltk.download('punkt')
+sys.path.append(str(Path(__file__).resolve().parent.parent.parent / 'models'))
 
 
 def SentimentAnalysis(_arg1, library='nltk'):
