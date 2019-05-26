@@ -43,7 +43,7 @@ class PythonServiceHandler:
             return response
         except Exception as e:
             msg = e
-            if hasattribute(e, 'message'):
+            if hasattr(e, 'message'):
                 msg = e.message
             logger.error(f'Error processing request: {msg}')
             return UnknownMessage(msg)
