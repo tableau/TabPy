@@ -1,12 +1,9 @@
 import base64
 import os
 import tempfile
-import unittest
 
 from argparse import Namespace
 from tabpy_server.app.app import TabPyApp
-from tabpy_server.handlers.evaluation_plane_handler\
-    import EvaluationPlaneHandler
 from tabpy_server.handlers.util import hash_password
 from tornado.testing import AsyncHTTPTestCase
 from unittest.mock import patch

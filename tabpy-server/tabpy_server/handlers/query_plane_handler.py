@@ -45,9 +45,12 @@ class QueryPlaneHandler(BaseHandler):
             as a dictionary, and the time in seconds that it took to complete
             the request.
         """
+        self.logger.log(logging.DEBUG,
+                        f'Collecting query info for {po_name}...')
         start_time = time.time()
         response = self.python_service.ps.query(po_name, data, uid)
         gls_time = time.time() - start_time
+        self.logger.log(logging.DEBUG, f'Query info: {response}')
 
         if isinstance(response, QuerySuccessful):
             response_json = response.to_json()
@@ -118,6 +121,8 @@ class QueryPlaneHandler(BaseHandler):
             raise RuntimeError(msg)
 
     def _process_query(self, endpoint_name, start):
+        self.logger.log(logging.DEBUG,
+                        f'Processing query {endpoint_name}...')
         try:
             self._add_CORS_header()
 
@@ -215,6 +220,9 @@ class QueryPlaneHandler(BaseHandler):
 
     @tornado.web.asynchronous
     def post(self, endpoint_name):
+        self.logger.log(logging.DEBUG,
+                        f'Processing POST for /query/{endpoint_name}...')
+
         if self.should_fail_with_not_authorized():
             self.fail_with_not_authorized()
             return

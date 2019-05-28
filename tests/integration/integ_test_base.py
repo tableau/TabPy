@@ -150,6 +150,7 @@ class IntegTestBase(unittest.TestCase):
         config_file = open(os.path.join(self.tmp_dir, 'test.conf'), 'w+')
         config_file.write(
             '[TabPy]\n'
+            f'TABPY_QUERY_OBJECT_PATH = ./query_objects\n'
             f'TABPY_PORT = {self._get_port()}\n'
             f'TABPY_STATE_PATH = {self.tmp_dir}\n')
 
