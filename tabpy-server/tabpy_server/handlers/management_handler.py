@@ -49,8 +49,9 @@ class ManagementHandler(MainHandler):
         '''
         Add or update an endpoint
         '''
-        logging.debug(f'Adding/updating model {name}...')
-        _name_checker = _compile('^[a-zA-Z0-9-_\\s]+$')
+        self.logger.log(logging.DEBUG, f'Adding/updating model {name}...')
+
+        _name_checker = _compile(r'^[a-zA-Z0-9-_\s]+$')
         if not isinstance(name, str):
             msg = 'Endpoint name must be a string'
             self.logger.log(logging.CRITICAL, msg)
@@ -91,14 +92,17 @@ class ManagementHandler(MainHandler):
                         else None)
             target_path = get_query_object_path(
                 self.settings[SettingsParameters.StateFilePath], name, version)
-            _path_checker = _compile('^[\\a-zA-Z0-9-_\\s/]+$')
+            self.logger.log(logging.DEBUG,
+                            f'Checking source path {src_path}...')
+            _path_checker = _compile(r'^[\\\:a-zA-Z0-9-_~\s/]+$')
             # copy from staging
             if src_path:
                 if not isinstance(request_data['src_path'], str):
                     raise gen.Return("src_path must be a string.")
                 if not _path_checker.match(src_path):
-                    raise gen.Return('Endpoint name can only contain: a-z, A-'
-                                     'Z, 0-9,underscore, hyphens and spaces.')
+                    raise gen.Return(
+                        'Endpoint source path name can only contain: '
+                        'a-z, A-Z, 0-9, underscore, hyphens and spaces.')
 
                 yield self._copy_po_future(src_path, target_path)
             elif endpoint_type != 'alias':
