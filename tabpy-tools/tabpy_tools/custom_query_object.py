@@ -50,18 +50,21 @@ class CustomQueryObject(_QueryObject):
         # correctly
 
         try:
+            logger.debug('Running custom query with arguments '
+                         f'({args}, {kwargs})...')
             ret = self.custom_query(*args, **kwargs)
         except Exception as e:
             logger.exception(
                 'Exception hit when running custom query, error: '
-                f'{e.message}')
+                f'{str(e)}')
             raise
 
+        logger.debug(f'Received response {ret}')
         try:
             return self._make_serializable(ret)
         except Exception as e:
             logger.exception('Cannot properly serialize custom query result, '
-                             f'error: {e.message}')
+                             f'error: {str(e)}')
             raise
 
     def get_doc_string(self):

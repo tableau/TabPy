@@ -3,8 +3,8 @@ import subprocess
 from pathlib import Path
 
 
-class TestDeployModelSSLOffAuthOff(integ_test_base.IntegTestBase):
-    def test_deploy_ssl_off_auth_off(self):
+class TestDeployAndEvaluateModel(integ_test_base.IntegTestBase):
+    def test_deploy_and_evaluate_model(self):
         path = str(Path('models', 'setup.py'))
         subprocess.call([self.py, path, self._get_config_file_name()])
 
