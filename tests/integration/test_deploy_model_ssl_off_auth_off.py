@@ -16,16 +16,6 @@ class TestDeployModelSSLOffAuthOff(integ_test_base.IntegTestBase):
             }''')
 
         conn = self._get_connection()
-        conn.request("GET", "/endpoints/PCA")
-        PCA_request = conn.getresponse()
-        self.assertEqual(200, PCA_request.status)
-        PCA_request.read()
-
-        conn.request("GET", "/endpoints/Sentiment%20Analysis")
-        SentimentAnalysis_request = conn.getresponse()
-        self.assertEqual(200, SentimentAnalysis_request.status)
-        SentimentAnalysis_request.read()
-
         conn.request("POST", "/evaluate", payload)
         SentimentAnalysis_eval = conn.getresponse()
         self.assertEqual(200, SentimentAnalysis_eval.status)
