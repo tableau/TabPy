@@ -1,5 +1,6 @@
 import integ_test_base
 
+
 class TestCustomEvaluateTimeout(integ_test_base.IntegTestBase):
     def _get_evaluate_timeout(self) -> str:
         return '5'
@@ -22,8 +23,7 @@ class TestCustomEvaluateTimeout(integ_test_base.IntegTestBase):
         res = conn.getresponse()
         actual_error_message = res.read().decode('utf-8')
 
-        self.assertEqual('{"message": "User defined script timed out. Timeout is set to 5.0 s.", "info": {}}',
-                         actual_error_message)
+        self.assertEqual(
+            '{"message": "User defined script timed out. Timeout is set to 5.0 s.", "info": {}}',
+            actual_error_message)
         self.assertEqual(408, res.status)
-
-
