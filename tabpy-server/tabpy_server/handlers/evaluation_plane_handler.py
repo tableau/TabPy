@@ -32,7 +32,8 @@ class EvaluationPlaneHandler(BaseHandler):
     def initialize(self, executor, app):
         super(EvaluationPlaneHandler, self).initialize(app)
         self.executor = executor
-        self._error_message_timeout = f'User defined script timed out. Timeout is set to {self.eval_timeout} s.'
+        self._error_message_timeout = f'User defined script timed out. ' \
+            f'Timeout is set to {self.eval_timeout} s.'
 
     @gen.coroutine
     def post(self):
@@ -79,8 +80,11 @@ class EvaluationPlaneHandler(BaseHandler):
                 f'function to evaluate={function_to_evaluate}')
 
             try:
-                result = yield self._call_subprocess(function_to_evaluate, arguments)
-            except (gen.TimeoutError, requests.exceptions.ConnectTimeout, requests.exceptions.ReadTimeout):
+                result = yield self._call_subprocess(function_to_evaluate,
+                                                     arguments)
+            except (gen.TimeoutError,
+                    requests.exceptions.ConnectTimeout,
+                    requests.exceptions.ReadTimeout):
                 self.logger.log(logging.ERROR, self._error_message_timeout)
                 self.error_out(408, self._error_message_timeout)
                 return
@@ -118,5 +122,6 @@ class EvaluationPlaneHandler(BaseHandler):
             future = self.executor.submit(_user_script, restricted_tabpy,
                                           **arguments)
 
-        ret = yield gen.with_timeout(timedelta(seconds=self.eval_timeout), future)
+        ret = yield gen.with_timeout(timedelta(seconds=self.eval_timeout),
+                                     future)
         raise gen.Return(ret)
