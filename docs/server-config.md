@@ -205,4 +205,3 @@ entry to your custom config.
 
 This timeout does not apply when evaluating models either through the `/query`
 method, or using the `tabpy.query(...)` syntax with the `/evaluate` method.
-
