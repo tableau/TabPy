@@ -202,3 +202,7 @@ to 30.0 s before being terminated. To configure this timeout, uncomment
 `tabpy-server/tabpy_server/common/default.conf` and replace `30` with the float
 value of your choice representing the timeout time in seconds, or add such an
 entry to your custom config.
+
+This timeout does not apply when evaluating models either through the `/query`
+method, or using the `tabpy.query(...)` syntax with the `/evaluate` method.
+
