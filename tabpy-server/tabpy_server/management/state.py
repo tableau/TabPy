@@ -144,6 +144,7 @@ class TabPyState(object):
                 endpoint_info['docstring'] = str(
                     bytes(docstring, "utf-8").decode('unicode_escape'))
                 endpoints[endpoint_name] = endpoint_info
+        logger.debug(f'Collected endpoints: {endpoints}')
         return endpoints
 
     @state_lock
