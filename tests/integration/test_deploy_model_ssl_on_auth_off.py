@@ -34,6 +34,6 @@ class TestDeployModelSSLOnAuthOff(integ_test_base.IntegTestBase):
             'Sentiment Analysis')
         self.assertEqual(200, SentimentAnalysis_response.status_code)
 
-        tTest_response = session.get(url=f'{self._get_transfer_protocol()}://'
-                                     'localhost:9004/endpoints/tTest')
-        self.assertEqual(200, tTest_response.status_code)
+        ttest_response = session.get(url=f'{self._get_transfer_protocol()}://'
+                                     'localhost:9004/endpoints/ttest')
+        self.assertEqual(200, ttest_response.status_code)
