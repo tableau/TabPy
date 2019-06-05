@@ -265,6 +265,48 @@ tabpy.query('Sentiment Analysis', _arg1, library='textblob')[‘response’]
 
 ```
 
+### T-Test 
+
+A [t-test](https://en.wikipedia.org/wiki/Student%27s_t-test) is a statistical
+hypothesis test that is used to compare two sample means or a sample’s mean against
+a known population mean. The ttest should be used when the means of the samples
+follows a normal distribution but the variance may not be known.
+
+TabPy’s pre-deployed t-test implementation can be called using the following syntax,
+
+```python
+
+tabpy.query(‘ttest’, _arg1, _arg2)[‘response’]
+
+```
+
+and is capable of performing two types of t-tests:
+
+1. [A t-test for the means of two independent samples with equal variance](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.ttest_ind.html)
+This is a two-sided t test with the null hypothesis being that the mean of sample1 is
+equal to the mean of sample2.
+_arg1 (list of numeric values): a list of independent observations
+_arg2 (list of numeric values): a list of independent observations equal to the length
+of _arg1 
+
+Alternatively, your data may not be split into separate measures. If that is the case
+you can pass the following fields to ttest,
+
+_arg1 (list of numeric values): a list of independent observations
+_arg2 (list of categorical variables with cardinality two): a binary factor that maps
+each observation in _arg1 to either sample1 or sample2 (this list should be equal to
+the length of _arg1)
+
+2. [A t-test for the mean of one group](https://docs.scipy.org/doc/scipy-0.14.0/reference/generated/scipy.stats.ttest_1samp.html)
+_arg1 (list of numeric values): a list of independent observations
+_arg2 (a numeric value): the known population mean
+A two-sided t test with the null hypothesis being that the mean of a sample of
+independent observations is equal to the given population mean.
+
+The function returns a two-tailed [p-value](https://en.wikipedia.org/wiki/P-value)
+(between 0 and 1). Depending on your [significance level](https://en.wikipedia.org/wiki/Statistical_significance)
+you may reject or fail to reject the null hypothesis. 
+
 ## Providing Schema Metadata
 
 As soon as you share your deployed functions, you also need to share metadata

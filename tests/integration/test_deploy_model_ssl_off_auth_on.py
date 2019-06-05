@@ -20,7 +20,7 @@ class TestDeployModelSSLOffAuthOn(integ_test_base.IntegTestBase):
                 'Basic ' +
                 base64.b64encode('user1:P@ssw0rd'.
                                  encode('utf-8')).decode('utf-8')
-            }
+        }
 
         conn = self._get_connection()
         conn.request("GET", "/endpoints/PCA", headers=headers)
@@ -32,3 +32,8 @@ class TestDeployModelSSLOffAuthOn(integ_test_base.IntegTestBase):
         SentimentAnalysis_request = conn.getresponse()
         self.assertEqual(200, SentimentAnalysis_request.status)
         SentimentAnalysis_request.read()
+
+        conn.request("GET", "/endpoints/tTest", headers=headers)
+        tTest_request = conn.getresponse()
+        self.assertEqual(200, tTest_request.status)
+        tTest_request.read()

@@ -18,3 +18,8 @@ class TestDeployModelSSLOffAuthOff(integ_test_base.IntegTestBase):
         SentimentAnalysis_request = conn.getresponse()
         self.assertEqual(200, SentimentAnalysis_request.status)
         SentimentAnalysis_request.read()
+
+        conn.request("GET", "/endpoints/tTest")
+        tTest_request = conn.getresponse()
+        self.assertEqual(200, tTest_request.status)
+        tTest_request.read()
