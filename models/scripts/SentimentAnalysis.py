@@ -64,4 +64,4 @@ if __name__ == '__main__':
     connection.deploy('Sentiment Analysis', SentimentAnalysis,
                       'Returns a sentiment score between -1 and '
                       '1 for a given string.', override=True)
-    print("Successfully deployed SentimentAnalysis")
+    print("Successfully deployed Sentiment Analysis")

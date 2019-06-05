@@ -1,9 +1,9 @@
-from utils import setup_utils
 from tabpy_tools.client import Client
 from scipy import stats
 import sys
 from pathlib import Path
 sys.path.append(str(Path(__file__).resolve().parent.parent.parent / 'models'))
+from utils import setup_utils
 
 
 def ttest(_arg1, _arg2):
@@ -55,4 +55,4 @@ if __name__ == '__main__':
     connection.deploy('ttest', ttest,
                       'Returns the p-value from a t-test.',
                       override=True)
-    print("Successfully deployed t-test")
+    print("Successfully deployed ttest")
