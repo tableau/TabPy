@@ -8,6 +8,7 @@ on TabPy server.
 - [Connecting to TabPy](#connecting-to-tabpy)
 - [Authentication](#authentication)
 - [Deploying a Function](#deploying-a-function)
+- [Predeployed Functions](#predeployed-functions)
 - [Providing Schema Metadata](#providing-schema-metadata)
 - [Querying an Endpoint](#querying-an-endpoint)
 - [Evaluating Arbitrary Python Scripts](#evaluating-arbitrary-python-scripts)
@@ -282,7 +283,8 @@ tabpy.query(‘ttest’, _arg1, _arg2)[‘response’]
 
 and is capable of performing two types of t-tests:
 
-1. [A t-test for the means of two independent samples with equal variance](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.ttest_ind.html)
+<!-- markdownlint-disable MD029 -->
+1\. [A t-test for the means of two independent samples with equal variance](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.ttest_ind.html)
 This is a two-sided t test with the null hypothesis being that the mean of
 sample1 is equal to the mean of sample2.
 _arg1 (list of numeric values): a list of independent observations
@@ -297,7 +299,7 @@ _arg2 (list of categorical variables with cardinality two): a binary factor
 that maps each observation in _arg1 to either sample1 or sample2 (this list
 should be equal to the length of _arg1)
 
-2. [A t-test for the mean of one group](https://docs.scipy.org/doc/scipy-0.14.0/reference/generated/scipy.stats.ttest_1samp.html)
+2\. [A t-test for the mean of one group](https://docs.scipy.org/doc/scipy-0.14.0/reference/generated/scipy.stats.ttest_1samp.html)
 _arg1 (list of numeric values): a list of independent observations
 _arg2 (a numeric value): the known population mean
 A two-sided t test with the null hypothesis being that the mean of a sample of
@@ -306,6 +308,7 @@ independent observations is equal to the given population mean.
 The function returns a two-tailed [p-value](https://en.wikipedia.org/wiki/P-value)
 (between 0 and 1). Depending on your [significance level](https://en.wikipedia.org/wiki/Statistical_significance)
 you may reject or fail to reject the null hypothesis.
+<!-- markdownlint-enable MD029 -->
 
 ## Providing Schema Metadata
 

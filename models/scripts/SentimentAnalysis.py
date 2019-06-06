@@ -1,4 +1,3 @@
-from tabpy_tools.client import Client
 from textblob import TextBlob
 import nltk
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
@@ -43,25 +42,7 @@ def SentimentAnalysis(_arg1, library='nltk'):
 
 
 if __name__ == '__main__':
-    # running from setup.py
-    if len(sys.argv) > 1:
-        config_file_path = sys.argv[1]
-    else:
-        config_file_path = setup_utils.get_default_config_file_path()
-    port, auth_on, prefix = setup_utils.parse_config(config_file_path)
-
-    connection = Client(f'{prefix}://localhost:{port}/')
-
-    if auth_on:
-        # credentials are passed in from setup.py
-        if len(sys.argv) == 4:
-            user, passwd = sys.argv[2], sys.argv[3]
-        # running Sentiment Analysis independently
-        else:
-            user, passwd = setup_utils.get_creds()
-        connection.set_credentials(user, passwd)
-
-    connection.deploy('Sentiment Analysis', SentimentAnalysis,
-                      'Returns a sentiment score between -1 and '
-                      '1 for a given string.', override=True)
-    print("Successfully deployed Sentiment Analysis")
+    setup_utils.main('Sentiment Analysis',
+                     SentimentAnalysis,
+                     'Returns a sentiment score between -1 and 1 for '
+                     'a given string')

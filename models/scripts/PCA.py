@@ -1,4 +1,3 @@
-from tabpy_tools.client import Client
 import pandas as pd
 from numpy import array
 from sklearn.decomposition import PCA as sklearnPCA
@@ -60,25 +59,6 @@ def PCA(component, _arg1, _arg2, *_argN):
 
 
 if __name__ == '__main__':
-    # running from setup.py
-    if len(sys.argv) > 1:
-        config_file_path = sys.argv[1]
-    else:
-        config_file_path = setup_utils.get_default_config_file_path()
-    port, auth_on, prefix = setup_utils.parse_config(config_file_path)
-
-    connection = Client(f'{prefix}://localhost:{port}/')
-
-    if auth_on:
-        # credentials are passed in from setup.py
-        if len(sys.argv) == 4:
-            user, passwd = sys.argv[2], sys.argv[3]
-        # running PCA independently
-        else:
-            user, passwd = setup_utils.get_creds()
-        connection.set_credentials(user, passwd)
-
-    connection.deploy('PCA', PCA,
-                      'Returns the specified principal component.',
-                      override=True)
-    print("Successfully deployed PCA")
+    setup_utils.main('PCA',
+                     PCA,
+                     'Returns the specified principal component')

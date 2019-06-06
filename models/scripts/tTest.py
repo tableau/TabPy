@@ -1,4 +1,3 @@
-from tabpy_tools.client import Client
 from scipy import stats
 import sys
 from pathlib import Path
@@ -7,6 +6,12 @@ from utils import setup_utils
 
 
 def ttest(_arg1, _arg2):
+    '''
+    T-Test is a statistical hypothesis test that is used to compare
+    two sample means or a sample’s mean against a known population mean.
+    For more information on the function and how to use it please refer
+    to tabpy-tools.md
+    '''
     # one sample test with mean
     if len(_arg2) == 1:
         test_stat, p_value = stats.ttest_1samp(_arg1, _arg2)
@@ -34,25 +39,6 @@ def ttest(_arg1, _arg2):
 
 
 if __name__ == '__main__':
-    # running from setup.py
-    if len(sys.argv) > 1:
-        config_file_path = sys.argv[1]
-    else:
-        config_file_path = setup_utils.get_default_config_file_path()
-    port, auth_on, prefix = setup_utils.parse_config(config_file_path)
-
-    connection = Client(f'{prefix}://localhost:{port}/')
-
-    if auth_on:
-        # credentials are passed in from setup.py
-        if len(sys.argv) == 4:
-            user, passwd = sys.argv[2], sys.argv[3]
-        # running ttest independently
-        else:
-            user, passwd = setup_utils.get_creds()
-        connection.set_credentials(user, passwd)
-
-    connection.deploy('ttest', ttest,
-                      'Returns the p-value from a t-test.',
-                      override=True)
-    print("Successfully deployed ttest")
+    setup_utils.main('ttest',
+                     ttest,
+                     'Returns the p-value form a t-test')

@@ -2,6 +2,7 @@ import configparser
 from pathlib import Path
 import getpass
 import sys
+from tabpy_tools.client import Client
 
 
 def get_default_config_file_path():
@@ -31,3 +32,25 @@ def get_creds():
         user = sys.stdin.readline().rstrip()
         passwd = sys.stdin.readline().rstrip()
     return [user, passwd]
+
+def main(funcName, func, funcDescription):
+   # running from setup.py
+    if len(sys.argv) > 1:
+        config_file_path = sys.argv[1]
+    else:
+        config_file_path = get_default_config_file_path()
+    port, auth_on, prefix = parse_config(config_file_path)
+
+    connection = Client(f'{prefix}://localhost:{port}/')
+
+    if auth_on:
+        # credentials are passed in from setup.py
+        if len(sys.argv) == 4:
+            user, passwd = sys.argv[2], sys.argv[3]
+        # running Sentiment Analysis independently
+        else:
+            user, passwd = get_creds()
+        connection.set_credentials(user, passwd)
+
+    connection.deploy(funcName, func, funcDescription, override=True)
+    print(f'Successfully deployed {funcName}')
