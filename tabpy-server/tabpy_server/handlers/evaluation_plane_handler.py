@@ -1,3 +1,5 @@
+import asyncio
+
 from tabpy_server.handlers import BaseHandler
 import json
 import logging
@@ -97,6 +99,7 @@ class EvaluationPlaneHandler(BaseHandler):
                     "endpoint exists and the correct set of arguments are "
                     "provided.")
 
+    @asyncio.coroutine
     def call_subprocess(self, function_to_evaluate, arguments):
         restricted_tabpy = RestrictedTabPy(self.port, self.logger)
         # Exec does not run the function, so it does not block.
@@ -107,4 +110,4 @@ class EvaluationPlaneHandler(BaseHandler):
         else:
             future = self.executor.submit(_user_script, restricted_tabpy,
                                           **arguments)
-        return yield future
+        return yield from future
