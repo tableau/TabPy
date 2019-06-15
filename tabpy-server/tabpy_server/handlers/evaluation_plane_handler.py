@@ -97,7 +97,7 @@ class EvaluationPlaneHandler(BaseHandler):
                     "endpoint exists and the correct set of arguments are "
                     "provided.")
 
-    async def call_subprocess(self, function_to_evaluate, arguments):
+    def call_subprocess(self, function_to_evaluate, arguments):
         restricted_tabpy = RestrictedTabPy(self.port, self.logger)
         # Exec does not run the function, so it does not block.
         exec(function_to_evaluate, globals())
@@ -107,4 +107,4 @@ class EvaluationPlaneHandler(BaseHandler):
         else:
             future = self.executor.submit(_user_script, restricted_tabpy,
                                           **arguments)
-        return await future
+        return yield future
