@@ -42,7 +42,8 @@ class ManagementHandler(MainHandler):
     def _get_protocol(self):
         return 'http://'
 
-    async def _add_or_update_endpoint(self, action, name, version, request_data):
+    async def _add_or_update_endpoint(
+            self, action, name, version, request_data):
         '''
         Add or update an endpoint
         '''
