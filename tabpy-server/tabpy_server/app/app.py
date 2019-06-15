@@ -19,7 +19,6 @@ from tabpy_server.handlers import (EndpointHandler, EndpointsHandler,
                                    EvaluationPlaneHandler, QueryPlaneHandler,
                                    ServiceInfoHandler, StatusHandler,
                                    UploadDestinationHandler)
-from tornado_json.constants import TORNADO_MAJOR
 import tornado
 
 
@@ -223,8 +222,8 @@ class TabPyApp:
             config=tabpy_state, settings=self.settings)
 
         self.python_service = PythonServiceHandler(PythonService())
-        self.settings['compress_response'] = True if TORNADO_MAJOR >= 4\
-            else "gzip"
+        self.settings['compress_response'] = (
+            True if tornado.version_info[0] >= 4 else "gzip")
 
         set_parameter(SettingsParameters.StaticPath,
                       ConfigParameters.TABPY_STATIC_PATH,
