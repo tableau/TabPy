@@ -1,5 +1,4 @@
 from tabpy_server.handlers import BaseHandler
-import tornado.web
 import json
 import logging
 from tabpy_server.common.util import format_exception

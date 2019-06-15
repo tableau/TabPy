@@ -9,7 +9,6 @@ at endpoints_handler.py
 from tabpy_server.handlers import ManagementHandler
 import json
 import logging
-import tornado.web
 from tabpy_server.management.state import get_query_object_path
 from tabpy_server.common.util import format_exception
 from tabpy_server.handlers.base_handler import STAGING_THREAD
