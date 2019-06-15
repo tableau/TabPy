@@ -34,7 +34,7 @@ class EvaluationPlaneHandler(BaseHandler):
         super(EvaluationPlaneHandler, self).initialize(app)
         self.executor = executor
 
-    async def post(self):
+    def post(self):
         if self.should_fail_with_not_authorized():
             self.fail_with_not_authorized()
             return
@@ -77,8 +77,8 @@ class EvaluationPlaneHandler(BaseHandler):
                 logging.INFO,
                 f'function to evaluate={function_to_evaluate}')
 
-            result = await self.call_subprocess(function_to_evaluate,
-                                                arguments)
+            result = yield from self.call_subprocess(function_to_evaluate,
+                                                     arguments)
             if result is None:
                 self.error_out(400, 'Error running script. No return value')
             else:
@@ -110,4 +110,4 @@ class EvaluationPlaneHandler(BaseHandler):
         else:
             future = self.executor.submit(_user_script, restricted_tabpy,
                                           **arguments)
-        return future.result()
+        return future
