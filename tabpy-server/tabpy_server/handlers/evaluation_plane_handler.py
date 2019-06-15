@@ -34,7 +34,7 @@ class EvaluationPlaneHandler(BaseHandler):
         super(EvaluationPlaneHandler, self).initialize(app)
         self.executor = executor
 
-    def post(self):
+    async def post(self):
         if self.should_fail_with_not_authorized():
             self.fail_with_not_authorized()
             return
@@ -77,8 +77,8 @@ class EvaluationPlaneHandler(BaseHandler):
                 logging.INFO,
                 f'function to evaluate={function_to_evaluate}')
 
-            result = yield from self.call_subprocess(function_to_evaluate,
-                                                     arguments)
+            result = await self.call_subprocess(function_to_evaluate,
+                                                arguments)
             if result is None:
                 self.error_out(400, 'Error running script. No return value')
             else:
@@ -99,7 +99,6 @@ class EvaluationPlaneHandler(BaseHandler):
                     "endpoint exists and the correct set of arguments are "
                     "provided.")
 
-    @asyncio.coroutine
     def call_subprocess(self, function_to_evaluate, arguments):
         restricted_tabpy = RestrictedTabPy(self.port, self.logger)
         # Exec does not run the function, so it does not block.
@@ -110,4 +109,4 @@ class EvaluationPlaneHandler(BaseHandler):
         else:
             future = self.executor.submit(_user_script, restricted_tabpy,
                                           **arguments)
-        return future
+        return asyncio.wrap_future(future)
