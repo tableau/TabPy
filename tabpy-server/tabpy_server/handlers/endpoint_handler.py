@@ -10,7 +10,6 @@ from tabpy_server.handlers import ManagementHandler
 import json
 import logging
 import tornado.web
-from tornado import gen
 from tabpy_server.management.state import get_query_object_path
 from tabpy_server.common.util import format_exception
 from tabpy_server.handlers.base_handler import STAGING_THREAD
@@ -42,9 +41,7 @@ class EndpointHandler(ManagementHandler):
                 self.error_out(404, 'Unknown endpoint',
                                info=f'Endpoint {endpoint_name} is not found')
 
-    @tornado.web.asynchronous
-    @gen.coroutine
-    def put(self, name):
+    async def put(self, name):
         if self.should_fail_with_not_authorized():
             self.fail_with_not_authorized()
             return
@@ -80,7 +77,7 @@ class EndpointHandler(ManagementHandler):
             self.logger.log(
                 logging.INFO,
                 f'Endpoint info: {request_data}')
-            err_msg = yield self._add_or_update_endpoint(
+            err_msg = await self._add_or_update_endpoint(
                 'update', name, new_version, request_data)
             if err_msg:
                 self.error_out(400, err_msg)
@@ -94,9 +91,7 @@ class EndpointHandler(ManagementHandler):
             self.error_out(500, err_msg)
             self.finish()
 
-    @tornado.web.asynchronous
-    @gen.coroutine
-    def delete(self, name):
+    async def delete(self, name):
         if self.should_fail_with_not_authorized():
             self.fail_with_not_authorized()
             return
@@ -127,7 +122,7 @@ class EndpointHandler(ManagementHandler):
                 delete_path = get_query_object_path(
                     self.settings['state_file_path'], name, None)
                 try:
-                    yield self._delete_po_future(delete_path)
+                    await self._delete_po_future(delete_path)
                 except Exception as e:
                     self.error_out(400,
                                    f'Error while deleting: {e}')
@@ -145,8 +140,6 @@ class EndpointHandler(ManagementHandler):
         on_state_change(self.settings, self.tabpy_state, self.python_service,
                         self.logger)
 
-    @gen.coroutine
-    def _delete_po_future(self, delete_path):
+    async def _delete_po_future(self, delete_path):
         future = STAGING_THREAD.submit(shutil.rmtree, delete_path)
-        ret = yield future
-        raise gen.Return(ret)
+        return await future

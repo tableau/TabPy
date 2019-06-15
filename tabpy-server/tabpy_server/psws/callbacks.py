@@ -8,7 +8,6 @@ from tabpy_server.common.util import format_exception
 from tabpy_server.management.state import TabPyState, get_query_object_path
 from tabpy_server.management import util
 from time import sleep
-from tornado import gen
 
 
 logger = logging.getLogger(__name__)
@@ -36,7 +35,6 @@ def wait_for_endpoint_loaded(python_service, object_uri):
         sleep(0.1)
 
 
-@gen.coroutine
 def init_ps_server(settings, tabpy_state):
     logger.info("Initializing TabPy Server...")
     existing_pos = tabpy_state.get_endpoints()
@@ -52,7 +50,6 @@ def init_ps_server(settings, tabpy_state):
                 f', error: {e}')
 
 
-@gen.coroutine
 def init_model_evaluator(settings, tabpy_state, python_service):
     '''
     This will go through all models that the service currently have and
@@ -129,7 +126,6 @@ def _get_latest_service_state(settings,
     return (True, changes)
 
 
-@gen.coroutine
 def on_state_change(settings, tabpy_state, python_service,
                     logger=logging.getLogger(__name__)):
     try:

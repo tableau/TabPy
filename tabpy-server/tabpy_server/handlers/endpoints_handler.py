@@ -9,7 +9,6 @@ at endpoint_handler.py
 from tabpy_server.handlers import ManagementHandler
 import json
 import tornado.web
-from tornado import gen
 import logging
 from tabpy_server.common.util import format_exception
 
@@ -26,9 +25,7 @@ class EndpointsHandler(ManagementHandler):
         self._add_CORS_header()
         self.write(json.dumps(self.tabpy_state.get_endpoints()))
 
-    @tornado.web.asynchronous
-    @gen.coroutine
-    def post(self):
+    async def post(self):
         if self.should_fail_with_not_authorized():
             self.fail_with_not_authorized()
             return
@@ -67,7 +64,7 @@ class EndpointsHandler(ManagementHandler):
             self.logger.log(
                 logging.DEBUG,
                 f'Adding endpoint "{name}"')
-            err_msg = yield self._add_or_update_endpoint('add', name, 1,
+            err_msg = await self._add_or_update_endpoint('add', name, 1,
                                                          request_data)
             if err_msg:
                 self.error_out(400, err_msg)

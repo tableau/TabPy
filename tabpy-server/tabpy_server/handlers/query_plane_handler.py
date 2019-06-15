@@ -208,7 +208,6 @@ class QueryPlaneHandler(BaseHandler):
 
         return (endpoint_name, all_endpoint_names)
 
-    @tornado.web.asynchronous
     def get(self, endpoint_name):
         if self.should_fail_with_not_authorized():
             self.fail_with_not_authorized()
@@ -218,7 +217,6 @@ class QueryPlaneHandler(BaseHandler):
         endpoint_name = urllib.parse.unquote(endpoint_name)
         self._process_query(endpoint_name, start)
 
-    @tornado.web.asynchronous
     def post(self, endpoint_name):
         self.logger.log(logging.DEBUG,
                         f'Processing POST for /query/{endpoint_name}...')

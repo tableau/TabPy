@@ -6,8 +6,6 @@ import shutil
 from re import compile as _compile
 from uuid import uuid4 as random_uuid
 
-from tornado import gen
-
 from tabpy_server.app.SettingsParameters import SettingsParameters
 from tabpy_server.handlers import MainHandler
 from tabpy_server.handlers.base_handler import STAGING_THREAD
@@ -44,8 +42,7 @@ class ManagementHandler(MainHandler):
     def _get_protocol(self):
         return 'http://'
 
-    @gen.coroutine
-    def _add_or_update_endpoint(self, action, name, version, request_data):
+    async def _add_or_update_endpoint(self, action, name, version, request_data):
         '''
         Add or update an endpoint
         '''
@@ -104,7 +101,7 @@ class ManagementHandler(MainHandler):
                         'Endpoint source path name can only contain: '
                         'a-z, A-Z, 0-9, underscore, hyphens and spaces.')
 
-                yield self._copy_po_future(src_path, target_path)
+                await self._copy_po_future(src_path, target_path)
             elif endpoint_type != 'alias':
                 raise gen.Return("src_path is required to add/update an "
                                  "endpoint.")
@@ -150,9 +147,7 @@ class ManagementHandler(MainHandler):
         finally:
             self.settings['add_or_updating_endpoint'] = None
 
-    @gen.coroutine
-    def _copy_po_future(self, src_path, target_path):
+    async def _copy_po_future(self, src_path, target_path):
         future = STAGING_THREAD.submit(copy_from_local, src_path,
                                        target_path, is_dir=True)
-        ret = yield future
-        raise gen.Return(ret)
+        return await future
