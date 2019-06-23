@@ -69,7 +69,8 @@ class EvaluationPlaneHandler(BaseHandler):
                                             'the format _arg1, _arg2, _argN')
                         return
 
-            function_to_evaluate = f'def _user_script(tabpy{arguments_str}):\n'
+            function_to_evaluate = ('async def _user_script('
+                                    f'tabpy{arguments_str}):\n')
             for u in user_code.splitlines():
                 function_to_evaluate += ' ' + u + '\n'
 
@@ -99,14 +100,12 @@ class EvaluationPlaneHandler(BaseHandler):
                     "endpoint exists and the correct set of arguments are "
                     "provided.")
 
-    def call_subprocess(self, function_to_evaluate, arguments):
+    async def call_subprocess(self, function_to_evaluate, arguments):
         restricted_tabpy = RestrictedTabPy(self.port, self.logger)
         # Exec does not run the function, so it does not block.
         exec(function_to_evaluate, globals())
 
         if arguments is None:
-            future = self.executor.submit(_user_script, restricted_tabpy)
-        else:
-            future = self.executor.submit(_user_script, restricted_tabpy,
-                                          **arguments)
-        return asyncio.wrap_future(future)
+            arguments = {}
+
+        return await _user_script(restricted_tabpy, **arguments)
