@@ -1,9 +1,7 @@
 from argparse import ArgumentParser
-import concurrent.futures
 import configparser
 import logging
 from logging import config
-import multiprocessing
 import os
 import tabpy_server
 from tabpy_server import __version__
@@ -88,9 +86,6 @@ class TabPyApp:
             lambda: init_ps_server(self.settings, self.tabpy_state))
         logger.info('Done initializing TabPy.')
 
-        executor = concurrent.futures.ThreadPoolExecutor(
-            max_workers=multiprocessing.cpu_count())
-
         # initialize Tornado application
         application = tornado.web.Application([
             # skip MainHandler to use StaticFileHandler .* page requests and
@@ -107,8 +102,7 @@ class TabPyApp:
             (self.subdirectory + r'/endpoints/([^/]+)?', EndpointHandler,
              dict(app=self)),
             (self.subdirectory + r'/evaluate', EvaluationPlaneHandler,
-             dict(executor=executor,
-                  app=self)),
+             dict(app=self)),
             (self.subdirectory +
              r'/configurations/endpoint_upload_destination',
              UploadDestinationHandler,

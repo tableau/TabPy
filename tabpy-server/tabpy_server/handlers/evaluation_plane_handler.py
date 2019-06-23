@@ -30,9 +30,8 @@ class EvaluationPlaneHandler(BaseHandler):
     EvaluationPlaneHandler is responsible for running arbitrary python scripts.
     '''
 
-    def initialize(self, executor, app):
+    def initialize(self, app):
         super(EvaluationPlaneHandler, self).initialize(app)
-        self.executor = executor
 
     async def post(self):
         if self.should_fail_with_not_authorized():
