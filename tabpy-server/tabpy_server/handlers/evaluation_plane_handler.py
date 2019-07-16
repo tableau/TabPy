@@ -8,19 +8,21 @@ from datetime import timedelta
 
 
 class RestrictedTabPy:
-    def __init__(self, port, logger, timeout):
+    def __init__(self, protocol, port, logger, timeout):
+        self.protocol = protocol
         self.port = port
         self.logger = logger
         self.timeout = timeout
 
     def query(self, name, *args, **kwargs):
-        url = f'http://localhost:{self.port}/query/{name}'
+        url = f'{self.protocol}://localhost:{self.port}/query/{name}'
         self.logger.log(logging.DEBUG, f'Querying {url}...')
         internal_data = {'data': args or kwargs}
         data = json.dumps(internal_data)
         headers = {'content-type': 'application/json'}
         response = requests.post(url=url, data=data, headers=headers,
-                                 timeout=self.timeout)
+                                 timeout=self.timeout,
+                                 verify=False)
         return response.json()
 
 
@@ -112,7 +114,10 @@ class EvaluationPlaneHandler(BaseHandler):
     @gen.coroutine
     def _call_subprocess(self, function_to_evaluate, arguments):
         restricted_tabpy = RestrictedTabPy(
-            self.port, self.logger, self.eval_timeout)
+            self.protocol,
+            self.port,
+            self.logger,
+            self.eval_timeout)
         # Exec does not run the function, so it does not block.
         exec(function_to_evaluate, globals())
 
