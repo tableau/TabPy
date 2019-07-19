@@ -108,7 +108,9 @@ class TestPartialConfigFile(unittest.TestCase):
     @patch('tabpy_server.app.app.os.path.exists', return_value=True)
     @patch('tabpy_server.app.app._get_state_from_file')
     @patch('tabpy_server.app.app.TabPyState')
-    def test_custom_evaluate_timeout_valid(self, mock_state, mock_get_state_from_file, mock_path_exists):
+    def test_custom_evaluate_timeout_valid(self, mock_state,
+                                           mock_get_state_from_file,
+                                           mock_path_exists):
         self.assertTrue(self.config_file is not None)
         config_file = self.config_file
         config_file.write('[TabPy]\n'
@@ -121,7 +123,9 @@ class TestPartialConfigFile(unittest.TestCase):
     @patch('tabpy_server.app.app.os.path.exists', return_value=True)
     @patch('tabpy_server.app.app._get_state_from_file')
     @patch('tabpy_server.app.app.TabPyState')
-    def test_custom_evaluate_timeout_invalid(self, mock_state, mock_get_state_from_file, mock_path_exists):
+    def test_custom_evaluate_timeout_invalid(self, mock_state,
+                                             mock_get_state_from_file,
+                                             mock_path_exists):
         self.assertTrue(self.config_file is not None)
         config_file = self.config_file
         config_file.write('[TabPy]\n'
