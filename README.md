@@ -25,6 +25,9 @@ order:
 * [Authoring Python calculations in Tableau](docs/TableauConfiguration.md).
 * [TabPy Tools](docs/tabpy-tools.md)
 
+Troubleshooting:
+* [FAQ for configuration, startup and other issues](docs/FAQ.md)
+
 More technical topics:
 
 * [Contributing Guide](CONTRIBUTING.md) for TabPy developers
