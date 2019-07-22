@@ -1,4 +1,4 @@
-# Starting TabPy Server
+# Setup and Startup TabPy Server
 
 These instructions explain how to start up TabPy Server.
 
