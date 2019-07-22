@@ -16,4 +16,3 @@ where the TabPy is running. For example, Python scripts can:
 •Install new Python packages which can contain binary code.
 •Execute operating system commands.
 •Open network connections to other servers and download files.
-
