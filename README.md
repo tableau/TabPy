@@ -20,7 +20,6 @@ order:
 * [TabPy Server Download Instructions](docs/server-download.md)
 * [TabPy Server Configuration Instructions](docs/server-config.md)
 * [TabPy Server Startup Instructions](docs/server-startup.md)
-* [Supported TabPy Server Configurations](docs/server-configurations.md)
 * [Running TabPy in Python Virtual Environment](docs/tabpy-virtualenv.md)
 * [Authoring Python calculations in Tableau](docs/TableauConfiguration.md).
 * [TabPy Tools](docs/tabpy-tools.md)
