@@ -48,8 +48,8 @@ Credentials only need to be set once for all further client operations.
 In cases where credentials are not provided but are required, the deployment will
 fail with an "Unauthorized" code (401).
 
-For instructions on how to configure and enable the authentication feature for TabPy, see
-[TabPy Server Configuration Instructions](server-config.md).
+For instructions on how to configure and enable the authentication feature for 
+TabPy, see [TabPy Server Configuration Instructions](server-config.md).
 
 ## Deploying a Function
 
@@ -88,8 +88,8 @@ client.deploy('clustering',
 
 In this example the function `clustering` expects a set of two-dimensional data
 points, represented by the list of all x-coordinates and the list of all y-coordinates.
-It will return a set of numerical labels corresponding to the clusters to which each datapoint
-is assigned. We deploy this function as an endpoint named `clustering`. It is
+It will return a set of numerical labels corresponding to the clusters to which each
+datapoint is assigned. We deploy this function as an endpoint named `clustering`. It is
 now reachable as a [REST API](server-rest.md#httppost-queryendpoint), as well as
 through the TabPy tools - for details see the next section.
 
@@ -125,10 +125,10 @@ modelfit(gbm, train, test, predictors)
 When the trained model (named `gbm` in this case) is used in a function being
 deployed (as in `gbm.predict(...)` below), Tableau will automatically save its
 definition using `cloudpickle` along with the definition of the function. The model
-will also be kept in memory on the server in order to achieve faster response times. If you
-persist your model manually to disk and read as part of your scoring function code
-however, you will notice that the response times are noticeably longer - as every time
-a client hits an endpoint, the code (including model loading) will get executed.
+will also be kept in memory on the server in order to achieve faster response times.
+If you persist your model manually to disk and read as part of your scoring function
+code however, you will notice that the response times are noticeably longer - as every
+time a client hits an endpoint, the code (including model loading) will get executed.
 In order to get the best performance, we recommended following the methodology
 outlined in this example.
 
