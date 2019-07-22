@@ -90,7 +90,7 @@ In this example the function `clustering` expects a set of two-dimensional
 data points, represented by the list of all x-coordinates and the list of all
 y-coordinates. It will return a set of numerical labels corresponding to the
 clusters to which each datapoint is assigned. We deploy this function as an
-endpoint named `clustering`. 
+endpoint named `clustering`.
 It is now reachable as a [REST API](server-rest.md#httppost-queryendpoint), as
 well as through the TabPy tools - for details see the next section.
 
