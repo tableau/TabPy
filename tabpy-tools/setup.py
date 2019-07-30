@@ -25,7 +25,6 @@ setup(
     install_requires=[
         'cloudpickle',
         'requests',
-        'genson',
-        'jsonschema'
+        'genson'
     ]
 )

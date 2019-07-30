@@ -38,7 +38,6 @@ setup(
         'decorator',
         'future',
         'genson',
-        'jsonschema~=2.3.0',
         'mock',
         'numpy',
         'pyopenssl',
