@@ -2,8 +2,9 @@ os: linux
 language: python
 python: 3.6
 install:
+    - pip install tornado
     - ./startup.sh --no-startup --print-install-logs
-    - pip install pytest pytest-cov coveralls tornado
+    - pip install pytest pytest-cov coveralls
     - npm install -g markdownlint-cli
 script:
     - source utils/set_env.sh
