@@ -3,16 +3,14 @@
 If security is a significant concern within your organization,
 you may want to consider the following as you use TabPy:
 
-•The REST server and Python execution share the same Python session,
+- The REST server and Python execution share the same Python session,
 meaning that HTTP requests and user scripts are evaluated in the
 same addressable memory and processor threads.
-•The tabpy_tools client does not validate that the tabpy server
+- The tabpy_tools client does not validate that the tabpy server
 certificate is signed by a trusted CA.
-
-Python scripts can contain code which can harm security on the server
+- Python scripts can contain code which can harm security on the server
 where the TabPy is running. For example, Python scripts can:
-
-•Access the file system (read/write).
-•Install new Python packages which can contain binary code.
-•Execute operating system commands.
-•Open network connections to other servers and download files.
+  - Access the file system (read/write).
+  - Install new Python packages which can contain binary code.
+  - Execute operating system commands.
+  - Open network connections to other servers and download files.
