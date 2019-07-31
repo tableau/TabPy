@@ -25,6 +25,7 @@ order:
 * [TabPy Tools](docs/tabpy-tools.md)
 
 Troubleshooting:
+
 * [FAQ for configuration, startup and other issues](docs/FAQ.md)
 
 More technical topics:

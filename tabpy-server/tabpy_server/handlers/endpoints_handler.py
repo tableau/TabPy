@@ -26,7 +26,6 @@ class EndpointsHandler(ManagementHandler):
         self._add_CORS_header()
         self.write(json.dumps(self.tabpy_state.get_endpoints()))
 
-    @tornado.web.asynchronous
     @gen.coroutine
     def post(self):
         if self.should_fail_with_not_authorized():

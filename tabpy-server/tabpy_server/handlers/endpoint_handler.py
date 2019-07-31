@@ -42,7 +42,6 @@ class EndpointHandler(ManagementHandler):
                 self.error_out(404, 'Unknown endpoint',
                                info=f'Endpoint {endpoint_name} is not found')
 
-    @tornado.web.asynchronous
     @gen.coroutine
     def put(self, name):
         if self.should_fail_with_not_authorized():
@@ -94,7 +93,6 @@ class EndpointHandler(ManagementHandler):
             self.error_out(500, err_msg)
             self.finish()
 
-    @tornado.web.asynchronous
     @gen.coroutine
     def delete(self, name):
         if self.should_fail_with_not_authorized():

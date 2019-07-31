@@ -38,7 +38,6 @@ setup(
         'decorator',
         'future',
         'genson',
-        'jsonschema~=2.3.0',
         'mock',
         'numpy',
         'pyopenssl',
@@ -46,8 +45,7 @@ setup(
         'requests',
         'singledispatch',
         'six',
-        'tornado==5.1.1',
-        'Tornado-JSON',
+        'tornado',
         'urllib3<1.25,>=1.21.1'
     ]
 )
