@@ -125,11 +125,13 @@ class BaseHandler(tornado.web.RequestHandler):
         self.tabpy_state = app.tabpy_state
         # set content type to application/json
         self.set_header("Content-Type", "application/json")
+        self.protocol = self.settings[SettingsParameters.TransferProtocol]
         self.port = self.settings[SettingsParameters.Port]
         self.python_service = app.python_service
         self.credentials = app.credentials
         self.username = None
         self.password = None
+        self.eval_timeout = self.settings[SettingsParameters.EvaluateTimeout]
 
         self.logger = ContextLoggerWrapper(self.request)
         self.logger.enable_context_logging(

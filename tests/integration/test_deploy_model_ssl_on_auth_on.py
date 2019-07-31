@@ -19,6 +19,7 @@ class TestDeployModelSSLOnAuthOn(integ_test_base.IntegTestBase):
         return './tests/integration/resources/pwdfile.txt'
 
     def test_deploy_ssl_on_auth_on(self):
+        models = ['PCA', 'Sentiment%20Analysis', "ttest"]
         path = str(Path('models', 'setup.py'))
         p = subprocess.run([self.py, path, self._get_config_file_name()],
                            input=b'user1\nP@ssw0rd\n')
@@ -36,13 +37,8 @@ class TestDeployModelSSLOnAuthOn(integ_test_base.IntegTestBase):
         # Do not warn about insecure request
         requests.packages.urllib3.disable_warnings()
 
-        PCA_response = session.get(url=f'{self._get_transfer_protocol()}'
-                                   '://localhost:9004/endpoints/PCA',
-                                   headers=headers)
-        self.assertEqual(200, PCA_response.status_code)
-
-        SentimentAnalysis_response = session.get(
-            url=f'{self._get_transfer_protocol()}'
-            '://localhost:9004/endpoints/'
-            'Sentiment Analysis', headers=headers)
-        self.assertEqual(200, SentimentAnalysis_response.status_code)
+        for m in models:
+            m_response = session.get(url=f'{self._get_transfer_protocol()}://'
+                                     f'localhost:9004/endpoints/{m}',
+                                     headers=headers)
+            self.assertEqual(200, m_response.status_code)

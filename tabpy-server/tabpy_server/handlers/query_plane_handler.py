@@ -8,8 +8,8 @@ import uuid
 import json
 from tabpy_server.common.util import format_exception
 import urllib
-import sys
 import tornado.web
+from tornado import gen
 
 
 def _get_uuid():
@@ -208,7 +208,7 @@ class QueryPlaneHandler(BaseHandler):
 
         return (endpoint_name, all_endpoint_names)
 
-    @tornado.web.asynchronous
+    @gen.coroutine
     def get(self, endpoint_name):
         if self.should_fail_with_not_authorized():
             self.fail_with_not_authorized()
@@ -218,7 +218,7 @@ class QueryPlaneHandler(BaseHandler):
         endpoint_name = urllib.parse.unquote(endpoint_name)
         self._process_query(endpoint_name, start)
 
-    @tornado.web.asynchronous
+    @gen.coroutine
     def post(self, endpoint_name):
         self.logger.log(logging.DEBUG,
                         f'Processing POST for /query/{endpoint_name}...')

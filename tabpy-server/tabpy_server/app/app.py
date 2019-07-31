@@ -19,7 +19,6 @@ from tabpy_server.handlers import (EndpointHandler, EndpointsHandler,
                                    EvaluationPlaneHandler, QueryPlaneHandler,
                                    ServiceInfoHandler, StatusHandler,
                                    UploadDestinationHandler)
-from tornado_json.constants import TORNADO_MAJOR
 import tornado
 
 
@@ -173,18 +172,46 @@ class TabPyApp:
                           default_val=None,
                           check_env_var=False):
             if config_key is not None and\
+               parser.has_section('TabPy') and\
                parser.has_option('TabPy', config_key):
                 self.settings[settings_key] = parser.get('TabPy', config_key)
+                logger.debug(
+                    f'Parameter {settings_key} set to '
+                    f'"{self.settings[settings_key]}" '
+                    'from config file')
             elif check_env_var:
                 self.settings[settings_key] = os.getenv(
                     config_key, default_val)
+                logger.debug(
+                    f'Parameter {settings_key} set to '
+                    f'"{self.settings[settings_key]}" '
+                    'from environment variable')
             elif default_val is not None:
                 self.settings[settings_key] = default_val
+                logger.debug(
+                    f'Parameter {settings_key} set to '
+                    f'"{self.settings[settings_key]}" '
+                    'from default value')
+            else:
+                logger.debug(
+                    f'Parameter {settings_key} is not set')
 
         set_parameter(SettingsParameters.Port, ConfigParameters.TABPY_PORT,
                       default_val=9004, check_env_var=True)
         set_parameter(SettingsParameters.ServerVersion, None,
                       default_val=__version__)
+
+        set_parameter(SettingsParameters.EvaluateTimeout,
+                      ConfigParameters.TABPY_EVALUATE_TIMEOUT,
+                      default_val=30)
+        try:
+            self.settings[SettingsParameters.EvaluateTimeout] = float(
+                self.settings[SettingsParameters.EvaluateTimeout])
+        except ValueError:
+            logger.warning(
+                'Evaluate timeout must be a float type. Defaulting '
+                'to evaluate timeout of 30 seconds.')
+            self.settings[SettingsParameters.EvaluateTimeout] = 30
 
         set_parameter(SettingsParameters.UploadDir,
                       ConfigParameters.TABPY_QUERY_OBJECT_PATH,
@@ -223,9 +250,7 @@ class TabPyApp:
             config=tabpy_state, settings=self.settings)
 
         self.python_service = PythonServiceHandler(PythonService())
-        self.settings['compress_response'] = True if TORNADO_MAJOR >= 4\
-            else "gzip"
-
+        self.settings['compress_response'] = True
         set_parameter(SettingsParameters.StaticPath,
                       ConfigParameters.TABPY_STATIC_PATH,
                       default_val='./')

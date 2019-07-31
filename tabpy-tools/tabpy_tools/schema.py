@@ -1,7 +1,7 @@
 import logging
 import genson as _genson
 
-from jsonschema import validate as _validate
+from json import validate as _validate
 
 
 logger = logging.getLogger(__name__)

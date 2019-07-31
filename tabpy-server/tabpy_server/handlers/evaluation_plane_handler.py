@@ -1,27 +1,28 @@
 from tabpy_server.handlers import BaseHandler
-import tornado.web
-from tornado import gen
 import json
 import logging
 from tabpy_server.common.util import format_exception
 import requests
-import sys
+from tornado import gen
+from datetime import timedelta
 
 
 class RestrictedTabPy:
-    def __init__(self, port, logger):
+    def __init__(self, protocol, port, logger, timeout):
+        self.protocol = protocol
         self.port = port
         self.logger = logger
+        self.timeout = timeout
 
     def query(self, name, *args, **kwargs):
-        url = f'http://localhost:{self.port}/query/{name}'
+        url = f'{self.protocol}://localhost:{self.port}/query/{name}'
         self.logger.log(logging.DEBUG, f'Querying {url}...')
         internal_data = {'data': args or kwargs}
         data = json.dumps(internal_data)
         headers = {'content-type': 'application/json'}
         response = requests.post(url=url, data=data, headers=headers,
-                                 timeout=30)
-
+                                 timeout=self.timeout,
+                                 verify=False)
         return response.json()
 
 
@@ -33,8 +34,9 @@ class EvaluationPlaneHandler(BaseHandler):
     def initialize(self, executor, app):
         super(EvaluationPlaneHandler, self).initialize(app)
         self.executor = executor
+        self._error_message_timeout = f'User defined script timed out. ' \
+            f'Timeout is set to {self.eval_timeout} s.'
 
-    @tornado.web.asynchronous
     @gen.coroutine
     def post(self):
         if self.should_fail_with_not_authorized():
@@ -79,8 +81,16 @@ class EvaluationPlaneHandler(BaseHandler):
                 logging.INFO,
                 f'function to evaluate={function_to_evaluate}')
 
-            result = yield self.call_subprocess(function_to_evaluate,
-                                                arguments)
+            try:
+                result = yield self._call_subprocess(function_to_evaluate,
+                                                     arguments)
+            except (gen.TimeoutError,
+                    requests.exceptions.ConnectTimeout,
+                    requests.exceptions.ReadTimeout):
+                self.logger.log(logging.ERROR, self._error_message_timeout)
+                self.error_out(408, self._error_message_timeout)
+                return
+
             if result is None:
                 self.error_out(400, 'Error running script. No return value')
             else:
@@ -102,8 +112,12 @@ class EvaluationPlaneHandler(BaseHandler):
                     "provided.")
 
     @gen.coroutine
-    def call_subprocess(self, function_to_evaluate, arguments):
-        restricted_tabpy = RestrictedTabPy(self.port, self.logger)
+    def _call_subprocess(self, function_to_evaluate, arguments):
+        restricted_tabpy = RestrictedTabPy(
+            self.protocol,
+            self.port,
+            self.logger,
+            self.eval_timeout)
         # Exec does not run the function, so it does not block.
         exec(function_to_evaluate, globals())
 
@@ -112,5 +126,7 @@ class EvaluationPlaneHandler(BaseHandler):
         else:
             future = self.executor.submit(_user_script, restricted_tabpy,
                                           **arguments)
-        ret = yield future
+
+        ret = yield gen.with_timeout(timedelta(seconds=self.eval_timeout),
+                                     future)
         raise gen.Return(ret)
