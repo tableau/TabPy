@@ -33,8 +33,9 @@ def get_creds():
         passwd = sys.stdin.readline().rstrip()
     return [user, passwd]
 
+
 def main(funcName, func, funcDescription):
-   # running from setup.py
+    # running from setup.py
     if len(sys.argv) > 1:
         config_file_path = sys.argv[1]
     else:
