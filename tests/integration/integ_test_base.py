@@ -225,13 +225,15 @@ class IntegTestBase(unittest.TestCase):
             if platform.system() == 'Windows':
                 self.py = 'python'
                 self.process = subprocess.Popen(
-                    ['startup.cmd', self.config_file_name],
+                    ['python',
+                     './tabpy.py',
+                     '--config=' + self.config_file_name],
                     stdout=outfile,
                     stderr=outfile)
             else:
                 self.py = 'python3'
                 self.process = subprocess.Popen(
-                    ['./startup.sh',
+                    ['python3',
                      '--config=' + self.config_file_name],
                     preexec_fn=os.setsid,
                     stdout=outfile,
