@@ -7,8 +7,8 @@ TabPy framework allows Tableau to remotely execute Python code. It has two compo
    executed or persisted in the server process and exposed as a REST endpoint,
    to be called later.
 
-2. A [tools library](tabpy-tools.md) that enables the deployment of such endpoints,
-   based on Python functions.
+2. A [tools library](tabpy-tools.md),
+   based on Python functions which enables the deployment of such endpoints.
 
 Tableau can connect to the TabPy server to execute Python code on the fly and
 display results in Tableau visualizations. Users can control data and parameters

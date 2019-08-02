@@ -34,8 +34,8 @@ more info can be found in the
 
 ## Authentication
 
-When TabPy is configured with authentication feature on, client code
-has to specify the credentials to use during model deployment with
+When TabPy is configured with the authentication feature on, client code
+has to specify the credentials to use during model deployment with the
 `set_credentials` call for a client:
 
 ```python
@@ -44,13 +44,13 @@ client.set_credentials('username', 'P@ssw0rd')
 
 ```
 
-Credentials only need to be set once for all futher client operations.
+Credentials only need to be set once for all further client operations.
 
-In case credentials are not provided when required deployment will
-fail with "Unauthorized" code (401).
+In cases where credentials are not provided but are required, the deployment will
+fail with an "Unauthorized" code (401).
 
-For how to configure and enable authentication feature for TabPy see
-[TabPy Server Configuration Instructions](server-config.md).
+For instructions on how to configure and enable the authentication feature for
+TabPy, see [TabPy Server Configuration Instructions](server-config.md).
 
 ## Deploying a Function
 
@@ -87,12 +87,13 @@ client.deploy('clustering',
 
 ```
 
-In this example the function `clustering` expects a set of two-dimensional data
-points, represented by the list of all x-coordinates and the list of all y-coordinates.
-It will return a set of numerical labels corresponding to the clusters each datapoint
-is assigned to. We deploy this function as an endpoint named `clustering`. It is
-now reachable as a [REST API](server-rest.md#httppost-queryendpoint), as well as
-through the TabPy tools - for details see the next section.
+In this example the function `clustering` expects a set of two-dimensional
+data points, represented by the list of all x-coordinates and the list of all
+y-coordinates. It will return a set of numerical labels corresponding to the
+clusters to which each datapoint is assigned. We deploy this function as an
+endpoint named `clustering`.
+It is now reachable as a [REST API](server-rest.md#httppost-queryendpoint), as
+well as through the TabPy tools - for details see the next section.
 
 You can re-deploy a function (for example, after you modified its code) by setting
 the `override` parameter to `True`:
@@ -106,7 +107,7 @@ client.deploy('add', add, 'Adds two numbers x and y', override=True)
 Each re-deployment of an endpoint will increment its version number, which is also
 returned as part of the query result.
 
-When deploying endpoints that rely on supervised learning models, you may want to
+When deploying endpoints which rely on supervised learning models, you may want to
 load a saved model instead of training on-the-fly for performance reasons.
 
 Below is an excerpt from the training stage of a hypothetical model that predicts
@@ -126,12 +127,12 @@ modelfit(gbm, train, test, predictors)
 When the trained model (named `gbm` in this case) is used in a function being
 deployed (as in `gbm.predict(...)` below), Tableau will automatically save its
 definition using `cloudpickle` along with the definition of the function. The model
-will also be kept in memory on the server to achieve fast response times. If you
-persist your model manually to disk and read as part of your scoring function code
-however, you will notice that response times are noticeably longer as every time
-a client hits an endpoint, the code (including model loading) will get executed.
-In order to get the best performance, we recommended following the methodology
-outlined in this example.
+will also be kept in memory on the server in order to achieve faster response times.
+If you persist your model manually to disk and read as part of your scoring function
+code however, you will notice that the response times are noticeably longer - as
+every time a client hits an endpoint, the code (including model loading) will get
+executed. In order to get the best performance, we recommended following the
+methodology outlined in this example.
 
 ```python
 
@@ -160,7 +161,7 @@ client.remove('WillItDefault')
 
 ## Predeployed Functions
 
-To setup models download the latest version of TabPy and follow the [instructions](server-download.md)
+To setup models, download the latest version of TabPy and follow the [instructions](server-download.md)
 to install and start up your server. Once your server is running, navigate to the
 models directory and run setup.py.  If your TabPy server is running on the default
 config (default.conf), you do not need to specify a config file when launching the
@@ -184,7 +185,7 @@ a message will be printed to the console:
 
 If you would like to deploy additional models using the deploy script, you can
 copy any python file to the `./models/scripts` directory and modify setup.py to
-include all necessary packages when installing dependencies or alternatively install
+include all necessary packages when installing dependencies, or alternatively install
 all the required dependencies manually.
 
 You can deploy models individually by navigating to models/scripts/ and running
@@ -375,7 +376,7 @@ client.get_endpoints()['add']['schema']
 ## Querying an Endpoint
 
 Once a Python function has been deployed to the server process, you can use the
-client's `query` method to query it (assumes you’re already connected to the
+client's `query` method to query it (assuming that you’re already connected to the
 service):
 
 ```python
@@ -401,7 +402,7 @@ Response:
 
 ## Evaluating Arbitrary Python Scripts
 
-The other core functionality besides deploying and querying methods as endpoints
+The other core functionality aside from deploying and querying methods as endpoints
 is the ad-hoc execution of Python code, called `evaluate`. Evaluate does not
 have a Python API in `tabpy-tools`, only a raw [REST interface](server-rest.md#httppost-evaluate)
 that other client bindings can easily implement. Tableau connects to TabPy
