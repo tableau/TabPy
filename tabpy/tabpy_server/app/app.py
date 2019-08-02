@@ -5,17 +5,17 @@ import logging
 from logging import config
 import multiprocessing
 import os
-import tabpy_server
-from tabpy import __version__
-from tabpy_server.app.ConfigParameters import ConfigParameters
-from tabpy_server.app.SettingsParameters import SettingsParameters
-from tabpy_server.app.util import parse_pwd_file
-from tabpy_server.management.state import TabPyState
-from tabpy_server.management.util import _get_state_from_file
-from tabpy_server.psws.callbacks import (init_model_evaluator, init_ps_server)
-from tabpy_server.psws.python_service import (PythonService,
+import tabpy.tabpy_server
+from tabpy.tabpy import __version__
+from tabpy.tabpy_server.app.ConfigParameters import ConfigParameters
+from tabpy.tabpy_server.app.SettingsParameters import SettingsParameters
+from tabpy.tabpy_server.app.util import parse_pwd_file
+from tabpy.tabpy_server.management.state import TabPyState
+from tabpy.tabpy_server.management.util import _get_state_from_file
+from tabpy.tabpy_server.psws.callbacks import (init_model_evaluator, init_ps_server)
+from tabpy.tabpy_server.psws.python_service import (PythonService,
                                               PythonServiceHandler)
-from tabpy_server.handlers import (EndpointHandler, EndpointsHandler,
+from tabpy.tabpy_server.handlers import (EndpointHandler, EndpointsHandler,
                                    EvaluationPlaneHandler, QueryPlaneHandler,
                                    ServiceInfoHandler, StatusHandler,
                                    UploadDestinationHandler)

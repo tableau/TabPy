@@ -18,7 +18,7 @@ __version__ = read_version()
 
 
 def main():
-    from tabpy_server.app.app import TabPyApp
+    from tabpy.tabpy_server.app.app import TabPyApp
     app = TabPyApp()
     app.run()
 
