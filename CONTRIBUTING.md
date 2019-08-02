@@ -1,20 +1,25 @@
 # TabPy Contributing Guide
 
+<!-- markdownlint-disable MD004 -->
+
 <!-- toc -->
 
 - [Environment Setup](#environment-setup)
 - [Prerequisites](#prerequisites)
 - [Cloning TabPy Repository](#cloning-tabpy-repository)
-- [Setting Up Environment](#setting-up-environment)
-- [Unit Tests](#unit-tests)
-- [Integration Tests](#integration-tests)
+- [Tests](#tests)
+  * [Unit Tests](#unit-tests)
+  * [Integration Tests](#integration-tests)
 - [Code Coverage](#code-coverage)
 - [TabPy in Python Virtual Environment](#tabpy-in-python-virtual-environment)
 - [Documentation Updates](#documentation-updates)
 - [TabPy with Swagger](#tabpy-with-swagger)
 - [Code styling](#code-styling)
+- [Publishing TabPy Package](#publishing-tabpy-package)
 
 <!-- tocstop -->
+
+<!-- markdownlint-enable MD004 -->
 
 ## Environment Setup
 
@@ -155,4 +160,14 @@ outputs formatted code to the console.
 
 ```sh
 autopep8 -i tabpy-server/server_tests/test_pwd_file.py
+```
+
+## Publishing TabPy Package
+
+Execute the following commands to build and publish new version of
+TabPy package:
+
+```sh
+python setup.py sdist bdist_wheel
+python -m twine upload dist/*
 ```
