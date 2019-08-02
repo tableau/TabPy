@@ -3,9 +3,9 @@ import logging
 import sys
 
 
-from tabpy_tools.query_object import QueryObject
-from tabpy_server.common.util import format_exception
-from tabpy_server.common.messages import (
+from tabpy.tabpy_tools.query_object import QueryObject
+from tabpy.tabpy_server.common.util import format_exception
+from tabpy.tabpy_server.common.messages import (
     LoadObject, DeleteObjects, FlushObjects, CountObjects, ListObjects,
     UnknownMessage, LoadFailed, ObjectsDeleted, ObjectsFlushed, QueryFailed,
     QuerySuccessful, UnknownURI, DownloadSkipped, LoadInProgress, ObjectCount,

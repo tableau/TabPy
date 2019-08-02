@@ -4,8 +4,8 @@ import concurrent
 import json
 import logging
 import tornado.web
-from tabpy_server.app.SettingsParameters import SettingsParameters
-from tabpy_server.handlers.util import hash_password
+from tabpy.tabpy_server.app.SettingsParameters import SettingsParameters
+from tabpy.tabpy_server.handlers.util import hash_password
 import uuid
 
 

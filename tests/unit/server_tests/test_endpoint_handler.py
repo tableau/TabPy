@@ -3,8 +3,8 @@ import os
 import tempfile
 
 from argparse import Namespace
-from tabpy_server.app.app import TabPyApp
-from tabpy_server.handlers.util import hash_password
+from tabpy.tabpy_server.app.app import TabPyApp
+from tabpy.tabpy_server.handlers.util import hash_password
 from tornado.testing import AsyncHTTPTestCase
 from unittest.mock import patch
 
@@ -13,7 +13,7 @@ class TestEndpointHandlerWithAuth(AsyncHTTPTestCase):
     @classmethod
     def setUpClass(cls):
         cls.patcher = patch(
-            'tabpy_server.app.app.TabPyApp._parse_cli_arguments',
+            'tabpy.tabpy_server.app.app.TabPyApp._parse_cli_arguments',
             return_value=Namespace(
                 config=None))
         cls.patcher.start()

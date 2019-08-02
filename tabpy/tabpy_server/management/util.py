@@ -5,8 +5,8 @@ try:
 except ImportError:
     from configparser import ConfigParser as _ConfigParser
 from datetime import datetime, timedelta, tzinfo
-from tabpy_server.app.ConfigParameters import ConfigParameters
-from tabpy_server.app.SettingsParameters import SettingsParameters
+from tabpy.tabpy_server.app.ConfigParameters import ConfigParameters
+from tabpy.tabpy_server.app.SettingsParameters import SettingsParameters
 
 
 def write_state_config(state, settings, logger=logging.getLogger(__name__)):

@@ -5,7 +5,7 @@ import unittest
 from unittest.mock import Mock
 from requests.auth import HTTPBasicAuth
 
-from tabpy_tools.rest import (RequestsNetworkWrapper, ServiceClient)
+from tabpy.tabpy_tools.rest import (RequestsNetworkWrapper, ServiceClient)
 
 
 class TestRequestsNetworkWrapper(unittest.TestCase):

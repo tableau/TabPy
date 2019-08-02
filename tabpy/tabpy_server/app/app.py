@@ -320,7 +320,7 @@ class TabPyApp:
             'an existing file.',
             os.path.isfile(cert),
             os.path.isfile(self.settings[SettingsParameters.KeyFile]))
-        tabpy_server.app.util.validate_cert(cert)
+        tabpy.tabpy_server.app.util.validate_cert(cert)
 
     @staticmethod
     def _validate_cert_key_state(msg, cert_valid, key_valid):

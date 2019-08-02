@@ -1,6 +1,6 @@
 import logging
-from tabpy_server.app.SettingsParameters import SettingsParameters
-from tabpy_server.handlers import ManagementHandler
+from tabpy.tabpy_server.app.SettingsParameters import SettingsParameters
+from tabpy.tabpy_server.handlers import ManagementHandler
 import os
 
 

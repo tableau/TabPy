@@ -5,7 +5,7 @@ except ImportError:
 import json
 import logging
 import sys
-from tabpy_server.management.util import write_state_config
+from tabpy.tabpy_server.management.util import write_state_config
 from threading import Lock
 from time import time
 

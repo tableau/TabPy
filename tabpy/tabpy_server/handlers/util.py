@@ -1,7 +1,7 @@
 import base64
 import binascii
 from hashlib import pbkdf2_hmac
-from tabpy_server.app.SettingsParameters import SettingsParameters
+from tabpy.tabpy_server.app.SettingsParameters import SettingsParameters
 
 
 def hash_password(username, pwd):

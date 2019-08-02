@@ -6,12 +6,12 @@ For how individual endpoint requests are served look
 at endpoint_handler.py
 '''
 
-from tabpy_server.handlers import ManagementHandler
 import json
-import tornado.web
-from tornado import gen
 import logging
-from tabpy_server.common.util import format_exception
+from tabpy.tabpy_server.common.util import format_exception
+from tabpy.tabpy_server.handlers import ManagementHandler
+from tornado import gen
+import tornado.web
 
 
 class EndpointsHandler(ManagementHandler):

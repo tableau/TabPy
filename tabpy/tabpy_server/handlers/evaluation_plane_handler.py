@@ -1,7 +1,7 @@
-from tabpy_server.handlers import BaseHandler
+from tabpy.tabpy_server.handlers import BaseHandler
 import json
 import logging
-from tabpy_server.common.util import format_exception
+from tabpy.tabpy_server.common.util import format_exception
 import requests
 from tornado import gen
 from datetime import timedelta

@@ -3,8 +3,8 @@ import unittest
 from argparse import Namespace
 from tempfile import NamedTemporaryFile
 
-from tabpy_server.app.util import validate_cert
-from tabpy_server.app.app import TabPyApp
+from tabpy.tabpy_server.app.util import validate_cert
+from tabpy.tabpy_server.app.app import TabPyApp
 
 from unittest.mock import patch, call
 
@@ -18,14 +18,14 @@ def assert_raises_runtime_error(message, fn, args={}):
 
 
 class TestConfigEnvironmentCalls(unittest.TestCase):
-    @patch('tabpy_server.app.app.TabPyApp._parse_cli_arguments',
+    @patch('tabpy.tabpy_server.app.app.TabPyApp._parse_cli_arguments',
            return_value=Namespace(config=None))
-    @patch('tabpy_server.app.app.TabPyState')
-    @patch('tabpy_server.app.app._get_state_from_file')
-    @patch('tabpy_server.app.app.PythonServiceHandler')
-    @patch('tabpy_server.app.app.os.path.exists', return_value=True)
-    @patch('tabpy_server.app.app.os.path.isfile', return_value=False)
-    @patch('tabpy_server.app.app.os')
+    @patch('tabpy.tabpy_server.app.app.TabPyState')
+    @patch('tabpy.tabpy_server.app.app._get_state_from_file')
+    @patch('tabpy.tabpy_server.app.app.PythonServiceHandler')
+    @patch('tabpy.tabpy_server.app.app.os.path.exists', return_value=True)
+    @patch('tabpy.tabpy_server.app.app.os.path.isfile', return_value=False)
+    @patch('tabpy.tabpy_server.app.app.os')
     def test_no_config_file(self, mock_os, mock_file_exists,
                             mock_path_exists, mock_psws,
                             mock_management_util, mock_tabpy_state,
@@ -44,14 +44,14 @@ class TestConfigEnvironmentCalls(unittest.TestCase):
         self.assertTrue(len(mock_management_util.mock_calls) > 0)
         mock_os.makedirs.assert_not_called()
 
-    @patch('tabpy_server.app.app.TabPyApp._parse_cli_arguments',
+    @patch('tabpy.tabpy_server.app.app.TabPyApp._parse_cli_arguments',
            return_value=Namespace(config=None))
-    @patch('tabpy_server.app.app.TabPyState')
-    @patch('tabpy_server.app.app._get_state_from_file')
-    @patch('tabpy_server.app.app.PythonServiceHandler')
-    @patch('tabpy_server.app.app.os.path.exists', return_value=False)
-    @patch('tabpy_server.app.app.os.path.isfile', return_value=False)
-    @patch('tabpy_server.app.app.os')
+    @patch('tabpy.tabpy_server.app.app.TabPyState')
+    @patch('tabpy.tabpy_server.app.app._get_state_from_file')
+    @patch('tabpy.tabpy_server.app.app.PythonServiceHandler')
+    @patch('tabpy.tabpy_server.app.app.os.path.exists', return_value=False)
+    @patch('tabpy.tabpy_server.app.app.os.path.isfile', return_value=False)
+    @patch('tabpy.tabpy_server.app.app.os')
     def test_no_state_ini_file_or_state_dir(self, mock_os, mock_file_exists,
                                             mock_path_exists, mock_psws,
                                             mock_management_util,
@@ -69,12 +69,12 @@ class TestPartialConfigFile(unittest.TestCase):
         os.remove(self.config_file.name)
         self.config_file = None
 
-    @patch('tabpy_server.app.app.TabPyApp._parse_cli_arguments')
-    @patch('tabpy_server.app.app.TabPyState')
-    @patch('tabpy_server.app.app._get_state_from_file')
-    @patch('tabpy_server.app.app.PythonServiceHandler')
-    @patch('tabpy_server.app.app.os.path.exists', return_value=True)
-    @patch('tabpy_server.app.app.os')
+    @patch('tabpy.tabpy_server.app.app.TabPyApp._parse_cli_arguments')
+    @patch('tabpy.tabpy_server.app.app.TabPyState')
+    @patch('tabpy.tabpy_server.app.app._get_state_from_file')
+    @patch('tabpy.tabpy_server.app.app.PythonServiceHandler')
+    @patch('tabpy.tabpy_server.app.app.os.path.exists', return_value=True)
+    @patch('tabpy.tabpy_server.app.app.os')
     def test_config_file_present(self, mock_os, mock_path_exists,
                                  mock_psws, mock_management_util,
                                  mock_tabpy_state, mock_parse_arguments):
@@ -105,9 +105,9 @@ class TestPartialConfigFile(unittest.TestCase):
         self.assertEqual(app.settings['log_request_context'], False)
         self.assertEqual(app.settings['evaluate_timeout'], 30)
 
-    @patch('tabpy_server.app.app.os.path.exists', return_value=True)
-    @patch('tabpy_server.app.app._get_state_from_file')
-    @patch('tabpy_server.app.app.TabPyState')
+    @patch('tabpy.tabpy_server.app.app.os.path.exists', return_value=True)
+    @patch('tabpy.tabpy_server.app.app._get_state_from_file')
+    @patch('tabpy.tabpy_server.app.app.TabPyState')
     def test_custom_evaluate_timeout_valid(self, mock_state,
                                            mock_get_state_from_file,
                                            mock_path_exists):
@@ -120,9 +120,9 @@ class TestPartialConfigFile(unittest.TestCase):
         app = TabPyApp(self.config_file.name)
         self.assertEqual(app.settings['evaluate_timeout'], 1996.0)
 
-    @patch('tabpy_server.app.app.os.path.exists', return_value=True)
-    @patch('tabpy_server.app.app._get_state_from_file')
-    @patch('tabpy_server.app.app.TabPyState')
+    @patch('tabpy.tabpy_server.app.app.os.path.exists', return_value=True)
+    @patch('tabpy.tabpy_server.app.app._get_state_from_file')
+    @patch('tabpy.tabpy_server.app.app.TabPyState')
     def test_custom_evaluate_timeout_invalid(self, mock_state,
                                              mock_get_state_from_file,
                                              mock_path_exists):
@@ -197,7 +197,7 @@ class TestTransferProtocolValidation(unittest.TestCase):
                                     'TABPY_KEY_FILE must be set.',
                                     TabPyApp, {self.fp.name})
 
-    @patch('tabpy_server.app.app.os.path')
+    @patch('tabpy.tabpy_server.app.app.os.path')
     def test_https_cert_and_key_file_not_found(self, mock_path):
         self.fp.write("[TabPy]\n"
                       "TABPY_TRANSFER_PROTOCOL = https\n"
@@ -213,7 +213,7 @@ class TestTransferProtocolValidation(unittest.TestCase):
             'TABPY_KEY_FILE must point to an existing file.',
             TabPyApp, {self.fp.name})
 
-    @patch('tabpy_server.app.app.os.path')
+    @patch('tabpy.tabpy_server.app.app.os.path')
     def test_https_cert_file_not_found(self, mock_path):
         self.fp.write("[TabPy]\n"
                       "TABPY_TRANSFER_PROTOCOL = https\n"
@@ -229,7 +229,7 @@ class TestTransferProtocolValidation(unittest.TestCase):
             'must point to an existing file.',
             TabPyApp, {self.fp.name})
 
-    @patch('tabpy_server.app.app.os.path')
+    @patch('tabpy.tabpy_server.app.app.os.path')
     def test_https_key_file_not_found(self, mock_path):
         self.fp.write("[TabPy]\n"
                       "TABPY_TRANSFER_PROTOCOL = https\n"
@@ -245,8 +245,8 @@ class TestTransferProtocolValidation(unittest.TestCase):
             'must point to an existing file.',
             TabPyApp, {self.fp.name})
 
-    @patch('tabpy_server.app.app.os.path.isfile', return_value=True)
-    @patch('tabpy_server.app.util.validate_cert')
+    @patch('tabpy.tabpy_server.app.app.os.path.isfile', return_value=True)
+    @patch('tabpy.tabpy_server.app.util.validate_cert')
     def test_https_success(self, mock_isfile, mock_validate_cert):
         self.fp.write("[TabPy]\n"
                       "TABPY_TRANSFER_PROTOCOL = HtTpS\n"

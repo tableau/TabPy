@@ -1,6 +1,6 @@
 import json
 import logging
-from tabpy_server.handlers import BaseHandler
+from tabpy.tabpy_server.handlers import BaseHandler
 
 
 class StatusHandler(BaseHandler):
