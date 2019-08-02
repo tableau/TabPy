@@ -13,8 +13,9 @@ def setup_package():
         version=version,
         description='Web server Tableau uses to run Python scripts.',
         long_description=(
-            'TabPy (Tableau Python Server) is external server implementation which allows '
-            'expanding Tableau with executing Python scripts in table calculation.'),
+            'TabPy (Tableau Python Server) is external server '
+            'implementation which allows expanding Tableau with '
+            'executing Python scripts in table calculation.'),
         long_description_content_type='text/markdown',
         url='https://github.com/tableau/TabPy',
         author='Tableau',
@@ -28,7 +29,8 @@ def setup_package():
             'Topic :: Scientific/Engineering :: Information Analysis',
         ],
         keywords=['tabpy tableau'],
-        packages=find_packages(exclude=['docs', 'misc', 'tests']), 
+        packages=find_packages(
+            exclude=['docs', 'misc', 'tests']),
         python_requires='>=3.6',
         license='MIT',
         # Note: many of these required packages are included in base python

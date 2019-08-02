@@ -1,8 +1,7 @@
 from scipy import stats
 import sys
 from pathlib import Path
-sys.path.append(str(Path(__file__).resolve().parent.parent.parent / 'models'))
-from utils import setup_utils
+from models.utils import setup_utils
 
 
 def ttest(_arg1, _arg2):

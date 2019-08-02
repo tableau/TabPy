@@ -281,11 +281,11 @@ class IntegTestBase(unittest.TestCase):
     def _get_password(self) -> str:
         return 'P@ssw0rd'
 
-    def deploy_models(self, username:str, password:str):
+    def deploy_models(self, username: str, password: str):
         path = str(Path('models', 'setup.py'))
         with open(self.tmp_dir + '/models_output.txt', 'w') as outfile:
-            p = subprocess.run([self.py, path, self._get_config_file_name()],
-                               input=f'{username}\n{password}\n'.encode('utf-8'),
-                               stdout=outfile,
-                               stderr=outfile)
-
+            p = subprocess.run(
+                [self.py, path, self._get_config_file_name()],
+                input=f'{username}\n{password}\n'.encode('utf-8'),
+                stdout=outfile,
+                stderr=outfile)

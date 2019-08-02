@@ -1,11 +1,12 @@
 import logging
 import sys
 from tabpy.tabpy_server.app.SettingsParameters import SettingsParameters
-from tabpy.tabpy_server.common.messages import (
-    LoadObject, DeleteObjects, ListObjects, ObjectList)
+from tabpy.tabpy_server.common.messages\
+    import (LoadObject, DeleteObjects, ListObjects, ObjectList)
 from tabpy.tabpy_server.common.endpoint_file_mgr import cleanup_endpoint_files
 from tabpy.tabpy_server.common.util import format_exception
-from tabpy.tabpy_server.management.state import TabPyState, get_query_object_path
+from tabpy.tabpy_server.management.state\
+    import TabPyState, get_query_object_path
 from tabpy.tabpy_server.management import util
 from time import sleep
 from tornado import gen

@@ -1,5 +1,6 @@
 from pathlib import Path
 
+
 def read_version():
     f = None
     for path in ['VERSION', '../VERSION', '../../VERSION']:

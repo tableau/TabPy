@@ -5,7 +5,7 @@ from pathlib import Path
 
 class TestDeployModelSSLOffAuthOff(integ_test_base.IntegTestBase):
     def test_deploy_ssl_off_auth_off(self):
-        self.deploy_models(self._get_username(), self._get_password())        
+        self.deploy_models(self._get_username(), self._get_password())
 
         conn = self._get_connection()
 

@@ -45,33 +45,29 @@ be able to work on TabPy changes:
     git clone https://github.com/tableau/TabPy.git
     cd TabPy
     ```
+4. Registeg TabPy repo as a pip package:
 
-Before making any code changes run environment setup script.
-For Windows run this command from the repository root folder:
+    ```sh
+    pip install tabpy -e .
+    ```
+
+## Tests
+
+To run the whole test suite execute the following command:
 
 ```sh
-utils\set_env.cmd
+pytest
 ```
 
-and for Linux or Mac the next command from the repository root folder:
+### Unit Tests
 
-```sh
-source utils/set_env.sh
-```
-
-## Unit Tests
-
-TabPy has test suites for `tabpy-server` and `tabpy-tools` components.
-To run the unit tests use `pytest` which you may need to install first
-(see [https://docs.pytest.org](https://docs.pytest.org) for details):
+Unit tests suite can be exectud with the following command:
 
 ```sh
 pytest tests/unit
 ```
 
-Check `pytest` documentation for how to run individual tests or set of tests.
-
-## Integration Tests
+### Integration Tests
 
 Integration tests can be executed with the next command:
 
@@ -112,7 +108,7 @@ These checks will run as part of the build if you submit a pull request.
 
 You can invoke the TabPy Server API against a running TabPy instance with Swagger.
 
-- Make CORS related changes in TabPy configuration file: update `tabpy-server\state.ini`
+- Make CORS related changes in TabPy configuration file: update `tabpy/tabpy-server/state.ini`
   file in your local repository to have the next settings:
 
 ```config

@@ -12,13 +12,15 @@ from tabpy.tabpy_server.app.SettingsParameters import SettingsParameters
 from tabpy.tabpy_server.app.util import parse_pwd_file
 from tabpy.tabpy_server.management.state import TabPyState
 from tabpy.tabpy_server.management.util import _get_state_from_file
-from tabpy.tabpy_server.psws.callbacks import (init_model_evaluator, init_ps_server)
-from tabpy.tabpy_server.psws.python_service import (PythonService,
-                                              PythonServiceHandler)
-from tabpy.tabpy_server.handlers import (EndpointHandler, EndpointsHandler,
-                                   EvaluationPlaneHandler, QueryPlaneHandler,
-                                   ServiceInfoHandler, StatusHandler,
-                                   UploadDestinationHandler)
+from tabpy.tabpy_server.psws.callbacks\
+    import (init_model_evaluator, init_ps_server)
+from tabpy.tabpy_server.psws.python_service\
+    import (PythonService, PythonServiceHandler)
+from tabpy.tabpy_server.handlers\
+    import (EndpointHandler, EndpointsHandler,
+            EvaluationPlaneHandler, QueryPlaneHandler,
+            ServiceInfoHandler, StatusHandler,
+            UploadDestinationHandler)
 import tornado
 
 
