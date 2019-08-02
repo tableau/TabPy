@@ -1,10 +1,4 @@
-"""
-TabPy client is a Python client to interact with a Tornado-Python-Connector
-server process.
-"""
-
 from pathlib import Path
-
 
 def read_version():
     f = None
@@ -21,3 +15,13 @@ def read_version():
 
 
 __version__ = read_version()
+
+
+def main():
+    from tabpy_server.app.app import TabPyApp
+    app = TabPyApp()
+    app.run()
+
+
+if __name__ == '__main__':
+    main()

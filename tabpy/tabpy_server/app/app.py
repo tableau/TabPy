@@ -6,7 +6,7 @@ from logging import config
 import multiprocessing
 import os
 import tabpy_server
-from tabpy_server import __version__
+from tabpy import __version__
 from tabpy_server.app.ConfigParameters import ConfigParameters
 from tabpy_server.app.SettingsParameters import SettingsParameters
 from tabpy_server.app.util import parse_pwd_file
@@ -237,7 +237,7 @@ class TabPyApp:
         # last dependence on batch/shell script
         set_parameter(SettingsParameters.StateFilePath,
                       ConfigParameters.TABPY_STATE_PATH,
-                      default_val='./tabpy_server',
+                      default_val='./tabpy/tabpy_server',
                       check_env_var=True)
         self.settings[SettingsParameters.StateFilePath] = os.path.realpath(
             os.path.normpath(
