@@ -2,7 +2,7 @@ import configparser
 from pathlib import Path
 import getpass
 import sys
-from tabpy_tools.client import Client
+from tabpy.tabpy_tools.client import Client
 
 
 def get_default_config_file_path():

@@ -5,11 +5,11 @@ from pathlib import Path
 
 class TestDeployModelSSLOffAuthOff(integ_test_base.IntegTestBase):
     def test_deploy_ssl_off_auth_off(self):
-        models = ['PCA', 'Sentiment%20Analysis', "ttest"]
-        path = str(Path('models', 'setup.py'))
-        subprocess.call([self.py, path, self._get_config_file_name()])
+        self.deploy_models(self._get_username(), self._get_password())        
 
         conn = self._get_connection()
+
+        models = ['PCA', 'Sentiment%20Analysis', "ttest"]
         for m in models:
             conn.request("GET", f'/endpoints/{m}')
             m_request = conn.getresponse()

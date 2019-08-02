@@ -18,8 +18,7 @@ class TestDeployAndEvaluateModelSSL(integ_test_base.IntegTestBase):
         return './tests/integration/resources/2019_04_24_to_3018_08_25.key'
 
     def test_deploy_and_evaluate_model_ssl(self):
-        path = str(Path('models', 'setup.py'))
-        subprocess.call([self.py, path, self._get_config_file_name()])
+        self.deploy_models(self._get_username(), self._get_password())
 
         payload = (
             '''{

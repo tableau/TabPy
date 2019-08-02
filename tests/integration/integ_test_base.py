@@ -1,5 +1,6 @@
 import http.client
 import os
+from pathlib import Path
 import platform
 import shutil
 import signal
@@ -222,19 +223,18 @@ class IntegTestBase(unittest.TestCase):
         # Platform specific - for integration tests we want to engage
         # startup script
         with open(self.tmp_dir + '/output.txt', 'w') as outfile:
+            cmd = ['tabpy',
+                   '--config=' + self.config_file_name]
             if platform.system() == 'Windows':
                 self.py = 'python'
                 self.process = subprocess.Popen(
-                    ['python',
-                     './tabpy.py',
-                     '--config=' + self.config_file_name],
+                    cmd,
                     stdout=outfile,
                     stderr=outfile)
             else:
                 self.py = 'python3'
                 self.process = subprocess.Popen(
-                    ['python3',
-                     '--config=' + self.config_file_name],
+                    cmd,
                     preexec_fn=os.setsid,
                     stdout=outfile,
                     stderr=outfile)
@@ -274,3 +274,18 @@ class IntegTestBase(unittest.TestCase):
             connection = http.client.HTTPConnection(url)
 
         return connection
+
+    def _get_username(self) -> str:
+        return 'user1'
+
+    def _get_password(self) -> str:
+        return 'P@ssw0rd'
+
+    def deploy_models(self, username:str, password:str):
+        path = str(Path('models', 'setup.py'))
+        with open(self.tmp_dir + '/models_output.txt', 'w') as outfile:
+            p = subprocess.run([self.py, path, self._get_config_file_name()],
+                               input=f'{username}\n{password}\n'.encode('utf-8'),
+                               stdout=outfile,
+                               stderr=outfile)
+
