@@ -1,21 +1,16 @@
+import os
 from setuptools import setup, find_packages
-from os import path
 
 
 def setup_package():
-    here = path.abspath(path.dirname(__file__))
-
-    with open(path.join(here, 'VERSION'), encoding='utf-8') as f:
-        version = f.read()
+    def read(fname):
+        return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
     setup(
         name='tabpy',
-        version=version,
+        version=read('VERSION'),
         description='Web server Tableau uses to run Python scripts.',
-        long_description=(
-            'TabPy (Tableau Python Server) is external server '
-            'implementation which allows expanding Tableau with '
-            'executing Python scripts in table calculation.'),
+        long_description=read('README.md'),
         long_description_content_type='text/markdown',
         url='https://github.com/tableau/TabPy',
         author='Tableau',
@@ -31,6 +26,12 @@ def setup_package():
         keywords=['tabpy tableau'],
         packages=find_packages(
             exclude=['docs', 'misc', 'tests']),
+        package_data={
+            'tabpy': [
+                'tabpy_server/state.ini',
+                'tabpy_server/common/default.conf'
+            ]
+        },
         python_requires='>=3.6',
         license='MIT',
         # Note: many of these required packages are included in base python

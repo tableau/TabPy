@@ -1,3 +1,6 @@
-include CHANGELOG
-include LICENSE
-include VERSION
+include \
+  CHANGELOG \
+  LICENSE \
+  VERSION \
+  tabpy/tabpy_server/state.ini \
+  tabpy/tabpy_server/common/default.conf

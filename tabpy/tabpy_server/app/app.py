@@ -173,28 +173,37 @@ class TabPyApp:
                           config_key,
                           default_val=None,
                           check_env_var=False):
+            key_set = False
+
             if config_key is not None and\
                parser.has_section('TabPy') and\
                parser.has_option('TabPy', config_key):
                 self.settings[settings_key] = parser.get('TabPy', config_key)
+                key_set = True
                 logger.debug(
                     f'Parameter {settings_key} set to '
                     f'"{self.settings[settings_key]}" '
                     'from config file')
-            elif check_env_var:
-                self.settings[settings_key] = os.getenv(
-                    config_key, default_val)
-                logger.debug(
-                    f'Parameter {settings_key} set to '
-                    f'"{self.settings[settings_key]}" '
-                    'from environment variable')
-            elif default_val is not None:
+
+            if not key_set and check_env_var:
+                val = os.getenv(config_key)
+                if val is not None:
+                    self.settings[settings_key] = val
+                    key_set = True
+                    logger.debug(
+                        f'Parameter {settings_key} set to '
+                        f'"{self.settings[settings_key]}" '
+                        'from environment variable')
+
+            if not key_set and default_val is not None:
                 self.settings[settings_key] = default_val
+                key_set = True
                 logger.debug(
                     f'Parameter {settings_key} set to '
                     f'"{self.settings[settings_key]}" '
                     'from default value')
-            else:
+
+            if not key_set:
                 logger.debug(
                     f'Parameter {settings_key} is not set')
 
@@ -215,9 +224,12 @@ class TabPyApp:
                 'to evaluate timeout of 30 seconds.')
             self.settings[SettingsParameters.EvaluateTimeout] = 30
 
+        pkg_path = os.path.dirname(tabpy.__file__)
         set_parameter(SettingsParameters.UploadDir,
                       ConfigParameters.TABPY_QUERY_OBJECT_PATH,
-                      default_val='/tmp/query_objects', check_env_var=True)
+                      default_val=os.path.join(pkg_path,
+                                               'tmp', 'query_objects'),
+                      check_env_var=True)
         if not os.path.exists(self.settings[SettingsParameters.UploadDir]):
             os.makedirs(self.settings[SettingsParameters.UploadDir])
 
@@ -238,7 +250,7 @@ class TabPyApp:
         # last dependence on batch/shell script
         set_parameter(SettingsParameters.StateFilePath,
                       ConfigParameters.TABPY_STATE_PATH,
-                      default_val='./tabpy/tabpy_server',
+                      default_val=os.path.join(pkg_path, 'tabpy_server'),
                       check_env_var=True)
         self.settings[SettingsParameters.StateFilePath] = os.path.realpath(
             os.path.normpath(

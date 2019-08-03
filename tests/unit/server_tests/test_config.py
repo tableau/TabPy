@@ -2,7 +2,7 @@ import os
 import unittest
 from argparse import Namespace
 from tempfile import NamedTemporaryFile
-
+import tabpy
 from tabpy.tabpy_server.app.util import validate_cert
 from tabpy.tabpy_server.app.app import TabPyApp
 
@@ -30,12 +30,18 @@ class TestConfigEnvironmentCalls(unittest.TestCase):
                             mock_path_exists, mock_psws,
                             mock_management_util, mock_tabpy_state,
                             mock_parse_arguments):
+        pkg_path = os.path.dirname(tabpy.__file__)
+        obj_path = os.path.join(pkg_path, 'tmp', 'query_objects')
+        state_path = os.path.join(pkg_path, 'tabpy_server')
+
+        mock_os.getenv.side_effect = [9004, obj_path, state_path]
+
         TabPyApp(None)
 
-        getenv_calls = [call('TABPY_PORT', 9004),
-                        call('TABPY_QUERY_OBJECT_PATH', '/tmp/query_objects'),
-                        call('TABPY_STATE_PATH',
-                             './tabpy/tabpy_server')]
+        getenv_calls = [
+            call('TABPY_PORT'),
+            call('TABPY_QUERY_OBJECT_PATH'),
+            call('TABPY_STATE_PATH')]
         mock_os.getenv.assert_has_calls(getenv_calls, any_order=True)
         self.assertEqual(len(mock_file_exists.mock_calls), 2)
         self.assertEqual(len(mock_psws.mock_calls), 1)
@@ -91,7 +97,7 @@ class TestPartialConfigFile(unittest.TestCase):
         mock_os.path.realpath.return_value = 'bar'
 
         app = TabPyApp(config_file.name)
-        getenv_calls = [call('TABPY_PORT', 9004)]
+        getenv_calls = [call('TABPY_PORT')]
 
         mock_os.getenv.assert_has_calls(getenv_calls, any_order=True)
         self.assertEqual(app.settings['port'], 1234)
