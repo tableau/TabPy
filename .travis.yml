@@ -2,11 +2,11 @@ os: linux
 language: python
 python: 3.6
 install:
-    - pip install tabpy -e .
     - pip install pytest pytest-cov coveralls
     - npm install -g markdownlint-cli
 script:
-    - pytest tests/unit --cov=tabpy/tabpy_server --cov=tabpy/tabpy_tools --cov-append
+    - pip install tabpy -e .
+    - pytest tests/unit --cov=tabpy --cov-append
     - pytest tests/integration
     - markdownlint .
 after_success:
