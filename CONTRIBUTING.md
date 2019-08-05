@@ -50,6 +50,7 @@ be able to work on TabPy changes:
     git clone https://github.com/tableau/TabPy.git
     cd TabPy
     ```
+
 4. Registeg TabPy repo as a pip package:
 
     ```sh
