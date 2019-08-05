@@ -18,7 +18,11 @@ class TestDeployModelSSLOnAuthOn(integ_test_base.IntegTestBase):
         return './tests/integration/resources/pwdfile.txt'
 
     def test_deploy_ssl_on_auth_on(self):
-        self.set_delete_temp_folder(False)
+        # Uncomment the following line to preserve
+        # test case output and other files (config, state, ect.)
+        # in system temp folder.
+        # self.set_delete_temp_folder(False)
+
         self.deploy_models(self._get_username(), self._get_password())
 
         headers = {

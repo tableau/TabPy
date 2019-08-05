@@ -261,6 +261,9 @@ class IntegTestBase(unittest.TestCase):
             os.remove(self.state_file_name)
             os.remove(self.config_file_name)
             shutil.rmtree(self.tmp_dir)
+        else:
+            print('Test output and other files are in '
+                  f'{self.tmp_dir}')
 
         super(IntegTestBase, self).tearDown()
 
@@ -284,8 +287,11 @@ class IntegTestBase(unittest.TestCase):
     def deploy_models(self, username: str, password: str):
         path = str(Path('models', 'setup.py'))
         with open(self.tmp_dir + '/models_output.txt', 'w') as outfile:
+            outfile.write(f'--<< Running {self.py} {path} {self._get_config_file_name()} >>--')
+            input_string = f'{username}\n{password}\n'
+            outfile.write(f'--<< Input = {input_string} >>--')
             p = subprocess.run(
                 [self.py, path, self._get_config_file_name()],
-                input=f'{username}\n{password}\n'.encode('utf-8'),
+                input=input_string.encode('utf-8'),
                 stdout=outfile,
                 stderr=outfile)
