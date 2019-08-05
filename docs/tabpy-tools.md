@@ -161,10 +161,13 @@ client.remove('WillItDefault')
 
 ## Predeployed Functions
 
-To setup models, download the latest version of TabPy and follow the [instructions](server-download.md)
-to install and start up your server. Once your server is running, navigate to the
-models directory and run setup.py.  If your TabPy server is running on the default
-config (default.conf), you do not need to specify a config file when launching the
+To setup models, install the latest version of TabPy following
+[TabPy Installation Instructions](server-install.md) and
+[TabPy Server Configuration Instructions](server-config.md).
+
+Once your server is running, navigate to the
+models directory and run setup.py.  If your TabPy server is running with all the
+default settings you do not need to specify a config file when launching the
 script. If your server is running using a custom config you can specify the config
 in the command line like so:
 

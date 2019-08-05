@@ -14,13 +14,11 @@ TabPy (the Tableau Python Server) is an external service implementation which ex
 Tableau's capabilities by allowing users to execute Python scripts and saved functions
 via Tableau's table calculations.
 
-All documentation is in the [docs](docs) folder. Consider reading it in this
-order:
+Consider reading TabPy documentation in the following order:
 
 * [About TabPy](docs/about.md)
-* [TabPy Server Download Instructions](docs/server-download.md)
+* [TabPy Installation Instructions](docs/server-install.md)
 * [TabPy Server Configuration Instructions](docs/server-config.md)
-* [TabPy Server Startup Instructions](docs/server-startup.md)
 * [Running TabPy in Python Virtual Environment](docs/tabpy-virtualenv.md)
 * [Authoring Python calculations in Tableau](docs/TableauConfiguration.md).
 * [TabPy Tools](docs/tabpy-tools.md)

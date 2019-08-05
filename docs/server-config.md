@@ -4,46 +4,145 @@
 
 <!-- toc -->
 
+- [Custom Settings](#custom-settings)
+  * [Configuration File Content](#configuration-file-content)
+  * [Configuration File Example](#configuration-file-example)
 - [Configuring HTTP vs HTTPS](#configuring-http-vs-https)
 - [Authentication](#authentication)
   * [Enabling Authentication](#enabling-authentication)
   * [Password File](#password-file)
-  * [Setting Up Environment](#setting-up-environment)
   * [Adding an Account](#adding-an-account)
   * [Updating an Account](#updating-an-account)
   * [Deleting an Account](#deleting-an-account)
 - [Logging](#logging)
   * [Request Context Logging](#request-context-logging)
-- [Custom Script Timeout](#custom-script-timeout)
 
 <!-- tocstop -->
 
 <!-- markdownlint-enable MD004 -->
 
-Default settings for TabPy may be viewed in the
-tabpy_server/common/default.conf file. This file also contains
-commented examples of how to set up your TabPy server to only
-serve HTTPS traffic and enable authentication.
+## Custom Settings
 
-Change settings by:
+TabPy starts with set of default settings unless settings are provided via
+environment variables or with a config files.
 
-1. Adding environment variables:
-   - set the environment variable as required by your Operating System. When
-     creating environment variables, use the same name as is in the config file
-     as an environment variable. The files startup.sh and startup.cmd in the root
-     of the install folder have examples of how to set environment variables in
-     both Linux and Windows respectively. Set any desired environment variables
-     and then start the application.
-2. Modifying default.conf.
-3. Specifying your own config file as a command line parameter.
-   - i.e. Running the command:
+Configuration parameters can be updated with:
 
-     ```sh
-     python tabpy.py --config=path\to\my\config
-     ```
+1. Adding environment variables - set the environment variable as required by
+   your Operating System. When creating environment variables, use the same
+   name as is in the config file as an environment variable.
+2. Specifying a parameter in a config file (enviroment variable value overwrites
+   configuration setting).
+
+Configuration file with custom settings is specified as a command line parameter:
+
+```sh
+tabpy --config=path/to/my/config/file.conf
+```
 
 The default config file is provided to show you the default values but does not
 need to be present to run TabPy.
+
+### Configuration File Content
+
+Configuration file consists of settings for TabPy itself and Python logger
+settings. It is possible to only set parameters which value should be different
+from default.
+
+TabPy parameters explained below and for the logger documentation
+can be found at [`logging.config` documentation page](https://docs.python.org/3.6/library/logging.config.html).
+
+`[TabPy]` parameters:
+
+- `TABPY_PORT` - port for TabPy to listen on. Default value - `9004`.
+- `TABPY_QUERY_OBJECT_PATH` - query objects location. Used with models, see
+  [TabPy Tools documentation](tabpy-tools.md) for details. Default value -
+  `/tmp/query_objects`.
+- `TABPY_STATE_PATH` - state location for Tornado web server. Default
+   value - `tabpy/tabpy_server` subfolder in TabPy package folder.
+- `TABPY_STATIC_PATH` - location of static files (index.html page) for
+  TabPy instance. Default value - `tabpy/tabpy_server/static` subfolder in
+  TabPy package folder.
+- `TABPY_PWD_FILE` - path to password file. Setting up this parameter
+  makes TabPy require credentials with HTTP(S) requests. More details about
+  authentication can be found in [Authentication](#authentication)
+  section. Default value - not set.
+- `TABPY_TRANSFER_PROTOCOL` - transfer protocol. Default value - `http`. If
+  set to `http` two additional parameters have to be specified:
+  `TABPY_CERTIFICATE_FILE` and `TABPY_KEY_FILE`. More details for how to
+  configure TabPy for HTTPS are at [Configuring HTTP vs HTTPS]
+  (#configuring-http-vs-https) section.
+- `TABPY_CERTIFICATE_FILE` to certificate file to run TabPy with. Only used
+  with `TABPY_TRANSFER_PROTOCOL` set to `https`. Default value - not set.
+- `TABPY_KEY_FILE` to private key file to run TabPy with. Only used
+  with `TABPY_TRANSFER_PROTOCOL` set to `https`. Default value - not set.
+- `TABPY_LOG_DETAILS` - when set to `true` additional call information
+  (caller IP, URL, client info, etc.) is logged. Default value - `false`.
+- `TABPY_EVALUATE_TIMEOUT` - script evaluation timeout in seconds. Default
+  value - `30`.
+
+### Configuration File Example
+
+```toml
+[TabPy]
+# TABPY_QUERY_OBJECT_PATH = /tmp/query_objects
+# TABPY_PORT = 9004
+# TABPY_STATE_PATH = ./tabpy/tabpy_server
+
+# Where static pages live
+# TABPY_STATIC_PATH = ./tabpy/tabpy_server/static
+
+# For how to configure TabPy authentication read
+# docs/server-config.md.
+# TABPY_PWD_FILE = /path/to/password/file.txt
+
+# To set up secure TabPy uncomment and modify the following lines.
+# Note only PEM-encoded x509 certificates are supported.
+# TABPY_TRANSFER_PROTOCOL = https
+# TABPY_CERTIFICATE_FILE = path/to/certificate/file.crt
+# TABPY_KEY_FILE = path/to/key/file.key
+
+# Log additional request details including caller IP, full URL, client
+# end user info if provided.
+# TABPY_LOG_DETAILS = true
+
+# Configure how long a custom script provided to the /evaluate method
+# will run before throwing a TimeoutError.
+# The value should be a float representing the timeout time in seconds.
+#TABPY_EVALUATE_TIMEOUT = 30
+
+[loggers]
+keys=root
+
+[handlers]
+keys=rootHandler,rotatingFileHandler
+
+[formatters]
+keys=rootFormatter
+
+[logger_root]
+level=DEBUG
+handlers=rootHandler,rotatingFileHandler
+qualname=root
+propagete=0
+
+[handler_rootHandler]
+class=StreamHandler
+level=DEBUG
+formatter=rootFormatter
+args=(sys.stdout,)
+
+[handler_rotatingFileHandler]
+class=handlers.RotatingFileHandler
+level=DEBUG
+formatter=rootFormatter
+args=('tabpy_log.log', 'a', 1000000, 5)
+
+[formatter_rootFormatter]
+format=%(asctime)s [%(levelname)s] (%(filename)s:%(module)s:%(lineno)d): %(message)s
+datefmt=%Y-%m-%d,%H:%M:%S
+
+```
 
 ## Configuring HTTP vs HTTPS
 
@@ -98,21 +197,6 @@ accounts in the password file. Run `utils/user_management.py -h` to
 see how to use it.
 
 After making any changes to the password file, TabPy needs to be restarted.
-
-### Setting Up Environment
-
-Before making any code changes run the environment setup script. For
-Windows run this command from the repository root folder:
-
-```sh
-utils\set_env.cmd
-```
-
-and for Linux or Mac run this command from the repository root folder:
-
-```sh
-source utils/set_env.sh
-```
 
 ### Adding an Account
 
@@ -193,15 +277,3 @@ arg1, _arg2):
 No passwords are logged.
 
 NOTE the request context details are logged with INFO level.
-
-## Custom Script Timeout
-
-By default, all custom scripts executed through `POST /evaluate` may run for up
-to 30.0 s before being terminated. To configure this timeout, uncomment
-`TABPY_EVALUATE_TIMEOUT = 30` in the default config under
-`tabpy-server/tabpy_server/common/default.conf` and replace `30` with the float
-value of your choice representing the timeout time in seconds, or add such an
-entry to your custom config.
-
-This timeout does not apply when evaluating models either through the `/query`
-method, or using the `tabpy.query(...)` syntax with the `/evaluate` method.
