@@ -1,7 +1,6 @@
 import logging
 import genson as _genson
-
-from json import validate as _validate
+import jsonschema
 
 
 logger = logging.getLogger(__name__)
@@ -44,7 +43,7 @@ def _generate_schema_from_example_and_description(input, description):
     try:
         # This should not fail unless there are bugs with either genson or
         # jsonschema.
-        _validate(input, input_schema)
+        jsonschema.validate(input, input_schema)
     except Exception as e:
         logger.error(f'Internal error validating schema: {str(e)}')
         raise

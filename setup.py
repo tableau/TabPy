@@ -44,6 +44,7 @@ def setup_package():
             'decorator',
             'future',
             'genson',
+            'jsonschema',
             'mock',
             'numpy',
             'pyopenssl',
