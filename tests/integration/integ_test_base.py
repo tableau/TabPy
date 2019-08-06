@@ -5,6 +5,7 @@ import platform
 import shutil
 import signal
 import subprocess
+import tabpy
 import tempfile
 import time
 import unittest
@@ -290,13 +291,16 @@ class IntegTestBase(unittest.TestCase):
         return 'P@ssw0rd'
 
     def deploy_models(self, username: str, password: str):
-        path = str(Path('models', 'setup.py'))
+        repo_dir = os.path.abspath(
+            os.path.join(os.path.dirname(tabpy.__file__), os.pardir))
+        path = os.path.join(repo_dir, 'models', 'setup.py')
         with open(self.tmp_dir + '/models_output.txt', 'w') as outfile:
-            outfile.write(f'--<< Current folder: {os.path.dirname(os.path.realpath(__file__))} >>--\n')
-            outfile.write(f'--<< Running {self.py} {path} {self._get_config_file_name()} >>--\n')
+            outfile.write(
+                f'--<< Running {self.py} {path} '
+                f'{self._get_config_file_name()} >>--\n')
             input_string = f'{username}\n{password}\n'
             outfile.write(f'--<< Input = {input_string} >>--')
-            p = subprocess.call(
+            p = subprocess.run(
                 [self.py, path, self._get_config_file_name()],
                 input=input_string.encode('utf-8'),
                 stdout=outfile,
