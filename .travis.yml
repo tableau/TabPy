@@ -6,8 +6,8 @@ install:
     - npm install -g markdownlint-cli
 script:
     - pip install tabpy -e .
-    - pytest tests/unit --cov=tabpy --cov-append
-    - pytest tests/integration
+    - py.test tests/unit --cov=tabpy --cov-append
+    - py.test tests/integration
     - markdownlint .
 after_success:
     - coveralls
