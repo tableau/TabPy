@@ -54,7 +54,7 @@ be able to work on TabPy changes:
 4. Registeg TabPy repo as a pip package:
 
     ```sh
-    pip install tabpy -e .
+    pip install -e .
     ```
 
 ## Tests
