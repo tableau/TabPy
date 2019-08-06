@@ -51,7 +51,7 @@ be able to work on TabPy changes:
     cd TabPy
     ```
 
-4. Registeg TabPy repo as a pip package:
+4. Register TabPy repo as a pip package:
 
     ```sh
     pip install -e .

@@ -46,8 +46,8 @@ need to be present to run TabPy.
 ### Configuration File Content
 
 Configuration file consists of settings for TabPy itself and Python logger
-settings. It is possible to only set parameters which value should be different
-from default.
+settings. You should only set parameters if you need different values than
+thr defaults.
 
 TabPy parameters explained below and for the logger documentation
 can be found at [`logging.config` documentation page](https://docs.python.org/3.6/library/logging.config.html).
@@ -68,7 +68,7 @@ can be found at [`logging.config` documentation page](https://docs.python.org/3.
   authentication can be found in [Authentication](#authentication)
   section. Default value - not set.
 - `TABPY_TRANSFER_PROTOCOL` - transfer protocol. Default value - `http`. If
-  set to `http` two additional parameters have to be specified:
+  set to `https` two additional parameters have to be specified:
   `TABPY_CERTIFICATE_FILE` and `TABPY_KEY_FILE`. More details for how to
   configure TabPy for HTTPS are at [Configuring HTTP vs HTTPS]
   (#configuring-http-vs-https) section.
