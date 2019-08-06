@@ -266,9 +266,9 @@ class IntegTestBase(unittest.TestCase):
                   'Test output and other files are in '
                   f'{self.tmp_dir}\n\n')
             with open(self.tmp_dir + '/output.txt', 'r') as f:
-                print(f'output.txt:\n{f.read()}\n')
+                print(f'[output.txt]:\n{f.read()}\n')
             with open(self.tmp_dir + '/models_output.txt', 'r') as f:
-                print(f'models_output.txt:\n{f.read()}\n')
+                print(f'[models_output.txt]:\n{f.read()}\n')
 
         super(IntegTestBase, self).tearDown()
 
