@@ -32,12 +32,18 @@ These are prerequisites for an environment required for a contributor to
 be able to work on TabPy changes:
 
 - Python 3.6.5:
-  - To see which version of Python you have installed, run ```python --version```.
+  - To see which version of Python you have installed, run `python --version`.
 - git
 - TabPy repo:
-  - Get the latest TabPy repository with `git clone https://github.com/tableau/TabPy.git`
+  - Get the latest TabPy repository with
+    `git clone https://github.com/tableau/TabPy.git`.
   - Create a new branch for your changes.
   - When changes are ready push them on github and create merge request.
+- PIP packages - install all with
+  `pip install pytest pycodestyle autopep8 twine --upgrade` command
+- Node.js for npm packages - install from <https://nodejs.org>.
+- NPM packages - install all with
+  `npm install markdown-toc markdownlint` command.
 
 ## Cloning TabPy Repository
 
@@ -108,6 +114,12 @@ TOC for markdown file is built with [markdown-toc](https://www.npmjs.com/package
 markdown-toc -i docs/server-startup.md
 ```
 
+To check markdown style for all the documentation use `markdownlint`:
+
+```sh
+markdownlint .
+```
+
 These checks will run as part of the build if you submit a pull request.
 
 ## TabPy with Swagger
@@ -133,29 +145,16 @@ Access-Control-Allow-Methods = GET, OPTIONS, POST
 
 ## Code styling
 
-`pycodestyle` is used to check Python code against our style conventions.
-You can run install it and run locally for files where modifications were made:
+`pycodestyle` is used to check Python code against our style conventions:
 
 ```sh
-pip install pycodestyle
-```
-
-And then run it for files where modifications were made, e.g.:
-
-```sh
-pycodestyle tabpy-server/server_tests/test_pwd_file.py
+pycodestyle .
 ```
 
 For reported errors and warnings either fix them manually or auto-format files with
 `autopep8`.
 
-To install `autopep8` run the next command:
-
-```sh
-pip install autopep8
-```
-
-Then you can run the tool for a file. In the example below `-i`
+Run the tool for a file. In the example below `-i`
 option tells `autopep8` to update the file. Without the option it
 outputs formatted code to the console.
 

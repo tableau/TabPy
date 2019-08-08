@@ -1,3 +1,12 @@
+'''Web server Tableau uses to run Python scripts.
+
+TabPy (the Tableau Python Server) is an external service implementation
+which expands Tableau's capabilities by allowing users to execute Python
+scripts and saved functions via Tableau's table calculations.
+'''
+
+DOCLINES = (__doc__ or '').split('\n')
+
 import os
 from setuptools import setup, find_packages
 
@@ -9,20 +18,34 @@ def setup_package():
     setup(
         name='tabpy',
         version=read('VERSION'),
-        description='Web server Tableau uses to run Python scripts.',
-        long_description=read('README.md'),
+        description=DOCLINES[0],
+        long_description='\n'.join(DOCLINES[1:]),
         long_description_content_type='text/markdown',
         url='https://github.com/tableau/TabPy',
         author='Tableau',
         author_email='github@tableau.com',
+        maintainer=='Tableau',
+        maintainer_email='github@tableau.com',
+        download_url='https://pypi.org/project/tabpy',
+        project_urls={
+            "Bug Tracker": "https://github.com/tableau/TabPy/issues",
+            "Documentation": "https://tableau.github.io/TabPy/",
+            "Source Code": "https://github.com/tableau/TabPy",
+        },
         classifiers=[
             'Development Status :: 4 - Beta',
             'Intended Audience :: Developers',
+            'Intended Audience :: Science/Research',
             'License :: OSI Approved :: MIT License',
             'Programming Language :: Python :: 3.6',
             'Topic :: Scientific/Engineering',
             'Topic :: Scientific/Engineering :: Information Analysis',
+            'Operating System :: Microsoft :: Windows',
+            'Operating System :: POSIX',
+            'Operating System :: Unix',
+            'Operating System :: MacOS'
         ],
+        platforms=['Windows', 'Linux', 'Mac OS-X', 'Unix']
         keywords=['tabpy tableau'],
         packages=find_packages(
             exclude=['docs', 'misc', 'tests']),
