@@ -24,7 +24,7 @@ def setup_package():
         url='https://github.com/tableau/TabPy',
         author='Tableau',
         author_email='github@tableau.com',
-        maintainer=='Tableau',
+        maintainer='Tableau',
         maintainer_email='github@tableau.com',
         download_url='https://pypi.org/project/tabpy',
         project_urls={
@@ -45,7 +45,7 @@ def setup_package():
             'Operating System :: Unix',
             'Operating System :: MacOS'
         ],
-        platforms=['Windows', 'Linux', 'Mac OS-X', 'Unix']
+        platforms=['Windows', 'Linux', 'Mac OS-X', 'Unix'],
         keywords=['tabpy tableau'],
         packages=find_packages(
             exclude=['docs', 'misc', 'tests']),
