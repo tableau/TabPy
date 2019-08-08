@@ -1,7 +1,7 @@
 from scipy import stats
 import sys
 from pathlib import Path
-from models.utils import setup_utils
+from tabpy.models.utils import setup_utils
 
 
 def ttest(_arg1, _arg2):
@@ -38,6 +38,7 @@ def ttest(_arg1, _arg2):
 
 
 if __name__ == '__main__':
-    setup_utils.main('ttest',
-                     ttest,
-                     'Returns the p-value form a t-test')
+    setup_utils.deploy_model(
+        'ttest',
+        ttest,
+        'Returns the p-value form a t-test')

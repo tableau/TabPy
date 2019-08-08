@@ -5,7 +5,7 @@ import platform
 import runpy
 import subprocess
 from pathlib import Path
-from utils import setup_utils
+from tabpy.models.utils import setup_utils
 
 # pip 10.0 introduced a breaking change that moves the location of main
 try:
@@ -22,7 +22,7 @@ def install_dependencies(packages):
         pip._internal.main(pip_arg)
 
 
-if __name__ == '__main__':
+def main():
     install_dependencies(['sklearn', 'pandas', 'numpy',
                           'textblob', 'nltk', 'scipy'])
     print('==================================================================')
@@ -48,3 +48,6 @@ if __name__ == '__main__':
     for filename in os.listdir(directory):
         subprocess.run([py, f'{directory}/{filename}', config_file_path]
                        + auth_args)
+
+if __name__ == '__main__':
+    main()

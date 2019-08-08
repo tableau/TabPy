@@ -1,13 +1,16 @@
 import configparser
-from pathlib import Path
 import getpass
+import os
+from pathlib import Path
 import sys
 from tabpy.tabpy_tools.client import Client
 
 
 def get_default_config_file_path():
-    config_file_path = str(Path(__file__).resolve().parent.parent.parent
-                           / 'tabpy-server/tabpy_server/common/default.conf')
+    import tabpy
+    pkg_path = os.path.dirname(tabpy.__file__)
+    config_file_path = os.path.join(
+        pkg_path, 'tabpy_server', 'common', 'default.conf')
     return config_file_path
 
 
@@ -15,7 +18,11 @@ def parse_config(config_file_path):
     config = configparser.ConfigParser()
     config.read(config_file_path)
     tabpy_config = config['TabPy']
-    port = tabpy_config['TABPY_PORT']
+
+    port = 9004
+    if 'TABPY_PORT' in tabpy_config:
+        port = tabpy_config['TABPY_PORT']
+
     auth_on = 'TABPY_PWD_FILE' in tabpy_config
     ssl_on = 'TABPY_TRANSFER_PROTOCOL' in tabpy_config and \
              'TABPY_CERTIFICATE_FILE' in tabpy_config and \
@@ -34,7 +41,7 @@ def get_creds():
     return [user, passwd]
 
 
-def main(funcName, func, funcDescription):
+def deploy_model(funcName, func, funcDescription):
     # running from setup.py
     if len(sys.argv) > 1:
         config_file_path = sys.argv[1]

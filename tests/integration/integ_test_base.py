@@ -268,8 +268,8 @@ class IntegTestBase(unittest.TestCase):
                   f'{self.tmp_dir}\n\n')
             with open(self.tmp_dir + '/output.txt', 'r') as f:
                 print(f'[output.txt]:\n{f.read()}\n')
-            with open(self.tmp_dir + '/models_output.txt', 'r') as f:
-                print(f'[models_output.txt]:\n{f.read()}\n')
+            with open(self.tmp_dir + '/deploy_models_output.txt', 'r') as f:
+                print(f'[deploy_models_output.txt]:\n{f.read()}\n')
 
         super(IntegTestBase, self).tearDown()
 
@@ -291,10 +291,9 @@ class IntegTestBase(unittest.TestCase):
         return 'P@ssw0rd'
 
     def deploy_models(self, username: str, password: str):
-        repo_dir = os.path.abspath(
-            os.path.join(os.path.dirname(tabpy.__file__), os.pardir))
-        path = os.path.join(repo_dir, 'models', 'setup.py')
-        with open(self.tmp_dir + '/models_output.txt', 'w') as outfile:
+        repo_dir = os.path.abspath(os.path.dirname(tabpy.__file__))
+        path = os.path.join(repo_dir, 'models', 'deploy_models.py')
+        with open(self.tmp_dir + '/deploy_models_output.txt', 'w') as outfile:
             outfile.write(
                 f'--<< Running {self.py} {path} '
                 f'{self._get_config_file_name()} >>--\n')

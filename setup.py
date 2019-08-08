@@ -28,6 +28,7 @@ def setup_package():
             exclude=['docs', 'misc', 'tests']),
         package_data={
             'tabpy': [
+                'VERSION',
                 'tabpy_server/state.ini',
                 'tabpy_server/common/default.conf'
             ]
@@ -58,6 +59,7 @@ def setup_package():
         entry_points={
             'console_scripts': [
                 'tabpy=tabpy.tabpy:main',
+                'tabpy-deploy-models=tabpy.models.deploy_models:main'
             ],
         }
     )

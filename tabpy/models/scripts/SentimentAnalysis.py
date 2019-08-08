@@ -3,7 +3,7 @@ import nltk
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 import sys
 from pathlib import Path
-from models.utils import setup_utils
+from tabpy.models.utils import setup_utils
 
 
 import ssl
@@ -50,7 +50,8 @@ def SentimentAnalysis(_arg1, library='nltk'):
 
 
 if __name__ == '__main__':
-    setup_utils.main('Sentiment Analysis',
-                     SentimentAnalysis,
-                     'Returns a sentiment score between -1 and 1 for '
-                     'a given string')
+    setup_utils.deploy_model(
+        'Sentiment Analysis',
+        SentimentAnalysis,
+        'Returns a sentiment score between -1 and 1 for '
+        'a given string')

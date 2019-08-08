@@ -6,7 +6,7 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import OneHotEncoder
 import sys
 from pathlib import Path
-from models.utils import setup_utils
+from tabpy.models.utils import setup_utils
 
 
 def PCA(component, _arg1, _arg2, *_argN):
@@ -58,6 +58,7 @@ def PCA(component, _arg1, _arg2, *_argN):
 
 
 if __name__ == '__main__':
-    setup_utils.main('PCA',
-                     PCA,
-                     'Returns the specified principal component')
+    setup_utils.deploy_model(
+        'PCA',
+        PCA,
+        'Returns the specified principal component')

@@ -1,18 +1,21 @@
+import os
 from pathlib import Path
 
 
 def read_version():
-    f = None
-    for path in ['VERSION', '../VERSION', '../../VERSION']:
-        if Path(path).exists():
-            f = path
-            break
+    ver = 'unknonw'
 
-    if f is not None:
-        with open(f) as h:
-            return h.read().strip()
+    import tabpy
+    pkg_path = os.path.dirname(tabpy.__file__)
+    ver_file_path = os.path.join(pkg_path, os.path.pardir, 'VERSION')
+    if Path(ver_file_path).exists():
+        with open(ver_file_path) as f:
+            ver = f.read().strip()
     else:
-        return 'dev'
+        ver = f'Version Unknown, (file {ver_file_path} not found)'
+
+
+    return ver
 
 
 __version__ = read_version()
