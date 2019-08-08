@@ -3,6 +3,8 @@
 TabPy tools is the Python package of tools for managing the published Python functions
 on TabPy server.
 
+<!-- markdownlint-disable MD004 -->
+
 <!-- toc -->
 
 - [Connecting to TabPy](#connecting-to-tabpy)
@@ -17,6 +19,8 @@ on TabPy server.
 - [Evaluating Arbitrary Python Scripts](#evaluating-arbitrary-python-scripts)
 
 <!-- tocstop -->
+
+<!-- markdownlint-enable MD004 -->
 
 ## Connecting to TabPy
 
@@ -159,7 +163,7 @@ client.remove('WillItDefault')
 
 ### Deploying Models Shipped With TabPy
 
-To deploy models shipped with TabPy follow the 
+To deploy models shipped with TabPy follow the
 [TabPy Installation Instructions](server-install.md) and then
 [TabPy Server Configuration Instructions](server-config.md).
 Once your server is running execute the following command:
