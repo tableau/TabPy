@@ -7,12 +7,8 @@ from tabpy.models.utils import setup_utils
 
 
 import ssl
-try:
-    _ctx = ssl._create_unverified_context
-except AttrubuteError:
-    pass
-else:
-    ssl._create_default_https_context = _ctx
+_ctx = ssl._create_unverified_context
+ssl._create_default_https_context = _ctx
 
 
 nltk.download('vader_lexicon')

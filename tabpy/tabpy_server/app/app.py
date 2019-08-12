@@ -173,37 +173,37 @@ class TabPyApp:
                           config_key,
                           default_val=None,
                           check_env_var=False):
-            key_set = False
+            key_is_set = False
 
             if config_key is not None and\
                parser.has_section('TabPy') and\
                parser.has_option('TabPy', config_key):
                 self.settings[settings_key] = parser.get('TabPy', config_key)
-                key_set = True
+                key_is_set = True
                 logger.debug(
                     f'Parameter {settings_key} set to '
                     f'"{self.settings[settings_key]}" '
                     'from config file')
 
-            if not key_set and check_env_var:
+            if not key_is_set and check_env_var:
                 val = os.getenv(config_key)
                 if val is not None:
                     self.settings[settings_key] = val
-                    key_set = True
+                    key_is_set = True
                     logger.debug(
                         f'Parameter {settings_key} set to '
                         f'"{self.settings[settings_key]}" '
                         'from environment variable')
 
-            if not key_set and default_val is not None:
+            if not key_is_set and default_val is not None:
                 self.settings[settings_key] = default_val
-                key_set = True
+                key_is_set = True
                 logger.debug(
                     f'Parameter {settings_key} set to '
                     f'"{self.settings[settings_key]}" '
                     'from default value')
 
-            if not key_set:
+            if not key_is_set:
                 logger.debug(
                     f'Parameter {settings_key} is not set')
 

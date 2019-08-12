@@ -83,6 +83,7 @@ def setup_package():
             'console_scripts': [
                 'tabpy=tabpy.tabpy:main',
                 'tabpy-deploy-models=tabpy.models.deploy_models:main'
+                'tabpy-user-management=tabpy.utils.user_management:main'
             ],
         }
     )

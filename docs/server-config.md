@@ -47,7 +47,7 @@ need to be present to run TabPy.
 
 Configuration file consists of settings for TabPy itself and Python logger
 settings. You should only set parameters if you need different values than
-thr defaults.
+the defaults.
 
 TabPy parameters explained below and for the logger documentation
 can be found at [`logging.config` documentation page](https://docs.python.org/3.6/library/logging.config.html).
@@ -83,14 +83,17 @@ can be found at [`logging.config` documentation page](https://docs.python.org/3.
 
 ### Configuration File Example
 
-```toml
+**Note:** _Always use absolute paths for the configuration paths
+settings._
+
+```ini
 [TabPy]
 # TABPY_QUERY_OBJECT_PATH = /tmp/query_objects
 # TABPY_PORT = 9004
-# TABPY_STATE_PATH = ./tabpy/tabpy_server
+# TABPY_STATE_PATH = <package-path>/tabpy/tabpy_server
 
 # Where static pages live
-# TABPY_STATIC_PATH = ./tabpy/tabpy_server/static
+# TABPY_STATIC_PATH = <package-path>/tabpy/tabpy_server/static
 
 # For how to configure TabPy authentication read
 # docs/server-config.md.
@@ -185,26 +188,25 @@ Password file is a text file containing usernames and hashed passwords
 per line separated by single space. For username only ASCII characters
 are supported. Usernames are case-insensitive.
 
-Passwords in the password file are hashed with PBKDF2. [See source code
-for implementation details](../tabpy-server/tabpy_server/handlers/util.py).
+Passwords in the password file are hashed with PBKDF2.
 
 **It is highly recommended to restrict access to the password file
 with hosting OS mechanisms. Ideally the file should only be accessible
 for reading with the account under which TabPy runs and TabPy admin account.**
 
-There is a `utils/user_management.py` utility to operate with
-accounts in the password file. Run `utils/user_management.py -h` to
-see how to use it.
+There is a `tabpy-user-management` command provided with `tabpy` package to
+operate with accounts in the password file. Run `tabpy-user-management -h`
+to see how to use it.
 
 After making any changes to the password file, TabPy needs to be restarted.
 
 ### Adding an Account
 
-To add an account run `utils/user_management.py` utility with `add`
+To add an account run `tabpy-user-management add`
 command  providing user name, password (optional) and password file:
 
 ```sh
-python utils/user_management.py add -u <username> -p <password> -f <pwdfile>
+tabpy-user-management add -u <username> -p <password> -f <pwdfile>
 ```
 
 If the (recommended) `-p` argument is not provided a password for the user name
@@ -212,11 +214,11 @@ will be generated and displayed in the command line.
 
 ### Updating an Account
 
-To update the password for an account run `utils/user_management.py` utility
-with `update` command:
+To update the password for an account run `tabpy-user-management update`
+command:
 
 ```sh
-python utils/user_management.py update -u <username> -p <password> -f <pwdfile>
+tabpy-user-management update -u <username> -p <password> -f <pwdfile>
 ```
 
 If the (recommended) `-p` agrument is not provided a password for the user name

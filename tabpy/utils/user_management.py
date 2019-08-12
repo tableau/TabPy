@@ -7,8 +7,8 @@ import logging
 import os
 import secrets
 import sys
-from tabpy_server.app.util import parse_pwd_file
-from tabpy_server.handlers.util import hash_password
+from tabpy.tabpy_server.app.util import parse_pwd_file
+from tabpy.tabpy_server.handlers.util import hash_password
 
 logger = logging.getLogger(__name__)
 
