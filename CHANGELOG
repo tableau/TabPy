@@ -3,6 +3,13 @@
 This file lists notable changes for TabPy project releases.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## v0.8
+
+### Improvements
+
+- TabPy is pip package now
+- Models are deployed with updated script
+
 ## v0.7
 
 ### Improvements
