@@ -5,6 +5,7 @@ import logging
 from logging import config
 import multiprocessing
 import os
+import shutil
 import tabpy.tabpy_server
 from tabpy.tabpy import __version__
 from tabpy.tabpy_server.app.ConfigParameters import ConfigParameters
@@ -256,10 +257,17 @@ class TabPyApp:
             os.path.normpath(
                 os.path.expanduser(
                     self.settings[SettingsParameters.StateFilePath])))
-        state_file_path = self.settings[SettingsParameters.StateFilePath]
-        logger.info('Loading state from state file '
-                    f'{os.path.join(state_file_path, "state.ini")}')
-        tabpy_state = _get_state_from_file(state_file_path)
+        state_file_dir = self.settings[SettingsParameters.StateFilePath]
+        state_file_path = os.path.join(state_file_dir, 'state.ini')
+        if not os.path.isfile(state_file_path):
+            state_file_template_path = os.path.join(
+                pkg_path, 'tabpy_server', 'state.ini.template')
+            logger.debug(f'File {state_file_path} not found, creating from '
+                         f'template {state_file_template_path}...')
+            shutil.copy(state_file_template_path, state_file_path)
+
+        logger.info(f'Loading state from state file {state_file_path}')
+        tabpy_state = _get_state_from_file(state_file_dir)
         self.tabpy_state = TabPyState(
             config=tabpy_state, settings=self.settings)
 

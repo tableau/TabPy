@@ -53,6 +53,7 @@ def setup_package():
             'tabpy': [
                 'VERSION',
                 'tabpy_server/state.ini',
+                'tabpy_server/static',
                 'tabpy_server/common/default.conf'
             ]
         },
