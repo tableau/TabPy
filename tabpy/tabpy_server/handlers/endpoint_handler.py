@@ -10,6 +10,7 @@ import concurrent
 import json
 import logging
 import shutil
+from tabpy.tabpy_server.common.util import format_exception
 from tabpy.tabpy_server.handlers import ManagementHandler
 from tabpy.tabpy_server.handlers.base_handler import STAGING_THREAD
 from tabpy.tabpy_server.management.state import get_query_object_path
