@@ -132,6 +132,8 @@ def process_command(args, credentials):
 
 
 def main():
+    logging.basicConfig(level=logging.DEBUG, format="%(message)s")
+
     parser = build_cli_parser()
     args = parser.parse_args()
     if not check_args(args):
@@ -150,6 +152,4 @@ def main():
 
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG, format="%(message)s")
-
     main()
