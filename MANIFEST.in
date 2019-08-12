@@ -3,6 +3,5 @@ include \
   LICENSE \
   VERSION \
   tabpy/tabpy_server/state.ini \
-  tabpy/tabpy_server/static \
+  tabpy/tabpy_server/static/* \
   tabpy/tabpy_server/common/default.conf \
-  utils
