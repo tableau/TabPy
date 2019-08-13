@@ -24,9 +24,8 @@ class TestConfigEnvironmentCalls(unittest.TestCase):
     @patch('tabpy.tabpy_server.app.app._get_state_from_file')
     @patch('tabpy.tabpy_server.app.app.PythonServiceHandler')
     @patch('tabpy.tabpy_server.app.app.os.path.exists', return_value=True)
-    @patch('tabpy.tabpy_server.app.app.os.path.isfile', return_value=False)
     @patch('tabpy.tabpy_server.app.app.os')
-    def test_no_config_file(self, mock_os, mock_file_exists,
+    def test_no_config_file(self, mock_os,
                             mock_path_exists, mock_psws,
                             mock_management_util, mock_tabpy_state,
                             mock_parse_arguments):
@@ -43,7 +42,6 @@ class TestConfigEnvironmentCalls(unittest.TestCase):
             call('TABPY_QUERY_OBJECT_PATH'),
             call('TABPY_STATE_PATH')]
         mock_os.getenv.assert_has_calls(getenv_calls, any_order=True)
-        self.assertEqual(len(mock_file_exists.mock_calls), 2)
         self.assertEqual(len(mock_psws.mock_calls), 1)
         self.assertEqual(len(mock_tabpy_state.mock_calls), 1)
         self.assertEqual(len(mock_path_exists.mock_calls), 1)
@@ -56,9 +54,8 @@ class TestConfigEnvironmentCalls(unittest.TestCase):
     @patch('tabpy.tabpy_server.app.app._get_state_from_file')
     @patch('tabpy.tabpy_server.app.app.PythonServiceHandler')
     @patch('tabpy.tabpy_server.app.app.os.path.exists', return_value=False)
-    @patch('tabpy.tabpy_server.app.app.os.path.isfile', return_value=False)
     @patch('tabpy.tabpy_server.app.app.os')
-    def test_no_state_ini_file_or_state_dir(self, mock_os, mock_file_exists,
+    def test_no_state_ini_file_or_state_dir(self, mock_os,
                                             mock_path_exists, mock_psws,
                                             mock_management_util,
                                             mock_tabpy_state,
