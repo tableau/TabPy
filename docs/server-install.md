@@ -36,7 +36,7 @@ To start TabPy with default setting run the following command:
 tabpy
 ```
 
-To run TabPy with custom setting create config file with parameters
+To run TabPy with custom settings create config file with parameters
 explained in [TabPy Server Configuration Instructions](server-config.md)
 and specify it in command line:
 

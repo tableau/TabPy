@@ -42,7 +42,7 @@ def get_creds():
 
 
 def deploy_model(funcName, func, funcDescription):
-    # running from setup.py
+    # running from deploy_models.py
     if len(sys.argv) > 1:
         config_file_path = sys.argv[1]
     else:

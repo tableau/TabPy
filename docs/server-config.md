@@ -24,13 +24,13 @@
 ## Custom Settings
 
 TabPy starts with set of default settings unless settings are provided via
-environment variables or with a config files.
+environment variables or with a config file.
 
 Configuration parameters can be updated with:
 
 1. Adding environment variables - set the environment variable as required by
    your Operating System. When creating environment variables, use the same
-   name as is in the config file as an environment variable.
+   name for your environment variable as specified in the config file.
 2. Specifying a parameter in a config file (enviroment variable value overwrites
    configuration setting).
 
@@ -49,8 +49,8 @@ Configuration file consists of settings for TabPy itself and Python logger
 settings. You should only set parameters if you need different values than
 the defaults.
 
-TabPy parameters explained below and for the logger documentation
-can be found at [`logging.config` documentation page](https://docs.python.org/3.6/library/logging.config.html).
+TabPy parameters explained below, the logger documentation can be found
+at [`logging.config` documentation page](https://docs.python.org/3.6/library/logging.config.html).
 
 `[TabPy]` parameters:
 
@@ -72,7 +72,7 @@ can be found at [`logging.config` documentation page](https://docs.python.org/3.
   `TABPY_CERTIFICATE_FILE` and `TABPY_KEY_FILE`. More details for how to
   configure TabPy for HTTPS are at [Configuring HTTP vs HTTPS]
   (#configuring-http-vs-https) section.
-- `TABPY_CERTIFICATE_FILE` to certificate file to run TabPy with. Only used
+- `TABPY_CERTIFICATE_FILE` the certificate file to run TabPy with. Only used
   with `TABPY_TRANSFER_PROTOCOL` set to `https`. Default value - not set.
 - `TABPY_KEY_FILE` to private key file to run TabPy with. Only used
   with `TABPY_TRANSFER_PROTOCOL` set to `https`. Default value - not set.
