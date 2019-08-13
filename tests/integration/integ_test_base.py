@@ -262,14 +262,6 @@ class IntegTestBase(unittest.TestCase):
             os.remove(self.state_file_name)
             os.remove(self.config_file_name)
             shutil.rmtree(self.tmp_dir)
-        else:
-            print('\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n'
-                  'Test output and other files are in '
-                  f'{self.tmp_dir}\n\n')
-            with open(self.tmp_dir + '/output.txt', 'r') as f:
-                print(f'[output.txt]:\n{f.read()}\n')
-            with open(self.tmp_dir + '/deploy_models_output.txt', 'r') as f:
-                print(f'[deploy_models_output.txt]:\n{f.read()}\n')
 
         super(IntegTestBase, self).tearDown()
 
