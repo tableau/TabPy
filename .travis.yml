@@ -7,7 +7,7 @@ install:
 script:
     - pip install -e .
     - py.test tests/unit --cov=tabpy --cov-append
-    - py.test tests/integration
+    - py.test tests/integration --cov=tabpy --cov-append
     - markdownlint .
 after_success:
     - coveralls

@@ -1,3 +1,4 @@
+import coverage
 import http.client
 import os
 from pathlib import Path
@@ -226,6 +227,7 @@ class IntegTestBase(unittest.TestCase):
         with open(self.tmp_dir + '/output.txt', 'w') as outfile:
             cmd = ['tabpy',
                    '--config=' + self.config_file_name]
+            coverage.process_startup()
             if platform.system() == 'Windows':
                 self.py = 'python'
                 self.process = subprocess.Popen(
@@ -291,6 +293,7 @@ class IntegTestBase(unittest.TestCase):
                 f'{self._get_config_file_name()} >>--\n')
             input_string = f'{username}\n{password}\n'
             outfile.write(f'--<< Input = {input_string} >>--')
+            coverage.process_startup()
             p = subprocess.run(
                 [self.py, path, self._get_config_file_name()],
                 input=input_string.encode('utf-8'),

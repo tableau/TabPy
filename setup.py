@@ -19,7 +19,7 @@ def setup_package():
         name='tabpy',
         version=read('VERSION'),
         description=DOCLINES[0],
-        long_description='\n'.join(DOCLINES[1:]),
+        long_description='\n'.join(DOCLINES[1:]) + '\n' + read('CHANGELOG'),
         long_description_content_type='text/markdown',
         url='https://github.com/tableau/TabPy',
         author='Tableau',
