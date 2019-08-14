@@ -188,7 +188,7 @@ For every successfully deployed model a message will be printed to the console:
 ```
 
 Use code in [`tabpy/models/scripts`](../tabpy/models/scripts)
-as an example how to create a model and
+as an example of how to create a model and
 [`tabpy/models/deploy_models.py`](../tabpy/models/deploy_models.py)
 as an example for how to deploy a model. For deployment script include all
 necessary packages when installing dependencies or alternatively install

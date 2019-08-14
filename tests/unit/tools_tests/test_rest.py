@@ -1,11 +1,10 @@
 import json
 import requests
+from requests.auth import HTTPBasicAuth
 import sys
+from tabpy.tabpy_tools.rest import (RequestsNetworkWrapper, ServiceClient)
 import unittest
 from unittest.mock import Mock
-from requests.auth import HTTPBasicAuth
-
-from tabpy.tabpy_tools.rest import (RequestsNetworkWrapper, ServiceClient)
 
 
 class TestRequestsNetworkWrapper(unittest.TestCase):
@@ -20,19 +19,19 @@ class TestRequestsNetworkWrapper(unittest.TestCase):
 
         self.assertIs(session, rnw.session)
 
+    def mock_response(self, status_code):
+        response = Mock(requests.Response())
+        response.json.return_value = 'json'
+        response.status_code = status_code
+
+        return response
+
     def setUp(self):
-        def mock_response(status_code):
-            response = Mock(requests.Response())
-            response.json.return_value = 'json'
-            response.status_code = status_code
-
-            return response
-
         session = Mock(requests.session())
-        session.get.return_value = mock_response(200)
-        session.post.return_value = mock_response(200)
-        session.put.return_value = mock_response(200)
-        session.delete.return_value = mock_response(204)
+        session.get.return_value = self.mock_response(200)
+        session.post.return_value = self.mock_response(200)
+        session.put.return_value = self.mock_response(200)
+        session.delete.return_value = self.mock_response(204)
 
         self.rnw = RequestsNetworkWrapper(session=session)
 
@@ -46,18 +45,18 @@ class TestRequestsNetworkWrapper(unittest.TestCase):
             timeout=None,
             auth=None)
 
-    @unittest.expectedFailure
     def test_GET_InvalidData(self):
         url = 'abc'
         data = {'cat'}
         with self.assertRaises(TypeError):
+            self.rnw.session.get.return_value = self.mock_response(404)
             self.rnw.GET(url, data)
 
-    @unittest.expectedFailure
     def test_GET_InvalidURL(self):
         url = ''
         data = {'foo': 'bar'}
         with self.assertRaises(TypeError):
+            self.rnw.session.get.return_value = self.mock_response(404)
             self.rnw.GET(url, data)
 
     def test_POST(self):
@@ -70,11 +69,11 @@ class TestRequestsNetworkWrapper(unittest.TestCase):
             timeout=None,
             auth=None)
 
-    @unittest.expectedFailure
     def test_POST_InvalidURL(self):
         url = ''
         data = {'foo': 'bar'}
         with self.assertRaises(TypeError):
+            self.rnw.session.post.return_value = self.mock_response(404)
             self.rnw.POST(url, data)
 
     def test_POST_InvalidData(self):

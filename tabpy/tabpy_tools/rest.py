@@ -84,15 +84,18 @@ class RequestsNetworkWrapper(object):
         self._remove_nones(data)
 
         logger.info(f'GET {url} with {data}')
+        print(f'GET {url} with {data}')
 
         response = self.session.get(
             url,
             params=data,
             timeout=timeout,
             auth=self.auth)
+        print(f'status_code={response.status_code}')
         if response.status_code != 200:
             self.raise_error(response)
         logger.info(f'response={response.text}')
+        print(f'response={str(response.text)}')
 
         if response.text == '':
             return dict()
