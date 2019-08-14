@@ -4,9 +4,19 @@ from pathlib import Path
 
 
 class TestDeployAndEvaluateModel(integ_test_base.IntegTestBase):
+    def _get_config_file_name(self) -> str:
+        return './tests/integration/resources/deploy_and_evaluate_model.conf'
+
+    def _get_port(self) -> str:
+        return '9008'
+
     def test_deploy_and_evaluate_model(self):
-        path = str(Path('models', 'setup.py'))
-        subprocess.call([self.py, path, self._get_config_file_name()])
+        # Uncomment the following line to preserve
+        # test case output and other files (config, state, ect.)
+        # in system temp folder.
+        self.set_delete_temp_folder(False)
+
+        self.deploy_models(self._get_username(), self._get_password())
 
         payload = (
             '''{
@@ -20,3 +30,4 @@ class TestDeployAndEvaluateModel(integ_test_base.IntegTestBase):
         SentimentAnalysis_eval = conn.getresponse()
         self.assertEqual(200, SentimentAnalysis_eval.status)
         SentimentAnalysis_eval.read()
+

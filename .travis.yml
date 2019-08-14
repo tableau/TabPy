@@ -2,13 +2,12 @@ os: linux
 language: python
 python: 3.6
 install:
-    - ./startup.sh --no-startup --print-install-logs
     - pip install pytest pytest-cov coveralls
     - npm install -g markdownlint-cli
 script:
-    - source utils/set_env.sh
-    - pytest tests/unit --cov=tabpy-server/tabpy_server --cov=tabpy-tools/tabpy_tools --cov-append
-    - pytest tests/integration
+    - pip install -e .
+    - py.test tests/unit --cov=tabpy --cov-append
+    - py.test tests/integration --cov=tabpy --cov-append
     - markdownlint .
 after_success:
     - coveralls

@@ -9,10 +9,7 @@ class TestDeployModelSSLOffAuthOn(integ_test_base.IntegTestBase):
         return './tests/integration/resources/pwdfile.txt'
 
     def test_deploy_ssl_off_auth_on(self):
-        models = ['PCA', 'Sentiment%20Analysis', "ttest"]
-        path = str(Path('models', 'setup.py'))
-        p = subprocess.run([self.py, path, self._get_config_file_name()],
-                           input=b'user1\nP@ssw0rd\n')
+        self.deploy_models(self._get_username(), self._get_password())
 
         headers = {
             'Content-Type': "application/json",
@@ -24,6 +21,8 @@ class TestDeployModelSSLOffAuthOn(integ_test_base.IntegTestBase):
         }
 
         conn = self._get_connection()
+
+        models = ['PCA', 'Sentiment%20Analysis', "ttest"]
         for m in models:
             conn.request("GET", f'/endpoints/{m}', headers=headers)
             m_request = conn.getresponse()

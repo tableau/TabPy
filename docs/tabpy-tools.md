@@ -3,17 +3,24 @@
 TabPy tools is the Python package of tools for managing the published Python functions
 on TabPy server.
 
+<!-- markdownlint-disable MD004 -->
+
 <!-- toc -->
 
 - [Connecting to TabPy](#connecting-to-tabpy)
 - [Authentication](#authentication)
 - [Deploying a Function](#deploying-a-function)
 - [Predeployed Functions](#predeployed-functions)
+  * [Principal Component Analysis (PCA)](#principal-component-analysis-pca)
+  * [Sentiment Analysis](#sentiment-analysis)
+  * [T-Test](#t-test)
 - [Providing Schema Metadata](#providing-schema-metadata)
 - [Querying an Endpoint](#querying-an-endpoint)
 - [Evaluating Arbitrary Python Scripts](#evaluating-arbitrary-python-scripts)
 
 <!-- tocstop -->
+
+<!-- markdownlint-enable MD004 -->
 
 ## Connecting to TabPy
 
@@ -39,9 +46,7 @@ has to specify the credentials to use during model deployment with the
 `set_credentials` call for a client:
 
 ```python
-
 client.set_credentials('username', 'P@ssw0rd')
-
 ```
 
 Credentials only need to be set once for all further client operations.
@@ -57,13 +62,11 @@ TabPy, see [TabPy Server Configuration Instructions](server-config.md).
 A persisted endpoint is backed by a Python method. For example:
 
 ```python
-
 def add(x,y):
     import numpy as np
     return np.add(x, y).tolist()
 
 client.deploy('add', add, 'Adds two numbers x and y')
-
 ```
 
 The next example is more complex, using scikit-learn's clustering API:
@@ -99,9 +102,7 @@ You can re-deploy a function (for example, after you modified its code) by setti
 the `override` parameter to `True`:
 
 ```python
-
 client.deploy('add', add, 'Adds two numbers x and y', override=True)
-
 ```
 
 Each re-deployment of an endpoint will increment its version number, which is also
@@ -135,7 +136,6 @@ executed. In order to get the best performance, we recommended following the
 methodology outlined in this example.
 
 ```python
-
 def LoanDefaultClassifier(Loan_Amount, Loan_Tenure, Monthly_Income, Age):
     import pandas as pd
     data=pd.concat([Loan_Amount,Loan_Tenure,Monthly_Income,Age],axis=1)
@@ -144,12 +144,12 @@ def LoanDefaultClassifier(Loan_Amount, Loan_Tenure, Monthly_Income, Age):
 client.deploy('WillItDefault',
               LoanDefaultClassifier,
               'Returns whether a loan application is likely to default.')
-
 ```
 
 You can find a detailed working example with a downloadable sample Tableau workbook
 and an accompanying Jupyter workbook that walks through model fitting, evaluation
-and publishing steps on [our blog](https://www.tableau.com/about/blog/2017/1/building-advanced-analytics-applications-tabpy-64916).
+and publishing steps on
+[our blog](https://www.tableau.com/about/blog/2017/1/building-advanced-analytics-applications-tabpy-64916).
 
 The endpoints that are no longer needed can be removed the following way:
 
@@ -161,34 +161,41 @@ client.remove('WillItDefault')
 
 ## Predeployed Functions
 
-To setup models, download the latest version of TabPy and follow the [instructions](server-download.md)
-to install and start up your server. Once your server is running, navigate to the
-models directory and run setup.py.  If your TabPy server is running on the default
-config (default.conf), you do not need to specify a config file when launching the
-script. If your server is running using a custom config you can specify the config
-in the command line like so:
+### Deploying Models Shipped With TabPy
+
+To deploy models shipped with TabPy follow the
+[TabPy Installation Instructions](server-install.md) and then
+[TabPy Server Configuration Instructions](server-config.md).
+Once your server is running execute the following command:
 
 ```sh
-
-python setup.py custom.conf
-
+tabpy-deploy-models
 ```
 
-The setup file will install all of the necessary dependencies `(eg. sklearn,
-nltk, textblob, pandas, & numpy)` and deploy all of the prebuilt models
-located in `./models/scripts`. For every model that is successfully deployed
-a message will be printed to the console:
+If your server is running using a custom config specify the config
+in the command line:
+
+```sh
+tabpy-deploy-models custom.conf
+```
+
+The command will install all of the necessary dependencies (e.g. `sklearn`,
+`nltk`, `textblob`, `pandas`, `numpy`) and deploy all of the prebuilt models.
+For every successfully deployed model a message will be printed to the console:
 
 ```sh
 "Successfully deployed PCA"
 ```
 
-If you would like to deploy additional models using the deploy script, you can
-copy any python file to the `./models/scripts` directory and modify setup.py to
-include all necessary packages when installing dependencies, or alternatively install
+Use code in [`tabpy/models/scripts`](../tabpy/models/scripts)
+as an example of how to create a model and
+[`tabpy/models/deploy_models.py`](../tabpy/models/deploy_models.py)
+as an example for how to deploy a model. For deployment script include all
+necessary packages when installing dependencies or alternatively install
 all the required dependencies manually.
 
-You can deploy models individually by navigating to models/scripts/ and running
+You can deploy models individually by navigating to
+[`tabpy/models/scripts`](../tabpy/models/scripts) and running
 each file in isolation like so:
 
 ```sh
