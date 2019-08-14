@@ -8,6 +8,6 @@ precision = 1
 
 [run]
 omit =
-    models/
+    tabpy/models/
     tests/
     tabpy/tabpy.py
