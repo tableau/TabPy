@@ -71,8 +71,6 @@ def setup_package():
             'future',
             'genson',
             'jsonschema',
-            'mock',
-            'numpy',
             'pyopenssl',
             'python-dateutil',
             'requests',
@@ -87,8 +85,20 @@ def setup_package():
                 'tabpy-deploy-models=tabpy.models.deploy_models:main',
                 'tabpy-user-management=tabpy.utils.user_management:main'
             ],
-        }
-    )
+        },
+        setup_requires=['pytest-runner'],
+        tests_require=[
+            'mock',
+            'nltk',
+            'numpy',
+            'pandas',
+            'pytest',
+            'scipy',
+            'sklearn',
+            'textblob'
+        ],
+        test_suite='pytest'
+)
 
 
 if __name__ == '__main__':
