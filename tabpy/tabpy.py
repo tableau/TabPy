@@ -14,7 +14,6 @@ def read_version():
     else:
         ver = f'Version Unknown, (file {ver_file_path} not found)'
 
-
     return ver
 
 

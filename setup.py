@@ -5,10 +5,11 @@ which expands Tableau's capabilities by allowing users to execute Python
 scripts and saved functions via Tableau's table calculations.
 '''
 
-DOCLINES = (__doc__ or '').split('\n')
-
 import os
 from setuptools import setup, find_packages
+
+
+DOCLINES = (__doc__ or '').split('\n')
 
 
 def setup_package():
@@ -77,6 +78,7 @@ def setup_package():
             'requests',
             'singledispatch',
             'six',
+            'textblob',
             'tornado',
             'urllib3<1.25,>=1.21.1'
         ],

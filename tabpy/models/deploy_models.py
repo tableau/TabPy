@@ -49,5 +49,6 @@ def main():
         subprocess.run([py, f'{directory}/{filename}', config_file_path]
                        + auth_args)
 
+
 if __name__ == '__main__':
     main()
