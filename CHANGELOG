@@ -17,16 +17,6 @@
 - Timeout is configurable with TABPY_EVALUATE_TIMEOUT config
   file option
 
-## v0.7
-
-### Improvements
-
-- Added t-test model
-- Fixed models call with /evaluate for HTTPS
-- Migrated to Tornado 6
-- Timeout is configurable with TABPY_EVALUATE_TIMEOUT config
-  file option
-
 ## v0.6.1
 
 ### Improvements
