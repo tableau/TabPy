@@ -39,6 +39,7 @@ def ttest(_arg1, _arg2):
 
 
 if __name__ == '__main__':
-    setup_utils.main('ttest',
-                     ttest,
-                     'Returns the p-value form a t-test')
+    setup_utils.deploy_model(
+        'ttest',
+        ttest,
+        'Returns the p-value form a t-test')
