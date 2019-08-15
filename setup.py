@@ -78,7 +78,6 @@ def setup_package():
             'requests',
             'singledispatch',
             'six',
-            'textblob',
             'tornado',
             'urllib3<1.25,>=1.21.1'
         ],
