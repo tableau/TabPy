@@ -1,3 +1,9 @@
+'''
+TabPy application.
+This file main() function is an entry point for
+'tabpy' command.
+'''
+
 import os
 from pathlib import Path
 
