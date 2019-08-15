@@ -57,10 +57,10 @@ startup.cmd myconfig.conf
 ```
 
 Replace `myconfig.conf` with the path to your config file relative to
-`%TABPY_ROOT%\tabpy-server\tabpy_server\`.
+`%TABPY_ROOT%\`.
 
 For example, in this case your config file would be located at
-`%TABPY_ROOT%\tabpy-server\tabpy_server\myconfig.conf`.
+`%TABPY_ROOT%\myconfig.conf`.
 
 ## Mac
 
@@ -89,10 +89,10 @@ For example, in this case your config file would be located at
     ```
 
     Replace ```myconfig.conf``` with the path to your config file relative to
-    ```$TABPY_ROOT/tabpy-server/tabpy_server/```.
+    ```$TABPY_ROOT/```.
 
     For example, in this case your config file would be located at
-    ```$TABPY_ROOT/tabpy-server/tabpy_server/myconfig.conf```.
+    ```$TABPY_ROOT/myconfig.conf```.
 
 ## Linux
 
@@ -121,7 +121,7 @@ For example, in this case your config file would be located at
     ```
 
     Replace ```myconfig.conf``` with the path to your config file relative to
-    ```$TABPY_ROOT/tabpy-server/tabpy_server/```.
+    ```$TABPY_ROOT/```.
 
     For example, in this case your config file would be located at
-    ```$TABPY_ROOT/tabpy-server/tabpy_server/myconfig.conf```.
+    ```$TABPY_ROOT/myconfig.conf```.
