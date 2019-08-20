@@ -73,7 +73,7 @@ pytest
 
 ### Unit Tests
 
-Unit tests suite can be exectud with the following command:
+Unit tests suite can be executed with the following command:
 
 ```sh
 pytest tests/unit
@@ -164,7 +164,7 @@ autopep8 -i tabpy-server/server_tests/test_pwd_file.py
 
 ## Publishing TabPy Package
 
-Execute the following commands to build and publish new version of
+Execute the following commands to build and publish a new version of
 TabPy package:
 
 ```sh
