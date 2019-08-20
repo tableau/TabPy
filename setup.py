@@ -98,7 +98,7 @@ def setup_package():
             'textblob'
         ],
         test_suite='pytest'
-)
+    )
 
 
 if __name__ == '__main__':

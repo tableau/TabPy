@@ -59,12 +59,13 @@ at [`logging.config` documentation page](https://docs.python.org/3.6/library/log
 - `TABPY_QUERY_OBJECT_PATH` - query objects location. Used with models, see
   [TabPy Tools documentation](tabpy-tools.md) for details. Default value -
   `/tmp/query_objects`.
-- `TABPY_STATE_PATH` - state location for Tornado web server. Default
-   value - `tabpy/tabpy_server` subfolder in TabPy package folder.
-- `TABPY_STATIC_PATH` - location of static files (index.html page) for
-  TabPy instance. Default value - `tabpy/tabpy_server/static` subfolder in
-  TabPy package folder.
-- `TABPY_PWD_FILE` - path to password file. Setting up this parameter
+- `TABPY_STATE_PATH` - state folder location (absolute path) for Tornado web
+   server. Default value - `tabpy/tabpy_server` subfolder in TabPy package
+   folder.
+- `TABPY_STATIC_PATH` - absolute path for location of static files (index.html
+  page) for TabPy instance. Default value - `tabpy/tabpy_server/static`
+  subfolder in TabPy package folder.
+- `TABPY_PWD_FILE` - absolute path to password file. Setting up this parameter
   makes TabPy require credentials with HTTP(S) requests. More details about
   authentication can be found in [Authentication](#authentication)
   section. Default value - not set.
@@ -73,10 +74,12 @@ at [`logging.config` documentation page](https://docs.python.org/3.6/library/log
   `TABPY_CERTIFICATE_FILE` and `TABPY_KEY_FILE`. More details for how to
   configure TabPy for HTTPS are at [Configuring HTTP vs HTTPS]
   (#configuring-http-vs-https) section.
-- `TABPY_CERTIFICATE_FILE` the certificate file to run TabPy with. Only used
-  with `TABPY_TRANSFER_PROTOCOL` set to `https`. Default value - not set.
-- `TABPY_KEY_FILE` to private key file to run TabPy with. Only used
-  with `TABPY_TRANSFER_PROTOCOL` set to `https`. Default value - not set.
+- `TABPY_CERTIFICATE_FILE` - absolute path to the certificate file to run
+  TabPy with. Only used with `TABPY_TRANSFER_PROTOCOL` set to `https`.
+  Default value - not set.
+- `TABPY_KEY_FILE` - absolute path to private key file to run TabPy with.
+  Only used with `TABPY_TRANSFER_PROTOCOL` set to `https`. Default value -
+  not set.
 - `TABPY_LOG_DETAILS` - when set to `true` additional call information
   (caller IP, URL, client info, etc.) is logged. Default value - `false`.
 - `TABPY_EVALUATE_TIMEOUT` - script evaluation timeout in seconds. Default
@@ -103,8 +106,8 @@ settings._
 # To set up secure TabPy uncomment and modify the following lines.
 # Note only PEM-encoded x509 certificates are supported.
 # TABPY_TRANSFER_PROTOCOL = https
-# TABPY_CERTIFICATE_FILE = path/to/certificate/file.crt
-# TABPY_KEY_FILE = path/to/key/file.key
+# TABPY_CERTIFICATE_FILE = /path/to/certificate/file.crt
+# TABPY_KEY_FILE = /path/to/key/file.key
 
 # Log additional request details including caller IP, full URL, client
 # end user info if provided.
