@@ -1,8 +1,8 @@
 from argparse import Namespace
 import json
 import os
-from tabpy_server.app.app import TabPyApp
-from tabpy_server.app.SettingsParameters import SettingsParameters
+from tabpy.tabpy_server.app.app import TabPyApp
+from tabpy.tabpy_server.app.SettingsParameters import SettingsParameters
 import tempfile
 from tornado.testing import AsyncHTTPTestCase
 from unittest.mock import patch
@@ -23,7 +23,7 @@ class TestServiceInfoHandlerDefault(AsyncHTTPTestCase):
     @classmethod
     def setUpClass(cls):
         cls.patcher = patch(
-            'tabpy_server.app.app.TabPyApp._parse_cli_arguments',
+            'tabpy.tabpy_server.app.app.TabPyApp._parse_cli_arguments',
             return_value=Namespace(
                 config=None))
         cls.patcher.start()

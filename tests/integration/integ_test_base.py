@@ -1,9 +1,12 @@
+import coverage
 import http.client
 import os
+from pathlib import Path
 import platform
 import shutil
 import signal
 import subprocess
+import tabpy
 import tempfile
 import time
 import unittest
@@ -222,17 +225,19 @@ class IntegTestBase(unittest.TestCase):
         # Platform specific - for integration tests we want to engage
         # startup script
         with open(self.tmp_dir + '/output.txt', 'w') as outfile:
+            cmd = ['tabpy',
+                   '--config=' + self.config_file_name]
+            coverage.process_startup()
             if platform.system() == 'Windows':
                 self.py = 'python'
                 self.process = subprocess.Popen(
-                    ['startup.cmd', self.config_file_name],
+                    cmd,
                     stdout=outfile,
                     stderr=outfile)
             else:
                 self.py = 'python3'
                 self.process = subprocess.Popen(
-                    ['./startup.sh',
-                     '--config=' + self.config_file_name],
+                    cmd,
                     preexec_fn=os.setsid,
                     stdout=outfile,
                     stderr=outfile)
@@ -272,3 +277,25 @@ class IntegTestBase(unittest.TestCase):
             connection = http.client.HTTPConnection(url)
 
         return connection
+
+    def _get_username(self) -> str:
+        return 'user1'
+
+    def _get_password(self) -> str:
+        return 'P@ssw0rd'
+
+    def deploy_models(self, username: str, password: str):
+        repo_dir = os.path.abspath(os.path.dirname(tabpy.__file__))
+        path = os.path.join(repo_dir, 'models', 'deploy_models.py')
+        with open(self.tmp_dir + '/deploy_models_output.txt', 'w') as outfile:
+            outfile.write(
+                f'--<< Running {self.py} {path} '
+                f'{self._get_config_file_name()} >>--\n')
+            input_string = f'{username}\n{password}\n'
+            outfile.write(f'--<< Input = {input_string} >>--')
+            coverage.process_startup()
+            p = subprocess.run(
+                [self.py, path, self._get_config_file_name()],
+                input=input_string.encode('utf-8'),
+                stdout=outfile,
+                stderr=outfile)

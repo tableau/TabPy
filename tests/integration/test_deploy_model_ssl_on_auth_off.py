@@ -15,9 +15,7 @@ class TestDeployModelSSLOnAuthOff(integ_test_base.IntegTestBase):
         return './tests/integration/resources/2019_04_24_to_3018_08_25.key'
 
     def test_deploy_ssl_on_auth_off(self):
-        models = ['PCA', 'Sentiment%20Analysis', "ttest"]
-        path = str(Path('models', 'setup.py'))
-        subprocess.call([self.py, path, self._get_config_file_name()])
+        self.deploy_models(self._get_username(), self._get_password())
 
         session = requests.Session()
         # Do not verify servers' cert to be signed by trusted CA
@@ -25,6 +23,7 @@ class TestDeployModelSSLOnAuthOff(integ_test_base.IntegTestBase):
         # Do not warn about insecure request
         requests.packages.urllib3.disable_warnings()
 
+        models = ['PCA', 'Sentiment%20Analysis', "ttest"]
         for m in models:
             m_response = session.get(url=f'{self._get_transfer_protocol()}://'
                                      f'localhost:9004/endpoints/{m}')

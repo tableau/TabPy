@@ -4,11 +4,13 @@
 
 <!-- toc -->
 
+- [Custom Settings](#custom-settings)
+  * [Configuration File Content](#configuration-file-content)
+  * [Configuration File Example](#configuration-file-example)
 - [Configuring HTTP vs HTTPS](#configuring-http-vs-https)
 - [Authentication](#authentication)
   * [Enabling Authentication](#enabling-authentication)
   * [Password File](#password-file)
-  * [Setting Up Environment](#setting-up-environment)
   * [Adding an Account](#adding-an-account)
   * [Updating an Account](#updating-an-account)
   * [Deleting an Account](#deleting-an-account)
@@ -20,30 +22,134 @@
 
 <!-- markdownlint-enable MD004 -->
 
-Default settings for TabPy may be viewed in the
-tabpy_server/common/default.conf file. This file also contains
-commented examples of how to set up your TabPy server to only
-serve HTTPS traffic and enable authentication.
+## Custom Settings
 
-Change settings by:
+TabPy starts with set of default settings unless settings are provided via
+environment variables or with a config file.
 
-1. Adding environment variables:
-   - set the environment variable as required by your Operating System. When
-     creating environment variables, use the same name as is in the config file
-     as an environment variable. The files startup.sh and startup.cmd in the root
-     of the install folder have examples of how to set environment variables in
-     both Linux and Windows respectively. Set any desired environment variables
-     and then start the application.
-2. Modifying default.conf.
-3. Specifying your own config file as a command line parameter.
-   - i.e. Running the command:
+Configuration parameters can be updated with:
 
-     ```sh
-     python tabpy.py --config=path\to\my\config
-     ```
+1. Adding environment variables - set the environment variable as required by
+   your Operating System. When creating environment variables, use the same
+   name for your environment variable as specified in the config file.
+2. Specifying a parameter in a config file (enviroment variable value overwrites
+   configuration setting).
+
+Configuration file with custom settings is specified as a command line parameter:
+
+```sh
+tabpy --config=path/to/my/config/file.conf
+```
 
 The default config file is provided to show you the default values but does not
 need to be present to run TabPy.
+
+### Configuration File Content
+
+Configuration file consists of settings for TabPy itself and Python logger
+settings. You should only set parameters if you need different values than
+the defaults.
+
+TabPy parameters explained below, the logger documentation can be found
+at [`logging.config` documentation page](https://docs.python.org/3.6/library/logging.config.html).
+
+`[TabPy]` parameters:
+
+- `TABPY_PORT` - port for TabPy to listen on. Default value - `9004`.
+- `TABPY_QUERY_OBJECT_PATH` - query objects location. Used with models, see
+  [TabPy Tools documentation](tabpy-tools.md) for details. Default value -
+  `/tmp/query_objects`.
+- `TABPY_STATE_PATH` - state folder location (absolute path) for Tornado web
+   server. Default value - `tabpy/tabpy_server` subfolder in TabPy package
+   folder.
+- `TABPY_STATIC_PATH` - absolute path for location of static files (index.html
+  page) for TabPy instance. Default value - `tabpy/tabpy_server/static`
+  subfolder in TabPy package folder.
+- `TABPY_PWD_FILE` - absolute path to password file. Setting up this parameter
+  makes TabPy require credentials with HTTP(S) requests. More details about
+  authentication can be found in [Authentication](#authentication)
+  section. Default value - not set.
+- `TABPY_TRANSFER_PROTOCOL` - transfer protocol. Default value - `http`. If
+  set to `https` two additional parameters have to be specified:
+  `TABPY_CERTIFICATE_FILE` and `TABPY_KEY_FILE`. More details for how to
+  configure TabPy for HTTPS are at [Configuring HTTP vs HTTPS]
+  (#configuring-http-vs-https) section.
+- `TABPY_CERTIFICATE_FILE` - absolute path to the certificate file to run
+  TabPy with. Only used with `TABPY_TRANSFER_PROTOCOL` set to `https`.
+  Default value - not set.
+- `TABPY_KEY_FILE` - absolute path to private key file to run TabPy with.
+  Only used with `TABPY_TRANSFER_PROTOCOL` set to `https`. Default value -
+  not set.
+- `TABPY_LOG_DETAILS` - when set to `true` additional call information
+  (caller IP, URL, client info, etc.) is logged. Default value - `false`.
+- `TABPY_EVALUATE_TIMEOUT` - script evaluation timeout in seconds. Default
+  value - `30`.
+
+### Configuration File Example
+
+**Note:** _Always use absolute paths for the configuration paths
+settings._
+
+```ini
+[TabPy]
+# TABPY_QUERY_OBJECT_PATH = /tmp/query_objects
+# TABPY_PORT = 9004
+# TABPY_STATE_PATH = <package-path>/tabpy/tabpy_server
+
+# Where static pages live
+# TABPY_STATIC_PATH = <package-path>/tabpy/tabpy_server/static
+
+# For how to configure TabPy authentication read
+# docs/server-config.md.
+# TABPY_PWD_FILE = /path/to/password/file.txt
+
+# To set up secure TabPy uncomment and modify the following lines.
+# Note only PEM-encoded x509 certificates are supported.
+# TABPY_TRANSFER_PROTOCOL = https
+# TABPY_CERTIFICATE_FILE = /path/to/certificate/file.crt
+# TABPY_KEY_FILE = /path/to/key/file.key
+
+# Log additional request details including caller IP, full URL, client
+# end user info if provided.
+# TABPY_LOG_DETAILS = true
+
+# Configure how long a custom script provided to the /evaluate method
+# will run before throwing a TimeoutError.
+# The value should be a float representing the timeout time in seconds.
+#TABPY_EVALUATE_TIMEOUT = 30
+
+[loggers]
+keys=root
+
+[handlers]
+keys=rootHandler,rotatingFileHandler
+
+[formatters]
+keys=rootFormatter
+
+[logger_root]
+level=DEBUG
+handlers=rootHandler,rotatingFileHandler
+qualname=root
+propagete=0
+
+[handler_rootHandler]
+class=StreamHandler
+level=DEBUG
+formatter=rootFormatter
+args=(sys.stdout,)
+
+[handler_rotatingFileHandler]
+class=handlers.RotatingFileHandler
+level=DEBUG
+formatter=rootFormatter
+args=('tabpy_log.log', 'a', 1000000, 5)
+
+[formatter_rootFormatter]
+format=%(asctime)s [%(levelname)s] (%(filename)s:%(module)s:%(lineno)d): %(message)s
+datefmt=%Y-%m-%d,%H:%M:%S
+
+```
 
 ## Configuring HTTP vs HTTPS
 
@@ -86,41 +192,25 @@ Password file is a text file containing usernames and hashed passwords
 per line separated by single space. For username only ASCII characters
 are supported. Usernames are case-insensitive.
 
-Passwords in the password file are hashed with PBKDF2. [See source code
-for implementation details](../tabpy-server/tabpy_server/handlers/util.py).
+Passwords in the password file are hashed with PBKDF2.
 
 **It is highly recommended to restrict access to the password file
 with hosting OS mechanisms. Ideally the file should only be accessible
 for reading with the account under which TabPy runs and TabPy admin account.**
 
-There is a `utils/user_management.py` utility to operate with
-accounts in the password file. Run `utils/user_management.py -h` to
-see how to use it.
+There is a `tabpy-user-management` command provided with `tabpy` package to
+operate with accounts in the password file. Run `tabpy-user-management -h`
+to see how to use it.
 
 After making any changes to the password file, TabPy needs to be restarted.
 
-### Setting Up Environment
-
-Before making any code changes run the environment setup script. For
-Windows run this command from the repository root folder:
-
-```sh
-utils\set_env.cmd
-```
-
-and for Linux or Mac run this command from the repository root folder:
-
-```sh
-source utils/set_env.sh
-```
-
 ### Adding an Account
 
-To add an account run `utils/user_management.py` utility with `add`
+To add an account run `tabpy-user-management add`
 command  providing user name, password (optional) and password file:
 
 ```sh
-python utils/user_management.py add -u <username> -p <password> -f <pwdfile>
+tabpy-user-management add -u <username> -p <password> -f <pwdfile>
 ```
 
 If the (recommended) `-p` argument is not provided a password for the user name
@@ -128,11 +218,11 @@ will be generated and displayed in the command line.
 
 ### Updating an Account
 
-To update the password for an account run `utils/user_management.py` utility
-with `update` command:
+To update the password for an account run `tabpy-user-management update`
+command:
 
 ```sh
-python utils/user_management.py update -u <username> -p <password> -f <pwdfile>
+tabpy-user-management update -u <username> -p <password> -f <pwdfile>
 ```
 
 If the (recommended) `-p` agrument is not provided a password for the user name

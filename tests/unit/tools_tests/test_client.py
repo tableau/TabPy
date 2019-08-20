@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import Mock
 
-from tabpy_tools.client import Client
+from tabpy.tabpy_tools.client import Client
 
 
 class TestClient(unittest.TestCase):

@@ -1,1 +1,0 @@
-export PYTHONPATH=./tabpy-server:./tabpy-tools:$PYTHONPATH
