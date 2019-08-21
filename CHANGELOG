@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.8.6
+
+### Fixes
+
+- Fixed file names for package building.
+- Fixed reading version info for /info call.
+
 ## v0.8
 
 ### Improvements

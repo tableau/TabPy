@@ -18,7 +18,7 @@ def setup_package():
 
     setup(
         name='tabpy',
-        version=read('VERSION'),
+        version=read('tabpy/VERSION'),
         description=DOCLINES[0],
         long_description='\n'.join(DOCLINES[1:]) + '\n' + read('CHANGELOG'),
         long_description_content_type='text/markdown',
@@ -53,7 +53,7 @@ def setup_package():
         package_data={
             'tabpy': [
                 'VERSION',
-                'tabpy_server/state.ini',
+                'tabpy_server/state.ini.template',
                 'tabpy_server/static',
                 'tabpy_server/common/default.conf'
             ]

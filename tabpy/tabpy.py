@@ -13,7 +13,7 @@ def read_version():
 
     import tabpy
     pkg_path = os.path.dirname(tabpy.__file__)
-    ver_file_path = os.path.join(pkg_path, os.path.pardir, 'VERSION')
+    ver_file_path = os.path.join(pkg_path, 'VERSION')
     if Path(ver_file_path).exists():
         with open(ver_file_path) as f:
             ver = f.read().strip()
