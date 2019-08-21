@@ -1,12 +1,7 @@
 include \
   CHANGELOG \
   LICENSE \
-<<<<<<< HEAD
-  VERSION \
-  tabpy/tabpy_server/state.ini \
-=======
   tabpy/VERSION \
   tabpy/tabpy_server/state.ini.template \
->>>>>>> master
   tabpy/tabpy_server/static/* \
   tabpy/tabpy_server/common/default.conf
