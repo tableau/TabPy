@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.8.1
+
+### Fixes
+
+- Fixed file names for package building.
+
 ## v0.8
 
 ### Improvements
