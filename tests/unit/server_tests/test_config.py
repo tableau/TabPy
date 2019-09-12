@@ -99,7 +99,7 @@ class TestPartialConfigFile(unittest.TestCase):
         mock_os.getenv.assert_has_calls(getenv_calls, any_order=True)
         self.assertEqual(app.settings['port'], 1234)
         self.assertEqual(app.settings['server_version'],
-                         open('VERSION').read().strip())
+                         open('tabpy/VERSION').read().strip())
         self.assertEqual(app.settings['upload_dir'], 'foo')
         self.assertEqual(app.settings['state_file_path'], 'bar')
         self.assertEqual(app.settings['transfer_protocol'], 'http')

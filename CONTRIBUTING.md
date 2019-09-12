@@ -63,6 +63,12 @@ be able to work on TabPy changes:
     pip install -e .
     ```
 
+5. Install all dependencies:
+
+   ```sh
+   python setup.py install
+   ```
+
 ## Tests
 
 To run the whole test suite execute the following command:
