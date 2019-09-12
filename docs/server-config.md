@@ -71,9 +71,9 @@ at [`logging.config` documentation page](https://docs.python.org/3.6/library/log
   section. Default value - not set.
 - `TABPY_TRANSFER_PROTOCOL` - transfer protocol. Default value - `http`. If
   set to `https` two additional parameters have to be specified:
-  `TABPY_CERTIFICATE_FILE` and `TABPY_KEY_FILE`. More details for how to
-  configure TabPy for HTTPS are at [Configuring HTTP vs HTTPS]
-  (#configuring-http-vs-https) section.
+  `TABPY_CERTIFICATE_FILE` and `TABPY_KEY_FILE`.
+  Details are in the [Configuring HTTP vs HTTPS](#configuring-http-vs-https)
+  section.
 - `TABPY_CERTIFICATE_FILE` - absolute path to the certificate file to run
   TabPy with. Only used with `TABPY_TRANSFER_PROTOCOL` set to `https`.
   Default value - not set.
