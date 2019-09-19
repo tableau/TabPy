@@ -9,7 +9,7 @@ from pathlib import Path
 
 
 def read_version():
-    ver = 'unknonw'
+    ver = 'unknown'
 
     import tabpy
     pkg_path = os.path.dirname(tabpy.__file__)
