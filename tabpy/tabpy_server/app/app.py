@@ -160,7 +160,7 @@ class TabPyApp:
         self.python_service = None
         self.credentials = {}
 
-        parser = configparser.ConfigParser()
+        parser = configparser.ConfigParser(os.environ)
 
         if os.path.isfile(config_file):
             with open(config_file) as f:
