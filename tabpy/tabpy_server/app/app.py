@@ -186,16 +186,6 @@ class TabPyApp:
                     f'"{self.settings[settings_key]}" '
                     'from config file')
 
-            if not key_is_set and check_env_var:
-                val = os.getenv(config_key)
-                if val is not None:
-                    self.settings[settings_key] = val
-                    key_is_set = True
-                    logger.debug(
-                        f'Parameter {settings_key} set to '
-                        f'"{self.settings[settings_key]}" '
-                        'from environment variable')
-
             if not key_is_set and default_val is not None:
                 self.settings[settings_key] = default_val
                 key_is_set = True
