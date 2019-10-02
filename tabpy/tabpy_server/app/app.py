@@ -183,7 +183,7 @@ class TabPyApp:
                 logger.debug(
                     f'Parameter {settings_key} set to '
                     f'"{self.settings[settings_key]}" '
-                    'from config file')
+                    'from config file or environment variable')
 
             if not key_is_set and default_val is not None:
                 self.settings[settings_key] = default_val
@@ -191,7 +191,7 @@ class TabPyApp:
                 logger.debug(
                     f'Parameter {settings_key} set to '
                     f'"{self.settings[settings_key]}" '
-                    'from default value or environment variable')
+                    'from default value')
 
             if not key_is_set:
                 logger.debug(

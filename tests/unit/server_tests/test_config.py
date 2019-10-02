@@ -6,7 +6,7 @@ import tabpy
 from tabpy.tabpy_server.app.util import validate_cert
 from tabpy.tabpy_server.app.app import TabPyApp
 
-from unittest.mock import patch, call
+from unittest.mock import patch
 
 
 def assert_raises_runtime_error(message, fn, args={}):
@@ -33,7 +33,7 @@ class TestConfigEnvironmentCalls(unittest.TestCase):
         obj_path = os.path.join(pkg_path, 'tmp', 'query_objects')
         state_path = os.path.join(pkg_path, 'tabpy_server')
         mock_os.environ = {
-            'TABPY_PORT': 9004, 'TABPY_QUERY_OBJECT_PATH': obj_path,
+            'TABPY_PORT': '9004', 'TABPY_QUERY_OBJECT_PATH': obj_path,
             'TABPY_STATE_PATH': state_path}
 
         TabPyApp(None)
@@ -86,7 +86,7 @@ class TestPartialConfigFile(unittest.TestCase):
 
         mock_parse_arguments.return_value = Namespace(config=config_file.name)
         mock_os.path.realpath.return_value = 'bar'
-        mock_os.environ = {'TABPY_PORT': 1234}
+        mock_os.environ = {'TABPY_PORT': '1234'}
 
         app = TabPyApp(config_file.name)
 
