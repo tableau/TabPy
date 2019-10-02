@@ -40,7 +40,7 @@ be able to work on TabPy changes:
   - Create a new branch for your changes.
   - When changes are ready push them on github and create merge request.
 - PIP packages - install all with
-  `pip install pytest pycodestyle autopep8 twine --upgrade` command
+  `pip install pytest pycodestyle autopep8 twine coverage --upgrade` command
 - Node.js for npm packages - install from <https://nodejs.org>.
 - NPM packages - install all with
   `npm install markdown-toc markdownlint` command.
@@ -62,6 +62,12 @@ be able to work on TabPy changes:
     ```sh
     pip install -e .
     ```
+
+5. Install all dependencies:
+
+   ```sh
+   python setup.py install
+   ```
 
 ## Tests
 
