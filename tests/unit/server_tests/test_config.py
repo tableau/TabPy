@@ -131,6 +131,21 @@ class TestPartialConfigFile(unittest.TestCase):
         app = TabPyApp(self.config_file.name)
         self.assertEqual(app.settings['evaluate_timeout'], 30.0)
 
+    @patch('tabpy.tabpy_server.app.app.os')
+    @patch('tabpy.tabpy_server.app.app.os.path.exists', return_value=True)
+    @patch('tabpy.tabpy_server.app.app._get_state_from_file')
+    @patch('tabpy.tabpy_server.app.app.TabPyState')
+    def test_env_variables_in_config(self, mock_state, mock_get_state,
+                                     mock_path_exists, mock_os):
+        mock_os.environ = {'foo': 'baz'}
+        config_file = self.config_file
+        config_file.write('[TabPy]\n'
+                          'TABPY_PORT = %(foo)sbar'.encode())
+        config_file.close()
+
+        app = TabPyApp(self.config_file.name)
+        self.assertEqual(app.settings['port'], 'bazbar')
+
 
 class TestTransferProtocolValidation(unittest.TestCase):
     @staticmethod
