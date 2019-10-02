@@ -32,16 +32,12 @@ class TestConfigEnvironmentCalls(unittest.TestCase):
         pkg_path = os.path.dirname(tabpy.__file__)
         obj_path = os.path.join(pkg_path, 'tmp', 'query_objects')
         state_path = os.path.join(pkg_path, 'tabpy_server')
-
-        mock_os.getenv.side_effect = [9004, obj_path, state_path]
+        mock_os.environ = {
+            'TABPY_PORT': 9004, 'TABPY_QUERY_OBJECT_PATH': obj_path,
+            'TABPY_STATE_PATH': state_path}
 
         TabPyApp(None)
 
-        getenv_calls = [
-            call('TABPY_PORT'),
-            call('TABPY_QUERY_OBJECT_PATH'),
-            call('TABPY_STATE_PATH')]
-        mock_os.getenv.assert_has_calls(getenv_calls, any_order=True)
         self.assertEqual(len(mock_psws.mock_calls), 1)
         self.assertEqual(len(mock_tabpy_state.mock_calls), 1)
         self.assertEqual(len(mock_path_exists.mock_calls), 1)
@@ -89,15 +85,12 @@ class TestPartialConfigFile(unittest.TestCase):
         config_file.close()
 
         mock_parse_arguments.return_value = Namespace(config=config_file.name)
-
-        mock_os.getenv.side_effect = [1234]
         mock_os.path.realpath.return_value = 'bar'
+        mock_os.environ = {'TABPY_PORT': 1234}
 
         app = TabPyApp(config_file.name)
-        getenv_calls = [call('TABPY_PORT')]
 
-        mock_os.getenv.assert_has_calls(getenv_calls, any_order=True)
-        self.assertEqual(app.settings['port'], 1234)
+        self.assertEqual(app.settings['port'], '1234')
         self.assertEqual(app.settings['server_version'],
                          open('VERSION').read().strip())
         self.assertEqual(app.settings['upload_dir'], 'foo')
