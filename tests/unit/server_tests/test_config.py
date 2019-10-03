@@ -9,14 +9,6 @@ from tabpy.tabpy_server.app.app import TabPyApp
 from unittest.mock import patch
 
 
-def assert_raises_runtime_error(message, fn, args={}):
-    try:
-        fn(*args)
-        assert False
-    except RuntimeError as err:
-        assert err.args[0] == message
-
-
 class TestConfigEnvironmentCalls(unittest.TestCase):
     @patch('tabpy.tabpy_server.app.app.TabPyApp._parse_cli_arguments',
            return_value=Namespace(config=None))
@@ -148,6 +140,11 @@ class TestPartialConfigFile(unittest.TestCase):
 
 
 class TestTransferProtocolValidation(unittest.TestCase):
+    def assertTabPyAppRaisesRuntimeError(self, expected_message):
+        with self.assertRaises(RuntimeError) as err:
+            TabPyApp(self.fp.name)
+        self.assertEqual(err.exception.args[0], expected_message)
+
     @staticmethod
     def mock_isfile(target_file, existing_files):
         if target_file in existing_files:
@@ -182,10 +179,9 @@ class TestTransferProtocolValidation(unittest.TestCase):
                       "TABPY_TRANSFER_PROTOCOL = https")
         self.fp.close()
 
-        assert_raises_runtime_error(
-            'Error using HTTPS: The parameter(s) TABPY_CERTIFICATE_FILE '
-            'and TABPY_KEY_FILE must be set.',
-            TabPyApp, {self.fp.name})
+        self.assertTabPyAppRaisesRuntimeError('Error using HTTPS: The paramete'
+                                              'r(s) TABPY_CERTIFICATE_FILE and'
+                                              ' TABPY_KEY_FILE must be set.')
 
     def test_https_without_cert(self):
         self.fp.write(
@@ -194,9 +190,9 @@ class TestTransferProtocolValidation(unittest.TestCase):
             "TABPY_KEY_FILE = foo")
         self.fp.close()
 
-        assert_raises_runtime_error('Error using HTTPS: The parameter(s) '
-                                    'TABPY_CERTIFICATE_FILE must be set.',
-                                    TabPyApp, {self.fp.name})
+        self.assertTabPyAppRaisesRuntimeError(
+            'Error using HTTPS: The parameter(s) TABPY_CERTIFICATE_FILE must '
+            'be set.')
 
     def test_https_without_key(self):
         self.fp.write("[TabPy]\n"
@@ -204,9 +200,8 @@ class TestTransferProtocolValidation(unittest.TestCase):
                       "TABPY_CERTIFICATE_FILE = foo")
         self.fp.close()
 
-        assert_raises_runtime_error('Error using HTTPS: The parameter(s) '
-                                    'TABPY_KEY_FILE must be set.',
-                                    TabPyApp, {self.fp.name})
+        self.assertTabPyAppRaisesRuntimeError(
+            'Error using HTTPS: The parameter(s) TABPY_KEY_FILE must be set.')
 
     @patch('tabpy.tabpy_server.app.app.os.path')
     def test_https_cert_and_key_file_not_found(self, mock_path):
@@ -219,10 +214,9 @@ class TestTransferProtocolValidation(unittest.TestCase):
         mock_path.isfile.side_effect = lambda x: self.mock_isfile(
             x, {self.fp.name})
 
-        assert_raises_runtime_error(
+        self.assertTabPyAppRaisesRuntimeError(
             'Error using HTTPS: The parameter(s) TABPY_CERTIFICATE_FILE and '
-            'TABPY_KEY_FILE must point to an existing file.',
-            TabPyApp, {self.fp.name})
+            'TABPY_KEY_FILE must point to an existing file.')
 
     @patch('tabpy.tabpy_server.app.app.os.path')
     def test_https_cert_file_not_found(self, mock_path):
@@ -235,10 +229,9 @@ class TestTransferProtocolValidation(unittest.TestCase):
         mock_path.isfile.side_effect = lambda x: self.mock_isfile(
             x, {self.fp.name, 'bar'})
 
-        assert_raises_runtime_error(
+        self.assertTabPyAppRaisesRuntimeError(
             'Error using HTTPS: The parameter(s) TABPY_CERTIFICATE_FILE '
-            'must point to an existing file.',
-            TabPyApp, {self.fp.name})
+            'must point to an existing file.')
 
     @patch('tabpy.tabpy_server.app.app.os.path')
     def test_https_key_file_not_found(self, mock_path):
@@ -251,10 +244,9 @@ class TestTransferProtocolValidation(unittest.TestCase):
         mock_path.isfile.side_effect = lambda x: self.mock_isfile(
             x, {self.fp.name, 'foo'})
 
-        assert_raises_runtime_error(
+        self.assertTabPyAppRaisesRuntimeError(
             'Error using HTTPS: The parameter(s) TABPY_KEY_FILE '
-            'must point to an existing file.',
-            TabPyApp, {self.fp.name})
+            'must point to an existing file.')
 
     @patch('tabpy.tabpy_server.app.app.os.path.isfile', return_value=True)
     @patch('tabpy.tabpy_server.app.util.validate_cert')
@@ -273,6 +265,10 @@ class TestTransferProtocolValidation(unittest.TestCase):
 
 
 class TestCertificateValidation(unittest.TestCase):
+    def assertValidateCertRaisesRuntimeError(self, expected_message, path):
+        with self.assertRaises(RuntimeError) as err:
+            validate_cert(path)
+        self.assertEqual(err.exception.args[0], expected_message)
 
     def __init__(self, *args, **kwargs):
         super(TestCertificateValidation, self).__init__(*args, **kwargs)
@@ -283,13 +279,13 @@ class TestCertificateValidation(unittest.TestCase):
         path = os.path.join(self.resources_path, 'expired.crt')
         message = ('Error using HTTPS: The certificate provided expired '
                    'on 2018-08-18 19:47:18.')
-        assert_raises_runtime_error(message, validate_cert, {path})
+        self.assertValidateCertRaisesRuntimeError(message, path)
 
     def test_future_cert(self):
         path = os.path.join(self.resources_path, 'future.crt')
         message = ('Error using HTTPS: The certificate provided is not valid '
                    'until 3001-01-01 00:00:00.')
-        assert_raises_runtime_error(message, validate_cert, {path})
+        self.assertValidateCertRaisesRuntimeError(message, path)
 
     def test_valid_cert(self):
         path = os.path.join(self.resources_path, 'valid.crt')
