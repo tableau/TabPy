@@ -50,6 +50,9 @@ Configuration file consists of settings for TabPy itself and Python logger
 settings. You should only set parameters if you need different values than
 the defaults.
 
+Environment variables can be used in the config file. Any instances of
+`%(ENV_VAR)s` will be replaced by the value of the environment variable `ENV_VAR`.
+
 TabPy parameters explained below, the logger documentation can be found
 at [`logging.config` documentation page](https://docs.python.org/3.6/library/logging.config.html).
 
