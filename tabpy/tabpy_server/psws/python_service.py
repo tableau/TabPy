@@ -42,6 +42,7 @@ class PythonServiceHandler:
             logger.debug(f'Returning response {response}')
             return response
         except Exception as e:
+            logger.exception(e)
             msg = e
             if hasattr(e, 'message'):
                 msg = e.message
@@ -90,6 +91,7 @@ class PythonService(object):
                                               'status': 'LoadSuccessful',
                                               'last_error': None}
         except Exception as e:
+            logger.exception(e)
             logger.error(f'Unable to load QueryObject: path={object_url}, '
                          f'error={str(e)}')
 
@@ -132,6 +134,7 @@ class PythonService(object):
                     object_uri, object_url, object_version, is_update,
                     object_type)
         except Exception as e:
+            logger.exception(e)
             logger.error(f'Unable to load QueryObject: path={object_url}, '
                          f'error={str(e)}')
 
@@ -226,6 +229,7 @@ class PythonService(object):
             else:
                 return UnknownURI(object_uri)
         except Exception as e:
+            logger.exception(e)
             err_msg = format_exception(e, '/query')
             logger.error(err_msg)
             return QueryFailed(uri=object_uri, error=err_msg)

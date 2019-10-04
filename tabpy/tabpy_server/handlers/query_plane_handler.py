@@ -135,6 +135,7 @@ class QueryPlaneHandler(BaseHandler):
             # Sanitize input data
             data = self._sanitize_request_data(json.loads(request_json))
         except Exception as e:
+            self.logger.log(logging.ERROR, str(e))
             err_msg = format_exception(e, "Invalid Input Data")
             self.error_out(400, err_msg)
             return
@@ -177,6 +178,7 @@ class QueryPlaneHandler(BaseHandler):
                 return
 
         except Exception as e:
+            self.logger.log(logging.ERROR, str(e))
             err_msg = format_exception(e, 'process query')
             self.error_out(500, 'Error processing query', info=err_msg)
             return

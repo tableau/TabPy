@@ -6,6 +6,7 @@ from logging import config
 import multiprocessing
 import os
 import shutil
+import signal
 import tabpy.tabpy_server
 from tabpy.tabpy import __version__
 from tabpy.tabpy_server.app.ConfigParameters import ConfigParameters
@@ -86,6 +87,18 @@ class TabPyApp:
         tornado.ioloop.IOLoop.instance().start()
 
     def _create_tornado_web_app(self):
+        class TabPyTornadoApp(tornado.web.Application):
+            is_closing = False
+
+            def signal_handler(self, signal, frame):
+                logger.critical(f'Exiting on signal {signal}...')
+                self.is_closing = True
+
+            def try_exit(self):
+                if self.is_closing:
+                    tornado.ioloop.IOLoop.instance().stop()
+                    logger.info('Shutting down TabPy...')
+
         logger.info('Initializing TabPy...')
         tornado.ioloop.IOLoop.instance().run_sync(
             lambda: init_ps_server(self.settings, self.tabpy_state))
@@ -95,7 +108,7 @@ class TabPyApp:
             max_workers=multiprocessing.cpu_count())
 
         # initialize Tornado application
-        application = tornado.web.Application([
+        application = TabPyTornadoApp([
             # skip MainHandler to use StaticFileHandler .* page requests and
             # default to index.html
             # (r"/", MainHandler),
@@ -120,6 +133,9 @@ class TabPyApp:
              dict(path=self.settings[SettingsParameters.StaticPath],
                   default_filename="index.html")),
         ], debug=False, **self.settings)
+
+        signal.signal(signal.SIGINT, application.signal_handler)
+        tornado.ioloop.PeriodicCallback(application.try_exit, 500).start()
 
         return application
 
