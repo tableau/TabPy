@@ -38,4 +38,5 @@ class TestSchema(unittest.TestCase):
                 'description': 'scores for input texts'
             }
         }
+        print(schema)
         self.assertEqual(schema, expected)

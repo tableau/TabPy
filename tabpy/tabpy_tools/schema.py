@@ -1,5 +1,5 @@
 import logging
-import genson as _genson
+import genson
 import jsonschema
 
 
@@ -12,9 +12,9 @@ def _generate_schema_from_example_and_description(input, description):
     to the example in json-schema.org. The description given by the users
     is then added to the schema.
     '''
-    s = _genson.Schema()
+    s = genson.SchemaBuilder(None)
     s.add_object(input)
-    input_schema = s.to_dict()
+    input_schema = s.to_schema()
 
     if description is not None:
         if 'properties' in input_schema:
