@@ -61,6 +61,9 @@ class TabPyApp:
 
     def run(self):
         application = self._create_tornado_web_app()
+        max_request_size =\
+            self.settings[SettingsParameters.MaxRequestSizeInMb] * 1024 * 1024
+        logger.info(f'Setting max request size to {max_request_size} bytes')
 
         init_model_evaluator(
             self.settings,
@@ -68,18 +71,22 @@ class TabPyApp:
             self.python_service)
 
         protocol = self.settings[SettingsParameters.TransferProtocol]
-        if protocol == 'http':
-            application.listen(self.settings[SettingsParameters.Port])
-        elif protocol == 'https':
-            application.listen(self.settings[SettingsParameters.Port],
-                               ssl_options={
+        ssl_options = None
+        if protocol == 'https':
+            ssl_options = {
                 'certfile': self.settings[SettingsParameters.CertificateFile],
                 'keyfile': self.settings[SettingsParameters.KeyFile]
-            })
-        else:
+            }
+        elif protocol != 'http':
             msg = f'Unsupported transfer protocol {protocol}.'
             logger.critical(msg)
             raise RuntimeError(msg)
+
+        application.listen(
+            self.settings[SettingsParameters.Port],
+            ssl_options=ssl_options,
+            max_buffer_size=max_request_size,
+            max_body_size=max_request_size)
 
         logger.info(
             'Web service listening on port '
@@ -318,6 +325,10 @@ class TabPyApp:
             'enabled' if self.settings[SettingsParameters.LogRequestContext]\
             else 'disabled'
         logger.info(f'Call context logging is {call_context_state}')
+
+        set_parameter(SettingsParameters.MaxRequestSizeInMb,
+                      ConfigParameters.TABPY_MAX_REQUEST_SIZE_MB,
+                      default_val=10)
 
     def _validate_transfer_protocol_settings(self):
         if SettingsParameters.TransferProtocol not in self.settings:

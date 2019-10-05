@@ -12,4 +12,5 @@ class SettingsParameters:
     ApiVersions = 'versions'
     LogRequestContext = 'log_request_context'
     StaticPath = 'static_path'
+    MaxRequestSizeInMb = 'max_request_size_in_mb'
     EvaluateTimeout = 'evaluate_timeout'
