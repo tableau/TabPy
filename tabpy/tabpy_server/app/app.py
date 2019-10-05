@@ -328,7 +328,7 @@ class TabPyApp:
 
         set_parameter(SettingsParameters.MaxRequestSizeInMb,
                       ConfigParameters.TABPY_MAX_REQUEST_SIZE_MB,
-                      default_val=10)
+                      default_val=100)
 
     def _validate_transfer_protocol_settings(self):
         if SettingsParameters.TransferProtocol not in self.settings:

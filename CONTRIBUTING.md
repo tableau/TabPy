@@ -187,5 +187,5 @@ python -m twine upload --repository-url https://test.pypi.org/legacy/ dist/*
 To install package from TestPyPi use the command:
 
 ```sh
-pip install --extra-index-url gttps://test.pypi.org/pypi tabpy
+pip install -i https://test.pypi.org/simple/ tabpy
 ```
