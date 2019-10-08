@@ -236,7 +236,7 @@ class IntegTestBase(unittest.TestCase):
                     stderr=outfile)
             else:
                 self.py = 'python3'
-                preexec_fn=os.setsid
+                preexec_fn = os.setsid
 
             coverage.process_startup()
             self.process = subprocess.Popen(
