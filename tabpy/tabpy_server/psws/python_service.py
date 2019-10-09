@@ -216,7 +216,7 @@ class PythonService(object):
                         error=("There is no query object associated to the "
                                f'endpoint: {object_uri}'))
 
-                logger.debug(f'Qurying endpoint with params ({params})...')
+                logger.debug(f'Querying endpoint with params ({params})...')
                 if isinstance(params, dict):
                     result = pred_obj.query(**params)
                 else:
