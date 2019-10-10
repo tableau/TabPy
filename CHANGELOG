@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.8.7
+
+### Improvements
+
+- Enabled the use of environment variables in the config file.
+
 ## v0.8.6
 
 ### Fixes

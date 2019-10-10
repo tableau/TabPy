@@ -160,7 +160,7 @@ class TabPyApp:
         self.python_service = None
         self.credentials = {}
 
-        parser = configparser.ConfigParser()
+        parser = configparser.ConfigParser(os.environ)
 
         if os.path.isfile(config_file):
             with open(config_file) as f:
@@ -172,8 +172,7 @@ class TabPyApp:
 
         def set_parameter(settings_key,
                           config_key,
-                          default_val=None,
-                          check_env_var=False):
+                          default_val=None):
             key_is_set = False
 
             if config_key is not None and\
@@ -184,17 +183,7 @@ class TabPyApp:
                 logger.debug(
                     f'Parameter {settings_key} set to '
                     f'"{self.settings[settings_key]}" '
-                    'from config file')
-
-            if not key_is_set and check_env_var:
-                val = os.getenv(config_key)
-                if val is not None:
-                    self.settings[settings_key] = val
-                    key_is_set = True
-                    logger.debug(
-                        f'Parameter {settings_key} set to '
-                        f'"{self.settings[settings_key]}" '
-                        'from environment variable')
+                    'from config file or environment variable')
 
             if not key_is_set and default_val is not None:
                 self.settings[settings_key] = default_val
@@ -209,13 +198,14 @@ class TabPyApp:
                     f'Parameter {settings_key} is not set')
 
         set_parameter(SettingsParameters.Port, ConfigParameters.TABPY_PORT,
-                      default_val=9004, check_env_var=True)
+                      default_val=9004)
         set_parameter(SettingsParameters.ServerVersion, None,
                       default_val=__version__)
 
         set_parameter(SettingsParameters.EvaluateTimeout,
                       ConfigParameters.TABPY_EVALUATE_TIMEOUT,
                       default_val=30)
+
         try:
             self.settings[SettingsParameters.EvaluateTimeout] = float(
                 self.settings[SettingsParameters.EvaluateTimeout])
@@ -229,8 +219,7 @@ class TabPyApp:
         set_parameter(SettingsParameters.UploadDir,
                       ConfigParameters.TABPY_QUERY_OBJECT_PATH,
                       default_val=os.path.join(pkg_path,
-                                               'tmp', 'query_objects'),
-                      check_env_var=True)
+                                               'tmp', 'query_objects'))
         if not os.path.exists(self.settings[SettingsParameters.UploadDir]):
             os.makedirs(self.settings[SettingsParameters.UploadDir])
 
@@ -251,8 +240,7 @@ class TabPyApp:
         # last dependence on batch/shell script
         set_parameter(SettingsParameters.StateFilePath,
                       ConfigParameters.TABPY_STATE_PATH,
-                      default_val=os.path.join(pkg_path, 'tabpy_server'),
-                      check_env_var=True)
+                      default_val=os.path.join(pkg_path, 'tabpy_server'))
         self.settings[SettingsParameters.StateFilePath] = os.path.realpath(
             os.path.normpath(
                 os.path.expanduser(
