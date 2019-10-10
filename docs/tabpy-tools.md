@@ -335,7 +335,6 @@ You can call ANOVA from tableau in the following way,
 tabpy.query(‘anova’, _arg1, _arg2, _arg3)[‘response’]
 ```
 
-
 ## Providing Schema Metadata
 
 As soon as you share your deployed functions, you also need to share metadata
