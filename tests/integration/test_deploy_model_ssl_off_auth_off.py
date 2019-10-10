@@ -9,7 +9,7 @@ class TestDeployModelSSLOffAuthOff(integ_test_base.IntegTestBase):
 
         conn = self._get_connection()
 
-        models = ['PCA', 'Sentiment%20Analysis', "ttest"]
+        models = ['PCA', 'Sentiment%20Analysis', "ttest", "anova"]
         for m in models:
             conn.request("GET", f'/endpoints/{m}')
             m_request = conn.getresponse()

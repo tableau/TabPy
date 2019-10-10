@@ -4,8 +4,6 @@ from sklearn.decomposition import PCA as sklearnPCA
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import OneHotEncoder
-import sys
-from pathlib import Path
 from tabpy.models.utils import setup_utils
 
 
