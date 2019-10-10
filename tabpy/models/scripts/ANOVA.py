@@ -17,6 +17,7 @@ def anova(_arg1, _arg2, *_argN):
     f_stat, p_value = stats.f_oneway(_arg1, _arg2, *_argN)
     return p_value
 
+
 if __name__ == '__main__':
     setup_utils.deploy_model(
         'anova',
