@@ -27,7 +27,7 @@ To run TabPy in Python virtual environment follow the steps:
    2. For Linux and Mac run
 
       ```sh
-      my-tabpy-env/bin/activate
+      source my-tabpy-env/bin/activate
       ```
 
 4. Run TabPy:
