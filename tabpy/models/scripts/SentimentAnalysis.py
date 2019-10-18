@@ -1,8 +1,6 @@
 from textblob import TextBlob
 import nltk
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
-import sys
-from pathlib import Path
 from tabpy.models.utils import setup_utils
 
 

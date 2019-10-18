@@ -38,7 +38,7 @@ class TestDeployModelSSLOnAuthOn(integ_test_base.IntegTestBase):
         # Do not warn about insecure request
         requests.packages.urllib3.disable_warnings()
 
-        models = ['PCA', 'Sentiment%20Analysis', "ttest"]
+        models = ['PCA', 'Sentiment%20Analysis', "ttest", "anova"]
         for m in models:
             m_response = session.get(url=f'{self._get_transfer_protocol()}://'
                                      f'localhost:9004/endpoints/{m}',
