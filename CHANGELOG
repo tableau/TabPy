@@ -6,6 +6,7 @@
 
 - Added Ctrl+C handler
 - Added configurable buffer size for HTTP requests
+- Added anvoa to supported pre-deployed models in tabpy
 
 ## v0.8.7
 
