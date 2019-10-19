@@ -230,10 +230,6 @@ class IntegTestBase(unittest.TestCase):
             preexec_fn = None
             if platform.system() == 'Windows':
                 self.py = 'python'
-                self.process = subprocess.Popen(
-                    cmd,
-                    stdout=outfile,
-                    stderr=outfile)
             else:
                 self.py = 'python3'
                 preexec_fn = os.setsid
@@ -302,3 +298,7 @@ class IntegTestBase(unittest.TestCase):
                 input=input_string.encode('utf-8'),
                 stdout=outfile,
                 stderr=outfile)
+
+    def _get_process(self):
+        return self.process
+
