@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.8.9
+
+### Improvements
+
+- Added Ctrl+C handler
+- Added configurable buffer size for HTTP requests
+
 ## v0.8.7
 
 ### Improvements

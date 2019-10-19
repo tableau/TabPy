@@ -18,6 +18,11 @@ class TestDeployAndEvaluateModelSSL(integ_test_base.IntegTestBase):
         return './tests/integration/resources/2019_04_24_to_3018_08_25.key'
 
     def test_deploy_and_evaluate_model_ssl(self):
+        # Uncomment the following line to preserve
+        # test case output and other files (config, state, ect.)
+        # in system temp folder.
+        self.set_delete_temp_folder(False)
+
         self.deploy_models(self._get_username(), self._get_password())
 
         payload = (

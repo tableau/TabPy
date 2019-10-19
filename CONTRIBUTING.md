@@ -177,3 +177,15 @@ TabPy package:
 python setup.py sdist bdist_wheel
 python -m twine upload dist/*
 ```
+
+To publish test version of the package use the following command:
+
+```sh
+python -m twine upload --repository-url https://test.pypi.org/legacy/ dist/*
+```
+
+To install package from TestPyPi use the command:
+
+```sh
+pip install -i https://test.pypi.org/simple/ tabpy
+```

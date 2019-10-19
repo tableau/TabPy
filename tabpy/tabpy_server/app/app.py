@@ -6,6 +6,7 @@ from logging import config
 import multiprocessing
 import os
 import shutil
+import signal
 import tabpy.tabpy_server
 from tabpy.tabpy import __version__
 from tabpy.tabpy_server.app.ConfigParameters import ConfigParameters
@@ -60,6 +61,9 @@ class TabPyApp:
 
     def run(self):
         application = self._create_tornado_web_app()
+        max_request_size =\
+            int(self.settings[SettingsParameters.MaxRequestSizeInMb]) * 1024 * 1024
+        logger.info(f'Setting max request size to {max_request_size} bytes')
 
         init_model_evaluator(
             self.settings,
@@ -67,18 +71,22 @@ class TabPyApp:
             self.python_service)
 
         protocol = self.settings[SettingsParameters.TransferProtocol]
-        if protocol == 'http':
-            application.listen(self.settings[SettingsParameters.Port])
-        elif protocol == 'https':
-            application.listen(self.settings[SettingsParameters.Port],
-                               ssl_options={
+        ssl_options = None
+        if protocol == 'https':
+            ssl_options = {
                 'certfile': self.settings[SettingsParameters.CertificateFile],
                 'keyfile': self.settings[SettingsParameters.KeyFile]
-            })
-        else:
+            }
+        elif protocol != 'http':
             msg = f'Unsupported transfer protocol {protocol}.'
             logger.critical(msg)
             raise RuntimeError(msg)
+
+        application.listen(
+            self.settings[SettingsParameters.Port],
+            ssl_options=ssl_options,
+            max_buffer_size=max_request_size,
+            max_body_size=max_request_size)
 
         logger.info(
             'Web service listening on port '
@@ -86,6 +94,18 @@ class TabPyApp:
         tornado.ioloop.IOLoop.instance().start()
 
     def _create_tornado_web_app(self):
+        class TabPyTornadoApp(tornado.web.Application):
+            is_closing = False
+
+            def signal_handler(self, signal, frame):
+                logger.critical(f'Exiting on signal {signal}...')
+                self.is_closing = True
+
+            def try_exit(self):
+                if self.is_closing:
+                    tornado.ioloop.IOLoop.instance().stop()
+                    logger.info('Shutting down TabPy...')
+
         logger.info('Initializing TabPy...')
         tornado.ioloop.IOLoop.instance().run_sync(
             lambda: init_ps_server(self.settings, self.tabpy_state))
@@ -95,7 +115,7 @@ class TabPyApp:
             max_workers=multiprocessing.cpu_count())
 
         # initialize Tornado application
-        application = tornado.web.Application([
+        application = TabPyTornadoApp([
             # skip MainHandler to use StaticFileHandler .* page requests and
             # default to index.html
             # (r"/", MainHandler),
@@ -120,6 +140,9 @@ class TabPyApp:
              dict(path=self.settings[SettingsParameters.StaticPath],
                   default_filename="index.html")),
         ], debug=False, **self.settings)
+
+        signal.signal(signal.SIGINT, application.signal_handler)
+        tornado.ioloop.PeriodicCallback(application.try_exit, 500).start()
 
         return application
 
@@ -302,6 +325,10 @@ class TabPyApp:
             'enabled' if self.settings[SettingsParameters.LogRequestContext]\
             else 'disabled'
         logger.info(f'Call context logging is {call_context_state}')
+
+        set_parameter(SettingsParameters.MaxRequestSizeInMb,
+                      ConfigParameters.TABPY_MAX_REQUEST_SIZE_MB,
+                      default_val=100)
 
     def _validate_transfer_protocol_settings(self):
         if SettingsParameters.TransferProtocol not in self.settings:
