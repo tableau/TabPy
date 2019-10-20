@@ -3,6 +3,7 @@ import os
 import signal
 import unittest
 
+
 class TestApp(integ_test_base.IntegTestBase):
     def test_ctrl_c(self):
         # Uncomment the following line to preserve
@@ -12,5 +13,3 @@ class TestApp(integ_test_base.IntegTestBase):
 
         process = self._get_process()
         os.kill(process.pid, signal.SIGINT)
-
-
