@@ -46,5 +46,3 @@ def _get_state_from_file(state_path, logger=logging.getLogger(__name__)):
 
     return config
 
-
-_ZERO = timedelta(0)

@@ -245,7 +245,7 @@ class RESTProperty(object):
         self.from_json = from_json
         self.to_json = to_json
 
-    def __get__(self, instance, owner):
+    def __get__(self, instance, _):
         if instance:
             try:
                 return getattr(instance, self.name)

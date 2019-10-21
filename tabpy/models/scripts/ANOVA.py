@@ -14,7 +14,7 @@ def anova(_arg1, _arg2, *_argN):
         if not isinstance(col[0], (int, float)):
             print("values must be numeric")
             raise ValueError
-    f_stat, p_value = stats.f_oneway(_arg1, _arg2, *_argN)
+    _, p_value = stats.f_oneway(_arg1, _arg2, *_argN)
     return p_value
 
 

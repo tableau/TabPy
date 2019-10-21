@@ -178,6 +178,14 @@ class TestTransferProtocolValidation(unittest.TestCase):
         os.remove(self.fp.name)
         self.fp = None
 
+    def test_invalid_protocol(self):
+        self.fp.write("[TabPy]\n"
+                      "TABPY_TRANSFER_PROTOCOL = gopher")
+        self.fp.close()
+
+        self.assertTabPyAppRaisesRuntimeError(
+            'Unsupported transfer protocol: gopher')
+
     def test_http(self):
         self.fp.write("[TabPy]\n"
                       "TABPY_TRANSFER_PROTOCOL = http")
