@@ -62,7 +62,8 @@ class TabPyApp:
     def run(self):
         application = self._create_tornado_web_app()
         max_request_size =\
-            int(self.settings[SettingsParameters.MaxRequestSizeInMb]) * 1024 * 1024
+            int(self.settings[SettingsParameters.MaxRequestSizeInMb]) *\
+            1024 * 1024
         logger.info(f'Setting max request size to {max_request_size} bytes')
 
         init_model_evaluator(

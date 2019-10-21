@@ -301,4 +301,3 @@ class IntegTestBase(unittest.TestCase):
 
     def _get_process(self):
         return self.process
-

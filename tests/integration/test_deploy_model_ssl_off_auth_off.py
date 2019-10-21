@@ -5,6 +5,11 @@ from pathlib import Path
 
 class TestDeployModelSSLOffAuthOff(integ_test_base.IntegTestBase):
     def test_deploy_ssl_off_auth_off(self):
+        # Uncomment the following line to preserve
+        # test case output and other files (config, state, ect.)
+        # in system temp folder.
+        # self.set_delete_temp_folder(False)
+
         self.deploy_models(self._get_username(), self._get_password())
 
         conn = self._get_connection()

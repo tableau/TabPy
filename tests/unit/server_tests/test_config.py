@@ -22,7 +22,6 @@ class TestConfigEnvironmentCalls(unittest.TestCase):
         self.assertEqual(app.settings['log_request_context'], False)
         self.assertEqual(app.settings['evaluate_timeout'], 30)
 
-
     @patch('tabpy.tabpy_server.app.app.TabPyApp._parse_cli_arguments',
            return_value=Namespace(config=None))
     @patch('tabpy.tabpy_server.app.app.TabPyState')
