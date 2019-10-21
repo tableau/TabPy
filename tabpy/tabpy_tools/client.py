@@ -97,21 +97,6 @@ class Client(object):
                 ' object at ' + hex(id(self)) +
                 ' connected to ' + repr(self._endpoint) + ">")
 
-    def get_info(self):
-        """Returns a dict containing information about the service.
-
-        Returns
-        -------
-        dict
-            Keys are:
-            * name: The name of the service
-            * creation_time: The creation time in seconds since 1970-01-01
-            * description: Description of the service
-            * server_version: The version of the service used
-            * state_path: Where the state file is stored.
-        """
-        return self._service.get_info()
-
     def get_status(self):
         '''
         Gets the status of the deployed endpoints.
@@ -209,57 +194,6 @@ class Client(object):
     def _get_endpoint_upload_destination(self):
         """Returns the endpoint upload destination."""
         return self._service.get_endpoint_upload_destination()['path']
-
-    def alias(self, alias, existing_endpoint_name, description=None):
-        '''
-        Create a new endpoint to redirect to an existing endpoint, or update an
-        existing alias to point to a different existing endpoint.
-
-        Parameters
-        ----------
-        alias : str
-            The new endpoint name or an existing alias endpoint name.
-
-        existing_endpoint_name : str
-            A name of an existing endpoint to redirect the alias to.
-
-        description : str, optional
-            A description for the alias.
-        '''
-        # check for invalid PO names
-        _check_endpoint_name(alias)
-
-        if not description:
-            description = f'Alias for {existing_endpoint_name}'
-
-        if existing_endpoint_name not in self.get_endpoints():
-            raise ValueError(
-                f'Endpoint "{existing_endpoint_name}" does not exist.')
-
-        # Can only overwrite existing alias
-        existing_endpoint = self.get_endpoints().get(alias)
-        endpoint = AliasEndpoint(
-            name=alias,
-            type='alias',
-            description=description,
-            target=existing_endpoint_name,
-            cache_state='disabled',
-            version=1,
-        )
-
-        if existing_endpoint:
-            if existing_endpoint.type != 'alias':
-                raise RuntimeError(
-                    f'Name "{alias}" is already in use by another '
-                    'endpoint.')
-
-            endpoint.version = existing_endpoint.version + 1
-
-            self._service.set_endpoint(endpoint)
-        else:
-            self._service.add_endpoint(endpoint)
-
-        self._wait_for_endpoint_deployment(alias, endpoint.version)
 
     def deploy(self,
                name, obj, description='', schema=None,
@@ -446,72 +380,6 @@ class Client(object):
 
             logger.info(f'Sleeping {interval}...')
             time.sleep(interval)
-
-    def remove(self, name):
-        '''
-        Remove the endpoint that has the specified name.
-
-        Parameters
-        ----------
-        name : str
-            The name of the endpoint to be removed.
-
-        Notes
-        -----
-        This could fail if the endpoint does not exist, or if the endpoint is
-        in use by an alias. To check all endpoints
-        that are depending on this endpoint, use `get_endpoint_dependencies`.
-
-        See Also
-        --------
-        deploy, get_endpoint_dependencies
-        '''
-        self._service.remove_endpoint(name)
-
-        # Wait for the endpoint to be removed
-        while name in self.get_endpoints():
-            time.sleep(1.0)
-
-    def get_endpoint_dependencies(self, endpoint_name=None):
-        '''
-        Get all endpoints that depend on the given endpoint. The only
-        dependency that is recorded is aliases on the endpoint they refer to.
-        This will not return internal dependencies, as when you have an
-        endpoint that calls another endpoint from within its code body.
-
-        Parameters
-        ----------
-        endpoint_name : str, optional
-            The name of the endpoint to find dependent endpoints. If not given,
-            find all dependent endpoints for all endpoints.
-
-        Returns
-        -------
-        dependent endpoints : dict
-            If endpoint_name is given, returns a list of endpoint names that
-            depend on the given endpoint.
-
-            If endpoint_name is not given, returns a dictionary where key is
-            the endpoint name and value is a set of endpoints that depend on
-            the endpoint specified by the key.
-        '''
-        endpoints = self.get_endpoints()
-
-        def get_dependencies(endpoint):
-            result = set()
-            for d in endpoints[endpoint].dependencies:
-                result.update([d])
-                result.update(get_dependencies(d))
-            return result
-
-        if endpoint_name:
-            return get_dependencies(endpoint_name)
-
-        else:
-            return {
-                endpoint: get_dependencies(endpoint)
-                for endpoint in endpoints
-            }
 
     def set_credentials(self, username, password):
         '''
