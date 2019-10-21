@@ -147,8 +147,7 @@ class TabPyApp:
 
         return application
 
-    @staticmethod
-    def _parse_cli_arguments():
+    def _parse_cli_arguments(self):
         '''
         Parse command line arguments. Expected arguments:
         * --config: string
