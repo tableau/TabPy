@@ -2,6 +2,7 @@ import unittest
 from unittest.mock import Mock
 
 from tabpy.tabpy_tools.client import Client
+from tabpy.tabpy_tools.client import _check_endpoint_name
 
 
 class TestClient(unittest.TestCase):
@@ -82,3 +83,12 @@ class TestClient(unittest.TestCase):
 
         self.client._service.set_credentials.assert_called_once_with(
             username, password)
+
+    def test_check_invalid_endpoint_name(self):
+        endpoint_name = 'Invalid:model:@name'
+        with self.assertRaises(ValueError) as err:
+            _check_endpoint_name(endpoint_name)
+
+        self.assertEqual(err.exception.args[0],
+                         f'endpoint name {endpoint_name } can only contain: '
+                         'a-z, A-Z, 0-9, underscore, hyphens and spaces.')

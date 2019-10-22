@@ -46,35 +46,3 @@ def _get_state_from_file(state_path, logger=logging.getLogger(__name__)):
 
     return config
 
-
-_ZERO = timedelta(0)
-
-
-class _UTC(tzinfo):
-    """
-    A UTC datetime.tzinfo class modeled after the pytz library. It includes a
-    __reduce__ method for pickling,
-    """
-
-    def fromutc(self, dt):
-        if dt.tzinfo is None:
-            return self.localize(dt)
-        return super(_UTC, self).fromutc(dt)
-
-    def utcoffset(self, dt):
-        return _ZERO
-
-    def tzname(self, dt):
-        return "UTC"
-
-    def dst(self, dt):
-        return _ZERO
-
-    def __reduce__(self):
-        return _UTC, ()
-
-    def __repr__(self):
-        return "<UTC>"
-
-    def __str__(self):
-        return "UTC"

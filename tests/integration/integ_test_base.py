@@ -227,20 +227,19 @@ class IntegTestBase(unittest.TestCase):
         with open(self.tmp_dir + '/output.txt', 'w') as outfile:
             cmd = ['tabpy',
                    '--config=' + self.config_file_name]
-            coverage.process_startup()
+            preexec_fn = None
             if platform.system() == 'Windows':
                 self.py = 'python'
-                self.process = subprocess.Popen(
-                    cmd,
-                    stdout=outfile,
-                    stderr=outfile)
             else:
                 self.py = 'python3'
-                self.process = subprocess.Popen(
-                    cmd,
-                    preexec_fn=os.setsid,
-                    stdout=outfile,
-                    stderr=outfile)
+                preexec_fn = os.setsid
+
+            coverage.process_startup()
+            self.process = subprocess.Popen(
+                cmd,
+                preexec_fn=preexec_fn,
+                stdout=outfile,
+                stderr=outfile)
 
             # give the app some time to start up...
             time.sleep(5)
@@ -299,3 +298,6 @@ class IntegTestBase(unittest.TestCase):
                 input=input_string.encode('utf-8'),
                 stdout=outfile,
                 stderr=outfile)
+
+    def _get_process(self):
+        return self.process

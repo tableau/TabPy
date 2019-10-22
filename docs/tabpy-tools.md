@@ -14,6 +14,7 @@ on TabPy server.
   * [Principal Component Analysis (PCA)](#principal-component-analysis-pca)
   * [Sentiment Analysis](#sentiment-analysis)
   * [T-Test](#t-test)
+  * [ANOVA](#anova)
 - [Providing Schema Metadata](#providing-schema-metadata)
 - [Querying an Endpoint](#querying-an-endpoint)
 - [Evaluating Arbitrary Python Scripts](#evaluating-arbitrary-python-scripts)
@@ -317,6 +318,22 @@ The function returns a two-tailed [p-value](https://en.wikipedia.org/wiki/P-valu
 (between 0 and 1). Depending on your [significance level](https://en.wikipedia.org/wiki/Statistical_significance)
 you may reject or fail to reject the null hypothesis.
 <!-- markdownlint-enable MD029 -->
+
+### ANOVA
+
+[Analysis of variance](https://en.wikipedia.org/wiki/Analysis_of_variance)
+helps inform if two or more group means within a sample differ. By measuring
+the variation between and among groups and computing the resulting F-statistic
+we are able to obtain a p-value. While a statistically significant p-value
+will inform you that at least 2 of your groups’ means are different from each
+other, it will not tell you which of the two groups differ.
+
+You can call ANOVA from tableau in the following way,
+
+```python
+
+tabpy.query(‘anova’, _arg1, _arg2, _arg3)[‘response’]
+```
 
 ## Providing Schema Metadata
 

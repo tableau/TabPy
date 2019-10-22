@@ -1,6 +1,4 @@
 from scipy import stats
-import sys
-from pathlib import Path
 from tabpy.models.utils import setup_utils
 
 

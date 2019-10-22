@@ -85,6 +85,9 @@ at [`logging.config` documentation page](https://docs.python.org/3.6/library/log
   not set.
 - `TABPY_LOG_DETAILS` - when set to `true` additional call information
   (caller IP, URL, client info, etc.) is logged. Default value - `false`.
+- `TABPY_MAX_REQUEST_SIZE_MB` - maximal request size supported by TabPy server
+  in Megabytes. All requests of exceeding size are rejected. Default value is
+  100 Mb.
 - `TABPY_EVALUATE_TIMEOUT` - script evaluation timeout in seconds. Default
   value - `30`.
 
@@ -116,10 +119,15 @@ settings._
 # end user info if provided.
 # TABPY_LOG_DETAILS = true
 
+# Limit request size (in Mb) - any request which size exceeds
+# specified amount will be rejected by TabPy.
+# Default value is 100 Mb.
+# TABPY_MAX_REQUEST_SIZE_MB = 100
+
 # Configure how long a custom script provided to the /evaluate method
 # will run before throwing a TimeoutError.
 # The value should be a float representing the timeout time in seconds.
-#TABPY_EVALUATE_TIMEOUT = 30
+# TABPY_EVALUATE_TIMEOUT = 30
 
 [loggers]
 keys=root

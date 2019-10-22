@@ -10,6 +10,18 @@ from unittest.mock import patch
 
 
 class TestConfigEnvironmentCalls(unittest.TestCase):
+    def test_config_file_does_not_exist(self):
+        app = TabPyApp('/folder_does_not_exit/file_does_not_exist.conf')
+
+        self.assertEqual(app.settings['port'], 9004)
+        self.assertEqual(app.settings['server_version'],
+                         open('tabpy/VERSION').read().strip())
+        self.assertEqual(app.settings['transfer_protocol'], 'http')
+        self.assertTrue('certificate_file' not in app.settings)
+        self.assertTrue('key_file' not in app.settings)
+        self.assertEqual(app.settings['log_request_context'], False)
+        self.assertEqual(app.settings['evaluate_timeout'], 30)
+
     @patch('tabpy.tabpy_server.app.app.TabPyApp._parse_cli_arguments',
            return_value=Namespace(config=None))
     @patch('tabpy.tabpy_server.app.app.TabPyState')
@@ -165,6 +177,14 @@ class TestTransferProtocolValidation(unittest.TestCase):
     def tearDown(self):
         os.remove(self.fp.name)
         self.fp = None
+
+    def test_invalid_protocol(self):
+        self.fp.write("[TabPy]\n"
+                      "TABPY_TRANSFER_PROTOCOL = gopher")
+        self.fp.close()
+
+        self.assertTabPyAppRaisesRuntimeError(
+            'Unsupported transfer protocol: gopher')
 
     def test_http(self):
         self.fp.write("[TabPy]\n"

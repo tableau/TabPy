@@ -94,7 +94,7 @@ class ManagementHandler(MainHandler):
                 self.settings[SettingsParameters.StateFilePath], name, version)
             self.logger.log(logging.DEBUG,
                             f'Checking source path {src_path}...')
-            _path_checker = _compile(r'^[\\\:a-zA-Z0-9-_~\s/\.]+$')
+            _path_checker = _compile(r'^[\\\:a-zA-Z0-9-_~\s/\.\(\)]+$')
             # copy from staging
             if src_path:
                 if not isinstance(request_data['src_path'], str):

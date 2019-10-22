@@ -2,7 +2,6 @@ import pip
 import os
 import sys
 import platform
-import runpy
 import subprocess
 from pathlib import Path
 from tabpy.models.utils import setup_utils

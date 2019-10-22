@@ -14,7 +14,7 @@ class TestDeployAndEvaluateModel(integ_test_base.IntegTestBase):
         # Uncomment the following line to preserve
         # test case output and other files (config, state, ect.)
         # in system temp folder.
-        self.set_delete_temp_folder(False)
+        # self.set_delete_temp_folder(False)
 
         self.deploy_models(self._get_username(), self._get_password())
 

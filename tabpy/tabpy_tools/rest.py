@@ -1,11 +1,10 @@
 import abc
+from collections.abc import MutableMapping
 import logging
 import requests
 from requests.auth import HTTPBasicAuth
 from re import compile
 import json as json
-
-from collections import MutableMapping as _MutableMapping
 
 
 logger = logging.getLogger(__name__)
@@ -246,7 +245,7 @@ class RESTProperty(object):
         self.from_json = from_json
         self.to_json = to_json
 
-    def __get__(self, instance, owner):
+    def __get__(self, instance, _):
         if instance:
             try:
                 return getattr(instance, self.name)
@@ -290,7 +289,7 @@ class _RESTMetaclass(abc.ABCMeta):
                 self.__rest__.add(k)
 
 
-class RESTObject(_MutableMapping, metaclass=_RESTMetaclass):
+class RESTObject(MutableMapping, metaclass=_RESTMetaclass):
     """A base class that has methods generally useful for interacting with
     REST objects. The attributes are accessible either as dict keys or as
     attributes. The object also behaves like a dict, even replicating the
