@@ -1,4 +1,4 @@
-from abc import ABCMeta
+import abc
 from collections import namedtuple
 import json
 
@@ -15,7 +15,7 @@ class Msg(object):
     operator (*) that we inherit from namedtuple is also convenient. We empty
     __slots__ to avoid unnecessary overhead.
     """
-    __metaclass__ = ABCMeta
+    __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
     def for_json(self):

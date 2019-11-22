@@ -4,7 +4,6 @@ except ImportError:
     from configparser import ConfigParser
 import json
 import logging
-import sys
 from tabpy.tabpy_server.management.util import write_state_config
 from threading import Lock
 from time import time

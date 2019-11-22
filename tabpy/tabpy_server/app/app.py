@@ -2,6 +2,7 @@ from argparse import ArgumentParser
 import concurrent.futures
 import configparser
 import logging
+from logging import config
 import multiprocessing
 import os
 import shutil

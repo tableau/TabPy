@@ -1,7 +1,5 @@
-import concurrent
 import logging
 import os
-import sys
 import shutil
 from re import compile as _compile
 from uuid import uuid4 as random_uuid

@@ -1,21 +1,9 @@
 from re import compile
 import time
-import sys
 import requests
-
-from .rest import (
-    RequestsNetworkWrapper,
-    ServiceClient
-)
-
-from .rest_client import (
-    RESTServiceClient,
-    Endpoint,
-    AliasEndpoint
-)
-
+from .rest import (RequestsNetworkWrapper, ServiceClient)
+from .rest_client import (RESTServiceClient, Endpoint)
 from .custom_query_object import CustomQueryObject
-
 import os
 import logging
 
@@ -311,7 +299,7 @@ class Client(object):
             description=description,
         )
 
-        _scema = schema in schema is not None else []
+        _schema = schema if schema is not None else []
         return {
             'name': name,
             'version': version,
