@@ -1,4 +1,3 @@
-import pip
 import os
 import sys
 import platform

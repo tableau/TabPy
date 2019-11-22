@@ -253,7 +253,7 @@ class Client(object):
 
         self._wait_for_endpoint_deployment(obj['name'], obj['version'])
 
-    def _gen_endpoint(self, name, obj, description, version=1, schema=[]):
+    def _gen_endpoint(self, name, obj, description, version=1, schema=None):
         '''Generates an endpoint dict.
 
         Parameters
@@ -311,6 +311,7 @@ class Client(object):
             description=description,
         )
 
+        _scema = schema in schema is not None else []
         return {
             'name': name,
             'version': version,
@@ -321,7 +322,7 @@ class Client(object):
             'methods': endpoint_object.get_methods(),
             'required_files': [],
             'required_packages': [],
-            'schema': schema
+            'schema': _schema
         }
 
     def _upload_endpoint(self, obj):

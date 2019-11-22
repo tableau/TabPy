@@ -1,4 +1,3 @@
-import abc
 from abc import ABCMeta
 from collections import namedtuple
 import json

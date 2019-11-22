@@ -1,7 +1,6 @@
 import configparser
 import getpass
 import os
-from pathlib import Path
 import sys
 from tabpy.tabpy_tools.client import Client
 
