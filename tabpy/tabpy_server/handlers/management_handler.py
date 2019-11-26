@@ -94,15 +94,11 @@ class ManagementHandler(MainHandler):
                 self.settings[SettingsParameters.StateFilePath], name, version)
             self.logger.log(logging.DEBUG,
                             f'Checking source path {src_path}...')
-            _path_checker = _compile(r'^[\\\:a-zA-Z0-9-_~\s/\.\(\)]+$')
+
             # copy from staging
             if src_path:
                 if not isinstance(request_data['src_path'], str):
                     raise gen.Return("src_path must be a string.")
-                if not _path_checker.match(src_path):
-                    raise gen.Return(
-                        'Endpoint source path name can only contain: '
-                        'a-z, A-Z, 0-9, underscore, hyphens and spaces.')
 
                 yield self._copy_po_future(src_path, target_path)
             elif endpoint_type != 'alias':
