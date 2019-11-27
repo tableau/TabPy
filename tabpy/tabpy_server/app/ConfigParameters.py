@@ -2,7 +2,6 @@ class ConfigParameters:
     '''
     Configuration settings names
     '''
-    TABPY_PWD_FILE = 'TABPY_PWD_FILE'
     TABPY_PORT = 'TABPY_PORT'
     TABPY_QUERY_OBJECT_PATH = 'TABPY_QUERY_OBJECT_PATH'
     TABPY_STATE_PATH = 'TABPY_STATE_PATH'

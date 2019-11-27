@@ -4,7 +4,6 @@ except ImportError:
     from configparser import ConfigParser
 import json
 import logging
-import sys
 from tabpy.tabpy_server.management.util import write_state_config
 from threading import Lock
 from time import time
@@ -470,7 +469,6 @@ class TabPyState(object):
                 'Service Info', 'Access-Control-Allow-Origin')
         except Exception as e:
             logger.error(e)
-            pass
         return _cors_origin
 
     def get_access_control_allow_headers(self):

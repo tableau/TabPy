@@ -14,11 +14,11 @@ def read_version():
     import tabpy
     pkg_path = os.path.dirname(tabpy.__file__)
     ver_file_path = os.path.join(pkg_path, 'VERSION')
+    ver = f'Version Unknown, (file {ver_file_path} not found)'
+
     if Path(ver_file_path).exists():
         with open(ver_file_path) as f:
             ver = f.read().strip()
-    else:
-        ver = f'Version Unknown, (file {ver_file_path} not found)'
 
     return ver
 
