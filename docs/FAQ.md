@@ -19,7 +19,6 @@
 TabPy uses Tornado 5.1.1. To it to your Python environment run
 `pip install tornado==5.1.1` and then try to start TabPy again.
 
-
 ### NotImplementedError
 
 Check your Python version (`python -V` command) - TabPy doesn't work with
