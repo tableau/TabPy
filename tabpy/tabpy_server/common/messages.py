@@ -4,7 +4,7 @@ from collections import namedtuple
 import json
 
 
-class Msg(object):
+class Msg:
     """
     An abstract base class for all messages used for communicating between
     the WebServices.

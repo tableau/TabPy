@@ -50,7 +50,7 @@ class PythonServiceHandler:
             return UnknownMessage(msg)
 
 
-class PythonService(object):
+class PythonService:
     """
     This class is a simple wrapper maintaining loaded query objects from
     the current TabPy instance. `query_objects` is a dictionary that

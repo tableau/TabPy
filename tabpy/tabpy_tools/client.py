@@ -55,7 +55,7 @@ def _check_endpoint_name(name):
             ' underscore, hyphens and spaces.')
 
 
-class Client(object):
+class Client:
     def __init__(self,
                  endpoint,
                  query_timeout=1000):
