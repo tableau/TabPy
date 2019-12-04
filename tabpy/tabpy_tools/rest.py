@@ -33,7 +33,7 @@ class ResponseError(Exception):
                 f'{self.info}')
 
 
-class RequestsNetworkWrapper(object):
+class RequestsNetworkWrapper:
     """The NetworkWrapper wraps the underlying network connection to simplify
     the interface a bit. This can be replaced with something that can be built
     on some other type of network connection, such as PyCURL.
@@ -178,7 +178,7 @@ class RequestsNetworkWrapper(object):
         self.auth = HTTPBasicAuth(username, password)
 
 
-class ServiceClient(object):
+class ServiceClient:
     """
     A generic service client.
 
@@ -235,7 +235,7 @@ class ServiceClient(object):
         self.network_wrapper.set_credentials(username, password)
 
 
-class RESTProperty(object):
+class RESTProperty:
     """A descriptor that will control the type of value stored."""
 
     def __init__(self, type, from_json=lambda x: x, to_json=lambda x: x,
