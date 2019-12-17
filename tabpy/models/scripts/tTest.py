@@ -3,12 +3,12 @@ from tabpy.models.utils import setup_utils
 
 
 def ttest(_arg1, _arg2):
-    '''
+    """
     T-Test is a statistical hypothesis test that is used to compare
     two sample means or a sample’s mean against a known population mean.
     For more information on the function and how to use it please refer
     to tabpy-tools.md
-    '''
+    """
     # one sample test with mean
     if len(_arg2) == 1:
         test_stat, p_value = stats.ttest_1samp(_arg1, _arg2)
@@ -35,8 +35,5 @@ def ttest(_arg1, _arg2):
         return p_value
 
 
-if __name__ == '__main__':
-    setup_utils.deploy_model(
-        'ttest',
-        ttest,
-        'Returns the p-value form a t-test')
+if __name__ == "__main__":
+    setup_utils.deploy_model("ttest", ttest, "Returns the p-value form a t-test")

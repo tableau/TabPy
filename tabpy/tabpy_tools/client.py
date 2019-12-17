@@ -3,16 +3,9 @@ import time
 import sys
 import requests
 
-from .rest import (
-    RequestsNetworkWrapper,
-    ServiceClient
-)
+from .rest import RequestsNetworkWrapper, ServiceClient
 
-from .rest_client import (
-    RESTServiceClient,
-    Endpoint,
-    AliasEndpoint
-)
+from .rest_client import RESTServiceClient, Endpoint, AliasEndpoint
 
 from .custom_query_object import CustomQueryObject
 
@@ -21,27 +14,27 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-_name_checker = compile(r'^[\w -]+$')
+_name_checker = compile(r"^[\w -]+$")
 
 
 def _check_endpoint_type(name):
     if not isinstance(name, str):
         raise TypeError("Endpoint name must be a string")
 
-    if name == '':
+    if name == "":
         raise ValueError("Endpoint name cannot be empty")
 
 
 def _check_hostname(name):
     _check_endpoint_type(name)
-    hostname_checker = compile(
-        r'^http(s)?://[a-zA-Z0-9-_\.]+(/)?(:[0-9]+)?(/)?$')
+    hostname_checker = compile(r"^http(s)?://[a-zA-Z0-9-_\.]+(/)?(:[0-9]+)?(/)?$")
 
     if not hostname_checker.match(name):
         raise ValueError(
-            f'endpoint name {name} should be in http(s)://<hostname>'
-            '[:<port>] and hostname may consist only of: '
-            'a-z, A-Z, 0-9, underscore and hyphens.')
+            f"endpoint name {name} should be in http(s)://<hostname>"
+            "[:<port>] and hostname may consist only of: "
+            "a-z, A-Z, 0-9, underscore and hyphens."
+        )
 
 
 def _check_endpoint_name(name):
@@ -51,14 +44,13 @@ def _check_endpoint_name(name):
 
     if not _name_checker.match(name):
         raise ValueError(
-            f'endpoint name {name} can only contain: a-z, A-Z, 0-9,'
-            ' underscore, hyphens and spaces.')
+            f"endpoint name {name} can only contain: a-z, A-Z, 0-9,"
+            " underscore, hyphens and spaces."
+        )
 
 
 class Client:
-    def __init__(self,
-                 endpoint,
-                 query_timeout=1000):
+    def __init__(self, endpoint, query_timeout=1000):
         """
         Connects to a running server.
 
@@ -93,12 +85,17 @@ class Client:
 
     def __repr__(self):
         return (
-                "<" + self.__class__.__name__ +
-                ' object at ' + hex(id(self)) +
-                ' connected to ' + repr(self._endpoint) + ">")
+            "<"
+            + self.__class__.__name__
+            + " object at "
+            + hex(id(self))
+            + " connected to "
+            + repr(self._endpoint)
+            + ">"
+        )
 
     def get_status(self):
-        '''
+        """
         Gets the status of the deployed endpoints.
 
         Returns
@@ -118,7 +115,7 @@ class Client:
                     u'type': u'model',
                 },
             }
-        '''
+        """
         return self._service.get_status()
 
     #
@@ -193,11 +190,9 @@ class Client:
 
     def _get_endpoint_upload_destination(self):
         """Returns the endpoint upload destination."""
-        return self._service.get_endpoint_upload_destination()['path']
+        return self._service.get_endpoint_upload_destination()["path"]
 
-    def deploy(self,
-               name, obj, description='', schema=None,
-               override=False):
+    def deploy(self, name, obj, description="", schema=None, override=False):
         """Deploys a Python function as an endpoint in the server.
 
         Parameters
@@ -234,9 +229,10 @@ class Client:
         if endpoint:
             if not override:
                 raise RuntimeError(
-                    f'An endpoint with that name ({name}) already'
+                    f"An endpoint with that name ({name}) already"
                     ' exists. Use "override = True" to force update '
-                    'an existing endpoint.')
+                    "an existing endpoint."
+                )
 
             version = endpoint.version + 1
         else:
@@ -251,10 +247,10 @@ class Client:
         else:
             self._service.set_endpoint(Endpoint(**obj))
 
-        self._wait_for_endpoint_deployment(obj['name'], obj['version'])
+        self._wait_for_endpoint_deployment(obj["name"], obj["version"])
 
     def _gen_endpoint(self, name, obj, description, version=1, schema=[]):
-        '''Generates an endpoint dict.
+        """Generates an endpoint dict.
 
         Parameters
         ----------
@@ -295,55 +291,48 @@ class Client:
         ------
         TypeError
             When obj is not one of the expected types.
-        '''
+        """
         # check for invalid PO names
         _check_endpoint_name(name)
 
         if description is None:
             if isinstance(obj.__doc__, str):
                 # extract doc string
-                description = obj.__doc__.strip() or ''
+                description = obj.__doc__.strip() or ""
             else:
-                description = ''
+                description = ""
 
-        endpoint_object = CustomQueryObject(
-            query=obj,
-            description=description,
-        )
+        endpoint_object = CustomQueryObject(query=obj, description=description,)
 
         return {
-            'name': name,
-            'version': version,
-            'description': description,
-            'type': 'model',
-            'endpoint_obj': endpoint_object,
-            'dependencies': endpoint_object.get_dependencies(),
-            'methods': endpoint_object.get_methods(),
-            'required_files': [],
-            'required_packages': [],
-            'schema': schema
+            "name": name,
+            "version": version,
+            "description": description,
+            "type": "model",
+            "endpoint_obj": endpoint_object,
+            "dependencies": endpoint_object.get_dependencies(),
+            "methods": endpoint_object.get_methods(),
+            "required_files": [],
+            "required_packages": [],
+            "schema": schema,
         }
 
     def _upload_endpoint(self, obj):
         """Sends the endpoint across the wire."""
-        endpoint_obj = obj['endpoint_obj']
+        endpoint_obj = obj["endpoint_obj"]
 
         dest_path = self._get_endpoint_upload_destination()
 
         # Upload the endpoint
-        obj['src_path'] = os.path.join(
-            dest_path,
-            'endpoints',
-            obj['name'],
-            str(obj['version']))
+        obj["src_path"] = os.path.join(
+            dest_path, "endpoints", obj["name"], str(obj["version"])
+        )
 
-        endpoint_obj.save(obj['src_path'])
+        endpoint_obj.save(obj["src_path"])
 
-    def _wait_for_endpoint_deployment(self,
-                                      endpoint_name,
-                                      version=1,
-                                      interval=1.0,
-                                      ):
+    def _wait_for_endpoint_deployment(
+        self, endpoint_name, version=1, interval=1.0,
+    ):
         """
         Waits for the endpoint to be deployed by calling get_status() and
         checking the versions deployed of the endpoint against the expected
@@ -351,25 +340,25 @@ class Client:
         expected, then it will return. Uses time.sleep().
         """
         logger.info(
-            f'Waiting for endpoint {endpoint_name} to deploy to '
-            f'version {version}')
+            f"Waiting for endpoint {endpoint_name} to deploy to " f"version {version}"
+        )
         start = time.time()
         while True:
             ep_status = self.get_status()
             try:
                 ep = ep_status[endpoint_name]
             except KeyError:
-                logger.info(f'Endpoint {endpoint_name} doesn\'t '
-                            'exist in endpoints yet')
+                logger.info(
+                    f"Endpoint {endpoint_name} doesn't " "exist in endpoints yet"
+                )
             else:
-                logger.info(f'ep={ep}')
+                logger.info(f"ep={ep}")
 
-                if ep['status'] == 'LoadFailed':
-                    raise RuntimeError(
-                        f'LoadFailed: {ep["last_error"]}')
+                if ep["status"] == "LoadFailed":
+                    raise RuntimeError(f'LoadFailed: {ep["last_error"]}')
 
-                elif ep['status'] == 'LoadSuccessful':
-                    if ep['version'] >= version:
+                elif ep["status"] == "LoadSuccessful":
+                    if ep["version"] >= version:
                         logger.info("LoadSuccessful")
                         break
                     else:
@@ -378,11 +367,11 @@ class Client:
             if time.time() - start > 10:
                 raise RuntimeError("Waited more then 10s for deployment")
 
-            logger.info(f'Sleeping {interval}...')
+            logger.info(f"Sleeping {interval}...")
             time.sleep(interval)
 
     def set_credentials(self, username, password):
-        '''
+        """
         Set credentials for all the TabPy client-server communication
         where client is tabpy-tools and server is tabpy-server.
 
@@ -393,5 +382,5 @@ class Client:
 
         password : str
             Password in plain text.
-        '''
+        """
         self._service.set_credentials(username, password)

@@ -35,6 +35,7 @@ class Endpoint(RESTObject):
     methods : list
         ???
     """
+
     name = RESTProperty(str)
     type = RESTProperty(str)
     version = RESTProperty(int)
@@ -49,25 +50,24 @@ class Endpoint(RESTObject):
 
     def __new__(cls, **kwargs):
         """Dispatch to the appropriate class."""
-        cls = {
-            'alias': AliasEndpoint,
-            'model': ModelEndpoint,
-        }[kwargs['type']]
+        cls = {"alias": AliasEndpoint, "model": ModelEndpoint,}[kwargs["type"]]
 
         """return object.__new__(cls, **kwargs)"""
         """ modified for Python 3"""
         return object.__new__(cls)
 
     def __eq__(self, other):
-        return self.name == other.name and \
-            self.type == other.type and \
-            self.version == other.version and \
-            self.description == other.description and \
-            self.dependencies == other.dependencies and \
-            self.methods == other.methods and \
-            self.evaluator == other.evaluator and \
-            self.schema_version == other.schema_version and \
-            self.schema == other.schema
+        return (
+            self.name == other.name
+            and self.type == other.type
+            and self.version == other.version
+            and self.description == other.description
+            and self.dependencies == other.dependencies
+            and self.methods == other.methods
+            and self.evaluator == other.evaluator
+            and self.schema_version == other.schema_version
+            and self.schema == other.schema
+        )
 
 
 class ModelEndpoint(Endpoint):
@@ -88,6 +88,7 @@ class ModelEndpoint(Endpoint):
         required packages.
 
     """
+
     src_path = RESTProperty(str)
     required_files = RESTProperty(list)
     required_packages = RESTProperty(list)
@@ -95,12 +96,14 @@ class ModelEndpoint(Endpoint):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.type = 'model'
+        self.type = "model"
 
     def __eq__(self, other):
-        return super().__eq__(other) and \
-            self.required_files == other.required_files and \
-            self.required_packages == other.required_packages
+        return (
+            super().__eq__(other)
+            and self.required_files == other.required_files
+            and self.required_packages == other.required_packages
+        )
 
 
 class AliasEndpoint(Endpoint):
@@ -111,33 +114,36 @@ class AliasEndpoint(Endpoint):
         The endpoint that this is an alias for.
 
     """
+
     target = RESTProperty(str)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.type = 'alias'
+        self.type = "alias"
 
 
 class RESTServiceClient:
     """A thin client for the REST Service."""
+
     def __init__(self, service_client):
         self.service_client = service_client
         self.query_timeout = None
 
     def get_info(self):
         """Returns the /info"""
-        return self.service_client.GET('info')
+        return self.service_client.GET("info")
 
     def query(self, name, *args, **kwargs):
         """Performs a query. Either specify *args or **kwargs, not both.
         Respects query_timeout."""
         if args and kwargs:
             raise ValueError(
-                'Mixing of keyword arguments and positional arguments when '
-                'querying an endpoint is not supported.')
-        return self.service_client.POST('query/' + name,
-                                        data={'data': args or kwargs},
-                                        timeout=self.query_timeout)
+                "Mixing of keyword arguments and positional arguments when "
+                "querying an endpoint is not supported."
+            )
+        return self.service_client.POST(
+            "query/" + name, data={"data": args or kwargs}, timeout=self.query_timeout
+        )
 
     def get_endpoint_upload_destination(self):
         """Returns a dict representing where endpoint data should be uploaded.
@@ -152,8 +158,7 @@ class RESTServiceClient:
 
         Note: At this time, the response should not change over time.
         """
-        return self.service_client.GET(
-            'configurations/endpoint_upload_destination')
+        return self.service_client.GET("configurations/endpoint_upload_destination")
 
     def get_endpoints(self, type=None):
         """Returns endpoints from the management API.
@@ -166,9 +171,7 @@ class RESTServiceClient:
             Other options are 'model' and 'alias'.
         """
         result = {}
-        for name, attrs in self.service_client.GET(
-                'endpoints',
-                {'type': type}).items():
+        for name, attrs in self.service_client.GET("endpoints", {"type": type}).items():
             endpoint = Endpoint.from_json(attrs)
             endpoint.name = name
             result[name] = endpoint
@@ -184,8 +187,7 @@ class RESTServiceClient:
 
             The name of the endpoint.
         """
-        ((name, attrs),) = self.service_client.GET(
-            'endpoints/' + endpoint_name).items()
+        ((name, attrs),) = self.service_client.GET("endpoints/" + endpoint_name).items()
         endpoint = Endpoint.from_json(attrs)
         endpoint.name = name
         return endpoint
@@ -198,7 +200,7 @@ class RESTServiceClient:
 
         endpoint : Endpoint
         """
-        return self.service_client.POST('endpoints', endpoint.to_json())
+        return self.service_client.POST("endpoints", endpoint.to_json())
 
     def set_endpoint(self, endpoint):
         """Updates an endpoint through the management API.
@@ -210,8 +212,7 @@ class RESTServiceClient:
 
             The endpoint to update.
         """
-        return self.service_client.PUT(
-            'endpoints/' + endpoint.name, endpoint.to_json())
+        return self.service_client.PUT("endpoints/" + endpoint.name, endpoint.to_json())
 
     def remove_endpoint(self, endpoint_name):
         """Deletes an endpoint through the management API.
@@ -223,7 +224,7 @@ class RESTServiceClient:
 
             The endpoint to delete.
         """
-        self.service_client.DELETE('endpoints/'+endpoint_name)
+        self.service_client.DELETE("endpoints/" + endpoint_name)
 
     def get_status(self):
         """Returns the status of the server.
@@ -233,10 +234,10 @@ class RESTServiceClient:
 
         dict
         """
-        return self.service_client.GET('status')
+        return self.service_client.GET("status")
 
     def set_credentials(self, username, password):
-        '''
+        """
         Set credentials for all the TabPy client-server communication
         where client is tabpy-tools and server is tabpy-server.
 
@@ -247,5 +248,5 @@ class RESTServiceClient:
 
         password : str
             Password in plain text.
-        '''
+        """
         self.service_client.set_credentials(username, password)
