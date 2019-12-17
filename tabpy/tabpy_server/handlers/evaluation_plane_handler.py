@@ -95,7 +95,7 @@ class EvaluationPlaneHandler(BaseHandler):
             if result is None:
                 self.error_out(400, 'Error running script. No return value')
             else:
-                self.write(simplejson.dumps(result, ignore_nan=True))                
+                self.write(simplejson.dumps(result, ignore_nan=True))
                 self.finish()
 
         except Exception as e:
