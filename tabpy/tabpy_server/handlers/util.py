@@ -3,7 +3,7 @@ from hashlib import pbkdf2_hmac
 
 
 def hash_password(username, pwd):
-    '''
+    """
     Hashes password using PKDBF2 method:
     hash = PKDBF2('sha512', pwd, salt=username, 10000)
 
@@ -23,11 +23,10 @@ def hash_password(username, pwd):
     str
         Sting representation (hexidecimal) for PBKDF2 hash
         for the password.
-    '''
-    salt = f'_$salt@tabpy:{username.lower()}$_'
+    """
+    salt = f"_$salt@tabpy:{username.lower()}$_"
 
-    hash = pbkdf2_hmac(hash_name='sha512',
-                       password=pwd.encode(),
-                       salt=salt.encode(),
-                       iterations=10000)
+    hash = pbkdf2_hmac(
+        hash_name="sha512", password=pwd.encode(), salt=salt.encode(), iterations=10000
+    )
     return binascii.hexlify(hash).decode()

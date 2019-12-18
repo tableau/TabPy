@@ -2,7 +2,11 @@ from tabpy.tabpy_server.handlers import BaseHandler
 import logging
 import time
 from tabpy.tabpy_server.common.messages import (
-    Query, QuerySuccessful, QueryError, UnknownURI)
+    Query,
+    QuerySuccessful,
+    QueryError,
+    UnknownURI,
+)
 from hashlib import md5
 import uuid
 import json
@@ -44,22 +48,19 @@ class QueryPlaneHandler(BaseHandler):
             as a dictionary, and the time in seconds that it took to complete
             the request.
         """
-        self.logger.log(logging.DEBUG,
-                        f'Collecting query info for {po_name}...')
+        self.logger.log(logging.DEBUG, f"Collecting query info for {po_name}...")
         start_time = time.time()
         response = self.python_service.ps.query(po_name, data, uid)
         gls_time = time.time() - start_time
-        self.logger.log(logging.DEBUG, f'Query info: {response}')
+        self.logger.log(logging.DEBUG, f"Query info: {response}")
 
         if isinstance(response, QuerySuccessful):
             response_json = response.to_json()
-            md5_tag = md5(response_json.encode('utf-8')).hexdigest()
+            md5_tag = md5(response_json.encode("utf-8")).hexdigest()
             self.set_header("Etag", f'"{md5_tag}"')
             return (QuerySuccessful, response.for_json(), gls_time)
         else:
-            self.logger.log(
-                logging.ERROR,
-                f'Failed query, response: {response}')
+            self.logger.log(logging.ERROR, f"Failed query, response: {response}")
             return (type(response), response.for_json(), gls_time)
 
     # handle HTTP Options requests to support CORS
@@ -70,43 +71,45 @@ class QueryPlaneHandler(BaseHandler):
             self.fail_with_not_authorized()
             return
 
-        self.logger.log(
-            logging.DEBUG,
-            f'Processing OPTIONS for /query/{pred_name}')
+        self.logger.log(logging.DEBUG, f"Processing OPTIONS for /query/{pred_name}")
 
         # add CORS headers if TabPy has a cors_origin specified
         self._add_CORS_header()
         self.write({})
 
     def _handle_result(self, po_name, data, qry, uid):
-        (response_type, response, gls_time) = \
-            self._query(po_name, data, uid, qry)
+        (response_type, response, gls_time) = self._query(po_name, data, uid, qry)
 
         if response_type == QuerySuccessful:
             result_dict = {
-                'response': response['response'],
-                'version': response['version'],
-                'model': po_name,
-                'uuid': uid
+                "response": response["response"],
+                "version": response["version"],
+                "model": po_name,
+                "uuid": uid,
             }
             self.write(result_dict)
             self.finish()
-            return (gls_time, response['response'])
+            return (gls_time, response["response"])
         else:
             if response_type == UnknownURI:
-                self.error_out(404, 'UnknownURI',
-                               info=('No query object has been registered'
-                                     f' with the name "{po_name}"'))
+                self.error_out(
+                    404,
+                    "UnknownURI",
+                    info=(
+                        "No query object has been registered"
+                        f' with the name "{po_name}"'
+                    ),
+                )
             elif response_type == QueryError:
-                self.error_out(400, 'QueryError', info=response)
+                self.error_out(400, "QueryError", info=response)
             else:
-                self.error_out(500, 'Error querying GLS', info=response)
+                self.error_out(500, "Error querying GLS", info=response)
 
             return (None, None)
 
     def _sanitize_request_data(self, data):
         if not isinstance(data, dict):
-            msg = 'Input data must be a dictionary'
+            msg = "Input data must be a dictionary"
             self.logger.log(logging.CRITICAL, msg)
             raise RuntimeError(msg)
 
@@ -120,8 +123,7 @@ class QueryPlaneHandler(BaseHandler):
             raise RuntimeError(msg)
 
     def _process_query(self, endpoint_name, start):
-        self.logger.log(logging.DEBUG,
-                        f'Processing query {endpoint_name}...')
+        self.logger.log(logging.DEBUG, f"Processing query {endpoint_name}...")
         try:
             self._add_CORS_header()
 
@@ -129,7 +131,7 @@ class QueryPlaneHandler(BaseHandler):
                 self.request.body = {}
 
             # extract request data explicitly for caching purpose
-            request_json = self.request.body.decode('utf-8')
+            request_json = self.request.body.decode("utf-8")
 
             # Sanitize input data
             data = self._sanitize_request_data(json.loads(request_json))
@@ -140,29 +142,28 @@ class QueryPlaneHandler(BaseHandler):
             return
 
         try:
-            (po_name, _) = self._get_actual_model(
-                endpoint_name)
+            (po_name, _) = self._get_actual_model(endpoint_name)
 
             # po_name is None if self.python_service.ps.query_objects.get(
             # endpoint_name) is None
             if not po_name:
                 self.error_out(
-                    404,
-                    'UnknownURI',
-                    info=f'Endpoint "{endpoint_name}" does not exist')
+                    404, "UnknownURI", info=f'Endpoint "{endpoint_name}" does not exist'
+                )
                 return
 
             po_obj = self.python_service.ps.query_objects.get(po_name)
 
             if not po_obj:
-                self.error_out(404, 'UnknownURI',
-                               info=f'Endpoint "{po_name}" does not exist')
+                self.error_out(
+                    404, "UnknownURI", info=f'Endpoint "{po_name}" does not exist'
+                )
                 return
 
             if po_name != endpoint_name:
                 self.logger.log(
-                    logging.INFO,
-                    f'Querying actual model: po_name={po_name}')
+                    logging.INFO, f"Querying actual model: po_name={po_name}"
+                )
 
             uid = _get_uuid()
 
@@ -178,8 +179,8 @@ class QueryPlaneHandler(BaseHandler):
 
         except Exception as e:
             self.logger.log(logging.ERROR, str(e))
-            err_msg = format_exception(e, 'process query')
-            self.error_out(500, 'Error processing query', info=err_msg)
+            err_msg = format_exception(e, "process query")
+            self.error_out(500, "Error processing query", info=err_msg)
             return
 
     def _get_actual_model(self, endpoint_name):
@@ -187,24 +188,24 @@ class QueryPlaneHandler(BaseHandler):
         all_endpoint_names = []
 
         while True:
-            endpoint_info = self.python_service.ps.query_objects.get(
-                endpoint_name)
+            endpoint_info = self.python_service.ps.query_objects.get(endpoint_name)
             if not endpoint_info:
                 return [None, None]
 
             all_endpoint_names.append(endpoint_name)
 
-            endpoint_type = endpoint_info.get('type', 'model')
+            endpoint_type = endpoint_info.get("type", "model")
 
-            if endpoint_type == 'alias':
-                endpoint_name = endpoint_info['endpoint_obj']
-            elif endpoint_type == 'model':
+            if endpoint_type == "alias":
+                endpoint_name = endpoint_info["endpoint_obj"]
+            elif endpoint_type == "model":
                 break
             else:
                 self.error_out(
                     500,
-                    'Unknown endpoint type',
-                    info=f'Endpoint type "{endpoint_type}" does not exist')
+                    "Unknown endpoint type",
+                    info=f'Endpoint type "{endpoint_type}" does not exist',
+                )
                 return
 
         return (endpoint_name, all_endpoint_names)
@@ -221,8 +222,7 @@ class QueryPlaneHandler(BaseHandler):
 
     @gen.coroutine
     def post(self, endpoint_name):
-        self.logger.log(logging.DEBUG,
-                        f'Processing POST for /query/{endpoint_name}...')
+        self.logger.log(logging.DEBUG, f"Processing POST for /query/{endpoint_name}...")
 
         if self.should_fail_with_not_authorized():
             self.fail_with_not_authorized()

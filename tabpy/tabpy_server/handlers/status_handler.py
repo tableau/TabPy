@@ -17,14 +17,13 @@ class StatusHandler(BaseHandler):
         status_dict = {}
         for k, v in self.python_service.ps.query_objects.items():
             status_dict[k] = {
-                'version': v['version'],
-                'type': v['type'],
-                'status': v['status'],
-                'last_error': v['last_error']}
+                "version": v["version"],
+                "type": v["type"],
+                "status": v["status"],
+                "last_error": v["last_error"],
+            }
 
-        self.logger.log(
-            logging.DEBUG,
-            f'Found models: {status_dict}')
+        self.logger.log(logging.DEBUG, f"Found models: {status_dict}")
         self.write(json.dumps(status_dict))
         self.finish()
         return
