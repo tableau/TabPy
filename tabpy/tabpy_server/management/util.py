@@ -45,4 +45,3 @@ def _get_state_from_file(state_path, logger=logging.getLogger(__name__)):
         raise ValueError(msg)
 
     return config
-

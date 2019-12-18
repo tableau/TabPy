@@ -129,7 +129,7 @@ class EvaluationPlaneHandler(BaseHandler):
             future = self.executor.submit(_user_script,  # noqa: F821
                                           restricted_tabpy)
         else:
-            future = self.executor.submit(_user_script, # noqa: F821
+            future = self.executor.submit(_user_script,  # noqa: F821
                                           restricted_tabpy, **arguments)
 
         ret = yield gen.with_timeout(timedelta(seconds=self.eval_timeout),
