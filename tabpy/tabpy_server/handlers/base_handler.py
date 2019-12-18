@@ -289,7 +289,7 @@ class BaseHandler(tornado.web.RequestHandler):
         self.password = login_pwd[1]
         return True
 
-    def _get_credentials(self, method) -> bool:
+    def _get_credentials(self, method, api_version) -> bool:
         '''
         Find credentials for specified authentication method. Credentials if
         found stored in self.username and self.password.
@@ -344,7 +344,7 @@ class BaseHandler(tornado.web.RequestHandler):
 
         return True
 
-    def _validate_credentials(self, method) -> bool:
+    def _validate_credentials(self, method, api_version) -> bool:
         '''
         Validates credentials according to specified methods if they
         are what expected.
