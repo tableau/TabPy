@@ -63,7 +63,7 @@ def get_query_object_path(state_file_path, name, version):
     return full_path
 
 
-class TabPyState(object):
+class TabPyState:
     '''
     The TabPy state object that stores attributes
     about this TabPy and perform GET/SET on these

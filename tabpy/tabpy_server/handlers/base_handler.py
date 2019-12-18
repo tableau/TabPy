@@ -12,7 +12,7 @@ import uuid
 STAGING_THREAD = concurrent.futures.ThreadPoolExecutor(max_workers=3)
 
 
-class ContextLoggerWrapper(object):
+class ContextLoggerWrapper:
     '''
     This class appends request context to logged messages.
     '''

@@ -118,7 +118,7 @@ class AliasEndpoint(Endpoint):
         self.type = 'alias'
 
 
-class RESTServiceClient(object):
+class RESTServiceClient:
     """A thin client for the REST Service."""
     def __init__(self, service_client):
         self.service_client = service_client
