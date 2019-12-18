@@ -62,7 +62,7 @@ class EvaluationPlaneHandler(BaseHandler):
             if arguments is not None:
                 if not isinstance(arguments, dict):
                     self.error_out(
-                        400, "Script parameters need to be " "provided as a dictionary."
+                        400, "Script parameters need to be provided as a dictionary."
                     )
                     return
                 else:

@@ -73,7 +73,7 @@ def parse_pwd_file(pwd_file_name):
             login = row[0].lower()
             if login in credentials:
                 logger.error(
-                    f"Multiple entries for username {login} " "in password file"
+                    f"Multiple entries for username {login} in password file"
                 )
                 return False, {}
 
