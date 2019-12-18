@@ -6,7 +6,6 @@ from tabpy.tabpy_tools.client import _check_endpoint_name
 
 
 class TestClient(unittest.TestCase):
-
     def setUp(self):
         self.client = Client("http://example.com/")
         self.client._service = Mock()  # TODO: should spec this
@@ -20,16 +19,14 @@ class TestClient(unittest.TestCase):
 
         self.assertEqual(client._endpoint, "http://example.com/")
 
-        client = Client(
-            endpoint="https://example.com/",
-            query_timeout=-10.0)
+        client = Client(endpoint="https://example.com/", query_timeout=-10.0)
 
         self.assertEqual(client._endpoint, "https://example.com/")
         self.assertEqual(client.query_timeout, 0.0)
 
         # valid name tests
         with self.assertRaises(ValueError):
-            Client('')
+            Client("")
         with self.assertRaises(TypeError):
             Client(1.0)
         with self.assertRaises(ValueError):
@@ -61,8 +58,7 @@ class TestClient(unittest.TestCase):
 
         self.assertEqual(self.client.query("foo", a=1, b=2, c=3), "ok")
 
-        self.client._service.query.assert_called_once_with(
-            "foo", a=1, b=2, c=3)
+        self.client._service.query.assert_called_once_with("foo", a=1, b=2, c=3)
 
     def test_get_endpoints(self):
         self.client._service.get_endpoints.return_value = "foo"
@@ -72,8 +68,9 @@ class TestClient(unittest.TestCase):
         self.client._service.get_endpoints.assert_called_once_with("foo")
 
     def test_get_endpoint_upload_destination(self):
-        self.client._service.get_endpoint_upload_destination.return_value = \
-            {"path": "foo"}
+        self.client._service.get_endpoint_upload_destination.return_value = {
+            "path": "foo"
+        }
 
         self.assertEqual(self.client._get_endpoint_upload_destination(), "foo")
 
@@ -81,14 +78,15 @@ class TestClient(unittest.TestCase):
         username, password = "username", "password"
         self.client.set_credentials(username, password)
 
-        self.client._service.set_credentials.assert_called_once_with(
-            username, password)
+        self.client._service.set_credentials.assert_called_once_with(username, password)
 
     def test_check_invalid_endpoint_name(self):
-        endpoint_name = 'Invalid:model:@name'
+        endpoint_name = "Invalid:model:@name"
         with self.assertRaises(ValueError) as err:
             _check_endpoint_name(endpoint_name)
 
-        self.assertEqual(err.exception.args[0],
-                         f'endpoint name {endpoint_name } can only contain: '
-                         'a-z, A-Z, 0-9, underscore, hyphens and spaces.')
+        self.assertEqual(
+            err.exception.args[0],
+            f"endpoint name {endpoint_name } can only contain: "
+            "a-z, A-Z, 0-9, underscore, hyphens and spaces.",
+        )
