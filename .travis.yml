@@ -2,6 +2,7 @@ os: linux
 language: python
 python: 3.6
 install:
+    - python -m pip install --upgrade pip
     - pip install pytest pytest-cov coveralls
     - npm install -g markdownlint-cli
 script:
