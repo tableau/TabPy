@@ -1,6 +1,6 @@
-'''
+"""
 All other misc. URL-related integration tests.
-'''
+"""
 
 import integ_test_base
 

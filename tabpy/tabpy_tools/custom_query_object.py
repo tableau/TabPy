@@ -6,8 +6,8 @@ logger = logging.getLogger(__name__)
 
 
 class CustomQueryObject(_QueryObject):
-    def __init__(self, query, description=''):
-        '''Create a new CustomQueryObject.
+    def __init__(self, query, description=""):
+        """Create a new CustomQueryObject.
 
         Parameters
         -----------
@@ -20,13 +20,13 @@ class CustomQueryObject(_QueryObject):
         description : str
             The description of the custom query object
 
-        '''
+        """
         super().__init__(description)
 
         self.custom_query = query
 
     def query(self, *args, **kwargs):
-        '''Query the custom defined query method using the given input.
+        """Query the custom defined query method using the given input.
 
         Parameters
         ----------
@@ -45,30 +45,32 @@ class CustomQueryObject(_QueryObject):
         See Also
         --------
         QueryObject
-        '''
+        """
         # include the dependent files in sys path so that the query can run
         # correctly
 
         try:
-            logger.debug('Running custom query with arguments '
-                         f'({args}, {kwargs})...')
+            logger.debug(
+                "Running custom query with arguments " f"({args}, {kwargs})..."
+            )
             ret = self.custom_query(*args, **kwargs)
         except Exception as e:
             logger.exception(
-                'Exception hit when running custom query, error: '
-                f'{str(e)}')
+                "Exception hit when running custom query, error: " f"{str(e)}"
+            )
             raise
 
-        logger.debug(f'Received response {ret}')
+        logger.debug(f"Received response {ret}")
         try:
             return self._make_serializable(ret)
         except Exception as e:
-            logger.exception('Cannot properly serialize custom query result, '
-                             f'error: {str(e)}')
+            logger.exception(
+                "Cannot properly serialize custom query result, " f"error: {str(e)}"
+            )
             raise
 
     def get_doc_string(self):
-        '''Get doc string from customized query'''
+        """Get doc string from customized query"""
         if self.custom_query.__doc__ is not None:
             return self.custom_query.__doc__
         else:
@@ -78,4 +80,4 @@ class CustomQueryObject(_QueryObject):
         return [self.get_query_method()]
 
     def get_query_method(self):
-        return {'method': 'query'}
+        return {"method": "query"}

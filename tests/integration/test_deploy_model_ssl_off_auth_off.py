@@ -14,9 +14,9 @@ class TestDeployModelSSLOffAuthOff(integ_test_base.IntegTestBase):
 
         conn = self._get_connection()
 
-        models = ['PCA', 'Sentiment%20Analysis', "ttest", "anova"]
+        models = ["PCA", "Sentiment%20Analysis", "ttest", "anova"]
         for m in models:
-            conn.request("GET", f'/endpoints/{m}')
+            conn.request("GET", f"/endpoints/{m}")
             m_request = conn.getresponse()
             self.assertEqual(200, m_request.status)
             m_request.read()
