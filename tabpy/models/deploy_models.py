@@ -10,7 +10,7 @@ from tabpy.models.utils import setup_utils
 def install_dependencies(packages):
     pip_arg = ["install"] + packages + ["--no-cache-dir"]
     from pip._internal import main
-    pip._internal.main(pip_arg)
+    pip._internal.main.main(pip_arg)
 
 
 def main():
