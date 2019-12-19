@@ -47,4 +47,6 @@ jobs:
         github-token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Markdownlint
-      uses: nosborn/github-action-markdown-cli@v1
+      uses: nosborn/github-action-markdown-cli@v1.1.1
+      with:
+        files: .
