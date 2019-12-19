@@ -49,4 +49,4 @@ jobs:
     - name: Markdownlint
       uses: nosborn/github-action-markdown-cli@v1.1
       with:
-        path: '.'
+        files: .
