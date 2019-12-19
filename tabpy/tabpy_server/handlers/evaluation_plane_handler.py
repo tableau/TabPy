@@ -127,10 +127,16 @@ class EvaluationPlaneHandler(BaseHandler):
         # Exec does not run the function, so it does not block.
         exec(function_to_evaluate, globals())
 
+        # 'noqa' comments below tell flake8 to ignore undefined _user_script
+        # name - the name is actually defined with user script being wrapped
+        # in _user_script function (constructed as a striong) and then executed
+        # with exec() call above.
         if arguments is None:
-            future = self.executor.submit(_user_script, restricted_tabpy)
+            future = self.executor.submit(_user_script,  # noqa: F821
+                                          restricted_tabpy)
         else:
-            future = self.executor.submit(_user_script, restricted_tabpy, **arguments)
+            future = self.executor.submit(_user_script,  # noqa: F821
+                                          restricted_tabpy, **arguments)
 
         ret = yield gen.with_timeout(timedelta(seconds=self.eval_timeout), future)
         raise gen.Return(ret)

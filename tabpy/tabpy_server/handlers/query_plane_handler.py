@@ -12,7 +12,6 @@ import uuid
 import json
 from tabpy.tabpy_server.common.util import format_exception
 import urllib
-import tornado.web
 from tornado import gen
 
 

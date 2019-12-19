@@ -1,7 +1,6 @@
 import coverage
 import http.client
 import os
-from pathlib import Path
 import platform
 import shutil
 import signal
@@ -292,7 +291,7 @@ class IntegTestBase(unittest.TestCase):
             input_string = f"{username}\n{password}\n"
             outfile.write(f"--<< Input = {input_string} >>--")
             coverage.process_startup()
-            p = subprocess.run(
+            subprocess.run(
                 [self.py, path, self._get_config_file_name()],
                 input=input_string.encode("utf-8"),
                 stdout=outfile,

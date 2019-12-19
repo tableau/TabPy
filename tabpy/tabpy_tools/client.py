@@ -1,11 +1,11 @@
+import copy
 from re import compile
 import time
-import sys
 import requests
 
 from .rest import RequestsNetworkWrapper, ServiceClient
 
-from .rest_client import RESTServiceClient, Endpoint, AliasEndpoint
+from .rest_client import RESTServiceClient, Endpoint
 
 from .custom_query_object import CustomQueryObject
 
@@ -314,7 +314,7 @@ class Client:
             "methods": endpoint_object.get_methods(),
             "required_files": [],
             "required_packages": [],
-            "schema": schema,
+            "schema": copy.copy(schema),
         }
 
     def _upload_endpoint(self, obj):

@@ -50,7 +50,7 @@ class Endpoint(RESTObject):
 
     def __new__(cls, **kwargs):
         """Dispatch to the appropriate class."""
-        cls = {"alias": AliasEndpoint, "model": ModelEndpoint,}[kwargs["type"]]
+        cls = {"alias": AliasEndpoint, "model": ModelEndpoint}[kwargs["type"]]
 
         """return object.__new__(cls, **kwargs)"""
         """ modified for Python 3"""

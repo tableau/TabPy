@@ -1,5 +1,4 @@
 import logging
-import sys
 from tabpy.tabpy_server.app.SettingsParameters import SettingsParameters
 from tabpy.tabpy_server.common.messages import (
     LoadObject,
@@ -134,7 +133,6 @@ def _get_latest_service_state(settings, tabpy_state, new_ps_state, python_servic
     if diff:
         changes["endpoints"] = diff
 
-    tabpy_state = new_ps_state
     return (True, changes)
 
 
