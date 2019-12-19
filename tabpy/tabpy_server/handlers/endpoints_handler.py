@@ -11,7 +11,6 @@ import logging
 from tabpy.tabpy_server.common.util import format_exception
 from tabpy.tabpy_server.handlers import ManagementHandler
 from tornado import gen
-import tornado.web
 
 
 class EndpointsHandler(ManagementHandler):

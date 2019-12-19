@@ -1,7 +1,6 @@
 import json
 import requests
 from requests.auth import HTTPBasicAuth
-import sys
 from tabpy.tabpy_tools.rest import RequestsNetworkWrapper, ServiceClient
 import unittest
 from unittest.mock import Mock

@@ -1,7 +1,5 @@
 import integ_test_base
 import base64
-import subprocess
-from pathlib import Path
 
 
 class TestDeployModelSSLOffAuthOn(integ_test_base.IntegTestBase):

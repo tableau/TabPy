@@ -12,7 +12,6 @@ def install_dependencies(packages):
     if hasattr(pip, "main"):
         pip.main(pip_arg)
     else:
-        from pip._internal import main
         pip._internal.main(pip_arg)
 
 

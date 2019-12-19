@@ -1,10 +1,11 @@
+import copy
 from re import compile
 import time
 import requests
 
 from .rest import RequestsNetworkWrapper, ServiceClient
 
-from .rest_client import RESTServiceClient, Endpoint, AliasEndpoint
+from .rest_client import RESTServiceClient, Endpoint
 
 from .custom_query_object import CustomQueryObject
 
@@ -303,7 +304,6 @@ class Client:
 
         endpoint_object = CustomQueryObject(query=obj, description=description,)
 
-        _schema = schema if schema is not None else []
         return {
             "name": name,
             "version": version,
@@ -314,7 +314,7 @@ class Client:
             "methods": endpoint_object.get_methods(),
             "required_files": [],
             "required_packages": [],
-            "schema": schema,
+            "schema": copy.copy(schema),
         }
 
     def _upload_endpoint(self, obj):
