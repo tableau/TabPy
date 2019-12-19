@@ -3,14 +3,14 @@ name: CI
 on: [push, pull_request]
 
 jobs:
-  build:
+  ubuntu-build:
     name: ${{ matrix.python-version }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     
     strategy:
       matrix:
         python-version: [3.6, 3.7]
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest]
 
     steps:
     - uses: actions/checkout@v1
@@ -44,7 +44,7 @@ jobs:
         
     - name: Setup Node.js
       uses: actions/setup-node@v1
-      
+
     - name: Coveralls
       uses: coverallsapp/github-action@master
       with:
@@ -54,3 +54,60 @@ jobs:
       uses: nosborn/github-action-markdown-cli@v1.1.1
       with:
         files: .
+
+  windows-build:
+    name: ${{ matrix.python-version }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      matrix:
+        python-version: [3.7]
+        os: [windows-latest]
+
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Test with pytest
+      run: |
+        pip install pytest
+        pytest tests/unit
+        pytest tests/integration
+
+  mac-build:
+    name: ${{ matrix.python-version }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      matrix:
+        python-version: [3.7]
+        os: [macos-latest]
+
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Test with pytest
+      run: |
+        pip install pytest pytest-cov coveralls
+        pytest tests/unit --cov=tabpy --cov-append
+        pytest tests/integration --cov=tabpy --cov-append
+        
