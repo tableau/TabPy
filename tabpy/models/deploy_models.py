@@ -9,11 +9,8 @@ from tabpy.models.utils import setup_utils
 
 def install_dependencies(packages):
     pip_arg = ["install"] + packages + ["--no-cache-dir"]
-    if hasattr(pip, "main"):
-        pip.main(pip_arg)
-    else:
-        from pip._internal import main
-        pip._internal.main(pip_arg)
+    from pip._internal import main
+    pip._internal.main(pip_arg)
 
 
 def main():
