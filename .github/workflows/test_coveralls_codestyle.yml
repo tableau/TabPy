@@ -4,12 +4,13 @@ on: [push, pull_request]
 
 jobs:
   build:
-    name: Build
-    runs-on: ubuntu-latest
+    name: ${{ matrix.python-version }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
     
     strategy:
       matrix:
         python-version: [3.6, 3.7]
+        os: [ubuntu-latest, windows-latest]
 
     steps:
     - uses: actions/checkout@v1
@@ -41,6 +42,9 @@ jobs:
         pytest tests/unit --cov=tabpy --cov-append
         pytest tests/integration --cov=tabpy --cov-append
         
+    - name: Setup Node.js
+      uses: actions/setup-node@v1
+      
     - name: Coveralls
       uses: coverallsapp/github-action@master
       with:
