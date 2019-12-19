@@ -38,7 +38,7 @@ jobs:
 
     - name: Test with pytest
       run: |
-        pip install pytest pytest-cov coveralls
+        pip install pytest pytest-cov coveralls coverage
         pytest tests/unit --cov=tabpy --cov-append
         pytest tests/integration --cov=tabpy --cov-append
         coveralls
