@@ -8,7 +8,6 @@ from .rest import RequestsNetworkWrapper, ServiceClient
 from .rest_client import RESTServiceClient, Endpoint
 
 from .custom_query_object import CustomQueryObject
-
 import os
 import logging
 
@@ -304,6 +303,7 @@ class Client:
 
         endpoint_object = CustomQueryObject(query=obj, description=description,)
 
+        _schema = schema if schema is not None else []
         return {
             "name": name,
             "version": version,

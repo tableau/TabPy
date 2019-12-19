@@ -162,6 +162,9 @@ class TabPyApp:
         signal.signal(signal.SIGINT, application.signal_handler)
         tornado.ioloop.PeriodicCallback(application.try_exit, 500).start()
 
+        signal.signal(signal.SIGINT, application.signal_handler)
+        tornado.ioloop.PeriodicCallback(application.try_exit, 500).start()
+
         return application
 
     def _parse_cli_arguments(self):
@@ -371,6 +374,10 @@ class TabPyApp:
             ConfigParameters.TABPY_MAX_REQUEST_SIZE_MB,
             default_val=100,
         )
+
+        set_parameter(SettingsParameters.MaxRequestSizeInMb,
+                      ConfigParameters.TABPY_MAX_REQUEST_SIZE_MB,
+                      default_val=100)
 
     def _validate_transfer_protocol_settings(self):
         if SettingsParameters.TransferProtocol not in self.settings:
