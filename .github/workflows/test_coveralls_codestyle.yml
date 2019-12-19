@@ -41,15 +41,8 @@ jobs:
         pip install pytest pytest-cov coveralls
         pytest tests/unit --cov=tabpy --cov-append
         pytest tests/integration --cov=tabpy --cov-append
+        coveralls
         
-    - name: Setup Node.js
-      uses: actions/setup-node@v1
-
-    - name: Coveralls
-      uses: coverallsapp/github-action@master
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-
     - name: Markdownlint
       uses: nosborn/github-action-markdown-cli@v1.1.1
       with:
