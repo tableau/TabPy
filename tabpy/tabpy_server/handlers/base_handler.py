@@ -288,7 +288,7 @@ class BaseHandler(tornado.web.RequestHandler):
         self.password = login_pwd[1]
         return True
 
-    def _get_credentials(self, method, api_version) -> bool:
+    def _get_credentials(self, method) -> bool:
         """
         Find credentials for specified authentication method. Credentials if
         found stored in self.username and self.password.
@@ -311,8 +311,7 @@ class BaseHandler(tornado.web.RequestHandler):
         # No known methods were found
         self.logger.log(
             logging.CRITICAL,
-            f'Unknown authentication method(s) "{method}" are configured '
-            f'for API "{api_version}"',
+            f'Unknown authentication method(s) "{method}" are configured ',
         )
         return False
 
@@ -345,7 +344,7 @@ class BaseHandler(tornado.web.RequestHandler):
 
         return True
 
-    def _validate_credentials(self, method, api_version) -> bool:
+    def _validate_credentials(self, method) -> bool:
         """
         Validates credentials according to specified methods if they
         are what expected.
@@ -368,8 +367,7 @@ class BaseHandler(tornado.web.RequestHandler):
         # No known methods were found
         self.logger.log(
             logging.CRITICAL,
-            f'Unknown authentication method(s) "{method}" are configured '
-            f'for API "{api_version}"',
+            f'Unknown authentication method(s) "{method}" are configured ',
         )
         return False
 
