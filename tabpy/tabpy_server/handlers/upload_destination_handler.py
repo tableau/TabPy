@@ -3,7 +3,7 @@ from tabpy.tabpy_server.handlers import ManagementHandler
 import os
 
 
-_QUERY_OBJECT_STAGING_FOLDER = 'staging'
+_QUERY_OBJECT_STAGING_FOLDER = "staging"
 
 
 class UploadDestinationHandler(ManagementHandler):

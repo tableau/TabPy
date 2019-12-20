@@ -20,20 +20,17 @@ class ResponseError(Exception):
 
         try:
             r = response.json()
-            self.info = r['info']
-            self.message = response.json()['message']
-        except (json.JSONDecodeError,
-                KeyError):
+            self.info = r["info"]
+            self.message = response.json()["message"]
+        except (json.JSONDecodeError, KeyError):
             self.info = None
             self.message = response.text
 
     def __str__(self):
-        return (f'({self.status_code}) '
-                f'{self.message} '
-                f'{self.info}')
+        return f"({self.status_code}) " f"{self.message} " f"{self.info}"
 
 
-class RequestsNetworkWrapper(object):
+class RequestsNetworkWrapper:
     """The NetworkWrapper wraps the underlying network connection to simplify
     the interface a bit. This can be replaced with something that can be built
     on some other type of network connection, such as PyCURL.
@@ -58,8 +55,9 @@ class RequestsNetworkWrapper(object):
     @staticmethod
     def raise_error(response):
         logger.error(
-            f'Error with server response. code={response.status_code}; '
-            f'text={response.text}')
+            f"Error with server response. code={response.status_code}; "
+            f"text={response.text}"
+        )
 
         raise ResponseError(response)
 
@@ -82,18 +80,14 @@ class RequestsNetworkWrapper(object):
         object that is parsed from the response JSON."""
         self._remove_nones(data)
 
-        logger.info(f'GET {url} with {data}')
+        logger.info(f"GET {url} with {data}")
 
-        response = self.session.get(
-            url,
-            params=data,
-            timeout=timeout,
-            auth=self.auth)
+        response = self.session.get(url, params=data, timeout=timeout, auth=self.auth)
         if response.status_code != 200:
             self.raise_error(response)
-        logger.info(f'response={response.text}')
+        logger.info(f"response={response.text}")
 
-        if response.text == '':
+        if response.text == "":
             return dict()
         else:
             return response.json()
@@ -103,15 +97,14 @@ class RequestsNetworkWrapper(object):
         object that is parsed from the response JSON."""
         data = self._encode_request(data)
 
-        logger.info(f'POST {url} with {data}')
+        logger.info(f"POST {url} with {data}")
         response = self.session.post(
             url,
             data=data,
-            headers={
-                'content-type': 'application/json',
-            },
+            headers={"content-type": "application/json",},
             timeout=timeout,
-            auth=self.auth)
+            auth=self.auth,
+        )
 
         if response.status_code not in (200, 201):
             self.raise_error(response)
@@ -123,43 +116,39 @@ class RequestsNetworkWrapper(object):
         object that is parsed from the response JSON."""
         data = self._encode_request(data)
 
-        logger.info(f'PUT {url} with {data}')
+        logger.info(f"PUT {url} with {data}")
 
         response = self.session.put(
             url,
             data=data,
-            headers={
-                'content-type': 'application/json',
-            },
+            headers={"content-type": "application/json",},
             timeout=timeout,
-            auth=self.auth)
+            auth=self.auth,
+        )
         if response.status_code != 200:
             self.raise_error(response)
 
         return response.json()
 
     def DELETE(self, url, data, timeout=None):
-        '''
+        """
         Issues a DELETE request to the URL with the data specified. Returns an
         object that is parsed from the response JSON.
-        '''
+        """
         if data is not None:
             data = json.dumps(data)
 
-        logger.info(f'DELETE {url} with {data}')
+        logger.info(f"DELETE {url} with {data}")
 
-        response = self.session.delete(
-            url,
-            data=data,
-            timeout=timeout,
-            auth=self.auth)
+        response = self.session.delete(url, data=data, timeout=timeout, auth=self.auth)
 
         if response.status_code <= 499 and response.status_code >= 400:
             raise RuntimeError(response.text)
 
         if response.status_code not in (200, 201, 204):
             raise RuntimeError(
-                f'Error with server response code: {response.status_code}')
+                f"Error with server response code: {response.status_code}"
+            )
 
     def set_credentials(self, username, password):
         """
@@ -174,11 +163,11 @@ class RequestsNetworkWrapper(object):
         password : str
             Password in plain text.
         """
-        logger.info(f'Setting credentials (username: {username})')
+        logger.info(f"Setting credentials (username: {username})")
         self.auth = HTTPBasicAuth(username, password)
 
 
-class ServiceClient(object):
+class ServiceClient:
     """
     A generic service client.
 
@@ -190,16 +179,14 @@ class ServiceClient(object):
 
     def __init__(self, endpoint, network_wrapper=None):
         if network_wrapper is None:
-            network_wrapper = RequestsNetworkWrapper(
-                session=requests.session())
+            network_wrapper = RequestsNetworkWrapper(session=requests.session())
 
         self.network_wrapper = network_wrapper
 
-        pattern = compile('.*(:[0-9]+)$')
-        if not endpoint.endswith('/') and not pattern.match(endpoint):
-            logger.warning(
-                f'endpoint {endpoint} does not end with \'/\': appending.')
-            endpoint = endpoint + '/'
+        pattern = compile(".*(:[0-9]+)$")
+        if not endpoint.endswith("/") and not pattern.match(endpoint):
+            logger.warning(f"endpoint {endpoint} does not end with '/': appending.")
+            endpoint = endpoint + "/"
 
         self.endpoint = endpoint
 
@@ -220,7 +207,7 @@ class ServiceClient(object):
         self.network_wrapper.DELETE(self.endpoint + url, data, timeout)
 
     def set_credentials(self, username, password):
-        '''
+        """
         Set credentials for all the TabPy client-server communication
         where client is tabpy-tools and server is tabpy-server.
 
@@ -231,15 +218,14 @@ class ServiceClient(object):
 
         password : str
             Password in plain text.
-        '''
+        """
         self.network_wrapper.set_credentials(username, password)
 
 
-class RESTProperty(object):
+class RESTProperty:
     """A descriptor that will control the type of value stored."""
 
-    def __init__(self, type, from_json=lambda x: x, to_json=lambda x: x,
-                 doc=None):
+    def __init__(self, type, from_json=lambda x: x, to_json=lambda x: x, doc=None):
         self.__doc__ = doc
         self.type = type
         self.from_json = from_json
@@ -250,8 +236,7 @@ class RESTProperty(object):
             try:
                 return getattr(instance, self.name)
             except AttributeError:
-                raise AttributeError(
-                    f'{self.name} has not been set yet.')
+                raise AttributeError(f"{self.name} has not been set yet.")
         else:
             return self
 
@@ -281,11 +266,11 @@ class _RESTMetaclass(abc.ABCMeta):
 
         self.__rest__ = set()
         for base in bases:
-            self.__rest__.update(getattr(base, '__rest__', set()))
+            self.__rest__.update(getattr(base, "__rest__", set()))
 
         for k, v in dict.items():
             if isinstance(v, RESTProperty):
-                v.__dict__['name'] = '_' + k
+                v.__dict__["name"] = "_" + k
                 self.__rest__.add(k)
 
 
@@ -304,6 +289,7 @@ class RESTObject(MutableMapping, metaclass=_RESTMetaclass):
         addition RESTProperty.
 
     """
+
     """ __metaclass__ = _RESTMetaclass"""
 
     def __init__(self, **kwargs):
@@ -317,20 +303,14 @@ class RESTObject(MutableMapping, metaclass=_RESTMetaclass):
         are ignored.
 
         """
-        logger.info(
-            f'Initializing {self.__class__.__name__} from {kwargs}')
+        logger.info(f"Initializing {self.__class__.__name__} from {kwargs}")
         for attr in self.__rest__:
             if attr in kwargs:
                 setattr(self, attr, kwargs.pop(attr))
 
     def __repr__(self):
         return (
-            "{" +
-            ", ".join([
-                repr(k) + ": " + repr(v)
-                for k, v in self.items()
-            ]) +
-            "}"
+            "{" + ", ".join([repr(k) + ": " + repr(v) for k, v in self.items()]) + "}"
         )
 
     @classmethod
@@ -365,17 +345,15 @@ class RESTObject(MutableMapping, metaclass=_RESTMetaclass):
         return result
 
     def __eq__(self, other):
-        return (isinstance(self, type(other)) and
-                all((
-                    getattr(self, a) == getattr(other, a)
-                    for a in self.__rest__
-                )))
+        return isinstance(self, type(other)) and all(
+            (getattr(self, a) == getattr(other, a) for a in self.__rest__)
+        )
 
     def __len__(self):
-        return len([a for a in self.__rest__ if hasattr(self, '_' + a)])
+        return len([a for a in self.__rest__ if hasattr(self, "_" + a)])
 
     def __iter__(self):
-        return iter([a for a in self.__rest__ if hasattr(self, '_' + a)])
+        return iter([a for a in self.__rest__ if hasattr(self, "_" + a)])
 
     def __getitem__(self, item):
         if item not in self.__rest__:
@@ -394,7 +372,7 @@ class RESTObject(MutableMapping, metaclass=_RESTMetaclass):
         if item not in self.__rest__:
             raise KeyError(item)
         try:
-            delattr(self, '_' + item)
+            delattr(self, "_" + item)
         except AttributeError:
             raise KeyError(item)
 
@@ -428,25 +406,18 @@ def enum(*values, **kwargs):
     """
     if len(values) < 1:
         raise ValueError("At least one value is required.")
-    enum_type = kwargs.pop('type', str)
+    enum_type = kwargs.pop("type", str)
     if kwargs:
-        raise TypeError(
-            f'Unexpected parameters: {", ".join(kwargs.keys())}')
+        raise TypeError(f'Unexpected parameters: {", ".join(kwargs.keys())}')
 
     def __new__(cls, value):
         if value not in cls.values:
             raise ValueError(
-                f'{value} is an unexpected value. '
-                f'Expected one of {cls.values}')
+                f"{value} is an unexpected value. " f"Expected one of {cls.values}"
+            )
 
         return super(enum, cls).__new__(cls, value)
 
-    enum = type(
-        'Enum',
-        (enum_type,),
-        {
-            'values': values,
-            '__new__': __new__,
-        })
+    enum = type("Enum", (enum_type,), {"values": values, "__new__": __new__,})
 
     return enum

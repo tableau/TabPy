@@ -30,7 +30,7 @@ to specify the service location for all subsequent operations:
 
 ```python
 
-from tabpy_tools.client import Client
+from tabpy.tabpy_tools.client import Client
 
 client = Client('http://localhost:9004/')
 

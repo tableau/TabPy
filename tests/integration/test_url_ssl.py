@@ -1,7 +1,7 @@
-'''
+"""
 All other misc. URL-related integration tests for
 when SSL is turned on for TabPy.
-'''
+"""
 
 import integ_test_base
 import requests
@@ -9,16 +9,16 @@ import requests
 
 class TestURL_SSL(integ_test_base.IntegTestBase):
     def _get_port(self):
-        return '9005'
+        return "9005"
 
     def _get_transfer_protocol(self) -> str:
-        return 'https'
+        return "https"
 
     def _get_certificate_file_name(self) -> str:
-        return './tests/integration/resources/2019_04_24_to_3018_08_25.crt'
+        return "./tests/integration/resources/2019_04_24_to_3018_08_25.crt"
 
     def _get_key_file_name(self) -> str:
-        return './tests/integration/resources/2019_04_24_to_3018_08_25.key'
+        return "./tests/integration/resources/2019_04_24_to_3018_08_25.key"
 
     def test_notexistent_url(self):
         session = requests.Session()
@@ -26,7 +26,6 @@ class TestURL_SSL(integ_test_base.IntegTestBase):
         session.verify = False
         # Do not warn about insecure request
         requests.packages.urllib3.disable_warnings()
-        response = session.get(
-            url=f'https://localhost:{self._get_port()}/unicorn')
+        response = session.get(url=f"https://localhost:{self._get_port()}/unicorn")
 
         self.assertEqual(404, response.status_code)
