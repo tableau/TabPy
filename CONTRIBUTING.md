@@ -31,7 +31,7 @@ and run it locally.
 These are prerequisites for an environment required for a contributor to
 be able to work on TabPy changes:
 
-- Python 3.6.5:
+- Python 3.6 or 3.7:
   - To see which version of Python you have installed, run `python --version`.
 - git
 - TabPy repo:
@@ -57,16 +57,10 @@ be able to work on TabPy changes:
     cd TabPy
     ```
 
-4. Register TabPy repo as a pip package:
-
-    ```sh
-    pip install -e .
-    ```
-
-5. Install all dependencies:
+4. Install all dependencies:
 
    ```sh
-   python setup.py install
+   pip install -r requirements.txt
    ```
 
 ## Tests

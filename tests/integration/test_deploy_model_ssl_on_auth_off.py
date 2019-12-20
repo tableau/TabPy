@@ -1,7 +1,5 @@
 import integ_test_base
 import requests
-import subprocess
-from pathlib import Path
 
 
 class TestDeployModelSSLOnAuthOff(integ_test_base.IntegTestBase):

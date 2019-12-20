@@ -1,5 +1,4 @@
 import logging
-import sys
 from tabpy.tabpy_server.app.SettingsParameters import SettingsParameters
 from tabpy.tabpy_server.common.messages import (
     LoadObject,

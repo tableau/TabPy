@@ -120,7 +120,7 @@ class TestServiceInfoHandlerWithAuth(AsyncHTTPTestCase):
         self.assertTrue("features" in v1)
         features = v1["features"]
         self.assertDictEqual(
-            {"authentication": {"methods": {"basic-auth": {}}, "required": True,}},
+            {"authentication": {"methods": {"basic-auth": {}}, "required": True}},
             features,
         )
 

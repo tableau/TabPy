@@ -15,8 +15,8 @@ class TestCustomEvaluateTimeout(integ_test_base.IntegTestBase):
             """
         headers = {
             "Content-Type": "application/json",
-            "TabPy-Client": "Integration test for testing custom evaluate timeouts with "
-            "scripts.",
+            "TabPy-Client": "Integration test for testing custom evaluate timeouts "
+            "with scripts.",
         }
 
         conn = self._get_connection()

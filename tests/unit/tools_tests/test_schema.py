@@ -1,6 +1,4 @@
 import unittest
-import json
-from unittest.mock import Mock
 
 from tabpy.tabpy_tools.schema import generate_schema
 
