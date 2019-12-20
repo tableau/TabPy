@@ -7,55 +7,51 @@ logger = logging.getLogger(__name__)
 
 
 def _generate_schema_from_example_and_description(input, description):
-    '''
+    """
     With an example input, a schema is automatically generated that conforms
     to the example in json-schema.org. The description given by the users
     is then added to the schema.
-    '''
+    """
     s = genson.SchemaBuilder(None)
     s.add_object(input)
     input_schema = s.to_schema()
 
     if description is not None:
-        if 'properties' in input_schema:
+        if "properties" in input_schema:
             # Case for input = {'x':1}, input_description='not a dict'
             if not isinstance(description, dict):
-                msg = f'{input} and {description} do not match'
+                msg = f"{input} and {description} do not match"
                 logger.error(msg)
                 raise Exception(msg)
 
             for key in description:
                 # Case for input = {'x':1},
                 # input_description={'x':'x value', 'y':'y value'}
-                if key not in input_schema['properties']:
-                    msg = f'{key} not found in {input}'
+                if key not in input_schema["properties"]:
+                    msg = f"{key} not found in {input}"
                     logger.error(msg)
                     raise Exception(msg)
                 else:
-                    input_schema['properties'][key][
-                        'description'] = description[key]
+                    input_schema["properties"][key]["description"] = description[key]
         else:
             if isinstance(description, dict):
-                raise Exception(f'{input} and {description} do not match')
+                raise Exception(f"{input} and {description} do not match")
             else:
-                input_schema['description'] = description
+                input_schema["description"] = description
 
     try:
         # This should not fail unless there are bugs with either genson or
         # jsonschema.
         jsonschema.validate(input, input_schema)
     except Exception as e:
-        logger.error(f'Internal error validating schema: {str(e)}')
+        logger.error(f"Internal error validating schema: {str(e)}")
         raise
 
     return input_schema
 
 
-def generate_schema(input,
-                    output,
-                    input_description=None,
-                    output_description=None):
-    '''
+def generate_schema(input, output, input_description=None, output_description=None):
+    """
     Generate schema from a given sample input and output.
     A generated schema can be passed to a server together with a function to
     annotate it with information about input and output parameters, and
@@ -102,11 +98,11 @@ def generate_schema(input,
                    'properties': {'y': {'type': 'integer', 'description': 'value of y'},
                                   'x': {'type': 'integer', 'description': 'value of x'}}},
          'output': {'type': 'integer', 'description': 'x times y'}}
-    '''  # noqa: E501
+    """  # noqa: E501
     input_schema = _generate_schema_from_example_and_description(
-        input, input_description)
+        input, input_description
+    )
     output_schema = _generate_schema_from_example_and_description(
-        output, output_description)
-    return {'input': input_schema,
-            'sample': input,
-            'output': output_schema}
+        output, output_description
+    )
+    return {"input": input_schema, "sample": input, "output": output_schema}

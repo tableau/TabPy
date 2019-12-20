@@ -11,17 +11,17 @@ logger = logging.getLogger(__name__)
 
 
 class QueryObject(abc.ABC):
-    '''
+    """
     Derived class needs to implement the following interface:
       * query() -- given input, return query result
       * get_doc_string() -- returns documentation for the Query Object
-    '''
+    """
 
-    def __init__(self, description=''):
+    def __init__(self, description=""):
         self.description = description
 
     def get_dependencies(self):
-        '''All endpoints this endpoint depends on'''
+        """All endpoints this endpoint depends on"""
         return []
 
     @abc.abstractmethod
@@ -31,11 +31,11 @@ class QueryObject(abc.ABC):
 
     @abc.abstractmethod
     def get_doc_string(self):
-        '''Returns documentation for the query object
+        """Returns documentation for the query object
 
         By default, this method returns the docstring for 'query' method
         Derived class may overwrite this method to dynamically create docstring
-        '''
+        """
         pass
 
     def save(self, path):
@@ -48,18 +48,20 @@ class QueryObject(abc.ABC):
         """
         if os.path.exists(path):
             logger.warning(
-                f'Overwriting existing file "{path}" when saving query object')
+                f'Overwriting existing file "{path}" when saving query object'
+            )
             rm_fn = os.remove if os.path.isfile(path) else shutil.rmtree
             rm_fn(path)
         self._save_local(path)
 
     def _save_local(self, path):
-        '''Save current query object to local path
-        '''
+        """Save current query object to local path
+        """
         try:
             os.makedirs(path)
         except OSError as e:
             import errno
+
             if e.errno == errno.EEXIST and os.path.isdir(path):
                 pass
             else:
@@ -75,8 +77,7 @@ class QueryObject(abc.ABC):
         new_po = None
         new_po = cls._load_local(path)
 
-        logger.info(
-            f'Loaded query object "{type(new_po).__name__}" successfully')
+        logger.info(f'Loaded query object "{type(new_po).__name__}" successfully')
 
         return new_po
 
@@ -88,15 +89,15 @@ class QueryObject(abc.ABC):
 
     @classmethod
     def _make_serializable(cls, result):
-        '''Convert a result from object query to python data structure that can
+        """Convert a result from object query to python data structure that can
         easily serialize over network
-        '''
+        """
         try:
             json.dumps(result)
         except TypeError:
             raise TypeError(
-                'Result from object query is not json serializable: '
-                f'{result}')
+                "Result from object query is not json serializable: " f"{result}"
+            )
 
         return result
 
