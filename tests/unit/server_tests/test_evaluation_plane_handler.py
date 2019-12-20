@@ -83,6 +83,10 @@ class TestEvaluationPlainHandlerWithAuth(AsyncHTTPTestCase):
             'res.append(_arg1[i] * _arg3[i])\\nreturn res"}'
         )
 
+        cls.nan_coverts_to_null =\
+            '{"data":{"_arg1":[2,3],"_arg2":[3,-1]},'\
+            '"script":"return [float(1), float(\\"NaN\\"), float(2)]"}'
+
     @classmethod
     def tearDownClass(cls):
         cls.patcher.stop()
@@ -177,3 +181,17 @@ class TestEvaluationPlainHandlerWithAuth(AsyncHTTPTestCase):
             },
         )
         self.assertEqual(400, response.code)
+
+    def test_nan_converts_to_null(self):
+        response = self.fetch(
+            '/evaluate',
+            method='POST',
+            body=self.nan_coverts_to_null,
+            headers={
+                'Authorization': 'Basic {}'.
+                format(
+                    base64.b64encode('username:password'.encode('utf-8')).
+                    decode('utf-8'))
+            })
+        self.assertEqual(200, response.code)
+        self.assertEqual(b'[1.0, null, 2.0]', response.body)

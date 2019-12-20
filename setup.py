@@ -70,6 +70,7 @@ def setup_package():
             "future",
             "genson",
             "jsonschema",
+            "simplejson",
             "pyopenssl",
             "python-dateutil",
             "requests",

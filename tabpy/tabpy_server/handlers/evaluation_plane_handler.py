@@ -1,5 +1,6 @@
 from tabpy.tabpy_server.handlers import BaseHandler
 import json
+import simplejson
 import logging
 from tabpy.tabpy_server.common.util import format_exception
 import requests
@@ -101,7 +102,7 @@ class EvaluationPlaneHandler(BaseHandler):
             if result is None:
                 self.error_out(400, "Error running script. No return value")
             else:
-                self.write(json.dumps(result))
+                self.write(simplejson.dumps(result, ignore_nan=True))
                 self.finish()
 
         except Exception as e:
