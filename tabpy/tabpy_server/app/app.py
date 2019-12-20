@@ -98,7 +98,7 @@ class TabPyApp:
         class TabPyTornadoApp(tornado.web.Application):
             is_closing = False
 
-            def signal_handler(self, signal):
+            def signal_handler(self, signal, _):
                 logger.critical(f"Exiting on signal {signal}...")
                 self.is_closing = True
 
