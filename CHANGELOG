@@ -4,6 +4,18 @@
 
 ### Improvements
 
+- 
+- 
+- 
+
+### Bug Fixes
+
+- 
+
+## v0.8.9
+
+### Improvements
+
 - Added Ctrl+C handler
 - Added configurable buffer size for HTTP requests
 - Added anvoa to supported pre-deployed models in tabpy
