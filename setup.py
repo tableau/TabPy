@@ -83,7 +83,7 @@ def setup_package():
             "console_scripts": [
                 "tabpy=tabpy.tabpy:main",
                 "tabpy-deploy-models=tabpy.models.deploy_models:main",
-                "tabpy-user-management=tabpy.utils.user_management:main",
+                "tabpy-user=tabpy.utils.tabpy_user:main",
             ],
         },
         setup_requires=["pytest-runner"],
