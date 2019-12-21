@@ -384,3 +384,4 @@ class Client:
             Password in plain text.
         """
         self._service.set_credentials(username, password)
+                                       
