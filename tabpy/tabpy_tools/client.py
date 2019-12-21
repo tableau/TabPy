@@ -53,12 +53,15 @@ class Client:
     def __init__(self, endpoint, query_timeout=1000):
         """
         Connects to a running server.
+
         The class constructor takes a server address which is then used to
         connect for all subsequent member APIs.
+
         Parameters
         ----------
         endpoint : str, optional
             The server URL.
+
         query_timeout : float, optional
             The timeout for query operations.
         """
@@ -94,11 +97,13 @@ class Client:
     def get_status(self):
         """
         Gets the status of the deployed endpoints.
+
         Returns
         -------
         dict
             Keys are endpoints and values are dicts describing the state of
             the endpoint.
+
         Examples
         --------
         .. sourcecode:: python
@@ -128,14 +133,18 @@ class Client:
 
     def query(self, name, *args, **kwargs):
         """Query an endpoint.
+
         Parameters
         ----------
         name : str
             The name of the endpoint.
+
         *args : list of anything
             Ordered parameters to the endpoint.
+
         **kwargs : dict of anything
             Named parameters to the endpoint.
+
         Returns
         -------
         dict
@@ -153,6 +162,7 @@ class Client:
 
     def get_endpoints(self, type=None):
         """Returns all deployed endpoints.
+
         Examples
         --------
         .. sourcecode:: python
@@ -184,27 +194,33 @@ class Client:
 
     def deploy(self, name, obj, description="", schema=None, override=False):
         """Deploys a Python function as an endpoint in the server.
+
         Parameters
         ----------
         name : str
             A unique identifier for the endpoint.
+
         obj :  function
             Refers to a user-defined function with any signature. However both
             input and output of the function need to be JSON serializable.
+
         description : str, optional
             The description for the endpoint. This string will be returned by
             the ``endpoints`` API.
+
         schema : dict, optional
             The schema of the function, containing information about input and
             output parameters, and respective examples. Providing a schema for
             a deployed function lets other users of the service discover how to
             use it. Refer to schema.generate_schema for more information on
             how to generate the schema.
+
         override : bool
             Whether to override (update) an existing endpoint. If False and
             there is already an endpoint with that name, it will raise a
             RuntimeError. If True and there is already an endpoint with that
             name, it will deploy a new version on top of it.
+
         See Also
         --------
         remove, get_endpoints
@@ -235,32 +251,42 @@ class Client:
 
     def _gen_endpoint(self, name, obj, description, version=1, schema=[]):
         """Generates an endpoint dict.
+
         Parameters
         ----------
         name : str
             Endpoint name to add or update
+
         obj :  func
             Object that backs the endpoint. See add() for a complete
             description.
+
         description : str
             Description of the endpoint
+
         version : int
             The version. Defaults to 1.
+
         Returns
         -------
         dict
             Keys:
                 name : str
                     The name provided.
+
                 version : int
                     The version provided.
+
                 description : str
                     The provided description.
+
                 type : str
                     The type of the endpoint.
+
                 endpoint_obj : object
                     The wrapper around the obj provided that can be used to
                     generate the code and dependencies for the endpoint.
+
         Raises
         ------
         TypeError
@@ -348,10 +374,12 @@ class Client:
         """
         Set credentials for all the TabPy client-server communication
         where client is tabpy-tools and server is tabpy-server.
+
         Parameters
         ----------
         username : str
             User name (login). Username is case insensitive.
+
         password : str
             Password in plain text.
         """
