@@ -213,4 +213,4 @@ class TestEvaluationPlainHandlerWithAuth(AsyncHTTPTestCase):
                     decode('utf-8'))
             })
         self.assertEqual(200, response.code)
-        self.assertEqual(b'None', response.body)
+        self.assertEqual(b'null', response.body)

@@ -1,5 +1,6 @@
 from tabpy.tabpy_server.handlers import BaseHandler
 import json
+import simplejson
 import logging
 from tabpy.tabpy_server.common.util import format_exception
 import requests
@@ -95,7 +96,7 @@ class EvaluationPlaneHandler(BaseHandler):
                 self.error_out(408, self._error_message_timeout)
                 return
 
-            self.write(json.dumps(result))
+            self.write(simplejson.dumps(result, ignore_nan=True))
             self.finish()
 
         except Exception as e:
