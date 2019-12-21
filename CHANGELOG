@@ -4,13 +4,13 @@
 
 ### Improvements
 
-- Code improvements
-- 
+- Minor code improvements.
+- Documentation updates with referencing Tableau Help pages.
 - 
 
 ### Bug Fixes
 
-- 
+- Fixed failing Ctrl+C handler.
 
 ## v0.8.9
 
