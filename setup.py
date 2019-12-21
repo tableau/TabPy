@@ -67,6 +67,7 @@ def setup_package():
             "cloudpickle",
             "configparser",
             "decorator",
+            "docopt",
             "future",
             "genson",
             "jsonschema",

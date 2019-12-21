@@ -1,4 +1,3 @@
-from argparse import ArgumentParser
 import concurrent.futures
 import configparser
 import logging
@@ -44,13 +43,9 @@ class TabPyApp:
 
     def __init__(self, config_file=None):
         if config_file is None:
-            cli_args = self._parse_cli_arguments()
-            if cli_args.config is not None:
-                config_file = cli_args.config
-            else:
-                config_file = os.path.join(
-                    os.path.dirname(__file__), os.path.pardir, "common", "default.conf"
-                )
+            config_file = os.path.join(
+                os.path.dirname(__file__), os.path.pardir, "common", "default.conf"
+            )
 
         if os.path.isfile(config_file):
             try:
@@ -166,15 +161,6 @@ class TabPyApp:
         tornado.ioloop.PeriodicCallback(application.try_exit, 500).start()
 
         return application
-
-    def _parse_cli_arguments(self):
-        """
-        Parse command line arguments. Expected arguments:
-        * --config: string
-        """
-        parser = ArgumentParser(description="Run TabPy Server.")
-        parser.add_argument("--config", help="Path to a config file.")
-        return parser.parse_args()
 
     def _parse_config(self, config_file):
         """Provide consistent mechanism for pulling in configuration.

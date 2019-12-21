@@ -1,6 +1,5 @@
 import os
 import unittest
-from argparse import Namespace
 from tempfile import NamedTemporaryFile
 import tabpy
 from tabpy.tabpy_server.app.util import validate_cert
@@ -23,10 +22,6 @@ class TestConfigEnvironmentCalls(unittest.TestCase):
         self.assertEqual(app.settings["log_request_context"], False)
         self.assertEqual(app.settings["evaluate_timeout"], 30)
 
-    @patch(
-        "tabpy.tabpy_server.app.app.TabPyApp._parse_cli_arguments",
-        return_value=Namespace(config=None),
-    )
     @patch("tabpy.tabpy_server.app.app.TabPyState")
     @patch("tabpy.tabpy_server.app.app._get_state_from_file")
     @patch("tabpy.tabpy_server.app.app.PythonServiceHandler")
@@ -39,7 +34,6 @@ class TestConfigEnvironmentCalls(unittest.TestCase):
         mock_psws,
         mock_management_util,
         mock_tabpy_state,
-        mock_parse_arguments,
     ):
         pkg_path = os.path.dirname(tabpy.__file__)
         obj_path = os.path.join(pkg_path, "tmp", "query_objects")
@@ -58,10 +52,6 @@ class TestConfigEnvironmentCalls(unittest.TestCase):
         self.assertTrue(len(mock_management_util.mock_calls) > 0)
         mock_os.makedirs.assert_not_called()
 
-    @patch(
-        "tabpy.tabpy_server.app.app.TabPyApp._parse_cli_arguments",
-        return_value=Namespace(config=None),
-    )
     @patch("tabpy.tabpy_server.app.app.TabPyState")
     @patch("tabpy.tabpy_server.app.app._get_state_from_file")
     @patch("tabpy.tabpy_server.app.app.PythonServiceHandler")
@@ -74,7 +64,6 @@ class TestConfigEnvironmentCalls(unittest.TestCase):
         mock_psws,
         mock_management_util,
         mock_tabpy_state,
-        mock_parse_arguments,
     ):
         TabPyApp(None)
         self.assertEqual(len(mock_os.makedirs.mock_calls), 1)
@@ -88,7 +77,6 @@ class TestPartialConfigFile(unittest.TestCase):
         os.remove(self.config_file.name)
         self.config_file = None
 
-    @patch("tabpy.tabpy_server.app.app.TabPyApp._parse_cli_arguments")
     @patch("tabpy.tabpy_server.app.app.TabPyState")
     @patch("tabpy.tabpy_server.app.app._get_state_from_file")
     @patch("tabpy.tabpy_server.app.app.PythonServiceHandler")
@@ -101,7 +89,6 @@ class TestPartialConfigFile(unittest.TestCase):
         mock_psws,
         mock_management_util,
         mock_tabpy_state,
-        mock_parse_arguments,
     ):
         self.assertTrue(self.config_file is not None)
         config_file = self.config_file
@@ -112,7 +99,6 @@ class TestPartialConfigFile(unittest.TestCase):
         )
         config_file.close()
 
-        mock_parse_arguments.return_value = Namespace(config=config_file.name)
         mock_os.path.realpath.return_value = "bar"
         mock_os.environ = {"TABPY_PORT": "1234"}
 
