@@ -1,6 +1,6 @@
 """
 Utility for managing user names and passwords for TabPy.
-For more information about how to configure and use authentication for 
+For more information about how to configure and use authentication for
 TabPy read the documentation at https://github.com/tableau/TabPy.
 
 Usage:
