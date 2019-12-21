@@ -20,40 +20,24 @@ configure Tableau to use this service for evaluating Python code.
 
 ### Tableau Desktop
 
-In Tableau Desktop version 10.1 or later:
-
-1. Go to Help->Settings and Performance->Manage External Service Connection...
-2. Enter the Server (localhost if running TabPy on the same computer) and the
-   Port (default is 9004).
-
-![Screenshot of Configuration on Tableau Desktop](img/external-service-configuration.png)
+To configure Tableau Desktop version 10.1 or later to connect to TabPy server
+follow steps at Tableau
+[Configure an external service connection](https://help.tableau.com/current/pro/desktop/en-us/r_connection_manage.htm#configure-an-external-service-connection)
+documentation page.
 
 ### Tableau Server 2018.2 and Newer Versions
 
 To configure Tableau Server 2018.2 and newer versions to connect to TabPy server
-use [TSM command line tool](https://onlinehelp.tableau.com/current/server/en-us/tsm.htm).
+follow instructions on Tableau
+[Configure Connections to External Services](https://onlinehelp.tableau.com/current/server/en-us/tsm.htm)
+page.
 
-To configure a non secure connection to TabPy server configuration:
+Specific details about how to configure a secure connection to TabPy, enable or
+disable connections and other setting can be found at Tableau
+[TSM Security documentation](https://onlinehelp.tableau.com/current/server/en-us/cli_security_tsm.htm#tsm_security_vizql-extsvc-ssl-enable)
+page.
 
-```sh
-tsm configuration set -k vizqlserver.extsvc.host -v <ip address or hostname>
-tsm configuration set -k vizqlserver.extsvc.port -v <port or TabPy>
-tsm pending-changes apply
-```
-
-To configure a secure connection to TabPy server use `tsm security vizql-extsvc enable`
-command as described at
-[TSM Security documentation page](https://onlinehelp.tableau.com/current/server/en-us/cli_security_tsm.htm#tsm_security_vizql-extsvc-ssl-enable).
-
-<!-- markdownlint-disable MD013 -->
-
-```sh
-tsm security vizql-extsvc-ssl enable --connection-type <type> --extsvc-host <host_name> --extsvc-port <port> [options] [global options]
-```
-
-<!-- markdownlint-enable MD013 -->
-
-For how to configure a secure TabPy instance follow instructions at
+For how to configure TabPy instance follow instructions at
 [TabPy Server Config documentation](server-config.md).
 
 ### Tableau Server 2018.1 and Older Versions

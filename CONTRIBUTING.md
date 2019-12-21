@@ -40,7 +40,7 @@ be able to work on TabPy changes:
   - Create a new branch for your changes.
   - When changes are ready push them on github and create merge request.
 - PIP packages - install all with
-  `pip install pytest pycodestyle autopep8 twine coverage --upgrade` command
+  `pip install pytest flake8 twine coverage --upgrade` command
 - Node.js for npm packages - install from <https://nodejs.org>.
 - NPM packages - install all with
   `npm install markdown-toc markdownlint` command.
@@ -60,6 +60,7 @@ be able to work on TabPy changes:
 4. Install all dependencies:
 
    ```sh
+   python -m pip install --upgrade pip
    pip install -r requirements.txt
    ```
 
@@ -145,21 +146,10 @@ Access-Control-Allow-Methods = GET, OPTIONS, POST
 
 ## Code styling
 
-`pycodestyle` is used to check Python code against our style conventions:
+`flake8` is used to check Python code against our style conventions:
 
 ```sh
-pycodestyle .
-```
-
-For reported errors and warnings either fix them manually or auto-format files with
-`autopep8`.
-
-Run the tool for a file. In the example below `-i`
-option tells `autopep8` to update the file. Without the option it
-outputs formatted code to the console.
-
-```sh
-autopep8 -i tabpy-server/server_tests/test_pwd_file.py
+flake8 .
 ```
 
 ## Publishing TabPy Package
