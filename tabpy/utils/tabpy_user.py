@@ -1,48 +1,28 @@
 """
 Utility for managing user names and passwords for TabPy.
+For more information about how to configure and use authentication for
+TabPy read the documentation at https://github.com/tableau/TabPy.
+
+Usage:
+  tabpy-user add (-u NAME | --user <NAME>) [-p PWD | --password PWD] (-f FILE | --pwdfile FILE)
+  tabpy-user update (-u NAME | --user <NAME>) [-p PWD | --password PWD] (-f FILE | --pwdfile FILE)
+  tabpy-user -h | --help
+
+Options:
+  -h --help                Show this screen.
+  -u NAME --username NAME  Username to add to password file.
+  -p PWD --password PWD    Password for the username. If not specified a
+                             password will be generated.
+  -f FILE --pwdfile FILE   Fully qualified path to passwords file.
 """
 
-from argparse import ArgumentParser
+import docopt
 import logging
 import secrets
 from tabpy.tabpy_server.app.util import parse_pwd_file
 from tabpy.tabpy_server.handlers.util import hash_password
 
 logger = logging.getLogger(__name__)
-
-
-def build_cli_parser():
-    parser = ArgumentParser(
-        description=__doc__,
-        epilog="""
-            For more information about how to configure and
-            use authentication for TabPy read the documentation
-            at https://github.com/tableau/TabPy
-            """,
-        argument_default=None,
-        add_help=True,
-    )
-    parser.add_argument("command", choices=["add", "update"], help="Command to execute")
-    parser.add_argument("-u", "--username", help="Username to add to passwords file")
-    parser.add_argument(
-        "-f", "--pwdfile", help="Fully qualified path to passwords file"
-    )
-    parser.add_argument(
-        "-p",
-        "--password",
-        help=(
-            "Password for the username. If not specified a password will "
-            "be generated"
-        ),
-    )
-    return parser
-
-
-def check_args(args):
-    if (args.username is None) or (args.pwdfile is None):
-        return False
-
-    return True
 
 
 def generate_password(pwd_len=16):
@@ -84,7 +64,7 @@ def store_passwords_file(pwdfile, credentials):
 
 
 def add_user(args, credentials):
-    username = args.username.lower()
+    username = args["--username"].lower()
     logger.info(f'Adding username "{username}"')
 
     if username in credentials:
@@ -95,11 +75,11 @@ def add_user(args, credentials):
         )
         return False
 
-    password = args.password
+    password = args["--password"]
     logger.info(f'Adding username "{username}" with password "{password}"...')
     credentials[username] = hash_password(username, password)
 
-    if store_passwords_file(args.pwdfile, credentials):
+    if store_passwords_file(args["--pwdfile"], credentials):
         logger.info(f'Added username "{username}" with password "{password}"')
     else:
         logger.info(
@@ -108,7 +88,7 @@ def add_user(args, credentials):
 
 
 def update_user(args, credentials):
-    username = args.username.lower()
+    username = args["--username"].lower()
     logger.info(f'Updating username "{username}"')
 
     if username not in credentials:
@@ -118,16 +98,16 @@ def update_user(args, credentials):
         )
         return False
 
-    password = args.password
+    password = args["--password"]
     logger.info(f'Updating username "{username}" password  to "{password}"')
     credentials[username] = hash_password(username, password)
-    return store_passwords_file(args.pwdfile, credentials)
+    return store_passwords_file(args["--pwdfile"], credentials)
 
 
 def process_command(args, credentials):
-    if args.command == "add":
+    if args["add"]:
         return add_user(args, credentials)
-    elif args.command == "update":
+    elif args["update"]:
         return update_user(args, credentials)
     else:
         logger.error(f'Unknown command "{args.command}"')
@@ -137,18 +117,14 @@ def process_command(args, credentials):
 def main():
     logging.basicConfig(level=logging.DEBUG, format="%(message)s")
 
-    parser = build_cli_parser()
-    args = parser.parse_args()
-    if not check_args(args):
-        parser.print_help()
+    args = docopt.docopt(__doc__)
+
+    succeeded, credentials = parse_pwd_file(args["--pwdfile"])
+    if not succeeded and not args["add"]:
         return
 
-    succeeded, credentials = parse_pwd_file(args.pwdfile)
-    if not succeeded and args.command != "add":
-        return
-
-    if args.password is None:
-        args.password = generate_password()
+    if args["--password"] is None:
+        args["--password"] = generate_password()
 
     process_command(args, credentials)
     return

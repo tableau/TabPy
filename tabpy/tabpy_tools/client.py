@@ -303,7 +303,6 @@ class Client:
 
         endpoint_object = CustomQueryObject(query=obj, description=description,)
 
-        _schema = schema if schema is not None else []
         return {
             "name": name,
             "version": version,
