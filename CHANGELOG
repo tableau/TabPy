@@ -6,11 +6,12 @@
 
 - Minor code improvements.
 - Documentation updates with referencing Tableau Help pages.
-- 
+- Added Client.remove() method for deleting deployed models.
 
 ### Bug Fixes
 
 - Fixed failing Ctrl+C handler.
+- Fixed query_timeout bug.
 
 ## v0.8.9
 
