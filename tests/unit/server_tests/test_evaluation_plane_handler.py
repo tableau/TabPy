@@ -168,6 +168,7 @@ class TestEvaluationPlainHandlerWithAuth(AsyncHTTPTestCase):
                         "utf-8"
                     )
                 )
+
             },
         )
         self.assertEqual(500, response.code)
