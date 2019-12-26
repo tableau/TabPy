@@ -1,5 +1,6 @@
 from tabpy.tabpy_server.handlers import BaseHandler
 import json
+import simplejson
 import logging
 from tabpy.tabpy_server.common.util import format_exception
 import requests
@@ -65,19 +66,17 @@ class EvaluationPlaneHandler(BaseHandler):
                         400, "Script parameters need to be provided as a dictionary."
                     )
                     return
+                args_in = sorted(arguments.keys())
+                n = len(arguments)
+                if sorted('_arg'+str(i+1) for i in range(n)) == args_in:
+                    arguments_str = ", " + ", ".join(args_in)
                 else:
-                    arguments_expected = []
-                    for i in range(1, len(arguments.keys()) + 1):
-                        arguments_expected.append("_arg" + str(i))
-                    if sorted(arguments_expected) == sorted(arguments.keys()):
-                        arguments_str = ", " + ", ".join(arguments.keys())
-                    else:
-                        self.error_out(
-                            400,
-                            "Variables names should follow "
-                            "the format _arg1, _arg2, _argN",
-                        )
-                        return
+                    self.error_out(
+                        400,
+                        "Variables names should follow "
+                        "the format _arg1, _arg2, _argN",
+                    )
+                    return
 
             function_to_evaluate = f"def _user_script(tabpy{arguments_str}):\n"
             for u in user_code.splitlines():
@@ -98,11 +97,8 @@ class EvaluationPlaneHandler(BaseHandler):
                 self.error_out(408, self._error_message_timeout)
                 return
 
-            if result is None:
-                self.error_out(400, "Error running script. No return value")
-            else:
-                self.write(json.dumps(result))
-                self.finish()
+            self.write(simplejson.dumps(result, ignore_nan=True))
+            self.finish()
 
         except Exception as e:
             err_msg = f"{e.__class__.__name__} : {str(e)}"
