@@ -67,7 +67,8 @@ class EvaluationPlaneHandler(BaseHandler):
                     )
                     return
                 args_in = sorted(arguments.keys())
-                if sorted('_arg'+str(i+1) for i in range(len(arguments))) == args_in:
+                n = len(arguments)
+                if sorted('_arg'+str(i+1) for i in range(n)) == args_in:
                     arguments_str = ", " + ", ".join(args_in)
                 else:
                     self.error_out(
