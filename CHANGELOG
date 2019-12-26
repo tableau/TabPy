@@ -12,6 +12,8 @@
 
 - Fixed failing Ctrl+C handler.
 - Fixed query_timeout bug.
+- Fixed None in result collection bug.
+- Fixed script evaluation with missing result/return bug.
 
 ## v0.8.9
 

@@ -75,6 +75,7 @@ def setup_package():
             "pyopenssl",
             "python-dateutil",
             "requests",
+            "simplejson",
             "singledispatch",
             "six",
             "tornado",

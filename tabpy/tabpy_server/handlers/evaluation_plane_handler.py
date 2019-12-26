@@ -97,7 +97,10 @@ class EvaluationPlaneHandler(BaseHandler):
                 self.error_out(408, self._error_message_timeout)
                 return
 
-            self.write(simplejson.dumps(result, ignore_nan=True))
+            if result is not None:
+                self.write(simplejson.dumps(result, ignore_nan=True))
+            else:
+                self.write("null")
             self.finish()
 
         except Exception as e:
