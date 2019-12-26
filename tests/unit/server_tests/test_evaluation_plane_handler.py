@@ -87,6 +87,11 @@ class TestEvaluationPlainHandlerWithAuth(AsyncHTTPTestCase):
             '{"data":{"_arg1":[2,3],"_arg2":[3,-1]},'\
             '"script":"return [float(1), float(\\"NaN\\"), float(2)]"}'
 
+        cls.script_returns_none = (
+            '{"data":{"_arg1":[2,3],"_arg2":[3,-1]},'
+            '"script":"return None"}'
+        )
+
     @classmethod
     def tearDownClass(cls):
         cls.patcher.stop()
@@ -163,6 +168,7 @@ class TestEvaluationPlainHandlerWithAuth(AsyncHTTPTestCase):
                         "utf-8"
                     )
                 )
+
             },
         )
         self.assertEqual(500, response.code)
@@ -195,3 +201,17 @@ class TestEvaluationPlainHandlerWithAuth(AsyncHTTPTestCase):
             })
         self.assertEqual(200, response.code)
         self.assertEqual(b'[1.0, null, 2.0]', response.body)
+
+    def test_script_returns_none(self):
+        response = self.fetch(
+            '/evaluate',
+            method='POST',
+            body=self.script_returns_none,
+            headers={
+                'Authorization': 'Basic {}'.
+                format(
+                    base64.b64encode('username:password'.encode('utf-8')).
+                    decode('utf-8'))
+            })
+        self.assertEqual(200, response.code)
+        self.assertEqual(b'null', response.body)
