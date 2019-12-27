@@ -35,6 +35,9 @@ More technical topics:
 
 Other useful resources:
 
+* [Tableau Sci-Fi Blog](http://tabscifi.com/) provides tips, tricks, under
+  the hood, useful resources, and technical details for how to extend
+  Tableau with data science.
 * For all questions not related to the TabPy code (installation, deployment,
   connections, Python issues, etc.) and requests use the
   [External Services Forum](https://community.tableau.com/community/forums/externalservices)
