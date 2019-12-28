@@ -1,7 +1,4 @@
-import concurrent.futures
 import os
-import tempfile
-import shutil
 try:
     from ConfigParser import ConfigParser as _ConfigParser
 except ImportError:
@@ -10,7 +7,6 @@ try:
     from StringIO import StringIO as _StringIO
 except ImportError:
     from io import StringIO as _StringIO
-from dateutil import parser
 from datetime import datetime, timedelta, tzinfo
 from time import mktime
 

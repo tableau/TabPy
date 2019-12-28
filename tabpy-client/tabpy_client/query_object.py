@@ -1,10 +1,7 @@
 import abc
 import os
-import sys
 import json
 import shutil
-import tempfile as _tempfie
-from tempfile import mkdtemp
 
 import cloudpickle as _cloudpickle
 

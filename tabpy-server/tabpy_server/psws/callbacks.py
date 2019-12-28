@@ -1,9 +1,6 @@
-import os
 import sys
-import base64
 from time import sleep
 from tornado import gen
-from tornado.httpclient import AsyncHTTPClient
 from common.messages import (LoadObject, DeleteObjects, Msg,
                             ListObjects, ObjectList)
 

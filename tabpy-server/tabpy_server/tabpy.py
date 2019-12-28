@@ -3,14 +3,12 @@ import sys
 import simplejson
 import multiprocessing
 import time
-from time import sleep
 from uuid import uuid4 as random_uuid
 import shutil
 from re import compile as _compile
 
 import uuid
 import urllib
-import functools
 import requests
 import tornado
 import tornado.options

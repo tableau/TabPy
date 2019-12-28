@@ -1,11 +1,4 @@
-import os
 import sys
-import time
-import uuid
-import urllib
-import requests
-import functools
-import subprocess
 import concurrent.futures
 
 from tabpy_client.query_object import QueryObject

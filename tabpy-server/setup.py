@@ -2,7 +2,6 @@ try:
     from setuptools import setup
 except ImportError:
     from distutils.core import setup
-import sys
 setup(
     name='tabpy-server',
     version='0.2',

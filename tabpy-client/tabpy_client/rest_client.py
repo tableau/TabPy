@@ -1,7 +1,6 @@
 from .rest import (
     RESTObject,
     RESTProperty,
-    enum,
 )
 
 from datetime import datetime

@@ -1,5 +1,4 @@
 import unittest
-import json
 
 try:
     from unittest.mock import Mock
@@ -8,7 +7,6 @@ except ImportError:
 
 from tabpy_client.client import *
 
-import requests
 
 class TestClient(unittest.TestCase):
 

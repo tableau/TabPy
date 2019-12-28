@@ -1,4 +1,3 @@
-import types as _types
 from .query_object import QueryObject as _QueryObject
 
 import logging as _logging

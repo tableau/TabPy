@@ -7,6 +7,3 @@ __version__ = 'dev'
 import logging
 logging.getLogger(__name__).addHandler(logging.NullHandler())
 
-from .client import Client
-
-from .schema import generate_schema as generate_schema
