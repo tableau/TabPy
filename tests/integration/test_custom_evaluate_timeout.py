@@ -6,6 +6,11 @@ class TestCustomEvaluateTimeout(integ_test_base.IntegTestBase):
         return "5"
 
     def test_custom_evaluate_timeout_with_script(self):
+        # Uncomment the following line to preserve
+        # test case output and other files (config, state, ect.)
+        # in system temp folder.
+        # self.set_delete_temp_folder(False)
+
         payload = """
             {
                 "data": { "_arg1": 1 },
