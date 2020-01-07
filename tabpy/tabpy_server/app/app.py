@@ -162,6 +162,34 @@ class TabPyApp:
 
         return application
 
+    def _set_parameter(self, parser, settings_key, config_key, default_val):
+        key_is_set = False
+
+        if (
+            config_key is not None
+            and parser.has_section("TabPy")
+            and parser.has_option("TabPy", config_key)
+        ):
+            self.settings[settings_key] = parser.get("TabPy", config_key)
+            key_is_set = True
+            logger.debug(
+                f"Parameter {settings_key} set to "
+                f'"{self.settings[settings_key]}" '
+                "from config file or environment variable"
+            )
+
+        if not key_is_set and default_val is not None:
+            self.settings[settings_key] = default_val
+            key_is_set = True
+            logger.debug(
+                f"Parameter {settings_key} set to "
+                f'"{self.settings[settings_key]}" '
+                "from default value"
+            )
+
+        if not key_is_set:
+            logger.debug(f"Parameter {settings_key} is not set")
+
     def _parse_config(self, config_file):
         """Provide consistent mechanism for pulling in configuration.
 
@@ -189,6 +217,8 @@ class TabPyApp:
         self.python_service = None
         self.credentials = {}
 
+        pkg_path = os.path.dirname(tabpy.__file__)
+
         parser = configparser.ConfigParser(os.environ)
 
         if os.path.isfile(config_file):
@@ -200,44 +230,29 @@ class TabPyApp:
                 "using default settings."
             )
 
-        def set_parameter(settings_key, config_key, default_val=None):
-            key_is_set = False
+        settings_parameters = [
+            (SettingsParameters.Port, ConfigParameters.TABPY_PORT, 9004),
+            (SettingsParameters.ServerVersion, None, __version__),
+            (SettingsParameters.EvaluateTimeout, ConfigParameters.TABPY_EVALUATE_TIMEOUT, 30),
+            (SettingsParameters.UploadDir, ConfigParameters.TABPY_QUERY_OBJECT_PATH,
+             os.path.join(pkg_path, "tmp", "query_objects")),
+            (SettingsParameters.TransferProtocol, ConfigParameters.TABPY_TRANSFER_PROTOCOL,
+             "http"),
+            (SettingsParameters.CertificateFile, ConfigParameters.TABPY_CERTIFICATE_FILE,
+             None),
+            (SettingsParameters.KeyFile, ConfigParameters.TABPY_KEY_FILE, None),
+            (SettingsParameters.StateFilePath, ConfigParameters.TABPY_STATE_PATH,
+             os.path.join(pkg_path, "tabpy_server")),
+            (SettingsParameters.StaticPath, ConfigParameters.TABPY_STATIC_PATH, "./"),
+            (ConfigParameters.TABPY_PWD_FILE, ConfigParameters.TABPY_PWD_FILE, None),
+            (SettingsParameters.LogRequestContext, ConfigParameters.TABPY_LOG_DETAILS,
+             "false"),
+            (SettingsParameters.MaxRequestSizeInMb, ConfigParameters.TABPY_MAX_REQUEST_SIZE_MB,
+             100),
+        ]
 
-            if (
-                config_key is not None
-                and parser.has_section("TabPy")
-                and parser.has_option("TabPy", config_key)
-            ):
-                self.settings[settings_key] = parser.get("TabPy", config_key)
-                key_is_set = True
-                logger.debug(
-                    f"Parameter {settings_key} set to "
-                    f'"{self.settings[settings_key]}" '
-                    "from config file or environment variable"
-                )
-
-            if not key_is_set and default_val is not None:
-                self.settings[settings_key] = default_val
-                key_is_set = True
-                logger.debug(
-                    f"Parameter {settings_key} set to "
-                    f'"{self.settings[settings_key]}" '
-                    "from default value"
-                )
-
-            if not key_is_set:
-                logger.debug(f"Parameter {settings_key} is not set")
-
-        set_parameter(
-            SettingsParameters.Port, ConfigParameters.TABPY_PORT, default_val=9004
-        )
-        set_parameter(SettingsParameters.ServerVersion, None, default_val=__version__)
-
-        set_parameter(
-            SettingsParameters.EvaluateTimeout,
-            ConfigParameters.TABPY_EVALUATE_TIMEOUT,
-            default_val=30,
-        )
+        for setting, parameter, default_val in settings_parameters:
+            self._set_parameter(parser, setting, parameter, default_val)
 
         try:
             self.settings[SettingsParameters.EvaluateTimeout] = float(
@@ -250,66 +265,27 @@ class TabPyApp:
             )
             self.settings[SettingsParameters.EvaluateTimeout] = 30
 
-        pkg_path = os.path.dirname(tabpy.__file__)
-        set_parameter(
-            SettingsParameters.UploadDir,
-            ConfigParameters.TABPY_QUERY_OBJECT_PATH,
-            default_val=os.path.join(pkg_path, "tmp", "query_objects"),
-        )
         if not os.path.exists(self.settings[SettingsParameters.UploadDir]):
             os.makedirs(self.settings[SettingsParameters.UploadDir])
 
         # set and validate transfer protocol
-        set_parameter(
-            SettingsParameters.TransferProtocol,
-            ConfigParameters.TABPY_TRANSFER_PROTOCOL,
-            default_val="http",
-        )
         self.settings[SettingsParameters.TransferProtocol] = self.settings[
             SettingsParameters.TransferProtocol
         ].lower()
 
-        set_parameter(
-            SettingsParameters.CertificateFile, ConfigParameters.TABPY_CERTIFICATE_FILE
-        )
-        set_parameter(SettingsParameters.KeyFile, ConfigParameters.TABPY_KEY_FILE)
         self._validate_transfer_protocol_settings()
 
         # if state.ini does not exist try and create it - remove
         # last dependence on batch/shell script
-        set_parameter(
-            SettingsParameters.StateFilePath,
-            ConfigParameters.TABPY_STATE_PATH,
-            default_val=os.path.join(pkg_path, "tabpy_server"),
-        )
         self.settings[SettingsParameters.StateFilePath] = os.path.realpath(
             os.path.normpath(
                 os.path.expanduser(self.settings[SettingsParameters.StateFilePath])
             )
         )
-        state_file_dir = self.settings[SettingsParameters.StateFilePath]
-        state_file_path = os.path.join(state_file_dir, "state.ini")
-        if not os.path.isfile(state_file_path):
-            state_file_template_path = os.path.join(
-                pkg_path, "tabpy_server", "state.ini.template"
-            )
-            logger.debug(
-                f"File {state_file_path} not found, creating from "
-                f"template {state_file_template_path}..."
-            )
-            shutil.copy(state_file_template_path, state_file_path)
-
-        logger.info(f"Loading state from state file {state_file_path}")
-        tabpy_state = _get_state_from_file(state_file_dir)
-        self.tabpy_state = TabPyState(config=tabpy_state, settings=self.settings)
+        state_config, self.tabpy_state = self._build_tabpy_state()
 
         self.python_service = PythonServiceHandler(PythonService())
         self.settings["compress_response"] = True
-        set_parameter(
-            SettingsParameters.StaticPath,
-            ConfigParameters.TABPY_STATIC_PATH,
-            default_val="./",
-        )
         self.settings[SettingsParameters.StaticPath] = os.path.abspath(
             self.settings[SettingsParameters.StaticPath]
         )
@@ -319,11 +295,10 @@ class TabPyApp:
         )
 
         # Set subdirectory from config if applicable
-        if tabpy_state.has_option("Service Info", "Subdirectory"):
-            self.subdirectory = "/" + tabpy_state.get("Service Info", "Subdirectory")
+        if state_config.has_option("Service Info", "Subdirectory"):
+            self.subdirectory = "/" + state_config.get("Service Info", "Subdirectory")
 
         # If passwords file specified load credentials
-        set_parameter(ConfigParameters.TABPY_PWD_FILE, ConfigParameters.TABPY_PWD_FILE)
         if ConfigParameters.TABPY_PWD_FILE in self.settings:
             if not self._parse_pwd_file():
                 msg = (
@@ -340,11 +315,6 @@ class TabPyApp:
         features = self._get_features()
         self.settings[SettingsParameters.ApiVersions] = {"v1": {"features": features}}
 
-        set_parameter(
-            SettingsParameters.LogRequestContext,
-            ConfigParameters.TABPY_LOG_DETAILS,
-            default_val="false",
-        )
         self.settings[SettingsParameters.LogRequestContext] = (
             self.settings[SettingsParameters.LogRequestContext].lower() != "false"
         )
@@ -354,16 +324,6 @@ class TabPyApp:
             else "disabled"
         )
         logger.info(f"Call context logging is {call_context_state}")
-
-        set_parameter(
-            SettingsParameters.MaxRequestSizeInMb,
-            ConfigParameters.TABPY_MAX_REQUEST_SIZE_MB,
-            default_val=100,
-        )
-
-        set_parameter(SettingsParameters.MaxRequestSizeInMb,
-                      ConfigParameters.TABPY_MAX_REQUEST_SIZE_MB,
-                      default_val=100)
 
     def _validate_transfer_protocol_settings(self):
         if SettingsParameters.TransferProtocol not in self.settings:
@@ -436,3 +396,22 @@ class TabPyApp:
             }
 
         return features
+
+    def _build_tabpy_state(self):
+        pkg_path = os.path.dirname(tabpy.__file__)
+        state_file_dir = self.settings[SettingsParameters.StateFilePath]
+        state_file_path = os.path.join(state_file_dir, "state.ini")
+        if not os.path.isfile(state_file_path):
+            state_file_template_path = os.path.join(
+                pkg_path, "tabpy_server", "state.ini.template"
+            )
+            logger.debug(
+                f"File {state_file_path} not found, creating from "
+                f"template {state_file_template_path}..."
+            )
+            shutil.copy(state_file_template_path, state_file_path)
+
+        logger.info(f"Loading state from state file {state_file_path}")
+        tabpy_state = _get_state_from_file(state_file_dir)
+        return tabpy_state, TabPyState(config=tabpy_state, settings=self.settings)
+    
