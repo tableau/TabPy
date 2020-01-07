@@ -1,21 +1,31 @@
 build:
-    environment:
-        python: 3.6
-    dependencies:
+  environment:
+    python: 3.6
+  tests:
+    before:
+    - pip install pytest pytest-cov coverage
+    - pip install -r requirements.txt
+  nodes:
+    analysis:
+      project_setup:
+        override:
+        - pip install sklearn pandas numpy textblob nltk scipy
+        tests:
+          override:
+          - py-scrutinizer-run
+          - command: pylint-run
+            use_website_config: true
+    coverage:
+      tests:
         before:
-            - pip install pytest pytest-cov coverage
-    nodes:
-        analysis:
-            project_setup:
-                override:
-                    - pip install sklearn pandas numpy textblob nltk scipy
-            tests:
-                override:
-                    - py-scrutinizer-run
-                    -
-                        command: pylint-run
-                        use_website_config: true
-        tests: true
+        - pip install pytest pytest-cov coverage coveralls
+        - pip install -r requirements.txt
+        override:
+        - command: pytest tests --cov=tabpy
+          coverage:
+            file: '.coverage'
+            config_file: '.coveragerc'
+            format: 'py-cc'
 checks:
     python:
         code_rating: true
@@ -25,11 +35,3 @@ filter:
         - '*/test/*'
     dependency_paths:
         - 'lib/*'
-tests:
-    override:
-        -
-            command: pytest tests --cov=tabpy
-            coverage:
-                file: '.coverage'
-                config_file: '.coveragerc'
-                format: 'py-cc'
