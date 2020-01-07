@@ -414,4 +414,3 @@ class TabPyApp:
         logger.info(f"Loading state from state file {state_file_path}")
         tabpy_state = _get_state_from_file(state_file_dir)
         return tabpy_state, TabPyState(config=tabpy_state, settings=self.settings)
-    
