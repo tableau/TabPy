@@ -35,12 +35,8 @@ jobs:
         
     - name: Test with pytest
       run: |
-        pip install pytest pytest-cov coveralls coverage==4.5.4
-        pytest tests/unit --cov=tabpy --cov-append
-        pytest tests/integration --cov=tabpy --cov-append
-        coveralls
-      env:
-        COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+        pip install pytest pytest-cov
+        pytest tests
         
     - name: Markdownlint
       uses: nosborn/github-action-markdown-cli@v1.1.1
@@ -71,9 +67,8 @@ jobs:
 
     - name: Test with pytest
       run: |
-        pip install pytest pytest-cov coveralls
-        pytest tests/unit
-        pytest tests/integration
+        pip install pytest pytest-cov
+        pytest tests
 
   mac-build:
     name: ${{ matrix.python-version }} on ${{ matrix.os }}
@@ -99,7 +94,6 @@ jobs:
 
     - name: Test with pytest
       run: |
-        pip install pytest pytest-cov coveralls
-        pytest tests/unit
-        pytest tests/integration
+        pip install pytest pytest-cov
+        pytest tests
         

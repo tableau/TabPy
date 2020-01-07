@@ -1,6 +1,9 @@
 build:
     environment:
         python: 3.6
+    dependencies:
+        before:
+            - pip install pytest pytest-cov coverage
     nodes:
         analysis:
             project_setup:
@@ -22,3 +25,11 @@ filter:
         - '*/test/*'
     dependency_paths:
         - 'lib/*'
+tests:
+    override:
+        -
+            command: pytest tests --cov=tabpy
+            coverage:
+                file: '.coverage'
+                config_file: '.coveragerc'
+                format: 'py-cc'
