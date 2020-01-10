@@ -18,14 +18,14 @@ class TestRequestsNetworkWrapper(unittest.TestCase):
         self.assertIs(session, rnw.session)
 
     def mock_response(self, status_code):
-        response = Mock(requests.Response())
+        response = Mock(requests.Response)
         response.json.return_value = "json"
         response.status_code = status_code
 
         return response
 
     def setUp(self):
-        session = Mock(requests.session())
+        session = Mock(requests.Session)
         session.get.return_value = self.mock_response(200)
         session.post.return_value = self.mock_response(200)
         session.put.return_value = self.mock_response(200)

@@ -79,7 +79,7 @@ def setup_package():
             "singledispatch",
             "six",
             "tornado",
-            "urllib3<1.25,>=1.21.1",
+            "urllib3",
         ],
         entry_points={
             "console_scripts": [
