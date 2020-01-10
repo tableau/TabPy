@@ -23,3 +23,4 @@ TabPy uses Tornado 5.1.1. To it to your Python environment run
 
 Check your Python version (`python -V` command) - TabPy doesn't work with
 Python 3.8. It is recommended to use Python 3.6 or 3.7 for now.
+The root cause for the failure - Tornado issue https://github.com/tornadoweb/tornado/issues/2608.
