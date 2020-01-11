@@ -12,13 +12,12 @@ build:
           - 
             command: pylint-run
             use_website_config: true
-    tests: true
 checks:
-    python:
-        code_rating: true
-        duplicate_code: true
+  python:
+    code_rating: true
+    duplicate_code: true
 filter:
-    excluded_paths:
-        - '*/test/*'
-    dependency_paths:
-        - 'lib/*'
+  excluded_paths:
+    - '*/test/*'
+  dependency_paths:
+    - 'lib/*'
