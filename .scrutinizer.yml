@@ -1,23 +1,24 @@
 build:
-  environment:
-    python: 3.6
-  nodes:
-    analysis:
-      project_setup:
-        override:
-        - pip install sklearn pandas numpy textblob nltk scipy
-        tests:
-          override:
-          - py-scrutinizer-run
-          - 
-            command: pylint-run
-            use_website_config: true
+    environment:
+        python: 3.6
+    nodes:
+        analysis:
+            project_setup:
+                override:
+                    - pip install sklearn pandas numpy textblob nltk scipy
+            tests:
+                override:
+                    - py-scrutinizer-run
+                    -
+                        command: pylint-run
+                        use_website_config: true
+        tests: true
 checks:
-  python:
-    code_rating: true
-    duplicate_code: true
+    python:
+        code_rating: true
+        duplicate_code: true
 filter:
-  excluded_paths:
-    - '*/test/*'
-  dependency_paths:
-    - 'lib/*'
+    excluded_paths:
+        - '*/test/*'
+    dependency_paths:
+        - 'lib/*'
