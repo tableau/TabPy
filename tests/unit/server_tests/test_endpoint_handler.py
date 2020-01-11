@@ -4,33 +4,15 @@ import sys
 import tempfile
 
 from tabpy.tabpy_server.app.app import TabPyApp
+from tabpy.tabpy_server.app.app import _init_asyncio_patch
 from tabpy.tabpy_server.handlers.util import hash_password
 from tornado.testing import AsyncHTTPTestCase
-
-
-def _init_asyncio_patch():
-    """
-    Select compatible event loop for Tornado 5+.
-    As of Python 3.8, the default event loop on Windows is `proactor`,
-    however Tornado requires the old default "selector" event loop.
-    As Tornado has decided to leave this to users to set, MkDocs needs
-    to set it. See https://github.com/tornadoweb/tornado/issues/2608.
-    """
-    if sys.platform.startswith("win") and sys.version_info >= (3, 8):
-        import asyncio
-        try:
-            from asyncio import WindowsSelectorEventLoopPolicy
-        except ImportError:
-            pass  # Can't assign a policy which doesn't exist.
-        else:
-            if not isinstance(asyncio.get_event_loop_policy(), WindowsSelectorEventLoopPolicy):
-                asyncio.set_event_loop_policy(WindowsSelectorEventLoopPolicy())
 
 
 class TestEndpointHandlerWithAuth(AsyncHTTPTestCase):
     @classmethod
     def setUpClass(cls):
-        _init_asyncio_patch()
+        tabpy.tabpy_server.app.app._init_asyncio_patch()
         prefix = "__TestEndpointHandlerWithAuth_"
         # create password file
         cls.pwd_file = tempfile.NamedTemporaryFile(

@@ -489,7 +489,7 @@ class TabPyState:
         """
         _cors_origin = ""
         try:
-            logger.debug("Collecting Access-Control-Allow-Origin from " "state file...")
+            logger.debug("Collecting Access-Control-Allow-Origin from state file ...")
             _cors_origin = self._get_config_value(
                 "Service Info", "Access-Control-Allow-Origin"
             )
@@ -591,21 +591,30 @@ class TabPyState:
     def _get_config_value(
         self, section_name, option_name, optional=False, default_value=None
     ):
+        logger.log(
+            logging.DEBUG, 
+            f"Loading option '{option_name}' from section [{section_name}]...")        
+
         if not self.config:
-            raise ValueError("State configuration not yet loaded.")
+            msg = "State configuration not yet loaded."
+            logging.log(msg)
+            raise ValueError(msg)
 
+        res = None
         if not option_name:
-            return self.config.options(section_name)
-
-        if self.config.has_option(section_name, option_name):
-            return self.config.get(section_name, option_name)
+            res = self.config.options(section_name)
+        elif self.config.has_option(section_name, option_name):
+            res = self.config.get(section_name, option_name)
         elif optional:
-            return default_value
+            res = default_value
         else:
             raise ValueError(
                 f"Cannot find option name {option_name} "
                 f"under section {section_name}"
             )
+
+        logger.log(logging.DEBUG, f"Returning value '{res}'")
+        return res
 
     def _write_state(self, logger=logging.getLogger(__name__)):
         """

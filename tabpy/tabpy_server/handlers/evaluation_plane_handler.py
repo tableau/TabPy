@@ -41,6 +41,64 @@ class EvaluationPlaneHandler(BaseHandler):
         )
 
     @gen.coroutine
+    def _post_impl(self):
+        body = json.loads(self.request.body.decode("utf-8"))
+        self.logger.log(logging.DEBUG, f"Processing POST request '{body}'...")
+        if "script" not in body:
+            self.error_out(400, "Script is empty.")
+            return
+
+        # Transforming user script into a proper function.
+        user_code = body["script"]
+        arguments = None
+        arguments_str = ""
+        if "data" in body:
+            arguments = body["data"]
+
+        if arguments is not None:
+            if not isinstance(arguments, dict):
+                self.error_out(
+                    400, "Script parameters need to be provided as a dictionary."
+                )
+                return
+            args_in = sorted(arguments.keys())
+            n = len(arguments)
+            if sorted('_arg'+str(i+1) for i in range(n)) == args_in:
+                arguments_str = ", " + ", ".join(args_in)
+            else:
+                self.error_out(
+                    400,
+                    "Variables names should follow "
+                    "the format _arg1, _arg2, _argN",
+                )
+                return
+
+        function_to_evaluate = f"def _user_script(tabpy{arguments_str}):\n"
+        for u in user_code.splitlines():
+            function_to_evaluate += " " + u + "\n"
+
+        self.logger.log(
+            logging.INFO, f"function to evaluate={function_to_evaluate}"
+        )
+
+        try:
+            result = yield self._call_subprocess(function_to_evaluate, arguments)
+        except (
+            gen.TimeoutError,
+            requests.exceptions.ConnectTimeout,
+            requests.exceptions.ReadTimeout,
+        ):
+            self.logger.log(logging.ERROR, self._error_message_timeout)
+            self.error_out(408, self._error_message_timeout)
+            return
+
+        if result is not None:
+            self.write(simplejson.dumps(result, ignore_nan=True))
+        else:
+            self.write("null")
+        self.finish()
+
+    @gen.coroutine
     def post(self):
         if self.should_fail_with_not_authorized():
             self.fail_with_not_authorized()
@@ -48,61 +106,7 @@ class EvaluationPlaneHandler(BaseHandler):
 
         self._add_CORS_header()
         try:
-            body = json.loads(self.request.body.decode("utf-8"))
-            if "script" not in body:
-                self.error_out(400, "Script is empty.")
-                return
-
-            # Transforming user script into a proper function.
-            user_code = body["script"]
-            arguments = None
-            arguments_str = ""
-            if "data" in body:
-                arguments = body["data"]
-
-            if arguments is not None:
-                if not isinstance(arguments, dict):
-                    self.error_out(
-                        400, "Script parameters need to be provided as a dictionary."
-                    )
-                    return
-                args_in = sorted(arguments.keys())
-                n = len(arguments)
-                if sorted('_arg'+str(i+1) for i in range(n)) == args_in:
-                    arguments_str = ", " + ", ".join(args_in)
-                else:
-                    self.error_out(
-                        400,
-                        "Variables names should follow "
-                        "the format _arg1, _arg2, _argN",
-                    )
-                    return
-
-            function_to_evaluate = f"def _user_script(tabpy{arguments_str}):\n"
-            for u in user_code.splitlines():
-                function_to_evaluate += " " + u + "\n"
-
-            self.logger.log(
-                logging.INFO, f"function to evaluate={function_to_evaluate}"
-            )
-
-            try:
-                result = yield self._call_subprocess(function_to_evaluate, arguments)
-            except (
-                gen.TimeoutError,
-                requests.exceptions.ConnectTimeout,
-                requests.exceptions.ReadTimeout,
-            ):
-                self.logger.log(logging.ERROR, self._error_message_timeout)
-                self.error_out(408, self._error_message_timeout)
-                return
-
-            if result is not None:
-                self.write(simplejson.dumps(result, ignore_nan=True))
-            else:
-                self.write("null")
-            self.finish()
-
+            yield self._post_impl()
         except Exception as e:
             err_msg = f"{e.__class__.__name__} : {str(e)}"
             if err_msg != "KeyError : 'response'":
