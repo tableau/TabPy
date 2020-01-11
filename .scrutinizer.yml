@@ -1,6 +1,6 @@
 build:
   environment:
-    python: 3.8
+    python: 3.6
   nodes:
     analysis:
       project_setup:
