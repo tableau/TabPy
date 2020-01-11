@@ -6,6 +6,7 @@ import multiprocessing
 import os
 import shutil
 import signal
+import sys
 import tabpy.tabpy_server
 from tabpy.tabpy import __version__
 from tabpy.tabpy_server.app.ConfigParameters import ConfigParameters
@@ -28,6 +29,25 @@ import tornado
 
 
 logger = logging.getLogger(__name__)
+
+
+def _init_asyncio_patch():
+    """
+    Select compatible event loop for Tornado 5+.
+    As of Python 3.8, the default event loop on Windows is `proactor`,
+    however Tornado requires the old default "selector" event loop.
+    As Tornado has decided to leave this to users to set, MkDocs needs
+    to set it. See https://github.com/tornadoweb/tornado/issues/2608.
+    """
+    if sys.platform.startswith("win") and sys.version_info >= (3, 8):
+        import asyncio
+        try:
+            from asyncio import WindowsSelectorEventLoopPolicy
+        except ImportError:
+            pass  # Can't assign a policy which doesn't exist.
+        else:
+            if not isinstance(asyncio.get_event_loop_policy(), WindowsSelectorEventLoopPolicy):
+                asyncio.set_event_loop_policy(WindowsSelectorEventLoopPolicy())
 
 
 class TabPyApp:
@@ -113,6 +133,7 @@ class TabPyApp:
         )
 
         # initialize Tornado application
+        _init_asyncio_patch()
         application = TabPyTornadoApp(
             [
                 # skip MainHandler to use StaticFileHandler .* page requests and
@@ -243,7 +264,8 @@ class TabPyApp:
             (SettingsParameters.KeyFile, ConfigParameters.TABPY_KEY_FILE, None),
             (SettingsParameters.StateFilePath, ConfigParameters.TABPY_STATE_PATH,
              os.path.join(pkg_path, "tabpy_server")),
-            (SettingsParameters.StaticPath, ConfigParameters.TABPY_STATIC_PATH, "./"),
+            (SettingsParameters.StaticPath, ConfigParameters.TABPY_STATIC_PATH,
+             os.path.join(pkg_path, "tabpy_server", "static")),
             (ConfigParameters.TABPY_PWD_FILE, ConfigParameters.TABPY_PWD_FILE, None),
             (SettingsParameters.LogRequestContext, ConfigParameters.TABPY_LOG_DETAILS,
              "false"),

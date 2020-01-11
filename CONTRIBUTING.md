@@ -34,13 +34,6 @@ be able to work on TabPy changes:
 - Python 3.6 or 3.7:
   - To see which version of Python you have installed, run `python --version`.
 - git
-- TabPy repo:
-  - Get the latest TabPy repository with
-    `git clone https://github.com/tableau/TabPy.git`.
-  - Create a new branch for your changes.
-  - When changes are ready push them on github and create merge request.
-- PIP packages - install all with
-  `pip install pytest flake8 twine coverage --upgrade` command
 - Node.js for npm packages - install from <https://nodejs.org>.
 - NPM packages - install all with
   `npm install markdown-toc markdownlint` command.
@@ -62,6 +55,8 @@ be able to work on TabPy changes:
    ```sh
    python -m pip install --upgrade pip
    pip install -r requirements.txt
+   pip install -r requirements_dev.txt
+   pip install -r requirements_test.txt
    ```
 
 ## Tests
@@ -94,7 +89,7 @@ You can run unit tests to collect code coverage data. To do so run `pytest`
 either for server or tools test, or even combined:
 
 ```sh
-pytest tests --cov=tabpy-server/tabpy_server --cov=tabpy-tools/tabpy_tools --cov-append
+pytest tests --cov=tabpy
 ```
 
 ## TabPy in Python Virtual Environment
