@@ -1,10 +1,6 @@
 build:
   environment:
-    python: 3.6
-  tests:
-    before:
-    - pip install pytest pytest-cov coverage
-    - pip install -r requirements.txt
+    python: 3.8
   nodes:
     analysis:
       project_setup:
@@ -15,17 +11,7 @@ build:
           - py-scrutinizer-run
           - command: pylint-run
             use_website_config: true
-    coverage:
-      tests:
-        before:
-        - pip install pytest pytest-cov coverage coveralls
-        - pip install -r requirements.txt
-        override:
-        - command: pytest tests --cov=tabpy
-          coverage:
-            file: '.coverage'
-            config_file: '.coveragerc'
-            format: 'py-cc'
+    tests: true
 checks:
     python:
         code_rating: true
