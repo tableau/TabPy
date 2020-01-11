@@ -94,7 +94,7 @@ jobs:
     
     strategy:
       matrix:
-        python-version: [3.7]
+        python-version: [3.6]
         os: [ubuntu-latest]
 
     steps:
