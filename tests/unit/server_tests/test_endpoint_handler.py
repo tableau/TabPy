@@ -12,7 +12,7 @@ from tornado.testing import AsyncHTTPTestCase
 class TestEndpointHandlerWithAuth(AsyncHTTPTestCase):
     @classmethod
     def setUpClass(cls):
-        tabpy.tabpy_server.app.app._init_asyncio_patch()
+        _init_asyncio_patch()
         prefix = "__TestEndpointHandlerWithAuth_"
         # create password file
         cls.pwd_file = tempfile.NamedTemporaryFile(
