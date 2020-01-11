@@ -592,8 +592,8 @@ class TabPyState:
         self, section_name, option_name, optional=False, default_value=None
     ):
         logger.log(
-            logging.DEBUG, 
-            f"Loading option '{option_name}' from section [{section_name}]...")        
+            logging.DEBUG,
+            f"Loading option '{option_name}' from section [{section_name}]...")
 
         if not self.config:
             msg = "State configuration not yet loaded."
