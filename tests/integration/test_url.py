@@ -17,3 +17,10 @@ class TestURL(integ_test_base.IntegTestBase):
         res = conn.getresponse()
 
         self.assertEqual(404, res.status)
+
+    def test_static_page(self):
+        conn = self._get_connection()
+        conn.request("GET", "/")
+        res = conn.getresponse()
+
+        self.assertEqual(200, res.status)
