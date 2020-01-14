@@ -3,7 +3,7 @@
 [![Community Supported](https://img.shields.io/badge/Support%20Level-Community%20Supported-457387.svg)](https://www.tableau.com/support-levels-it-and-developer-tools)
 [![GitHub](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://raw.githubusercontent.com/Tableau/TabPy/master/LICENSE)
 
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/tableau/tabpy/Test%20Run%20on%20Push)
+[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/tableau/tabpy/Test%20Run%20on%20Push)](https://github.com/tableau/TabPy/actions?query=workflow%3A%22Test+Run+on+Push%22)
 [![Coverage Status](https://img.shields.io/coveralls/github/tableau/TabPy.svg)](https://coveralls.io/github/tableau/TabPy)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/tableau/TabPy/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/tableau/TabPy/?branch=master)
 
