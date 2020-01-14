@@ -1,3 +1,6 @@
+exclude \
+  tabpy/tabpy_server/state.ini
+
 include \
   CHANGELOG \
   LICENSE \
