@@ -2,7 +2,8 @@
 
 [![Community Supported](https://img.shields.io/badge/Support%20Level-Community%20Supported-457387.svg)](https://www.tableau.com/support-levels-it-and-developer-tools)
 [![GitHub](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://raw.githubusercontent.com/Tableau/TabPy/master/LICENSE)
-[![Build Status](https://img.shields.io/travis/com/tableau/TabPy.svg?branch=master)](https://travis-ci.com/tableau/TabPy)
+
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/tableau/tabpy/Test%20Run%20on%20Push)
 [![Coverage Status](https://img.shields.io/coveralls/github/tableau/TabPy.svg)](https://coveralls.io/github/tableau/TabPy)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/tableau/TabPy/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/tableau/TabPy/?branch=master)
 
@@ -10,6 +11,9 @@
 [![Python 3.7](https://img.shields.io/badge/python-3.7-blue.svg)](https://www.python.org/downloads/release/python-370/)
 [![Python 3.8](https://img.shields.io/badge/python-3.8-blue.svg)](https://www.python.org/downloads/release/python-380/)
 
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/tabpy?label=PyPI%20Python%20versions)
+![PyPI - Wheel](https://img.shields.io/pypi/wheel/tabpy)
+[![PyPI version](https://badge.fury.io/py/tabpy.svg)](https://pypi.python.org/pypi/tabpy/)
 ![Release](https://img.shields.io/github/release/tableau/TabPy.svg)
 
 TabPy (the Tableau Python Server) is an external service implementation which expands
