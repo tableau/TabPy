@@ -1,11 +1,9 @@
-from argparse import Namespace
 import json
 import os
 from tabpy.tabpy_server.app.app import TabPyApp
 from tabpy.tabpy_server.app.SettingsParameters import SettingsParameters
 import tempfile
 from tornado.testing import AsyncHTTPTestCase
-from unittest.mock import patch
 
 
 def _create_expected_info_response(settings, tabpy_state):
@@ -20,18 +18,6 @@ def _create_expected_info_response(settings, tabpy_state):
 
 
 class TestServiceInfoHandlerDefault(AsyncHTTPTestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.patcher = patch(
-            "tabpy.tabpy_server.app.app.TabPyApp._parse_cli_arguments",
-            return_value=Namespace(config=None),
-        )
-        cls.patcher.start()
-
-    @classmethod
-    def tearDownClass(cls):
-        cls.patcher.stop()
-
     def get_app(self):
         self.app = TabPyApp()
         return self.app._create_tornado_web_app()
@@ -120,7 +106,7 @@ class TestServiceInfoHandlerWithAuth(AsyncHTTPTestCase):
         self.assertTrue("features" in v1)
         features = v1["features"]
         self.assertDictEqual(
-            {"authentication": {"methods": {"basic-auth": {}}, "required": True,}},
+            {"authentication": {"methods": {"basic-auth": {}}, "required": True}},
             features,
         )
 

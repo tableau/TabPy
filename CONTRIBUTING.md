@@ -31,16 +31,9 @@ and run it locally.
 These are prerequisites for an environment required for a contributor to
 be able to work on TabPy changes:
 
-- Python 3.6.5:
+- Python 3.6 or 3.7:
   - To see which version of Python you have installed, run `python --version`.
 - git
-- TabPy repo:
-  - Get the latest TabPy repository with
-    `git clone https://github.com/tableau/TabPy.git`.
-  - Create a new branch for your changes.
-  - When changes are ready push them on github and create merge request.
-- PIP packages - install all with
-  `pip install pytest pycodestyle autopep8 twine coverage --upgrade` command
 - Node.js for npm packages - install from <https://nodejs.org>.
 - NPM packages - install all with
   `npm install markdown-toc markdownlint` command.
@@ -57,16 +50,13 @@ be able to work on TabPy changes:
     cd TabPy
     ```
 
-4. Register TabPy repo as a pip package:
-
-    ```sh
-    pip install -e .
-    ```
-
-5. Install all dependencies:
+4. Install all dependencies:
 
    ```sh
-   python setup.py install
+   python -m pip install --upgrade pip
+   pip install -r requirements.txt
+   pip install -r requirements_dev.txt
+   pip install -r requirements_test.txt
    ```
 
 ## Tests
@@ -99,7 +89,7 @@ You can run unit tests to collect code coverage data. To do so run `pytest`
 either for server or tools test, or even combined:
 
 ```sh
-pytest tests --cov=tabpy-server/tabpy_server --cov=tabpy-tools/tabpy_tools --cov-append
+pytest tests --cov=tabpy
 ```
 
 ## TabPy in Python Virtual Environment
@@ -151,21 +141,10 @@ Access-Control-Allow-Methods = GET, OPTIONS, POST
 
 ## Code styling
 
-`pycodestyle` is used to check Python code against our style conventions:
+`flake8` is used to check Python code against our style conventions:
 
 ```sh
-pycodestyle .
-```
-
-For reported errors and warnings either fix them manually or auto-format files with
-`autopep8`.
-
-Run the tool for a file. In the example below `-i`
-option tells `autopep8` to update the file. Without the option it
-outputs formatted code to the console.
-
-```sh
-autopep8 -i tabpy-server/server_tests/test_pwd_file.py
+flake8 .
 ```
 
 ## Publishing TabPy Package

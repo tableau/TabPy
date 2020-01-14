@@ -1,24 +1,16 @@
-import pip
 import os
-import sys
+from pathlib import Path
+import pip
 import platform
 import subprocess
-from pathlib import Path
+import sys
 from tabpy.models.utils import setup_utils
-
-# pip 10.0 introduced a breaking change that moves the location of main
-try:
-    from pip import main
-except ImportError:
-    from pip._internal import main
 
 
 def install_dependencies(packages):
     pip_arg = ["install"] + packages + ["--no-cache-dir"]
-    if hasattr(pip, "main"):
-        pip.main(pip_arg)
-    else:
-        pip._internal.main(pip_arg)
+    from pip._internal import main
+    pip._internal.main.main(pip_arg)
 
 
 def main():

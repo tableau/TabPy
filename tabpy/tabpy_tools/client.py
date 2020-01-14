@@ -1,14 +1,13 @@
+import copy
 from re import compile
 import time
-import sys
 import requests
 
 from .rest import RequestsNetworkWrapper, ServiceClient
 
-from .rest_client import RESTServiceClient, Endpoint, AliasEndpoint
+from .rest_client import RESTServiceClient, Endpoint
 
 from .custom_query_object import CustomQueryObject
-
 import os
 import logging
 
@@ -27,7 +26,7 @@ def _check_endpoint_type(name):
 
 def _check_hostname(name):
     _check_endpoint_type(name)
-    hostname_checker = compile(r"^http(s)?://[a-zA-Z0-9-_\.]+(/)?(:[0-9]+)?(/)?$")
+    hostname_checker = compile(r"^^http(s)?://[\w.-]+(/)?(:\d+)?(/)?$")
 
     if not hostname_checker.match(name):
         raise ValueError(
@@ -78,10 +77,10 @@ class Client:
         service_client = ServiceClient(self._endpoint, network_wrapper)
 
         self._service = RESTServiceClient(service_client)
-        if query_timeout is not None and query_timeout > 0:
-            self.query_timeout = query_timeout
+        if type(query_timeout) in (int, float) and query_timeout > 0:
+            self._service.query_timeout = query_timeout
         else:
-            self.query_timeout = 0.0
+            self._service.query_timeout = 0.0
 
     def __repr__(self):
         return (
@@ -124,12 +123,13 @@ class Client:
 
     @property
     def query_timeout(self):
-        """The timeout for queries in seconds."""
+        """The timeout for queries in milliseconds."""
         return self._service.query_timeout
 
     @query_timeout.setter
     def query_timeout(self, value):
-        self._service.query_timeout = value
+        if type(value) in (int, float) and value > 0:
+            self._service.query_timeout = value
 
     def query(self, name, *args, **kwargs):
         """Query an endpoint.
@@ -249,7 +249,16 @@ class Client:
 
         self._wait_for_endpoint_deployment(obj["name"], obj["version"])
 
-    def _gen_endpoint(self, name, obj, description, version=1, schema=[]):
+    def remove(self, name):
+        '''Removes an endpoint dict.
+
+        Parameters
+        ----------
+        name : str
+            Endpoint name to remove'''
+        self._service.remove_endpoint(name)
+
+    def _gen_endpoint(self, name, obj, description, version=1, schema=None):
         """Generates an endpoint dict.
 
         Parameters
@@ -314,7 +323,7 @@ class Client:
             "methods": endpoint_object.get_methods(),
             "required_files": [],
             "required_packages": [],
-            "schema": schema,
+            "schema": copy.copy(schema),
         }
 
     def _upload_endpoint(self, obj):

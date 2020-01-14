@@ -1,9 +1,16 @@
 """
-TabPy application.
-This file main() function is an entry point for
-'tabpy' command.
+TabPy Server.
+
+Usage:
+  tabpy [-h] | [--help]
+  tabpy [--config <CONFIG>]
+
+Options:
+  -h --help         Show this screen.
+  --config <CONFIG> Path to a config file.
 """
 
+import docopt
 import os
 from pathlib import Path
 
@@ -28,9 +35,12 @@ __version__ = read_version()
 
 
 def main():
+    args = docopt.docopt(__doc__)
+    config = args["--config"] or None
+
     from tabpy.tabpy_server.app.app import TabPyApp
 
-    app = TabPyApp()
+    app = TabPyApp(config)
     app.run()
 
 

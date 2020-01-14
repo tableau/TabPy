@@ -18,5 +18,5 @@
     "python.testing.unittestEnabled": false,
     "python.testing.nosetestsEnabled": false,
     "python.testing.pytestEnabled": true,
-    "python.linting.pep8Enabled": true
+    "python.linting.pycodestyleEnabled": true
 }

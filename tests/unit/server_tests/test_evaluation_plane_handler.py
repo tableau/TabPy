@@ -6,18 +6,11 @@ from argparse import Namespace
 from tabpy.tabpy_server.app.app import TabPyApp
 from tabpy.tabpy_server.handlers.util import hash_password
 from tornado.testing import AsyncHTTPTestCase
-from unittest.mock import patch
 
 
 class TestEvaluationPlainHandlerWithAuth(AsyncHTTPTestCase):
     @classmethod
     def setUpClass(cls):
-        cls.patcher = patch(
-            "tabpy.tabpy_server.app.app.TabPyApp._parse_cli_arguments",
-            return_value=Namespace(config=None),
-        )
-        cls.patcher.start()
-
         prefix = "__TestEvaluationPlainHandlerWithAuth_"
         # create password file
         cls.pwd_file = tempfile.NamedTemporaryFile(
@@ -94,7 +87,6 @@ class TestEvaluationPlainHandlerWithAuth(AsyncHTTPTestCase):
 
     @classmethod
     def tearDownClass(cls):
-        cls.patcher.stop()
         os.remove(cls.pwd_file.name)
         os.remove(cls.state_file.name)
         os.remove(cls.config_file.name)
@@ -137,10 +129,6 @@ class TestEvaluationPlainHandlerWithAuth(AsyncHTTPTestCase):
             },
         )
         self.assertEqual(200, response.code)
-
-    def test_null_request(self):
-        response = self.fetch("")
-        self.assertEqual(404, response.code)
 
     def test_script_not_present(self):
         response = self.fetch(

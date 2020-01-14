@@ -311,8 +311,7 @@ class BaseHandler(tornado.web.RequestHandler):
         # No known methods were found
         self.logger.log(
             logging.CRITICAL,
-            f'Unknown authentication method(s) "{method}" are configured '
-            f'for API "{api_version}"',
+            f'Unknown authentication method(s) "{method}" are configured ',
         )
         return False
 
@@ -368,8 +367,7 @@ class BaseHandler(tornado.web.RequestHandler):
         # No known methods were found
         self.logger.log(
             logging.CRITICAL,
-            f'Unknown authentication method(s) "{method}" are configured '
-            f'for API "{api_version}"',
+            f'Unknown authentication method(s) "{method}" are configured ',
         )
         return False
 

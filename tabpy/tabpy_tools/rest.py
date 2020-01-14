@@ -101,7 +101,7 @@ class RequestsNetworkWrapper:
         response = self.session.post(
             url,
             data=data,
-            headers={"content-type": "application/json",},
+            headers={"content-type": "application/json"},
             timeout=timeout,
             auth=self.auth,
         )
@@ -121,7 +121,7 @@ class RequestsNetworkWrapper:
         response = self.session.put(
             url,
             data=data,
-            headers={"content-type": "application/json",},
+            headers={"content-type": "application/json"},
             timeout=timeout,
             auth=self.auth,
         )
@@ -418,6 +418,6 @@ def enum(*values, **kwargs):
 
         return super(enum, cls).__new__(cls, value)
 
-    enum = type("Enum", (enum_type,), {"values": values, "__new__": __new__,})
+    enum = type("Enum", (enum_type,), {"values": values, "__new__": __new__})
 
     return enum

@@ -1,7 +1,6 @@
 import json
 import requests
 from requests.auth import HTTPBasicAuth
-import sys
 from tabpy.tabpy_tools.rest import RequestsNetworkWrapper, ServiceClient
 import unittest
 from unittest.mock import Mock
@@ -19,14 +18,14 @@ class TestRequestsNetworkWrapper(unittest.TestCase):
         self.assertIs(session, rnw.session)
 
     def mock_response(self, status_code):
-        response = Mock(requests.Response())
+        response = Mock(requests.Response)
         response.json.return_value = "json"
         response.status_code = status_code
 
         return response
 
     def setUp(self):
-        session = Mock(requests.session())
+        session = Mock(requests.Session)
         session.get.return_value = self.mock_response(200)
         session.post.return_value = self.mock_response(200)
         session.put.return_value = self.mock_response(200)
