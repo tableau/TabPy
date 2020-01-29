@@ -16,9 +16,9 @@
 [![PyPI version](https://badge.fury.io/py/tabpy.svg)](https://pypi.python.org/pypi/tabpy/)
 ![Release](https://img.shields.io/github/release/tableau/TabPy.svg)
 
-TabPy (the Tableau Python Server) is an Analytices Extension implementation which expands
-Tableau's capabilities by allowing users to execute Python scripts and saved functions
-via Tableau's table calculations.
+TabPy (the Tableau Python Server) is an Analytices Extension implementation which
+expands Tableau's capabilities by allowing users to execute Python scripts and
+saved functions via Tableau's table calculations.
 
 Consider reading TabPy documentation in the following order:
 
