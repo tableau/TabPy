@@ -92,7 +92,6 @@ at [`logging.config` documentation page](https://docs.python.org/3.6/library/log
   through the `/query` method, or using the `tabpy.query(...)` syntax with
   the `/evaluate` method.
 
-
 ### Configuration File Example
 
 **Note:** _Always use absolute paths for the configuration paths
