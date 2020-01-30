@@ -7,15 +7,7 @@ import sys
 from tabpy.models.utils import setup_utils
 
 
-def install_dependencies(packages):
-    pip_arg = ["install"] + packages + ["--no-cache-dir"]
-    from pip._internal import main
-    pip._internal.main(pip_arg)
-
-
 def main():
-    install_dependencies(["sklearn", "pandas", "numpy", "textblob", "nltk", "scipy"])
-    print("==================================================================")
     # Determine if we run python or python3
     if platform.system() == "Windows":
         py = "python"

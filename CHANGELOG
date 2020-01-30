@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.9.0
+
+### Improvements
+
+- Models deployment doesn't depend on pip._internal anymore.
+- Package size reduced.
+
 ## v0.8.13
 
 ### Improvements
@@ -7,7 +14,6 @@
 - TabPy works with Python 3.8 now.
 - Documentation updates with referencing Tableau Help pages.
 - Added Client.remove() method for deleting deployed models.
-
 
 ### Bug Fixes
 
