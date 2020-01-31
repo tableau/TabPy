@@ -92,7 +92,6 @@ at [`logging.config` documentation page](https://docs.python.org/3.6/library/log
   through the `/query` method, or using the `tabpy.query(...)` syntax with
   the `/evaluate` method.
 
-
 ### Configuration File Example
 
 **Note:** _Always use absolute paths for the configuration paths
@@ -211,19 +210,19 @@ Passwords in the password file are hashed with PBKDF2.
 with hosting OS mechanisms. Ideally the file should only be accessible
 for reading with the account under which TabPy runs and TabPy admin account.**
 
-There is a `tabpy-user-management` command provided with `tabpy`
+There is a `tabpy-user` command provided with `tabpy`
  package to operate with accounts in the password file. Run
-`tabpy-user-management -h` to see how to use it.
+`tabpy-user -h` to see how to use it.
 
 After making any changes to the password file, TabPy needs to be restarted.
 
 ### Adding an Account
 
-To add an account run `tabpy-user-management add`
+To add an account run `tabpy-user add`
 command  providing user name, password (optional) and password file:
 
 ```sh
-tabpy-user-management add -u <username> -p <password> -f <pwdfile>
+tabpy-user add -u <username> -p <password> -f <pwdfile>
 ```
 
 If the (recommended) `-p` argument is not provided a password for the user name
@@ -231,11 +230,11 @@ will be generated and displayed in the command line.
 
 ### Updating an Account
 
-To update the password for an account run `tabpy-user-management update`
+To update the password for an account run `tabpy-user update`
 command:
 
 ```sh
-tabpy-user-management update -u <username> -p <password> -f <pwdfile>
+tabpy-user update -u <username> -p <password> -f <pwdfile>
 ```
 
 If the (recommended) `-p` agrument is not provided a password for the user name
