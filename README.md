@@ -44,6 +44,7 @@ Other useful resources:
 * [Tableau Sci-Fi Blog](http://tabscifi.com/) provides tips, tricks, under
   the hood, useful resources, and technical details for how to extend
   Tableau with data science.
+* [Known Issues for the Tableau Analytics Extensions API](https://tableau.github.io/analytics-extensions-api/docs/ae_known_issues.html).
 * For all questions not related to the TabPy code (installation, deployment,
   connections, Python issues, etc.) and requests use the
   [Analytics Extensions Forum](https://community.tableau.com/community/forums/analyticsextensions)
