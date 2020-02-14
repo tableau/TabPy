@@ -27,7 +27,7 @@ jobs:
         pip install -r requirements_test.txt
         pip install -r requirements_dev.txt
 
-    - name: Test with pytest
+    - name: Collect code coverage
       run: |
         pytest tests --cov=tabpy
         coveralls
