@@ -5,7 +5,6 @@ build:
     coverage:
       project_setup:
         override:
-          - python -m pip install --upgrade pip
           - pip install -r requirements.txt
           - pip install -r requirements_test.txt
           - pip install -r requirements_dev.txt
@@ -19,7 +18,7 @@ build:
     analysis:
       project_setup:
         override:
-          - pip install sklearn pandas numpy textblob nltk scipy
+          - pip install -r requirements_test.txt
       tests:
         override:
           - py-scrutinizer-run
