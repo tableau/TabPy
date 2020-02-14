@@ -10,7 +10,7 @@ build:
           - pip install -r requirements_dev.txt
       tests:
         override:
-          - command: 'pytest'
+          - command: 'pytest tests'
             coverage:
               file: '.coverage'
               config_file: '.coveragerc'
