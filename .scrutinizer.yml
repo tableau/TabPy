@@ -1,24 +1,37 @@
 build:
-    environment:
-        python: 3.6
-    nodes:
-        analysis:
-            project_setup:
-                override:
-                    - pip install sklearn pandas numpy textblob nltk scipy
-            tests:
-                override:
-                    - py-scrutinizer-run
-                    -
-                        command: pylint-run
-                        use_website_config: true
-        tests: true
+  environment:
+    python: 3.7.6
+  nodes:
+    coverage:
+      project_setup:
+        override:
+          - pip install -r requirements.txt
+          - pip install -r requirements_test.txt
+          - pip install -r requirements_dev.txt
+      tests:
+        override:
+          - command: 'pytest tests --cov=tabpy --cov-config=setup.cfg'
+            coverage:
+              file: '.coverage'
+              config_file: 'setup.cfg'
+              format: 'py-cc'
+    analysis:
+      project_setup:
+        override:
+          - pip install -r requirements_test.txt
+      tests:
+        override:
+          - py-scrutinizer-run
+          -
+            command: pylint-run
+            use_website_config: true
+    tests: true
 checks:
-    python:
-        code_rating: true
-        duplicate_code: true
+  python:
+    code_rating: true
+    duplicate_code: true
 filter:
-    excluded_paths:
-        - '*/test/*'
-    dependency_paths:
-        - 'lib/*'
+  excluded_paths:
+    - '*/tests/*'
+  dependency_paths:
+    - 'lib/*'
