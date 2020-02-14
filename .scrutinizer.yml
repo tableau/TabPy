@@ -10,10 +10,10 @@ build:
           - pip install -r requirements_dev.txt
       tests:
         override:
-          - command: 'pytest tests'
+          - command: 'pytest tests --cov=tabpy --cov-config=setup.cfg'
             coverage:
               file: '.coverage'
-              config_file: '.coveragerc'
+              config_file: 'setup.cfg'
               format: 'py-cc'
     analysis:
       project_setup:
