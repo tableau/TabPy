@@ -1,13 +1,31 @@
 # Changelog
 
-## v0.8.10
+## v1.0.0
+
+### Improvements
+
+- Minor: feature name changed to analytics extensions.
+- Startup script files deleted.
+- Index page updated.
+
+### Other
+
+- TabPy is now Tableau Supported (used to be Community Supported).
+
+## v0.9.0
+
+### Improvements
+
+- Models deployment doesn't depend on pip._internal anymore.
+- Package size reduced.
+
+## v0.8.13
 
 ### Improvements
 
 - TabPy works with Python 3.8 now.
 - Documentation updates with referencing Tableau Help pages.
 - Added Client.remove() method for deleting deployed models.
-
 
 ### Bug Fixes
 

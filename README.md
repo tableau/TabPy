@@ -1,19 +1,23 @@
 # TabPy
 
-[![Community Supported](https://img.shields.io/badge/Support%20Level-Community%20Supported-457387.svg)](https://www.tableau.com/support-levels-it-and-developer-tools)
+[![Tableau Supported](https://img.shields.io/badge/Support%20Level-Tableau%20Supported-53bd92.svg)](https://www.tableau.com/support-levels-it-and-developer-tools)
 [![GitHub](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://raw.githubusercontent.com/Tableau/TabPy/master/LICENSE)
-[![Build Status](https://img.shields.io/travis/com/tableau/TabPy.svg?branch=master)](https://travis-ci.com/tableau/TabPy)
-[![Coverage Status](https://img.shields.io/coveralls/github/tableau/TabPy.svg)](https://coveralls.io/github/tableau/TabPy)
+
+[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/tableau/tabpy/Test%20Run%20on%20Push)](https://github.com/tableau/TabPy/actions?query=workflow%3A%22Test+Run+on+Push%22)
+![Scrutinizer coverage](https://img.shields.io/scrutinizer/coverage/g/tableau/tabpy)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/tableau/TabPy/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/tableau/TabPy/?branch=master)
 
 [![Python 3.6](https://img.shields.io/badge/python-3.6-blue.svg)](https://www.python.org/downloads/release/python-360/)
 [![Python 3.7](https://img.shields.io/badge/python-3.7-blue.svg)](https://www.python.org/downloads/release/python-370/)
-
+[![Python 3.8](https://img.shields.io/badge/python-3.8-blue.svg)](https://www.python.org/downloads/release/python-380/)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/tabpy?label=PyPI%20Python%20versions)
+![PyPI - Wheel](https://img.shields.io/pypi/wheel/tabpy)
+[![PyPI version](https://badge.fury.io/py/tabpy.svg)](https://pypi.python.org/pypi/tabpy/)
 ![Release](https://img.shields.io/github/release/tableau/TabPy.svg)
 
-TabPy (the Tableau Python Server) is an external service implementation which expands
-Tableau's capabilities by allowing users to execute Python scripts and saved functions
-via Tableau's table calculations.
+TabPy (the Tableau Python Server) is an Analytices Extension implementation which
+expands Tableau's capabilities by allowing users to execute Python scripts and
+saved functions via Tableau's table calculations.
 
 Consider reading TabPy documentation in the following order:
 
@@ -36,9 +40,13 @@ More technical topics:
 
 Other useful resources:
 
+* [Tableau Sci-Fi Blog](http://tabscifi.com/) provides tips, tricks, under
+  the hood, useful resources, and technical details for how to extend
+  Tableau with data science.
+* [Known Issues for the Tableau Analytics Extensions API](https://tableau.github.io/analytics-extensions-api/docs/ae_known_issues.html).
 * For all questions not related to the TabPy code (installation, deployment,
   connections, Python issues, etc.) and requests use the
-  [External Services Forum](https://community.tableau.com/community/forums/externalservices)
+  [Analytics Extensions Forum](https://community.tableau.com/community/forums/analyticsextensions)
   on [Tableau Community](https://community.tableau.com).
 * [Building advanced analytics applications with TabPy](https://www.tableau.com/about/blog/2017/1/building-advanced-analytics-applications-tabpy-64916)
 * [Building Data Science Applications with TabPy Video Tutorial](https://youtu.be/nRtOMTnBz_Y)

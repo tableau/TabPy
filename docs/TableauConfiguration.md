@@ -22,14 +22,14 @@ configure Tableau to use this service for evaluating Python code.
 
 To configure Tableau Desktop version 10.1 or later to connect to TabPy server
 follow steps at Tableau
-[Configure an external service connection](https://help.tableau.com/current/pro/desktop/en-us/r_connection_manage.htm#configure-an-external-service-connection)
+[Configure an Analytics Extension connection](https://help.tableau.com/current/pro/desktop/en-us/r_connection_manage.htm#configure-an-external-service-connection)
 documentation page.
 
 ### Tableau Server 2018.2 and Newer Versions
 
 To configure Tableau Server 2018.2 and newer versions to connect to TabPy server
 follow instructions on Tableau
-[Configure Connections to External Services](https://onlinehelp.tableau.com/current/server/en-us/tsm.htm)
+[Configure Connections to Analytics Extensions](https://onlinehelp.tableau.com/current/server/en-us/tsm.htm)
 page.
 
 Specific details about how to configure a secure connection to TabPy, enable or
