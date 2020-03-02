@@ -15,7 +15,7 @@
 
 ## Configuration
 
-Once you have a [TabPy instance](server-config.md) set up you can easily
+Once you have a [TabPy instance](server-install.md) set up you can easily
 configure Tableau to use this service for evaluating Python code.
 
 ### Tableau Desktop
