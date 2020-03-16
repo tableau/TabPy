@@ -138,7 +138,7 @@ class BaseHandler(tornado.web.RequestHandler):
         self.logger.enable_context_logging(
             app.settings[SettingsParameters.LogRequestContext]
         )
-        self.logger.log(logging.DEBUG, "Checking if need to handle authentication")
+        self.logger.log(logging.DEBUG, f'Request headers: {self.request.headers}')
         self.not_authorized = not self.handle_authentication("v1")
 
     def error_out(self, code, log_message, info=None):
