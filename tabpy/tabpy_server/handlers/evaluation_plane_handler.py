@@ -2,10 +2,9 @@ from tabpy.tabpy_server.handlers import BaseHandler
 import json
 import simplejson
 import logging
-from tabpy.tabpy_server.common.util import format_exception
 import requests
-from tornado import gen
 from datetime import timedelta
+from tornado import gen
 
 
 class RestrictedTabPy:
@@ -43,7 +42,7 @@ class EvaluationPlaneHandler(BaseHandler):
     @gen.coroutine
     def _post_impl(self):
         body = json.loads(self.request.body.decode("utf-8"))
-        self.logger.log(logging.DEBUG, f"Processing POST request '{body}'...")
+        self.logger.log(logging.DEBUG, f"Processing POST /evaluate ...")
         if "script" not in body:
             self.error_out(400, "Script is empty.")
             return
@@ -109,18 +108,7 @@ class EvaluationPlaneHandler(BaseHandler):
             yield self._post_impl()
         except Exception as e:
             err_msg = f"{e.__class__.__name__} : {str(e)}"
-            if err_msg != "KeyError : 'response'":
-                err_msg = format_exception(e, "POST /evaluate")
-                self.error_out(500, "Error processing script", info=err_msg)
-            else:
-                self.error_out(
-                    404,
-                    "Error processing script",
-                    info="The endpoint you're "
-                    "trying to query did not respond. Please make sure the "
-                    "endpoint exists and the correct set of arguments are "
-                    "provided.",
-                )
+            self.error_out(500, f"Error processing script: {err_msg}", info=err_msg)
 
     @gen.coroutine
     def _call_subprocess(self, function_to_evaluate, arguments):

@@ -1,9 +1,9 @@
 import json
 from tabpy.tabpy_server.app.SettingsParameters import SettingsParameters
-from tabpy.tabpy_server.handlers import ManagementHandler
+from tabpy.tabpy_server.handlers import BaseHandler
 
 
-class ServiceInfoHandler(ManagementHandler):
+class ServiceInfoHandler(BaseHandler):
     def initialize(self, app):
         super(ServiceInfoHandler, self).initialize(app)
 

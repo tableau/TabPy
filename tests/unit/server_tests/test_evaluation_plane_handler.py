@@ -2,7 +2,6 @@ import base64
 import os
 import tempfile
 
-from argparse import Namespace
 from tabpy.tabpy_server.app.app import TabPyApp
 from tabpy.tabpy_server.handlers.util import hash_password
 from tornado.testing import AsyncHTTPTestCase

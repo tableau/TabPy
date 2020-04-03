@@ -4,6 +4,7 @@ import logging
 from logging import config
 import multiprocessing
 import os
+import pkg_resources
 import shutil
 import signal
 import sys
@@ -14,8 +15,6 @@ from tabpy.tabpy_server.app.SettingsParameters import SettingsParameters
 from tabpy.tabpy_server.app.util import parse_pwd_file
 from tabpy.tabpy_server.management.state import TabPyState
 from tabpy.tabpy_server.management.util import _get_state_from_file
-from tabpy.tabpy_server.psws.callbacks import init_model_evaluator, init_ps_server
-from tabpy.tabpy_server.psws.python_service import PythonService, PythonServiceHandler
 from tabpy.tabpy_server.handlers import (
     EndpointHandler,
     EndpointsHandler,
@@ -23,7 +22,6 @@ from tabpy.tabpy_server.handlers import (
     QueryPlaneHandler,
     ServiceInfoHandler,
     StatusHandler,
-    UploadDestinationHandler,
 )
 import tornado
 
@@ -60,6 +58,7 @@ class TabPyApp:
     tabpy_state = None
     python_service = None
     credentials = {}
+    models = {}
 
     def __init__(self, config_file=None):
         if config_file is None:
@@ -74,6 +73,7 @@ class TabPyApp:
                 logging.basicConfig(level=logging.DEBUG)
 
         self._parse_config(config_file)
+        self._load_models()
 
     def run(self):
         application = self._create_tornado_web_app()
@@ -81,8 +81,6 @@ class TabPyApp:
             int(self.settings[SettingsParameters.MaxRequestSizeInMb]) * 1024 * 1024
         )
         logger.info(f"Setting max request size to {max_request_size} bytes")
-
-        init_model_evaluator(self.settings, self.tabpy_state, self.python_service)
 
         protocol = self.settings[SettingsParameters.TransferProtocol]
         ssl_options = None
@@ -122,12 +120,6 @@ class TabPyApp:
                     tornado.ioloop.IOLoop.instance().stop()
                     logger.info("Shutting down TabPy...")
 
-        logger.info("Initializing TabPy...")
-        tornado.ioloop.IOLoop.instance().run_sync(
-            lambda: init_ps_server(self.settings, self.tabpy_state)
-        )
-        logger.info("Done initializing TabPy.")
-
         executor = concurrent.futures.ThreadPoolExecutor(
             max_workers=multiprocessing.cpu_count()
         )
@@ -156,11 +148,6 @@ class TabPyApp:
                     self.subdirectory + r"/evaluate",
                     EvaluationPlaneHandler,
                     dict(executor=executor, app=self),
-                ),
-                (
-                    self.subdirectory + r"/configurations/endpoint_upload_destination",
-                    UploadDestinationHandler,
-                    dict(app=self),
                 ),
                 (
                     self.subdirectory + r"/(.*)",
@@ -306,7 +293,6 @@ class TabPyApp:
         )
         state_config, self.tabpy_state = self._build_tabpy_state()
 
-        self.python_service = PythonServiceHandler(PythonService())
         self.settings["compress_response"] = True
         self.settings[SettingsParameters.StaticPath] = os.path.abspath(
             self.settings[SettingsParameters.StaticPath]
@@ -435,4 +421,11 @@ class TabPyApp:
 
         logger.info(f"Loading state from state file {state_file_path}")
         tabpy_state = _get_state_from_file(state_file_dir)
-        return tabpy_state, TabPyState(config=tabpy_state, settings=self.settings)
+        return tabpy_state, TabPyState(config=tabpy_state, settings=self.settings, models=self.models)
+
+    def _load_models(self):
+        logger.info("Loading models...")
+        for pkg in pkg_resources.iter_entry_points('tabpy_models'):
+            logger.info(f"Loading model '{pkg.name}'...")
+            self.models[pkg.name] = pkg.load()
+        logger.info(f"Loaded {len(self.models)} models")
