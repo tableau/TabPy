@@ -1,4 +1,4 @@
-name: Fis spelling
+name: Fix spelling on push
 
 on: [push]
 
