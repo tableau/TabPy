@@ -17,11 +17,61 @@ def _create_expected_info_response(settings, tabpy_state):
         "versions": settings["versions"],
     }
 
-
-class TestServiceInfoHandlerDefault(AsyncHTTPTestCase):
+class BaseTestServiceInfoHandler(AsyncHTTPTestCase):
     def get_app(self):
-        self.app = TabPyApp()
+        if hasattr(self, 'config_file') and hasattr(self.config_file, 'name'):
+            self.app = TabPyApp(self.config_file.name)
+        else:
+            self.app = TabPyApp()
         return self.app._create_tornado_web_app()
+
+    @classmethod
+    def tearDownClass(cls):
+        os.remove(cls.state_file.name)
+        os.remove(cls.config_file.name)
+        os.rmdir(cls.state_dir)
+
+
+    @classmethod
+    def setUpClass(cls):
+        # create state.ini dir and file
+        cls.state_dir = tempfile.mkdtemp(prefix=cls.prefix)
+        with open(os.path.join(cls.state_dir, "state.ini"), "w+") as cls.state_file:
+            cls.state_file.write(
+                "[Service Info]\n"
+                "Name = TabPy Serve\n"
+                "Description = \n"
+                "Creation Time = 0\n"
+                "Access-Control-Allow-Origin = \n"
+                "Access-Control-Allow-Headers = \n"
+                "Access-Control-Allow-Methods = \n"
+                "\n"
+                "[Query Objects Service Versions]\n"
+                "\n"
+                "[Query Objects Docstrings]\n"
+                "\n"
+                "[Meta]\n"
+                "Revision Number = 1\n"
+            )
+        cls.state_file.close()
+
+        # create config file
+        cls.config_file = tempfile.NamedTemporaryFile(
+            prefix=cls.prefix, suffix=".conf", delete=False, mode='w'
+        )
+        cls.config_file.write( "[TabPy]\n")
+        if hasattr(cls, 'tabpy_config'):
+                for k in cls.tabpy_config:
+                    cls.config_file.write(k)
+        cls.config_file.close()
+
+
+class TestServiceInfoHandlerDefault(BaseTestServiceInfoHandler):
+    @classmethod
+    def setUpClass(cls):
+        cls.prefix = "__TestServiceInfoHandlerWithAuth_"
+        cls.tabpy_config = ["TABPY_PWD_FILE = ./tests/integration/resources/pwdfile.txt\n"]
+        super(TestServiceInfoHandlerDefault, cls).setUpClass()
 
     def test_given_vanilla_tabpy_server_expect_correct_info_response(self):
         response = self.fetch("/info")
@@ -34,62 +84,13 @@ class TestServiceInfoHandlerDefault(AsyncHTTPTestCase):
         self.assertDictEqual(actual_response, expected_response)
 
 
-class TestServiceInfoHandlerWithAuth(AsyncHTTPTestCase):
+class TestServiceInfoHandlerWithAuth(BaseTestServiceInfoHandler):
     @classmethod
     def setUpClass(cls):
-        prefix = "__TestServiceInfoHandlerWithAuth_"
-        # create password file
-        cls.pwd_file = tempfile.NamedTemporaryFile(
-            prefix=prefix, suffix=".txt", delete=False
-        )
-        cls.pwd_file.write(b"username password")
-        cls.pwd_file.close()
+        cls.prefix = "__TestServiceInfoHandlerWithAuth_"
+        cls.tabpy_config = ["TABPY_PWD_FILE = ./tests/integration/resources/pwdfile.txt\n"]
+        super(TestServiceInfoHandlerWithAuth, cls).setUpClass()
 
-        # create state.ini dir and file
-        cls.state_dir = tempfile.mkdtemp(prefix=prefix)
-        cls.state_file = open(os.path.join(cls.state_dir, "state.ini"), "w+")
-        cls.state_file.write(
-            "[Service Info]\n"
-            "Name = TabPy Serve\n"
-            "Description = \n"
-            "Creation Time = 0\n"
-            "Access-Control-Allow-Origin = \n"
-            "Access-Control-Allow-Headers = \n"
-            "Access-Control-Allow-Methods = \n"
-            "\n"
-            "[Query Objects Service Versions]\n"
-            "\n"
-            "[Query Objects Docstrings]\n"
-            "\n"
-            "[Meta]\n"
-            "Revision Number = 1\n"
-        )
-        cls.state_file.close()
-
-        # create config file
-        cls.config_file = tempfile.NamedTemporaryFile(
-            prefix=prefix, suffix=".conf", delete=False
-        )
-        cls.config_file.write(
-            bytes(
-                "[TabPy]\n"
-                f"TABPY_PWD_FILE = {cls.pwd_file.name}\n"
-                f"TABPY_STATE_PATH = {cls.state_dir}",
-                "utf-8",
-            )
-        )
-        cls.config_file.close()
-
-    @classmethod
-    def tearDownClass(cls):
-        os.remove(cls.pwd_file.name)
-        os.remove(cls.state_file.name)
-        os.remove(cls.config_file.name)
-        os.rmdir(cls.state_dir)
-
-    def get_app(self):
-        self.app = TabPyApp(self.config_file.name)
-        return self.app._create_tornado_web_app()
 
     def test_given_tabpy_server_with_auth_expect_correct_info_response(self):
         response = self.fetch("/info")
@@ -112,48 +113,11 @@ class TestServiceInfoHandlerWithAuth(AsyncHTTPTestCase):
         )
 
 
-class TestServiceInfoHandlerWithoutAuth(AsyncHTTPTestCase):
+class TestServiceInfoHandlerWithoutAuth(BaseTestServiceInfoHandler):
     @classmethod
     def setUpClass(cls):
-        prefix = "__TestServiceInfoHandlerWithoutAuth_"
-
-        # create state.ini dir and file
-        cls.state_dir = tempfile.mkdtemp(prefix=prefix)
-        with open(os.path.join(cls.state_dir, "state.ini"), "w+") as cls.state_file:
-            cls.state_file.write(
-                "[Service Info]\n"
-                "Name = TabPy Serve\n"
-                "Description = \n"
-                "Creation Time = 0\n"
-                "Access-Control-Allow-Origin = \n"
-                "Access-Control-Allow-Headers = \n"
-                "Access-Control-Allow-Methods = \n"
-                "\n"
-                "[Query Objects Service Versions]\n"
-                "\n"
-                "[Query Objects Docstrings]\n"
-                "\n"
-                "[Meta]\n"
-                "Revision Number = 1\n"
-            )
-        cls.state_file.close()
-
-        # create config file
-        cls.config_file = tempfile.NamedTemporaryFile(
-            prefix=prefix, suffix=".conf", delete=False, mode="w+"
-        )
-        cls.config_file.write("[TabPy]\n" f"TABPY_STATE_PATH = {cls.state_dir}")
-        cls.config_file.close()
-
-    @classmethod
-    def tearDownClass(cls):
-        os.remove(cls.state_file.name)
-        os.remove(cls.config_file.name)
-        os.rmdir(cls.state_dir)
-
-    def get_app(self):
-        self.app = TabPyApp(self.config_file.name)
-        return self.app._create_tornado_web_app()
+        cls.prefix = "__TestServiceInfoHandlerWithoutAuth_"
+        super(TestServiceInfoHandlerWithoutAuth, cls).setUpClass()
 
     def test_tabpy_server_with_no_auth_expect_correct_info_response(self):
         response = self.fetch("/info")
@@ -175,54 +139,13 @@ class TestServiceInfoHandlerWithoutAuth(AsyncHTTPTestCase):
 
 
 
-class TestServiceInfoHandlerWithAuthWithSecureEndpointAndPassword(AsyncHTTPTestCase):
+class TestServiceInfoHandlerWithAuthWithSecureEndpointAndPassword(BaseTestServiceInfoHandler):
     @classmethod
     def setUpClass(cls):
-        prefix = "__TestServiceInfoHandlerWithAuthWithSecureEndpoint_"
-        # create state.ini dir and file
-        cls.state_dir = tempfile.mkdtemp(prefix=prefix)
-        cls.state_file = open(os.path.join(cls.state_dir, "state.ini"), "w+")
-        cls.state_file.write(
-            "[Service Info]\n"
-            "Name = TabPy Serve\n"
-            "Description = \n"
-            "Creation Time = 0\n"
-            "Access-Control-Allow-Origin = \n"
-            "Access-Control-Allow-Headers = \n"
-            "Access-Control-Allow-Methods = \n"
-            "\n"
-            "[Query Objects Service Versions]\n"
-            "\n"
-            "[Query Objects Docstrings]\n"
-            "\n"
-            "[Meta]\n"
-            "Revision Number = 1\n"
-        )
-        cls.state_file.close()
-
-        # create config file
-        cls.config_file = tempfile.NamedTemporaryFile(
-            prefix=prefix, suffix=".conf", delete=False
-        )
-        cls.config_file.write(
-            bytes(
-                "[TabPy]\n"
-                "TABPY_PWD_FILE = ./tests/integration/resources/pwdfile.txt\n"
-                "TABPY_AUTH_INFO = true\n",
-                "utf-8",
-            )
-        )
-        cls.config_file.close()
-
-    @classmethod
-    def tearDownClass(cls):
-        os.remove(cls.state_file.name)
-        os.remove(cls.config_file.name)
-        os.rmdir(cls.state_dir)
-
-    def get_app(self):
-        self.app = TabPyApp(self.config_file.name)
-        return self.app._create_tornado_web_app()
+        cls.prefix = "__TestServiceInfoHandlerWithAuthWithSecureEndpointAndPassword_"
+        cls.tabpy_config = ["TABPY_AUTH_INFO = true\n",
+            "TABPY_PWD_FILE = ./tests/integration/resources/pwdfile.txt\n"]
+        super(TestServiceInfoHandlerWithAuthWithSecureEndpointAndPassword, cls).setUpClass()
 
     def test_given_tabpy_server_with_auth_expect_correct_info_response(self):
 
@@ -252,111 +175,24 @@ class TestServiceInfoHandlerWithAuthWithSecureEndpointAndPassword(AsyncHTTPTestC
             features,
         )
 
-class TestServiceInfoHandlerWithAuthWithSecureEndpoint(AsyncHTTPTestCase):
+class TestServiceInfoHandlerWithAuthWithSecureEndpoint(BaseTestServiceInfoHandler):
     @classmethod
     def setUpClass(cls):
-        prefix = "__TestServiceInfoHandlerWithAuthWithSecureEndpoint_"
-        # create password file
-        cls.pwd_file = tempfile.NamedTemporaryFile(
-            prefix=prefix, suffix=".txt", delete=False
-        )
-        cls.pwd_file.write(b"username password")
-        cls.pwd_file.close()
-
-        # create state.ini dir and file
-        cls.state_dir = tempfile.mkdtemp(prefix=prefix)
-        cls.state_file = open(os.path.join(cls.state_dir, "state.ini"), "w+")
-        cls.state_file.write(
-            "[Service Info]\n"
-            "Name = TabPy Serve\n"
-            "Description = \n"
-            "Creation Time = 0\n"
-            "Access-Control-Allow-Origin = \n"
-            "Access-Control-Allow-Headers = \n"
-            "Access-Control-Allow-Methods = \n"
-            "\n"
-            "[Query Objects Service Versions]\n"
-            "\n"
-            "[Query Objects Docstrings]\n"
-            "\n"
-            "[Meta]\n"
-            "Revision Number = 1\n"
-        )
-        cls.state_file.close()
-
-        # create config file
-        cls.config_file = tempfile.NamedTemporaryFile(
-            prefix=prefix, suffix=".conf", delete=False
-        )
-        cls.config_file.write(
-            bytes(
-                "[TabPy]\n"
-                f"TABPY_PWD_FILE = {cls.pwd_file.name}\n"
-                "TABPY_AUTH_INFO = true\n",
-                "utf-8",
-            )
-        )
-        cls.config_file.close()
-
-    @classmethod
-    def tearDownClass(cls):
-        os.remove(cls.pwd_file.name)
-        os.remove(cls.state_file.name)
-        os.remove(cls.config_file.name)
-        os.rmdir(cls.state_dir)
-
-    def get_app(self):
-        self.app = TabPyApp(self.config_file.name)
-        return self.app._create_tornado_web_app()
+        cls.prefix = "__TestServiceInfoHandlerWithAuthWithSecureEndpoint_"
+        cls.tabpy_config = ["TABPY_AUTH_INFO = true\n",
+                            "TABPY_PWD_FILE = ./tests/integration/resources/pwdfile.txt\n"]
+        super(TestServiceInfoHandlerWithAuthWithSecureEndpoint, cls).setUpClass()
 
     def test_given_tabpy_server_with_auth_expect_correct_info_response(self):
         response = self.fetch("/info")
         self.assertEqual(response.code, 401)
 
-class TestServiceInfoHandlerWithoutAuthWithSecureEndpoint(AsyncHTTPTestCase):
+class TestServiceInfoHandlerWithoutAuthWithSecureEndpoint(BaseTestServiceInfoHandler):
     @classmethod
     def setUpClass(cls):
-        prefix = "__TestServiceInfoHandlerWithoutAuthWithSecureEndpoint_"
-
-        # create state.ini dir and file
-        cls.state_dir = tempfile.mkdtemp(prefix=prefix)
-        with open(os.path.join(cls.state_dir, "state.ini"), "w+") as cls.state_file:
-            cls.state_file.write(
-                "[Service Info]\n"
-                "Name = TabPy Serve\n"
-                "Description = \n"
-                "Creation Time = 0\n"
-                "Access-Control-Allow-Origin = \n"
-                "Access-Control-Allow-Headers = \n"
-                "Access-Control-Allow-Methods = \n"
-                "\n"
-                "[Query Objects Service Versions]\n"
-                "\n"
-                "[Query Objects Docstrings]\n"
-                "\n"
-                "[Meta]\n"
-                "Revision Number = 1\n"
-            )
-        cls.state_file.close()
-
-        # create config file
-        cls.config_file = tempfile.NamedTemporaryFile(
-            prefix=prefix, suffix=".conf", delete=False, mode="w+"
-        )
-        cls.config_file.write("[TabPy]\n" f"TABPY_STATE_PATH = {cls.state_dir}\n"
-                              "TABPY_AUTH_INFO = true\n",
-                              )
-        cls.config_file.close()
-
-    @classmethod
-    def tearDownClass(cls):
-        os.remove(cls.state_file.name)
-        os.remove(cls.config_file.name)
-        os.rmdir(cls.state_dir)
-
-    def get_app(self):
-        self.app = TabPyApp(self.config_file.name)
-        return self.app._create_tornado_web_app()
+        cls.prefix = "__TestServiceInfoHandlerWithoutAuthWithSecureEndpoint_"
+        cls.tabpy_config = ["TABPY_AUTH_INFO = true\n"]
+        super(TestServiceInfoHandlerWithoutAuthWithSecureEndpoint, cls).setUpClass()
 
     def test_tabpy_server_with_no_auth_expect_correct_info_response(self):
         response = self.fetch("/info")
