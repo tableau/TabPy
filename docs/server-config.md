@@ -71,7 +71,7 @@ at [`logging.config` documentation page](https://docs.python.org/3.6/library/log
   makes TabPy require credentials with HTTP(S) requests. More details about
   authentication can be found in [Authentication](#authentication)
   section. Default value - not set.
-- `TABPY_AUTH_INFO` - Determines whether authorization is required when 
+- `TABPY_AUTH_INFO` - Determines whether authorization is required when
   accessing the `info` API. More details about
   authentication can be found in [Authentication](#authentication)
   section. Default value - False.
@@ -251,6 +251,7 @@ To delete an account open password file in any text editor and delete the
 line with the user name.
 
 ### Endpoint Security
+
 All endpoints except `info` require authentication if it is enabled for the server.
  `info` can be secured using the `TABPY_AUTH_INFO` setting.
 
