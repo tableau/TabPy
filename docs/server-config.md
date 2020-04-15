@@ -31,7 +31,7 @@ Configuration parameters can be updated with:
 1. Adding environment variables - set the environment variable as required by
    your Operating System. When creating environment variables, use the same
    name for your environment variable as specified in the config file.
-2. Specifying a parameter in a config file (enviroment variable value overwrites
+2. Specifying a parameter in a config file (environment variable value overwrites
    configuration setting).
 
 Configuration file with custom settings is specified as a command line parameter:
