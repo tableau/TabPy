@@ -271,6 +271,7 @@ class TabPyApp:
              "false"),
             (SettingsParameters.MaxRequestSizeInMb, ConfigParameters.TABPY_MAX_REQUEST_SIZE_MB,
              100),
+            (SettingsParameters.AuthInfo, ConfigParameters.TABPY_AUTH_INFO, "false"),
         ]
 
         for setting, parameter, default_val in settings_parameters:

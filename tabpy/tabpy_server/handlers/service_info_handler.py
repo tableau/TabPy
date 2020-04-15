@@ -8,9 +8,18 @@ class ServiceInfoHandler(ManagementHandler):
         super(ServiceInfoHandler, self).initialize(app)
 
     def get(self):
-        # do not check for authentication - this method
+        # Optionally check for authentication - this method
         # is the only way for client to collect info about
-        # supported API versions and required features
+        # supported API versions and required features so auth is not checked
+        # by default.
+        # Some clients may wish to lock down the entire API which can be done through
+        # the configuration file.
+
+        if self.settings[SettingsParameters.AuthInfo] == "true":
+            if self.should_fail_with_not_authorized():
+                self.fail_with_not_authorized()
+                return
+
         self._add_CORS_header()
         info = {}
         info["description"] = self.tabpy_state.get_description()
