@@ -183,7 +183,7 @@ class TabPyApp:
 
         return application
 
-    def _set_parameter(self, parser, settings_key, config_key, default_val):
+    def _set_parameter(self, parser, settings_key, config_key, default_val, parse_function):
         key_is_set = False
 
         if (
@@ -191,7 +191,9 @@ class TabPyApp:
             and parser.has_section("TabPy")
             and parser.has_option("TabPy", config_key)
         ):
-            self.settings[settings_key] = parser.get("TabPy", config_key)
+            if parse_function is None:
+                parse_function = parser.get
+            self.settings[settings_key] = parse_function("TabPy", config_key)
             key_is_set = True
             logger.debug(
                 f"Parameter {settings_key} set to "
@@ -252,41 +254,30 @@ class TabPyApp:
             )
 
         settings_parameters = [
-            (SettingsParameters.Port, ConfigParameters.TABPY_PORT, 9004),
-            (SettingsParameters.ServerVersion, None, __version__),
-            (SettingsParameters.EvaluateTimeout, ConfigParameters.TABPY_EVALUATE_TIMEOUT, 30),
+            (SettingsParameters.Port, ConfigParameters.TABPY_PORT, 9004, None),
+            (SettingsParameters.ServerVersion, None, __version__, None),
+            (SettingsParameters.EvaluateTimeout, ConfigParameters.TABPY_EVALUATE_TIMEOUT, 30, parser.getfloat),
             (SettingsParameters.UploadDir, ConfigParameters.TABPY_QUERY_OBJECT_PATH,
-             os.path.join(pkg_path, "tmp", "query_objects")),
+             os.path.join(pkg_path, "tmp", "query_objects"), None),
             (SettingsParameters.TransferProtocol, ConfigParameters.TABPY_TRANSFER_PROTOCOL,
-             "http"),
+             "http", None),
             (SettingsParameters.CertificateFile, ConfigParameters.TABPY_CERTIFICATE_FILE,
-             None),
-            (SettingsParameters.KeyFile, ConfigParameters.TABPY_KEY_FILE, None),
+             None, None),
+            (SettingsParameters.KeyFile, ConfigParameters.TABPY_KEY_FILE, None, None),
             (SettingsParameters.StateFilePath, ConfigParameters.TABPY_STATE_PATH,
-             os.path.join(pkg_path, "tabpy_server")),
+             os.path.join(pkg_path, "tabpy_server"), None),
             (SettingsParameters.StaticPath, ConfigParameters.TABPY_STATIC_PATH,
-             os.path.join(pkg_path, "tabpy_server", "static")),
-            (ConfigParameters.TABPY_PWD_FILE, ConfigParameters.TABPY_PWD_FILE, None),
+             os.path.join(pkg_path, "tabpy_server", "static"), None),
+            (ConfigParameters.TABPY_PWD_FILE, ConfigParameters.TABPY_PWD_FILE, None, None),
             (SettingsParameters.LogRequestContext, ConfigParameters.TABPY_LOG_DETAILS,
-             "false"),
+             "false", None),
             (SettingsParameters.MaxRequestSizeInMb, ConfigParameters.TABPY_MAX_REQUEST_SIZE_MB,
-             100),
-            (SettingsParameters.AuthInfo, ConfigParameters.TABPY_AUTH_INFO, "false"),
+             100, None),
+            (SettingsParameters.AuthInfo, ConfigParameters.TABPY_AUTH_INFO, "false", parser.getboolean),
         ]
 
-        for setting, parameter, default_val in settings_parameters:
-            self._set_parameter(parser, setting, parameter, default_val)
-
-        try:
-            self.settings[SettingsParameters.EvaluateTimeout] = float(
-                self.settings[SettingsParameters.EvaluateTimeout]
-            )
-        except ValueError:
-            logger.warning(
-                "Evaluate timeout must be a float type. Defaulting "
-                "to evaluate timeout of 30 seconds."
-            )
-            self.settings[SettingsParameters.EvaluateTimeout] = 30
+        for setting, parameter, default_val, parse_function in settings_parameters:
+            self._set_parameter(parser, setting, parameter, default_val, parse_function)
 
         if not os.path.exists(self.settings[SettingsParameters.UploadDir]):
             os.makedirs(self.settings[SettingsParameters.UploadDir])
