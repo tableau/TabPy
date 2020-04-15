@@ -15,7 +15,7 @@ class ServiceInfoHandler(ManagementHandler):
         # Some clients may wish to lock down the entire API which can be done through
         # the configuration file.
 
-        if self.settings[SettingsParameters.AuthInfo] == "true":
+        if self.settings[SettingsParameters.AuthInfo]:
             if self.should_fail_with_not_authorized():
                 self.fail_with_not_authorized()
                 return
