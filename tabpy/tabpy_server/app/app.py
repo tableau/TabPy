@@ -256,7 +256,8 @@ class TabPyApp:
         settings_parameters = [
             (SettingsParameters.Port, ConfigParameters.TABPY_PORT, 9004, None),
             (SettingsParameters.ServerVersion, None, __version__, None),
-            (SettingsParameters.EvaluateTimeout, ConfigParameters.TABPY_EVALUATE_TIMEOUT, 30, parser.getfloat),
+            (SettingsParameters.EvaluateTimeout, ConfigParameters.TABPY_EVALUATE_TIMEOUT,
+             30, parser.getfloat),
             (SettingsParameters.UploadDir, ConfigParameters.TABPY_QUERY_OBJECT_PATH,
              os.path.join(pkg_path, "tmp", "query_objects"), None),
             (SettingsParameters.TransferProtocol, ConfigParameters.TABPY_TRANSFER_PROTOCOL,
@@ -273,7 +274,8 @@ class TabPyApp:
              "false", None),
             (SettingsParameters.MaxRequestSizeInMb, ConfigParameters.TABPY_MAX_REQUEST_SIZE_MB,
              100, None),
-            (SettingsParameters.AuthInfo, ConfigParameters.TABPY_AUTH_INFO, "false", parser.getboolean),
+            (SettingsParameters.AuthInfo, ConfigParameters.TABPY_AUTH_INFO, "false",
+             parser.getboolean),
         ]
 
         for setting, parameter, default_val, parse_function in settings_parameters:
