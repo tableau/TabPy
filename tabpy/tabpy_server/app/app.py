@@ -274,7 +274,7 @@ class TabPyApp:
              "false", None),
             (SettingsParameters.MaxRequestSizeInMb, ConfigParameters.TABPY_MAX_REQUEST_SIZE_MB,
              100, None),
-            (SettingsParameters.AuthInfo, ConfigParameters.TABPY_AUTH_INFO, "false",
+            (SettingsParameters.AuthInfo, ConfigParameters.TABPY_AUTH_INFO, False,
              parser.getboolean),
         ]
 
