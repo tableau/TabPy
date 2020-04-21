@@ -71,10 +71,6 @@ at [`logging.config` documentation page](https://docs.python.org/3.6/library/log
   makes TabPy require credentials with HTTP(S) requests. More details about
   authentication can be found in [Authentication](#authentication)
   section. Default value - not set.
-- `TABPY_AUTH_INFO` - Determines whether authorization is required when
-  accessing the `info` API. More details about
-  authentication can be found in [Authentication](#authentication)
-  section. Default value - False.
 - `TABPY_TRANSFER_PROTOCOL` - transfer protocol. Default value - `http`. If
   set to `https` two additional parameters have to be specified:
   `TABPY_CERTIFICATE_FILE` and `TABPY_KEY_FILE`.
@@ -113,7 +109,6 @@ settings._
 # For how to configure TabPy authentication read
 # docs/server-config.md.
 # TABPY_PWD_FILE = /path/to/password/file.txt
-# TABPY_AUTH_INFO = true
 
 # To set up secure TabPy uncomment and modify the following lines.
 # Note only PEM-encoded x509 certificates are supported.
@@ -252,8 +247,7 @@ line with the user name.
 
 ### Endpoint Security
 
-All endpoints except `info` require authentication if it is enabled for the server.
- `info` can be secured using the `TABPY_AUTH_INFO` setting.
+All endpoints require authentication if it is enabled for the server.
 
 ## Logging
 
