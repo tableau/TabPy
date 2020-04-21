@@ -154,5 +154,3 @@ class TestServiceInfoHandlerWithoutAuth(BaseTestServiceInfoHandler):
             {},
             features,
         )
-
-
