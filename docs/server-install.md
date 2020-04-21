@@ -44,6 +44,6 @@ and specify it in command line:
 tabpy --config=path/to/my/config/file.conf
 ```
 
-It is highly recommended to use Python virtual environment for running TabPy.
+It is highly recommended to use Python virtual enviroment for running TabPy.
 Check the [Running TabPy in Python Virtual Environment](tabpy-virtualenv.md) page
 for more details.
