@@ -210,9 +210,9 @@ Passwords in the password file are hashed with PBKDF2.
 with hosting OS mechanisms. Ideally the file should only be accessible
 for reading with the account under which TabPy runs and TabPy admin account.**
 
-There is a `tabpy-user` command provided with `tabpy`
- package to operate with accounts in the password file. Run
-`tabpy-user -h` to see how to use it.
+There is a `tabpy-user` command provided with `tabpy` package to
+operate with accounts in the password file. Run `tabpy-user -h`
+to see how to use it.
 
 After making any changes to the password file, TabPy needs to be restarted.
 
@@ -244,6 +244,10 @@ will be generated and displayed in the command line.
 
 To delete an account open password file in any text editor and delete the
 line with the user name.
+
+### Endpoint Security
+
+All endpoints require authentication if it is enabled for the server.
 
 ## Logging
 

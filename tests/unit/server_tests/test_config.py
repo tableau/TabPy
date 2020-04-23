@@ -143,8 +143,8 @@ class TestPartialConfigFile(unittest.TestCase):
         )
         config_file.close()
 
-        app = TabPyApp(self.config_file.name)
-        self.assertEqual(app.settings["evaluate_timeout"], 30.0)
+        with self.assertRaises(ValueError) as err:
+            TabPyApp(self.config_file.name)
 
     @patch("tabpy.tabpy_server.app.app.os")
     @patch("tabpy.tabpy_server.app.app.os.path.exists", return_value=True)
