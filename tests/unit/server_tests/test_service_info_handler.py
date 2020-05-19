@@ -66,24 +66,6 @@ class BaseTestServiceInfoHandler(AsyncHTTPTestCase):
         cls.config_file.close()
 
 
-class TestServiceInfoHandlerDefault(BaseTestServiceInfoHandler):
-    @classmethod
-    def setUpClass(cls):
-        cls.prefix = "__TestServiceInfoHandlerWithAuth_"
-        cls.tabpy_config = ["TABPY_PWD_FILE = ./tests/integration/resources/pwdfile.txt\n"]
-        super(TestServiceInfoHandlerDefault, cls).setUpClass()
-
-    def test_given_vanilla_tabpy_server_expect_correct_info_response(self):
-        response = self.fetch("/info")
-        self.assertEqual(response.code, 200)
-        actual_response = json.loads(response.body)
-        expected_response = _create_expected_info_response(
-            self.app.settings, self.app.tabpy_state
-        )
-
-        self.assertDictEqual(actual_response, expected_response)
-
-
 class TestServiceInfoHandlerWithAuth(BaseTestServiceInfoHandler):
     @classmethod
     def setUpClass(cls):
@@ -91,8 +73,19 @@ class TestServiceInfoHandlerWithAuth(BaseTestServiceInfoHandler):
         cls.tabpy_config = ["TABPY_PWD_FILE = ./tests/integration/resources/pwdfile.txt\n"]
         super(TestServiceInfoHandlerWithAuth, cls).setUpClass()
 
-    def test_given_tabpy_server_with_auth_expect_correct_info_response(self):
+    def test_given_tabpy_server_with_auth_expect_error_info_response(self):
         response = self.fetch("/info")
+        self.assertEqual(response.code, 401)
+
+    def test_given_tabpy_server_with_auth_expect_correct_info_response(self):
+        header = {
+            "Content-Type": "application/json",
+            "TabPy-Client": "Integration test for deploying models with auth",
+            "Authorization": "Basic " +
+            base64.b64encode("user1:P@ssw0rd".encode("utf-8")).decode("utf-8"),
+        }
+
+        response = self.fetch("/info", headers=header)
         self.assertEqual(response.code, 200)
         actual_response = json.loads(response.body)
         expected_response = _create_expected_info_response(
@@ -135,16 +128,7 @@ class TestServiceInfoHandlerWithoutAuth(BaseTestServiceInfoHandler):
         features = v1["features"]
         self.assertDictEqual({}, features)
 
-
-class TestServiceInfoHandlerWithAuthWithSecureEndpointAndPassword(BaseTestServiceInfoHandler):
-    @classmethod
-    def setUpClass(cls):
-        cls.prefix = "__TestServiceInfoHandlerWithAuthWithSecureEndpointAndPassword_"
-        cls.tabpy_config = ["TABPY_AUTH_INFO = true\n",
-                            "TABPY_PWD_FILE = ./tests/integration/resources/pwdfile.txt\n"]
-        super(TestServiceInfoHandlerWithAuthWithSecureEndpointAndPassword, cls).setUpClass()
-
-    def test_given_tabpy_server_with_auth_expect_correct_info_response(self):
+    def test_given_tabpy_server_with_no_auth_and_password_expect_correct_info_response(self):
         header = {
             "Content-Type": "application/json",
             "TabPy-Client": "Integration test for deploying models with auth",
@@ -167,44 +151,6 @@ class TestServiceInfoHandlerWithAuthWithSecureEndpointAndPassword(BaseTestServic
         self.assertTrue("features" in v1)
         features = v1["features"]
         self.assertDictEqual(
-            {"authentication": {"methods": {"basic-auth": {}}, "required": True}},
+            {},
             features,
         )
-
-
-class TestServiceInfoHandlerWithAuthWithSecureEndpoint(BaseTestServiceInfoHandler):
-    @classmethod
-    def setUpClass(cls):
-        cls.prefix = "__TestServiceInfoHandlerWithAuthWithSecureEndpoint_"
-        cls.tabpy_config = ["TABPY_AUTH_INFO = true\n",
-                            "TABPY_PWD_FILE = ./tests/integration/resources/pwdfile.txt\n"]
-        super(TestServiceInfoHandlerWithAuthWithSecureEndpoint, cls).setUpClass()
-
-    def test_given_tabpy_server_with_auth_expect_correct_info_response(self):
-        response = self.fetch("/info")
-        self.assertEqual(response.code, 401)
-
-
-class TestServiceInfoHandlerWithoutAuthWithSecureEndpoint(BaseTestServiceInfoHandler):
-    @classmethod
-    def setUpClass(cls):
-        cls.prefix = "__TestServiceInfoHandlerWithoutAuthWithSecureEndpoint_"
-        cls.tabpy_config = ["TABPY_AUTH_INFO = true\n"]
-        super(TestServiceInfoHandlerWithoutAuthWithSecureEndpoint, cls).setUpClass()
-
-    def test_tabpy_server_with_no_auth_expect_correct_info_response(self):
-        response = self.fetch("/info")
-        self.assertEqual(response.code, 200)
-        actual_response = json.loads(response.body)
-        expected_response = _create_expected_info_response(
-            self.app.settings, self.app.tabpy_state
-        )
-
-        self.assertDictEqual(actual_response, expected_response)
-        self.assertTrue("versions" in actual_response)
-        versions = actual_response["versions"]
-        self.assertTrue("v1" in versions)
-        v1 = versions["v1"]
-        self.assertTrue("features" in v1)
-        features = v1["features"]
-        self.assertDictEqual({}, features)
