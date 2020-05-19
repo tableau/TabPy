@@ -303,7 +303,7 @@ and is capable of performing two types of t-tests:
 
    - `_arg1` (list of numeric values): a list of independent observations
    - `_arg2` (list of categorical variables with cardinality two): a binary factor
-     that maps each observation in _arg1 to either sample1 or sample2 (this list
+     that maps each observation in `_arg1` to either sample1 or sample2 (this list
      should be equal to the length of `_arg1`).
 
 2. [A t-test for the mean of one group](https://docs.scipy.org/doc/scipy-0.14.0/reference/generated/scipy.stats.ttest_1samp.html):
