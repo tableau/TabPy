@@ -30,7 +30,7 @@ Consider reading TabPy documentation in the following order:
 
 Troubleshooting:
 
-* [FAQ for configuration, startup and other issues](docs/FAQ.md)
+* [TabPy Wiki](https://github.com/tableau/TabPy/wiki)
 
 More technical topics:
 
