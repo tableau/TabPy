@@ -1,6 +1,8 @@
-# Running TabPy in Python Virtual Environment
+# Running TabPy in Virtual Environment
 
 <!-- toc -->
+
+## Running TabPy in Python Virtual Environment
 
 To run TabPy in Python virtual environment follow the steps:
 
@@ -42,26 +44,37 @@ To run TabPy in Python virtual environment follow the steps:
    deactivate
    ```
 
-# Running TabPy in an Anaconda Virtual Environment
+## Running TabPy in an Anaconda Virtual Environment
 
 To run TabPy in an Anaconda virtual environment follow the steps:
 *NOTE: this assumes you have installed [Anaconda](https://www.anaconda.com/products/individual) in a Windows environment*
 
-1. Open `Anaconda Prompt` from the Windows Start menu
+1. For Windows open `Anaconda Prompt` from the Windows Start menu, for Linux and Mac run shell.
 
 2. Navigate to your home directory:
-*TabPy will need to be able to the `tabpy_log.log` file on startup*
-
-   ```cd %USERPROFILE%   ```
+   1. On Windows run
+   
+   ```sh
+   cd %USERPROFILE%   
+   ```
+   
+   2. For Linux and Mac run
+   
+   ```sh
+   cd ~
+   ```
 
 3. Create the virtual Anaconda environment
-*Inserting the TabPy version number into the name of your Conda environment is optional, but may help you distinguish your environments, should you have multiple available to you.*
 
-    ```conda create --name TabPy<version-here> python=3.7      ```
+    ```sh
+    conda create --name my-tabpy-env python=3.7
+    ```
 
 4. Activate your virtual environment
 
-	```conda activate TabPy<version-here>```
+   ```sh
+   conda activate my-tabpy-env
+   ```
 
 5. Install TabPy to your new Anaconda environment by following the instructions on the [TabPy Server Install](https://github.com/tableau/TabPy/blob/master/docs/server-install.md) documentation page.
 
@@ -73,4 +86,6 @@ To run TabPy in an Anaconda virtual environment follow the steps:
 
 8. To deactivate virtual environment run:
 
-   ```conda deactivate   ```
+   ```sh
+   conda deactivate
+   ```
