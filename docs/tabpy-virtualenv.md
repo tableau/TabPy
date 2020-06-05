@@ -81,13 +81,13 @@ Linux and Mac run shell.
 5. Install TabPy to your new Anaconda environment by following the instructions
    on the [TabPy Server Install](server-install.md) documentation page.
 
-7. Run TabPy:
+6. Run TabPy:
 
    ```sh
    tabpy
    ```
 
-8. To deactivate virtual environment run:
+7. To deactivate virtual environment run:
 
    ```sh
    conda deactivate
