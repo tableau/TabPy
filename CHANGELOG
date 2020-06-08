@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.1.0
+
+### Improvements
+
+- Authorization is now required for the /info API method.
+  This method did not check authentication previously. This change is
+  backwards compatible with Tableau clients.
+- Improved config parsing flexibility. Previously the
+  TABPY_EVALUATE_TIMEOUT setting would be set to a default if
+  tabpy couldn't parse the value. Now it will throw an exception
+  at startup.
+
 ## v1.0.0
 
 ### Improvements

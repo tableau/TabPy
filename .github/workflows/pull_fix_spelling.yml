@@ -1,0 +1,22 @@
+name: Fix spelling on push
+
+on: [push]
+
+jobs:
+  build:
+    name: ${{ matrix.python-version }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      matrix:
+        python-version: [3.7]
+        os: [ubuntu-latest]
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: sobolevn/misspell-fixer-action@master
+    - uses: peter-evans/create-pull-request@v2.4.4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        commit-message: 'Fixes by misspell-fixer'
+        title: 'Typos fix by misspell-fixer'
