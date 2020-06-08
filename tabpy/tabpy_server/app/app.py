@@ -212,6 +212,31 @@ class TabPyApp:
         if not key_is_set:
             logger.debug(f"Parameter {settings_key} is not set")
 
+    def _parse_eval_with_config(self, parser):
+        """
+        Parse parameters specific for evaluation engine.
+        """
+
+        settings_parameters = []
+        evaluate_with = self.settings[SettingsParameters.EvaluateWith].lower()
+
+        if evaluate_with == "python":
+            # do nothing, Python evaluation requieres no additional parameters
+            pass
+        elif evaluate_with == "rserve":
+            settings_parameters = [
+                (SettingsParameters.ExtSvcHost, ConfigParameters.EXTSVC_HOST, None, None),
+                (SettingsParameters.ExtSvcPort, ConfigParameters.EXTSVC_PORT, None,
+                 parser.getint),
+            ]
+        else:
+            msg = f"Unknown evaluation engine '{evaluate_vith}'"
+            logger.critical(msg)
+            raise RuntimeError(msg)
+
+        for setting, parameter, default_val, parse_function in settings_parameters:
+            self._set_parameter(parser, setting, parameter, default_val, parse_function)
+
     def _parse_config(self, config_file):
         """Provide consistent mechanism for pulling in configuration.
 
@@ -279,6 +304,9 @@ class TabPyApp:
 
         for setting, parameter, default_val, parse_function in settings_parameters:
             self._set_parameter(parser, setting, parameter, default_val, parse_function)
+
+        # parse evaluation engine specific parameters
+        self._parse_eval_with_config(parser)
 
         if not os.path.exists(self.settings[SettingsParameters.UploadDir]):
             os.makedirs(self.settings[SettingsParameters.UploadDir])

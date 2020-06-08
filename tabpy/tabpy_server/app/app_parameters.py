@@ -16,6 +16,8 @@ class ConfigParameters:
     TABPY_MAX_REQUEST_SIZE_MB = "TABPY_MAX_REQUEST_SIZE_MB"
     TABPY_EVALUATE_TIMEOUT = "TABPY_EVALUATE_TIMEOUT"
     TABPY_EVALUATE_WITH = "TABPY_EVALUATE_WITH"
+    EXTSVC_HOST = "EXTSVC_HOST"
+    EXTSVC_PORT = "EXTSVC_PORT"
 
 
 class SettingsParameters:
@@ -36,3 +38,5 @@ class SettingsParameters:
     MaxRequestSizeInMb = "max_request_size_in_mb"
     EvaluateTimeout = "evaluate_timeout"
     EvaluateWith = "evaluate_with"
+    ExtSvcHost = "extsvc_host"
+    ExtSvcPort = "extsvc_port"
