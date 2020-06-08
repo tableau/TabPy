@@ -9,8 +9,7 @@ import signal
 import sys
 import tabpy.tabpy_server
 from tabpy.tabpy import __version__
-from tabpy.tabpy_server.app.ConfigParameters import ConfigParameters
-from tabpy.tabpy_server.app.SettingsParameters import SettingsParameters
+from tabpy.tabpy_server.app.app_parameters import ConfigParameters, SettingsParameters
 from tabpy.tabpy_server.app.util import parse_pwd_file
 from tabpy.tabpy_server.management.state import TabPyState
 from tabpy.tabpy_server.management.util import _get_state_from_file
@@ -274,6 +273,8 @@ class TabPyApp:
              "false", None),
             (SettingsParameters.MaxRequestSizeInMb, ConfigParameters.TABPY_MAX_REQUEST_SIZE_MB,
              100, None),
+            (SettingsParameters.EvaluateWith, ConfigParameters.TABPY_EVALUATE_WITH,
+             "Python", None),
         ]
 
         for setting, parameter, default_val, parse_function in settings_parameters:
