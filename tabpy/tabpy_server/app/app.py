@@ -217,7 +217,7 @@ class TabPyApp:
                  parser.getint),
             ]
         else:
-            msg = f"Unknown evaluation engine '{evaluate_vith}'"
+            msg = f"Unknown evaluation engine '{evaluate_with}'"
             logger.critical(msg)
             raise RuntimeError(msg)
 

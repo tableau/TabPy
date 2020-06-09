@@ -30,7 +30,6 @@ class RestrictedTabPy:
 class PythonEvaluator(ScriptEvaluatorInterface):
     @gen.coroutine
     def evaluate(self, script, arguments):
-        result = []
         self.logger.log(logging.DEBUG, "Evaluating Python script...")
         args_str = ""
         if arguments is not None and len(arguments) > 0:

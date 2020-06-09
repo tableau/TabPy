@@ -1,6 +1,5 @@
 import os
 from pathlib import Path
-import pip
 import platform
 import subprocess
 import sys

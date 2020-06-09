@@ -1,6 +1,5 @@
 import base64
 import os
-import sys
 import tempfile
 
 from tabpy.tabpy_server.app.app import TabPyApp
