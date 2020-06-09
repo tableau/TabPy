@@ -8,14 +8,12 @@ from tornado.testing import AsyncHTTPTestCase
 
 
 def _create_expected_info_response(settings, tabpy_state):
-    return {
-        "description": tabpy_state.get_description(),
-        "creation_time": tabpy_state.creation_time,
-        "state_path": settings["state_file_path"],
-        "server_version": settings[SettingsParameters.ServerVersion],
-        "name": tabpy_state.name,
-        "versions": settings["versions"],
-    }
+    expected_response = settings
+    expected_response["description"] = tabpy_state.get_description()
+    expected_response["creation_time"] = tabpy_state.creation_time
+    expected_response["name"] = tabpy_state.name
+    expected_response["versions"] = settings["versions"]
+    return expected_response
 
 
 class BaseTestServiceInfoHandler(AsyncHTTPTestCase):
@@ -65,6 +63,23 @@ class BaseTestServiceInfoHandler(AsyncHTTPTestCase):
                 cls.config_file.write(k)
         cls.config_file.close()
 
+    def assertDictContainsSubset(self, subset, fullset):
+        fail = False
+        msg = ''
+        for key in subset:
+            if key not in fullset:
+                fail = True
+                msg += f"\nSubset is missing key '{key}'"
+            elif subset[key] != fullset[key]:
+                fail = True
+                msg += (
+                    f"\nSubset '{key}' is '{subset[key]}' and fullset value "
+                    f"is '{fullset[key]}'"
+                )
+
+        if fail:
+            self.fail(msg)
+
 
 class TestServiceInfoHandlerWithAuth(BaseTestServiceInfoHandler):
     @classmethod
@@ -92,7 +107,7 @@ class TestServiceInfoHandlerWithAuth(BaseTestServiceInfoHandler):
             self.app.settings, self.app.tabpy_state
         )
 
-        self.assertDictEqual(actual_response, expected_response)
+        self.assertDictContainsSubset(expected_response, actual_response)
         self.assertTrue("versions" in actual_response)
         versions = actual_response["versions"]
         self.assertTrue("v1" in versions)
@@ -119,7 +134,7 @@ class TestServiceInfoHandlerWithoutAuth(BaseTestServiceInfoHandler):
             self.app.settings, self.app.tabpy_state
         )
 
-        self.assertDictEqual(actual_response, expected_response)
+        self.assertDictContainsSubset(expected_response, actual_response)
         self.assertTrue("versions" in actual_response)
         versions = actual_response["versions"]
         self.assertTrue("v1" in versions)
@@ -143,7 +158,7 @@ class TestServiceInfoHandlerWithoutAuth(BaseTestServiceInfoHandler):
             self.app.settings, self.app.tabpy_state
         )
 
-        self.assertDictEqual(actual_response, expected_response)
+        self.assertDictContainsSubset(expected_response, actual_response)
         self.assertTrue("versions" in actual_response)
         versions = actual_response["versions"]
         self.assertTrue("v1" in versions)

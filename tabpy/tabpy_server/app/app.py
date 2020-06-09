@@ -1,8 +1,6 @@
-import concurrent.futures
 import configparser
 import logging
 from logging import config
-import multiprocessing
 import os
 import shutil
 import signal
@@ -127,17 +125,10 @@ class TabPyApp:
         )
         logger.info("Done initializing TabPy.")
 
-        executor = concurrent.futures.ThreadPoolExecutor(
-            max_workers=multiprocessing.cpu_count()
-        )
-
         # initialize Tornado application
         _init_asyncio_patch()
         application = TabPyTornadoApp(
             [
-                # skip MainHandler to use StaticFileHandler .* page requests and
-                # default to index.html
-                # (r"/", MainHandler),
                 (
                     self.subdirectory + r"/query/([^/]+)",
                     QueryPlaneHandler,
@@ -151,11 +142,7 @@ class TabPyApp:
                     EndpointHandler,
                     dict(app=self),
                 ),
-                (
-                    self.subdirectory + r"/evaluate",
-                    EvaluationPlaneHandler,
-                    dict(executor=executor, app=self),
-                ),
+                (self.subdirectory + r"/evaluate", EvaluationPlaneHandler, dict(app=self)),
                 (
                     self.subdirectory + r"/configurations/endpoint_upload_destination",
                     UploadDestinationHandler,

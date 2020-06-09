@@ -9,13 +9,13 @@ class TestCustomEvaluateTimeout(integ_test_base.IntegTestBase):
         # Uncomment the following line to preserve
         # test case output and other files (config, state, ect.)
         # in system temp folder.
-        self.set_delete_temp_folder(False)
+        # self.set_delete_temp_folder(False)
 
         payload = """
             {
                 "data": { "_arg1": 1 },
                 "script":
-                "import time\\ntime.sleep(100)\\nreturn 1"
+                "import time\\ntime.sleep(1000)\\nreturn 1"
             }
             """
         headers = {
@@ -32,7 +32,7 @@ class TestCustomEvaluateTimeout(integ_test_base.IntegTestBase):
         self.assertEqual(408, res.status)
         self.assertEqual(
             '{"message": '
-            '"User defined script timed out. Timeout is set to 3.0 s.", '
+            '"User defined script timed out. Timeout is set to 3.0s.", '
             '"info": {}}',
             actual_error_message,
         )

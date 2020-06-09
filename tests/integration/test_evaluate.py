@@ -8,6 +8,11 @@ import json
 
 class TestEvaluate(integ_test_base.IntegTestBase):
     def test_single_value_returned(self):
+        # Uncomment the following line to preserve
+        # test case output and other files (config, state, ect.)
+        # in system temp folder.
+        # self.set_delete_temp_folder(False)
+
         payload = """
             {
                 "data": { "_arg1": 2, "_arg2": 40 },
@@ -28,6 +33,11 @@ class TestEvaluate(integ_test_base.IntegTestBase):
         self.assertEqual("42", result)
 
     def test_collection_returned(self):
+        # Uncomment the following line to preserve
+        # test case output and other files (config, state, ect.)
+        # in system temp folder.
+        # self.set_delete_temp_folder(False)
+
         payload = """
             {
                 "data": { "_arg1": [2, 3], "_arg2": [40, 0.1415926] },
@@ -48,6 +58,11 @@ class TestEvaluate(integ_test_base.IntegTestBase):
         self.assertEqual("[42, 3.1415926]", result)
 
     def test_none_returned(self):
+        # Uncomment the following line to preserve
+        # test case output and other files (config, state, ect.)
+        # in system temp folder.
+        # self.set_delete_temp_folder(False)
+
         payload = """
             {
                 "data": { "_arg1": 2, "_arg2": 40 },
@@ -68,6 +83,11 @@ class TestEvaluate(integ_test_base.IntegTestBase):
         self.assertEqual("null", result)
 
     def test_nothing_returned(self):
+        # Uncomment the following line to preserve
+        # test case output and other files (config, state, ect.)
+        # in system temp folder.
+        # self.set_delete_temp_folder(False)
+
         payload = """
             {
                 "data": { "_arg1": [2], "_arg2": [40] },
@@ -88,6 +108,11 @@ class TestEvaluate(integ_test_base.IntegTestBase):
         self.assertEqual("null", result)
 
     def test_syntax_error(self):
+        # Uncomment the following line to preserve
+        # test case output and other files (config, state, ect.)
+        # in system temp folder.
+        # self.set_delete_temp_folder(False)
+
         payload = """
             {
                 "data": { "_arg1": [2], "_arg2": [40] },

@@ -13,11 +13,9 @@ class ServiceInfoHandler(ManagementHandler):
             return
 
         self._add_CORS_header()
-        info = {}
+        info = self.settings
         info["description"] = self.tabpy_state.get_description()
         info["creation_time"] = self.tabpy_state.creation_time
-        info["state_path"] = self.settings[SettingsParameters.StateFilePath]
-        info["server_version"] = self.settings[SettingsParameters.ServerVersion]
         info["name"] = self.tabpy_state.name
         info["versions"] = self.settings[SettingsParameters.ApiVersions]
         self.write(json.dumps(info))
