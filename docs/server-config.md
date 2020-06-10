@@ -6,6 +6,9 @@
 
 - [Custom Settings](#custom-settings)
   * [Configuration File Content](#configuration-file-content)
+  * [Evaluation Engines](#evaluation-engines)
+    + [Python Evaluation Engine](#python-evaluation-engine)
+    + [Rserve Evaluation Engine](#rserve-evaluation-engine)
   * [Configuration File Example](#configuration-file-example)
 - [Configuring HTTP vs HTTPS](#configuring-http-vs-https)
 - [Authentication](#authentication)
@@ -14,6 +17,7 @@
   * [Adding an Account](#adding-an-account)
   * [Updating an Account](#updating-an-account)
   * [Deleting an Account](#deleting-an-account)
+  * [Endpoint Security](#endpoint-security)
 - [Logging](#logging)
   * [Request Context Logging](#request-context-logging)
 
@@ -91,77 +95,46 @@ at [`logging.config` documentation page](https://docs.python.org/3.6/library/log
   value - `30`. This timeout does not apply when evaluating models either
   through the `/query` method, or using the `tabpy.query(...)` syntax with
   the `/evaluate` method.
+- `TABPY_EVALUATE_WITH` - evaluation engine for user scripts. Supported
+  values are `Python` and `Rserve`. For specific configuration and other
+  details on each evaluation engine see [Evaluation Engines](#evaluation-engines)
+  section. Default value - `Python`.
+
+### Evaluation Engines
+
+TabPy supports evaluation user scripts with different evaluation engines.
+The engine can be specified with `TABPY_EVALUATE_WITH` configuration parameter.
+By default `Python` evaluation engine is used.
+
+#### Python Evaluation Engine
+
+User scripts are executed in the same Python instance where TabPy is running.
+No additional configuration parameters are needed for the engine (in
+`[TabPy]` section):
+
+- `EXTSVC_HOST` - Rserve host.
+- `EXTSVC_PORT` - Rserve port.
+
+Current limitations:
+
+- Authentication is not supported.
+
+#### Rserve Evaluation Engine
+
+TabPy forwards data and user script to specified
+[Rserve](https://www.rforge.net/Rserve/) instance.
+
+There are some additional configuration parameters needed for the engine:
+
+- Authentication is not supported.
 
 ### Configuration File Example
 
 **Note:** _Always use absolute paths for the configuration paths
 settings._
 
-```ini
-[TabPy]
-# TABPY_QUERY_OBJECT_PATH = /tmp/query_objects
-# TABPY_PORT = 9004
-# TABPY_STATE_PATH = <package-path>/tabpy/tabpy_server
-
-# Where static pages live
-# TABPY_STATIC_PATH = <package-path>/tabpy/tabpy_server/static
-
-# For how to configure TabPy authentication read
-# docs/server-config.md.
-# TABPY_PWD_FILE = /path/to/password/file.txt
-
-# To set up secure TabPy uncomment and modify the following lines.
-# Note only PEM-encoded x509 certificates are supported.
-# TABPY_TRANSFER_PROTOCOL = https
-# TABPY_CERTIFICATE_FILE = /path/to/certificate/file.crt
-# TABPY_KEY_FILE = /path/to/key/file.key
-
-# Log additional request details including caller IP, full URL, client
-# end user info if provided.
-# TABPY_LOG_DETAILS = true
-
-# Limit request size (in Mb) - any request which size exceeds
-# specified amount will be rejected by TabPy.
-# Default value is 100 Mb.
-# TABPY_MAX_REQUEST_SIZE_MB = 100
-
-# Configure how long a custom script provided to the /evaluate method
-# will run before throwing a TimeoutError.
-# The value should be a float representing the timeout time in seconds.
-# TABPY_EVALUATE_TIMEOUT = 30
-
-[loggers]
-keys=root
-
-[handlers]
-keys=rootHandler,rotatingFileHandler
-
-[formatters]
-keys=rootFormatter
-
-[logger_root]
-level=DEBUG
-handlers=rootHandler,rotatingFileHandler
-qualname=root
-propagete=0
-
-[handler_rootHandler]
-class=StreamHandler
-level=DEBUG
-formatter=rootFormatter
-args=(sys.stdout,)
-
-[handler_rotatingFileHandler]
-class=handlers.RotatingFileHandler
-level=DEBUG
-formatter=rootFormatter
-args=('tabpy_log.log', 'a', 1000000, 5)
-
-[formatter_rootFormatter]
-format=%(asctime)s [%(levelname)s] (%(filename)s:%(module)s:%(lineno)d): %(message)s
-datefmt=%Y-%m-%d,%H:%M:%S
-
-```
+Example file can be found at
+[https://github.com/tableau/TabPy/blob/master/tabpy/tabpy_server/common/default.conf](https://github.com/tableau/TabPy/blob/master/tabpy/tabpy_server/common/default.conf).
 
 ## Configuring HTTP vs HTTPS
 

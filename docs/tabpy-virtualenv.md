@@ -51,7 +51,7 @@ To run TabPy in an Anaconda virtual environment follow the steps:
 in a Windows environment*
 
 1. For Windows open `Anaconda Prompt` from the Windows Start menu, for
-Linux and Mac run shell.
+   Linux and Mac run shell.
 
 2. Navigate to your home directory:
    1. On Windows run
