@@ -77,6 +77,7 @@ def setup_package():
             "numpy",
             "pandas",
             "pyopenssl",
+            "pyrserve",
             "python-dateutil",
             "requests",
             "scipy",

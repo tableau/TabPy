@@ -7,7 +7,6 @@ from tabpy.tabpy_server.handlers import BaseHandler
 from tabpy.tabpy_server.handlers.script_evaluator_builder import buildScriptEvaluator
 import requests
 from tornado import gen
-from datetime import timedelta
 
 
 class EvaluationPlaneHandler(BaseHandler):
@@ -15,10 +14,19 @@ class EvaluationPlaneHandler(BaseHandler):
     EvaluationPlaneHandler is responsible for running arbitrary python scripts.
     """
 
+    def get_setting(self, setting):
+        if setting in self.settings:
+            return self.settings[setting]
+        elif setting == "logger":
+            return self.logger
+        msg = f"Uknonwn setting '{setting}' requested"
+        self.logger.log(logging.CRITICAL, msg)
+        raise RuntimeError(msg)
+
     @gen.coroutine
     def _post_impl(self):
         body = json.loads(self.request.body.decode("utf-8"))
-        self.logger.log(logging.DEBUG, "Processing POST request...")
+        self.logger.log(logging.DEBUG, "Processing /evaluate POST request...")
         if "script" not in body:
             self.error_out(400, "Script is empty.")
             return
@@ -52,10 +60,8 @@ class EvaluationPlaneHandler(BaseHandler):
 
         evaluator = buildScriptEvaluator(
             self.settings[SettingsParameters.EvaluateWith].lower(),
-            self.protocol,
-            self.port,
-            self.logger,
-            self.eval_timeout)
+            self,
+            self.logger)
 
         try:
             result = yield evaluator.evaluate(script, arguments)

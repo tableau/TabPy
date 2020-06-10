@@ -15,6 +15,8 @@ class RestrictedTabPy:
         self.logger = logger
         self.timeout = timeout
 
+    # This method called on 'tabpy.query(...)' invokation and it
+    # uses its first argument as a model name.
     def query(self, name, *args, **kwargs):
         url = f"{self.protocol}://localhost:{self.port}/query/{name}"
         self.logger.log(logging.DEBUG, f"Querying {url}...")
@@ -28,6 +30,12 @@ class RestrictedTabPy:
 
 
 class PythonEvaluator(ScriptEvaluatorInterface):
+    def initialize(self, settings_provider):
+        self.protocol = settings_provider.get_setting("transfer_protocol")
+        self.port = settings_provider.get_setting("port")
+        self.logger = settings_provider.get_setting("logger")
+        self.eval_timeout = settings_provider.get_setting("evaluate_timeout")
+
     @gen.coroutine
     def evaluate(self, script, arguments):
         self.logger.log(logging.DEBUG, "Evaluating Python script...")
@@ -36,6 +44,8 @@ class PythonEvaluator(ScriptEvaluatorInterface):
             args_in = sorted(arguments.keys())
             args_str = ", " + ", ".join(args_in)
 
+        # First argument to _user_script function named "tabpy" and an
+        # instance of RestrictedTabpy is used for it.
         function_to_evaluate = f"def _user_script(tabpy{args_str}):\n"
         for u in script.splitlines():
             function_to_evaluate += " " + u + "\n"
@@ -45,6 +55,8 @@ class PythonEvaluator(ScriptEvaluatorInterface):
             f"User script:\n{function_to_evaluate}")
 
         ret = yield self._call_subprocess(function_to_evaluate, arguments)
+        # self.logger.log(logging.DEBUG, f"ret={ret}")
+
         return ret
 
     @gen.coroutine

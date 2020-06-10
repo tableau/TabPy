@@ -389,7 +389,6 @@ class BaseHandler(tornado.web.RequestHandler):
             credentials provided.
             False otherwise.
         """
-        self.logger.log(logging.DEBUG, "Handling authentication")
         found, method = self._get_auth_method(api_version)
         if not found:
             return False

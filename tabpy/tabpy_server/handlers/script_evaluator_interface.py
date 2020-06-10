@@ -2,11 +2,8 @@ from tornado import gen
 
 
 class ScriptEvaluatorInterface:
-    def __init__(self, protocol, port, logger, eval_timeout):
-        self.protocol = protocol
-        self.port = port
-        self.logger = logger
-        self.eval_timeout = eval_timeout
+    def initialize(self, settings_provider):
+        raise NotImplementedError()
 
     @gen.coroutine
     def evaluate(self, script, arguments):
