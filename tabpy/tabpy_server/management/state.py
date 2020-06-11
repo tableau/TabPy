@@ -582,11 +582,6 @@ class TabPyState:
             self._increase_revision_number()
         self._write_state(logger=logger)
 
-    def _get_config_items(self, section_name):
-        if not self.config:
-            raise ValueError("State configuration not yet loaded.")
-        return self.config.items(section_name)
-
     def _get_config_value(
         self, section_name, option_name, optional=False, default_value=None
     ):
