@@ -356,11 +356,6 @@ class TabPyApp:
         logger.info(f"Call context logging is {call_context_state}")
 
     def _validate_transfer_protocol_settings(self):
-        if SettingsParameters.TransferProtocol not in self.settings:
-            msg = "Missing transfer protocol information."
-            logger.critical(msg)
-            raise RuntimeError(msg)
-
         protocol = self.settings[SettingsParameters.TransferProtocol]
 
         if protocol == "http":

@@ -203,7 +203,7 @@ class TestTransferProtocolValidation(unittest.TestCase):
         self.assertEqual(app.settings["transfer_protocol"], "http")
 
     def test_https_without_cert_and_key(self):
-        self.fp.write("[TabPy]\n" "TABPY_TRANSFER_PROTOCOL = https")
+        self.fp.write("[TabPy]\nTABPY_TRANSFER_PROTOCOL = https")
         self.fp.close()
 
         self.assertTabPyAppRaisesRuntimeError(
@@ -214,7 +214,7 @@ class TestTransferProtocolValidation(unittest.TestCase):
 
     def test_https_without_cert(self):
         self.fp.write(
-            "[TabPy]\n" "TABPY_TRANSFER_PROTOCOL = https\n" "TABPY_KEY_FILE = foo"
+            "[TabPy]\nTABPY_TRANSFER_PROTOCOL = https\nTABPY_KEY_FILE = foo"
         )
         self.fp.close()
 
@@ -336,3 +336,52 @@ class TestCertificateValidation(unittest.TestCase):
     def test_valid_cert(self):
         path = os.path.join(self.resources_path, "valid.crt")
         validate_cert(path)
+
+
+class TestEvaluationEngines(unittest.TestCase):
+    def __init__(self, *args, **kwargs):
+        super(TestEvaluationEngines, self).__init__(*args, **kwargs)
+        self.fp = None
+
+    def setUp(self):
+        self.fp = NamedTemporaryFile(mode="w+t", delete=False)
+
+    def tearDown(self):
+        os.remove(self.fp.name)
+        self.fp = None
+
+    def test_default_evaluation_engine(self):
+        self.fp.write("[TabPy]")
+        self.fp.close()
+
+        app = TabPyApp(self.fp.name)
+        self.assertEqual(app.settings["evaluate_with"].lower(), "python")
+
+    def test_python_evaluation_engine(self):
+        self.fp.write("[TabPy]\nTABPY_EVALUATE_WITH = Python")
+        self.fp.close()
+
+        app = TabPyApp(self.fp.name)
+        self.assertEqual(app.settings["evaluate_with"].lower(), "python")
+
+    def test_rserve_evaluation_engine(self):
+        self.fp.write(
+            "[TabPy]\n"
+            "TABPY_EVALUATE_WITH = Rserve\n"
+            "EXTSVC_HOST = my-rserve-host\n"
+            "EXTSVC_PORT = 6311")
+        self.fp.close()
+
+        app = TabPyApp(self.fp.name)
+        self.assertEqual(app.settings["evaluate_with"].lower(), "rserve")
+        self.assertEqual(app.settings["extsvc_host"], "my-rserve-host")
+        self.assertEqual(app.settings["extsvc_port"], 6311)
+
+    def test_unknown_evaluation_engine(self):
+        self.fp.write(
+            "[TabPy]\n"
+            "TABPY_EVALUATE_WITH = C++\n")
+        self.fp.close()
+
+        with self.assertRaises(RuntimeError) as err:
+            TabPyApp(self.fp.name)

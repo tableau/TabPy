@@ -14,6 +14,11 @@ class TestAuth(integ_test_base.IntegTestBase):
         return "./tests/integration/resources/pwdfile.txt"
 
     def test_missing_credentials_fails(self):
+        # Uncomment the following line to preserve
+        # test case output and other files (config, state, ect.)
+        # in system temp folder.
+        # self.set_delete_temp_folder(False)
+
         headers = {
             "Content-Type": "application/json",
             "TabPy-Client": "Integration tests for Auth",
