@@ -76,6 +76,12 @@ class TestEvaluationPlainHandlerWithAuth(AsyncHTTPTestCase):
             'res.append(_arg1[i] * _arg3[i])\\nreturn res"}'
         )
 
+        cls.args_data_not_dicitionary = (
+            '{"data":[{"_arg1":[2,3],"_arg3":[3,-1]}],'
+            '"script":"res=[]\\nfor i in range(len(_arg1)):\\n  '
+            'res.append(_arg1[i] * _arg3[i])\\nreturn res"}'
+        )
+
         cls.nan_coverts_to_null =\
             '{"data":{"_arg1":[2,3],"_arg2":[3,-1]},'\
             '"script":"return [float(1), float(\\"NaN\\"), float(2)]"}'
@@ -203,3 +209,18 @@ class TestEvaluationPlainHandlerWithAuth(AsyncHTTPTestCase):
             })
         self.assertEqual(200, response.code)
         self.assertEqual(b'null', response.body)
+
+    def test_data_is_not_dict(self):
+        response = self.fetch(
+            "/evaluate",
+            method="POST",
+            body=self.args_data_not_dicitionary,
+            headers={
+                "Authorization": "Basic {}".format(
+                    base64.b64encode("username:password".encode("utf-8")).decode(
+                        "utf-8"
+                    )
+                )
+            },
+        )
+        self.assertEqual(400, response.code)
