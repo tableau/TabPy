@@ -30,7 +30,7 @@ to specify the service location for all subsequent operations:
 
 ```python
 
-from tabpy.tabpy_tools.client import Client
+from tabpy.tools.client import Client
 
 client = Client('http://localhost:9004/')
 
@@ -351,7 +351,7 @@ method provided in this tools package:
 
 ```python
 
-from tabpy_tools.schema import generate_schema
+from tabpy.tools.schema import generate_schema
 
 schema = generate_schema(
   input={'x': 3, 'y': 2},
@@ -368,7 +368,7 @@ To describe more complex input, like arrays, you would use the following syntax:
 
 ```python
 
-from tabpy_tools.schema import generate_schema
+from tabpy.tools.schema import generate_schema
 
 schema = generate_schema(
   input={'x': [6.35, 6.40, 6.65, 8.60],
@@ -413,10 +413,10 @@ Response:
 
 ```json
 {
-  'model': 'clustering',
-  'response': [0, 0, 0, 1, 1, 1, 1],
-  'uuid': '1ca01e46-733c-4a77-b3da-3ded84dff4cd',
-  'version': 2
+  "model": "clustering",
+  "response": [0, 0, 0, 1, 1, 1, 1],
+  "uuid": "1ca01e46-733c-4a77-b3da-3ded84dff4cd",
+  "version": 2
 }
 
 ```

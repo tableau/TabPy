@@ -1,5 +1,5 @@
 import unittest
-from tabpy.tabpy_server.common.endpoint_file_mgr import _check_endpoint_name
+from tabpy.server.common.endpoint_file_mgr import _check_endpoint_name
 
 
 class TestEndpointFileManager(unittest.TestCase):

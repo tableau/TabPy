@@ -1,0 +1,15 @@
+[Service Info]
+Name = TabPy Server
+Description = 
+Creation Time = 0
+Access-Control-Allow-Origin = 
+Access-Control-Allow-Headers = 
+Access-Control-Allow-Methods = 
+
+[Query Objects Service Versions]
+
+[Query Objects Docstrings]
+
+[Meta]
+Revision Number = 1
+

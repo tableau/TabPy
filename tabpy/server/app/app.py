@@ -7,16 +7,16 @@ import os
 import shutil
 import signal
 import sys
-import tabpy.tabpy_server
+import tabpy
 from tabpy.tabpy import __version__
-from tabpy.tabpy_server.app.ConfigParameters import ConfigParameters
-from tabpy.tabpy_server.app.SettingsParameters import SettingsParameters
-from tabpy.tabpy_server.app.util import parse_pwd_file
-from tabpy.tabpy_server.management.state import TabPyState
-from tabpy.tabpy_server.management.util import _get_state_from_file
-from tabpy.tabpy_server.psws.callbacks import init_model_evaluator, init_ps_server
-from tabpy.tabpy_server.psws.python_service import PythonService, PythonServiceHandler
-from tabpy.tabpy_server.handlers import (
+from tabpy.server.app.ConfigParameters import ConfigParameters
+from tabpy.server.app.SettingsParameters import SettingsParameters
+from tabpy.server.app.util import parse_pwd_file
+from tabpy.server.management.state import TabPyState
+from tabpy.server.management.util import _get_state_from_file
+from tabpy.server.psws.callbacks import init_model_evaluator, init_ps_server
+from tabpy.server.psws.python_service import PythonService, PythonServiceHandler
+from tabpy.server.handlers import (
     EndpointHandler,
     EndpointsHandler,
     EvaluationPlaneHandler,
@@ -266,9 +266,9 @@ class TabPyApp:
              None, None),
             (SettingsParameters.KeyFile, ConfigParameters.TABPY_KEY_FILE, None, None),
             (SettingsParameters.StateFilePath, ConfigParameters.TABPY_STATE_PATH,
-             os.path.join(pkg_path, "tabpy_server"), None),
+             os.path.join(pkg_path, "server"), None),
             (SettingsParameters.StaticPath, ConfigParameters.TABPY_STATIC_PATH,
-             os.path.join(pkg_path, "tabpy_server", "static"), None),
+             os.path.join(pkg_path, "server", "static"), None),
             (ConfigParameters.TABPY_PWD_FILE, ConfigParameters.TABPY_PWD_FILE, None, None),
             (SettingsParameters.LogRequestContext, ConfigParameters.TABPY_LOG_DETAILS,
              "false", None),
@@ -367,7 +367,7 @@ class TabPyApp:
             os.path.isfile(cert),
             os.path.isfile(self.settings[SettingsParameters.KeyFile]),
         )
-        tabpy.tabpy_server.app.util.validate_cert(cert)
+        tabpy.server.app.util.validate_cert(cert)
 
     @staticmethod
     def _validate_cert_key_state(msg, cert_valid, key_valid):
@@ -417,7 +417,7 @@ class TabPyApp:
         state_file_path = os.path.join(state_file_dir, "state.ini")
         if not os.path.isfile(state_file_path):
             state_file_template_path = os.path.join(
-                pkg_path, "tabpy_server", "state.ini.template"
+                pkg_path, "server", "state.ini.template"
             )
             logger.debug(
                 f"File {state_file_path} not found, creating from "

@@ -6,11 +6,11 @@ from uuid import uuid4 as random_uuid
 
 from tornado import gen
 
-from tabpy.tabpy_server.app.SettingsParameters import SettingsParameters
-from tabpy.tabpy_server.handlers import MainHandler
-from tabpy.tabpy_server.handlers.base_handler import STAGING_THREAD
-from tabpy.tabpy_server.management.state import get_query_object_path
-from tabpy.tabpy_server.psws.callbacks import on_state_change
+from tabpy.server.app.SettingsParameters import SettingsParameters
+from tabpy.server.handlers import MainHandler
+from tabpy.server.handlers.base_handler import STAGING_THREAD
+from tabpy.server.management.state import get_query_object_path
+from tabpy.server.psws.callbacks import on_state_change
 
 
 def copy_from_local(localpath, remotepath, is_dir=False):

@@ -2,14 +2,14 @@ import configparser
 import getpass
 import os
 import sys
-from tabpy.tabpy_tools.client import Client
+from tabpy.tools.client import Client
 
 
 def get_default_config_file_path():
     import tabpy
 
     pkg_path = os.path.dirname(tabpy.__file__)
-    config_file_path = os.path.join(pkg_path, "tabpy_server", "common", "default.conf")
+    config_file_path = os.path.join(pkg_path, "server", "common", "default.conf")
     return config_file_path
 
 
