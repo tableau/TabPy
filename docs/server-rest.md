@@ -7,105 +7,173 @@ Python code and query deployed methods.
 
 <!-- toc -->
 
-- [GET /info](#get-info)
-  * [URL](#url)
-  * [Method](#method)
-  * [URL parameters](#url-parameters)
-  * [Data Parameters](#data-parameters)
-  * [Response](#response)
-- [API versions](#api-versions)
+- [Authentication, /info and /evaluate](#authentication-info-and-evaluate)
+- [http:get:: /status](#httpget-status)
+- [http:get:: /endpoints](#httpget-endpoints)
+- [http:get:: /endpoints/:endpoint](#httpget-endpointsendpoint)
+- [http:post:: /query/:endpoint](#httppost-queryendpoint)
 
 <!-- tocstop -->
 
 <!-- markdownlint-enable MD004 -->
 
-## GET /info
+## Authentication, /info and /evaluate
 
-Get static information about the server. The method doesn't require any
-authentication and returns supported API versions which the client can use
-together with optional and required features.
+Analytics Extensions API v1 is documented at
+[https://tableau.github.io/analytics-extensions-api/docs/ae_api_ref.html](https://tableau.github.io/analytics-extensions-api/docs/ae_api_ref.html).
 
-### URL
+The following documentation is for methods not currently used by Tableau.
+
+## http:get:: /status
+
+Gets runtime status of deployed endpoints. If no endpoints are deployed in
+the server, the returned data is an empty JSON object.
+
+Example request:
 
 ```HTTP
-/info
+GET /status HTTP/1.1
+Host: localhost:9004
+Accept: application/json
 ```
 
-### Method
+Example response:
 
 ```HTTP
-GET
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"clustering": {
+  "status": "LoadSuccessful",
+  "last_error": null,
+  "version": 1,
+  "type": "model"},
+ "add": {
+  "status": "LoadSuccessful",
+  "last_error": null,
+  "version": 1,
+  "type": "model"}
+}
 ```
 
-### URL parameters
-
-None.
-
-### Data Parameters
-
-None.
-
-### Response
-
-For a successful call:
-
-- Status: 200
-- Content:
-
-  ```json
-  {
-      "description": "",
-      "creation_time": "0",
-      "state_path": "e:\\dev\\TabPy\\tabpy-server\\tabpy_server",
-      "server_version": "0.4.1",
-      "name": "TabPy Server",
-      "versions": {
-          "v1": {
-              "features": {
-                  "authentication": {
-                      "required": true,
-                      "methods": {
-                          "basic-auth": {}
-                      }
-                  }
-              }
-          }
-      }
-  }
-  ```
-
-Response fields:
-
-<!-- markdownlint-disable MD013 -->
-
-Property | Description
---- | ---
-`description` | String that is hardcoded in the `state.ini` file and can be edited there.
-`creation_time` |  Creation time in seconds since 1970-01-01, hardcoded in the `state.ini` file, where it can be edited.
-`state_path` | State file path of the server (the value of the TABPY_STATE_PATH at the time the server was started).
-`server_version` | TabPy Server version tag. Clients can use this information for compatibility checks.
-`name` | TabPy server instance name. Can be edited in `state.ini` file.
-`version` | Collection of API versions supported by the server. Each entry in the collection is an API version which has a corresponding list of properties.
-`version.`*`<ver>`* | Set of properties for an API version.
-`version.`*`<ver>.features`* | Set of an API's available features.
-`version.`*`<ver>.features.<feature>`* | Set of a feature's properties. For specific details for a particular property meaning of a feature, check the documentation for the specific API version.
-`version.`*`<ver>.features.<feature>.required`* | If true the feature is required to be used by client.
-
-<!-- markdownlint-enable MD013 -->
-
-See [TabPy Configuration](#tabpy-configuration) section for more information
-on modifying the settings.
-
-- **Examples**
-
-Calling the method with curl:
+Using curl:
 
 ```bash
-curl -X GET http://localhost:9004/info
+curl -X GET http://localhost:9004/status
 ```
 
-## API versions
+## http:get:: /endpoints
 
-TabPy supports the following API versions:
+Gets a list of deployed endpoints and their static information. If no
+endpoints are deployed in the server, the returned data is an empty JSON object.
 
-- v1 - see details at [api-v1.md](api-v1.md).
+Example request:
+
+```HTTP
+GET /endpoints HTTP/1.1
+Host: localhost:9004
+Accept: application/json
+```
+
+Example response:
+
+```HTTP
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"clustering":
+  {"description": "",
+   "docstring": "-- no docstring found in query function --",
+   "creation_time": 1469511182,
+   "version": 1,
+   "dependencies": [],
+   "last_modified_time": 1469511182,
+   "type": "model",
+   "target": null},
+"add": {
+  "description": "",
+  "docstring": "-- no docstring found in query function --",
+  "creation_time": 1469505967,
+  "version": 1,
+  "dependencies": [],
+  "last_modified_time": 1469505967,
+  "type": "model",
+  "target": null}
+}
+```
+
+Using curl:
+
+```bash
+curl -X GET http://localhost:9004/endpoints
+```
+
+## http:get:: /endpoints/:endpoint
+
+Gets the description of a specific deployed endpoint. The endpoint must first
+be deployed in the server (see the [TabPy Tools documentation](tabpy-tools.md)).
+
+Example request:
+
+```HTTP
+GET /endpoints/add HTTP/1.1
+Host: localhost:9004
+Accept: application/json
+```
+
+Example response:
+
+```HTTP
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"description": "", "docstring": "-- no docstring found in query function --",
+ "creation_time": 1469505967, "version": 1, "dependencies": [],
+ "last_modified_time": 1469505967, "type": "model", "target": null}
+```
+
+Using curl:
+
+```bash
+curl -X GET http://localhost:9004/endpoints/add
+```
+
+## http:post:: /query/:endpoint
+
+Executes a function at the specified endpoint. The function must first be
+deployed (see the [TabPy Tools documentation](tabpy-tools.md)).
+
+This interface expects a JSON body with a `data` key, specifying the values
+for the function, according to its original definition. In the example below,
+the function `clustering` was defined with a signature of two parameters `x`
+and `y`, expecting arrays of numbers.
+
+Example request:
+
+```HTTP
+POST /query/clustering HTTP/1.1
+Host: localhost:9004
+Accept: application/json
+
+{"data": {
+  "x": [6.35, 6.40, 6.65, 8.60, 8.90, 9.00, 9.10],
+  "y": [1.95, 1.95, 2.05, 3.05, 3.05, 3.10, 3.15]}}
+```
+
+Example response:
+
+```HTTP
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"model": "clustering", "version": 1, "response": [0, 0, 0, 1, 1, 1, 1],
+ "uuid": "46d3df0e-acca-4560-88f1-67c5aedeb1c4"}
+```
+
+Using curl:
+
+```bash
+curl -X GET http://localhost:9004/query/clustering -d \
+'{"data": {"x": [6.35, 6.40, 6.65, 8.60, 8.90, 9.00, 9.10],
+           "y": [1.95, 1.95, 2.05, 3.05, 3.05, 3.10, 3.15]}}'
+```
