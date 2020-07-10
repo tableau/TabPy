@@ -44,9 +44,9 @@ def state_lock(func):
 
 def _get_root_path(state_path):
     if state_path[-1] != "/":
-        return state_path + "/"
-    else:
-        return state_path
+        state_path += "/"
+
+    return state_path
 
 
 def get_query_object_path(state_file_path, name, version):
@@ -313,10 +313,7 @@ class TabPyState:
             if dependencies and not isinstance(dependencies, list):
                 raise ValueError("dependencies must be a list.")
             elif not dependencies:
-                if "dependencies" in endpoint_info:
-                    dependencies = endpoint_info["dependencies"]
-                else:
-                    dependencies = []
+                dependencies = endpoint_info["dependencies"] if "dependencies" in endpoint_info else []
             if target and not isinstance(target, str):
                 raise ValueError("target must be a string.")
             elif target and target not in endpoints:

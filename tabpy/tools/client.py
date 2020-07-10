@@ -77,10 +77,9 @@ class Client:
         service_client = ServiceClient(self._endpoint, network_wrapper)
 
         self._service = RESTServiceClient(service_client)
-        if type(query_timeout) in (int, float) and query_timeout > 0:
-            self._service.query_timeout = query_timeout
-        else:
-            self._service.query_timeout = 0.0
+        if not type(query_timeout) in (int, float) or query_timeout <= 0:
+            query_timeout = 0.0
+        self._service.query_timeout = query_timeout
 
     def __repr__(self):
         return (
@@ -226,6 +225,7 @@ class Client:
         remove, get_endpoints
         """
         endpoint = self.get_endpoints().get(name)
+        version = 1
         if endpoint:
             if not override:
                 raise RuntimeError(
@@ -235,8 +235,6 @@ class Client:
                 )
 
             version = endpoint.version + 1
-        else:
-            version = 1
 
         obj = self._gen_endpoint(name, obj, description, version, schema)
 
@@ -305,11 +303,7 @@ class Client:
         _check_endpoint_name(name)
 
         if description is None:
-            if isinstance(obj.__doc__, str):
-                # extract doc string
-                description = obj.__doc__.strip() or ""
-            else:
-                description = ""
+            description = obj.__doc__.strip() or "" if isinstance(obj.__doc__, str) else ""
 
         endpoint_object = CustomQueryObject(query=obj, description=description,)
 
