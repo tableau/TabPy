@@ -134,9 +134,9 @@ class EvaluationPlaneHandler(BaseHandler):
         # name - the name is actually defined with user script being wrapped
         # in _user_script function (constructed as a striong) and then executed
         # with exec() call above.
-        args = arguments or ()
         future = self.executor.submit(_user_script,  # noqa: F821
-                                      restricted_tabpy, args)
+                                      restricted_tabpy,
+                                      **arguments if arguments is not None else None)
 
         ret = yield gen.with_timeout(timedelta(seconds=self.eval_timeout), future)
         raise gen.Return(ret)

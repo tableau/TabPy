@@ -56,10 +56,10 @@ def get_query_object_path(state_file_path, name, version):
     If the version is None, a path without the version will be returned.
     """
     root_path = _get_root_path(state_file_path)
+    sub_path = [_QUERY_OBJECT_DIR, name]
     if version is not None:
-        full_path = root_path + "/".join([_QUERY_OBJECT_DIR, name, str(version)])
-    else:
-        full_path = root_path + "/".join([_QUERY_OBJECT_DIR, name])
+        sub_path.append(str(version))
+    full_path = root_path + "/".join(sub_path)
     return full_path
 
 
