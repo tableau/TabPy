@@ -313,7 +313,7 @@ class TabPyState:
             if dependencies and not isinstance(dependencies, list):
                 raise ValueError("dependencies must be a list.")
             elif not dependencies:
-                dependencies = endpoint_info["dependencies"] if "dependencies" in endpoint_info else []
+                dependencies = endpoint_info.get("dependencies", [])
             if target and not isinstance(target, str):
                 raise ValueError("target must be a string.")
             elif target and target not in endpoints:

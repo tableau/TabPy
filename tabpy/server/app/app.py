@@ -1,7 +1,6 @@
 import concurrent.futures
 import configparser
 import logging
-from logging import config
 import multiprocessing
 import os
 import shutil
@@ -69,7 +68,8 @@ class TabPyApp:
 
         if os.path.isfile(config_file):
             try:
-                logging.config.fileConfig(config_file, disable_existing_loggers=False)
+                from logging import config
+                config.fileConfig(config_file, disable_existing_loggers=False)
             except KeyError:
                 logging.basicConfig(level=logging.DEBUG)
 

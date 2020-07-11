@@ -38,8 +38,8 @@ class ContextLoggerWrapper:
         self.method = request.method
         self.url = request.full_url()
 
-        self.client = request.headers["TabPy-Client"] if "TabPy-Client" in request.headers else None
-        self.tableau_username = request.headers["TabPy-User"] if "TabPy-User" in request.headers else None
+        self.client = request.headers.get("TabPy-Client", None)
+        self.tableau_username = request.headers.get("TabPy-User", None)
 
     def set_tabpy_username(self, tabpy_username: str):
         self.tabpy_username = tabpy_username
