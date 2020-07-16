@@ -227,7 +227,8 @@ class TabPyState:
             endpoints = self.get_endpoints()
 
             description = self._check_and_set_endpoint_description(description, "")
-            docstring = self._check_and_set_endpoint_docstring(docstring, "-- no docstring found in query function --")
+            docstring = self._check_and_set_endpoint_docstring(
+                docstring, "-- no docstring found in query function --")
             endpoint_type = self._check_and_set_endpoint_type(endpoint_type, None)
             dependencies = self._check_and_set_dependencies(dependencies, [])
 
