@@ -8,8 +8,8 @@ at endpoint_handler.py
 
 import json
 import logging
-from tabpy.tabpy_server.common.util import format_exception
-from tabpy.tabpy_server.handlers import ManagementHandler
+from tabpy.server.common.util import format_exception
+from tabpy.server.handlers import ManagementHandler
 from tornado import gen
 
 

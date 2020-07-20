@@ -4,7 +4,7 @@ except ImportError:
     from configparser import ConfigParser
 import json
 import logging
-from tabpy.tabpy_server.management.util import write_state_config
+from tabpy.server.management.util import write_state_config
 from threading import Lock
 from time import time
 
@@ -44,9 +44,9 @@ def state_lock(func):
 
 def _get_root_path(state_path):
     if state_path[-1] != "/":
-        return state_path + "/"
-    else:
-        return state_path
+        state_path += "/"
+
+    return state_path
 
 
 def get_query_object_path(state_file_path, name, version):
@@ -56,10 +56,10 @@ def get_query_object_path(state_file_path, name, version):
     If the version is None, a path without the version will be returned.
     """
     root_path = _get_root_path(state_file_path)
+    sub_path = [_QUERY_OBJECT_DIR, name]
     if version is not None:
-        full_path = root_path + "/".join([_QUERY_OBJECT_DIR, name, str(version)])
-    else:
-        full_path = root_path + "/".join([_QUERY_OBJECT_DIR, name])
+        sub_path.append(str(version))
+    full_path = root_path + "/".join(sub_path)
     return full_path
 
 
@@ -148,6 +148,45 @@ class TabPyState:
         logger.debug(f"Collected endpoints: {endpoints}")
         return endpoints
 
+    def _check_endpoint_exists(self, name):
+        endpoints = self.get_endpoints()
+        if not name or not isinstance(name, str) or len(name) == 0:
+            raise ValueError("name of the endpoint must be a valid string.")
+
+        return name in endpoints
+
+    def _check_and_set_endpoint_str_value(self, param, paramName, defaultValue):
+        if not param and defaultValue is not None:
+            return defaultValue
+
+        if not param or not isinstance(param, str):
+            raise ValueError(f"{paramName} must be a string.")
+
+        return param
+
+    def _check_and_set_endpoint_description(self, description, defaultValue):
+        return self._check_and_set_endpoint_str_value(description, "description", defaultValue)
+
+    def _check_and_set_endpoint_docstring(self, docstring, defaultValue):
+        return self._check_and_set_endpoint_str_value(docstring, "docstring", defaultValue)
+
+    def _check_and_set_endpoint_type(self, endpoint_type, defaultValue):
+        return self._check_and_set_endpoint_str_value(
+            endpoint_type, "endpoint type", defaultValue)
+
+    def _check_and_set_target(self, target, defaultValue):
+        return self._check_and_set_endpoint_str_value(
+            target, "target", defaultValue)
+
+    def _check_and_set_dependencies(self, dependencies, defaultValue):
+        if not dependencies:
+            return defaultValue
+
+        if dependencies or not isinstance(dependencies, list):
+            raise ValueError("dependencies must be a list.")
+
+        return dependencies
+
     @state_lock
     def add_endpoint(
         self,
@@ -182,28 +221,19 @@ class TabPyState:
 
         """
         try:
-            endpoints = self.get_endpoints()
-            if name is None or not isinstance(name, str) or len(name) == 0:
-                raise ValueError("name of the endpoint must be a valid string.")
-            elif name in endpoints:
+            if (self._check_endpoint_exists(name)):
                 raise ValueError(f"endpoint {name} already exists.")
-            if description and not isinstance(description, str):
-                raise ValueError("description must be a string.")
-            elif not description:
-                description = ""
-            if docstring and not isinstance(docstring, str):
-                raise ValueError("docstring must be a string.")
-            elif not docstring:
-                docstring = "-- no docstring found in query function --"
-            if not endpoint_type or not isinstance(endpoint_type, str):
-                raise ValueError("endpoint type must be a string.")
-            if dependencies and not isinstance(dependencies, list):
-                raise ValueError("dependencies must be a list.")
-            elif not dependencies:
-                dependencies = []
-            if target and not isinstance(target, str):
-                raise ValueError("target must be a string.")
-            elif target and target not in endpoints:
+
+            endpoints = self.get_endpoints()
+
+            description = self._check_and_set_endpoint_description(description, "")
+            docstring = self._check_and_set_endpoint_docstring(
+                docstring, "-- no docstring found in query function --")
+            endpoint_type = self._check_and_set_endpoint_type(endpoint_type, None)
+            dependencies = self._check_and_set_dependencies(dependencies, [])
+
+            target = self._check_and_set_target(target, "")
+            if target and target not in endpoints:
                 raise ValueError("target endpoint is not valid.")
 
             endpoint_info = {
@@ -286,43 +316,32 @@ class TabPyState:
 
         """
         try:
-            endpoints = self.get_endpoints()
-            if not name or not isinstance(name, str):
-                raise ValueError("name of the endpoint must be string.")
-            elif name not in endpoints:
+            if (not self._check_endpoint_exists(name)):
                 raise ValueError(f"endpoint {name} does not exist.")
 
+            endpoints = self.get_endpoints()
             endpoint_info = endpoints[name]
 
-            if description and not isinstance(description, str):
-                raise ValueError("description must be a string.")
-            elif not description:
-                description = endpoint_info["description"]
-            if docstring and not isinstance(docstring, str):
-                raise ValueError("docstring must be a string.")
-            elif not docstring:
-                docstring = endpoint_info["docstring"]
-            if endpoint_type and not isinstance(endpoint_type, str):
-                raise ValueError("endpoint type must be a string.")
-            elif not endpoint_type:
-                endpoint_type = endpoint_info["type"]
+            description = self._check_and_set_endpoint_description(
+                description, endpoint_info["description"])
+            docstring = self._check_and_set_endpoint_docstring(
+                docstring, endpoint_info["docstring"])
+            endpoint_type = self._check_and_set_endpoint_type(
+                endpoint_type, endpoint_info["type"])
+            dependencies = self._check_and_set_dependencies(
+                dependencies, endpoint_info.get("dependencies", []))
+
+            target = self._check_and_set_target(target, None)
+            if target and target not in endpoints:
+                raise ValueError("target endpoint is not valid.")
+            elif not target:
+                target = endpoint_info["target"]
+
             if version and not isinstance(version, int):
                 raise ValueError("version must be an int.")
             elif not version:
                 version = endpoint_info["version"]
-            if dependencies and not isinstance(dependencies, list):
-                raise ValueError("dependencies must be a list.")
-            elif not dependencies:
-                if "dependencies" in endpoint_info:
-                    dependencies = endpoint_info["dependencies"]
-                else:
-                    dependencies = []
-            if target and not isinstance(target, str):
-                raise ValueError("target must be a string.")
-            elif target and target not in endpoints:
-                raise ValueError("target endpoint is not valid.")
-            elif not target:
-                target = endpoint_info["target"]
+
             endpoint_info = {
                 "description": description,
                 "docstring": docstring,

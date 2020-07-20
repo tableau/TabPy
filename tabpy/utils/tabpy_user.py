@@ -19,8 +19,8 @@ Options:
 import docopt
 import logging
 import secrets
-from tabpy.tabpy_server.app.util import parse_pwd_file
-from tabpy.tabpy_server.handlers.util import hash_password
+from tabpy.server.app.util import parse_pwd_file
+from tabpy.server.handlers.util import hash_password
 
 logger = logging.getLogger(__name__)
 

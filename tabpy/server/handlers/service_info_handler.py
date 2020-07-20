@@ -1,6 +1,6 @@
 import json
-from tabpy.tabpy_server.app.SettingsParameters import SettingsParameters
-from tabpy.tabpy_server.handlers import ManagementHandler
+from tabpy.server.app.SettingsParameters import SettingsParameters
+from tabpy.server.handlers import ManagementHandler
 
 
 class ServiceInfoHandler(ManagementHandler):
