@@ -266,9 +266,9 @@ class TabPyApp:
              None, None),
             (SettingsParameters.KeyFile, ConfigParameters.TABPY_KEY_FILE, None, None),
             (SettingsParameters.StateFilePath, ConfigParameters.TABPY_STATE_PATH,
-             os.path.join(pkg_path, "server"), None),
+             os.path.join(pkg_path, "tabpy_server"), None),
             (SettingsParameters.StaticPath, ConfigParameters.TABPY_STATIC_PATH,
-             os.path.join(pkg_path, "server", "static"), None),
+             os.path.join(pkg_path, "tabpy_server", "static"), None),
             (ConfigParameters.TABPY_PWD_FILE, ConfigParameters.TABPY_PWD_FILE, None, None),
             (SettingsParameters.LogRequestContext, ConfigParameters.TABPY_LOG_DETAILS,
              "false", None),
@@ -417,7 +417,7 @@ class TabPyApp:
         state_file_path = os.path.join(state_file_dir, "state.ini")
         if not os.path.isfile(state_file_path):
             state_file_template_path = os.path.join(
-                pkg_path, "server", "state.ini.template"
+                pkg_path, "tabpy_server", "state.ini.template"
             )
             logger.debug(
                 f"File {state_file_path} not found, creating from "
