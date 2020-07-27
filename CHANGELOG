@@ -1,15 +1,10 @@
 # Changelog
 
-## v2.0.0
+## v1.2.0
 
 ### Improvements
 
 - Minor code cleanup.
-
-### Breaking changes
-
-- tabpy_server and tabpy_tools are renamed to server and tools.
-
 
 ## v1.1.0
 

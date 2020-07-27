@@ -146,25 +146,3 @@ Access-Control-Allow-Methods = GET, OPTIONS, POST
 ```sh
 flake8 .
 ```
-
-## Publishing TabPy Package
-
-Execute the following commands to build and publish a new version of
-TabPy package:
-
-```sh
-python setup.py sdist bdist_wheel
-python -m twine upload dist/*
-```
-
-To publish test version of the package use the following command:
-
-```sh
-python -m twine upload --repository-url https://test.pypi.org/legacy/ dist/*
-```
-
-To install package from TestPyPi use the command:
-
-```sh
-pip install --upgrade -i https://test.pypi.org/simple/ tabpy
-```
