@@ -1,0 +1,72 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<meta http-equiv="Content-Style-Type" content="text/css">
+
+<title>Tableau Python Server</title>
+
+<style type="text/css">
+body {
+  background: url("tableau.png") no-repeat center;
+  font-family: Merriweather,serif;
+}
+img {
+  position: absolute;
+  top: 0; bottom:0; left: 0; right:0;
+  margin: auto;
+}
+</style>
+
+<script type="text/javascript">
+function displayResponse(method, controlId) {
+  var r;
+  if (window.XMLHttpRequest) {
+    r = new XMLHttpRequest();
+  } else {
+    // code for older browsers
+    r = new ActiveXObject("Microsoft.XMLHTTP");
+  }
+  r.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      document.getElementById(controlId).innerHTML =
+      "<pre>" +
+      JSON.stringify(JSON.parse(this.responseText), null, 4);
+    }
+  };
+  r.open("GET", method, true);
+  r.send();
+}
+
+function loadInfo() {
+  displayResponse("info", "info")
+}
+
+function loadModels() {
+  displayResponse("endpoints", "models")
+}
+
+loadInfo()
+loadModels()
+</script>
+</head>
+
+<body>
+<h1>TabPy Server Info:</h1>
+<p id="info">
+
+<h1>Deployed Models:</h1>
+<p id="models">
+
+<h1>Useful links:</h1>
+<ul>
+<li><a href="https://tableau.github.io/TabPy/">TabPy Documentation</a></li>
+<li><a href="https://github.com/tableau/TabPy">TabPy Source Code</a></li>
+<li><a href="https://pypi.org/project/tabpy/">TabPy PyPi</a></li>
+<li><a href="http://tabscifi.com">Tableau Sci-Fi - Advanced Analytics Team blog</a></li>
+</ul>
+
+</body>
+</html> 
