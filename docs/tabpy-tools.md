@@ -30,7 +30,7 @@ to specify the service location for all subsequent operations:
 
 ```python
 
-from tabpy.tools.client import Client
+from tabpy.tabpy_tools.client import Client
 
 client = Client('http://localhost:9004/')
 
@@ -351,7 +351,7 @@ method provided in this tools package:
 
 ```python
 
-from tabpy.tools.schema import generate_schema
+from tabpy.tabpy_tools.schema import generate_schema
 
 schema = generate_schema(
   input={'x': 3, 'y': 2},
@@ -368,7 +368,7 @@ To describe more complex input, like arrays, you would use the following syntax:
 
 ```python
 
-from tabpy.tools.schema import generate_schema
+from tabpy.tabpy_tools.schema import generate_schema
 
 schema = generate_schema(
   input={'x': [6.35, 6.40, 6.65, 8.60],

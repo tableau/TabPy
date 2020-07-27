@@ -38,7 +38,7 @@ def main():
     args = docopt.docopt(__doc__)
     config = args["--config"] or None
 
-    from tabpy.server.app.app import TabPyApp
+    from tabpy.tabpy_server.app.app import TabPyApp
 
     app = TabPyApp(config)
     app.run()

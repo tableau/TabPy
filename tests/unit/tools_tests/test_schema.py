@@ -1,6 +1,6 @@
 import unittest
 
-from tabpy.tools.schema import generate_schema
+from tabpy.tabpy_tools.schema import generate_schema
 
 
 class TestSchema(unittest.TestCase):

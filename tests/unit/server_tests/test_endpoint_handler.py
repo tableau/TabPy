@@ -3,9 +3,9 @@ import os
 import sys
 import tempfile
 
-from tabpy.server.app.app import TabPyApp
-from tabpy.server.app.app import _init_asyncio_patch
-from tabpy.server.handlers.util import hash_password
+from tabpy.tabpy_server.app.app import TabPyApp
+from tabpy.tabpy_server.app.app import _init_asyncio_patch
+from tabpy.tabpy_server.handlers.util import hash_password
 from tornado.testing import AsyncHTTPTestCase
 
 

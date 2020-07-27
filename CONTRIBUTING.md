@@ -15,7 +15,6 @@
 - [Documentation Updates](#documentation-updates)
 - [TabPy with Swagger](#tabpy-with-swagger)
 - [Code styling](#code-styling)
-- [Publishing TabPy Package](#publishing-tabpy-package)
 
 <!-- tocstop -->
 

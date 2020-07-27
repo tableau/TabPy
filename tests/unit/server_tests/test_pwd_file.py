@@ -2,7 +2,7 @@ import os
 import unittest
 from tempfile import NamedTemporaryFile
 
-from tabpy.server.app.app import TabPyApp
+from tabpy.tabpy_server.app.app import TabPyApp
 
 
 class TestPasswordFile(unittest.TestCase):
