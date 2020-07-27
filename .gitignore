@@ -117,9 +117,9 @@ package-lock.json
 .idea/
 
 # TabPy server artifacts
-tabpy/tabpy_server/state.ini
-tabpy/tabpy_server/query_objects
-tabpy/tabpy_server/staging
+tabpy/server/state.ini
+tabpy/server/query_objects
+tabpy/server/staging
 
 # VS Code
 *.code-workspace
@@ -128,3 +128,4 @@ tabpy/tabpy_server/staging
 # etc
 setup.bat
 *~
+tabpy_log.log.1

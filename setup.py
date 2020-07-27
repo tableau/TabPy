@@ -54,9 +54,9 @@ def setup_package():
         package_data={
             "tabpy": [
                 "VERSION",
-                "tabpy_server/state.ini.template",
-                "tabpy_server/static/*",
-                "tabpy_server/common/default.conf",
+                "server/state.ini.template",
+                "server/static/*",
+                "server/common/default.conf",
             ]
         },
         python_requires=">=3.6",

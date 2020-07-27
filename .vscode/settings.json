@@ -9,7 +9,7 @@
         "**/*.pyc": true
     },
     "python.linting.pylintEnabled": false,
-    "python.linting.flake8Enabled": false,
+    "python.linting.flake8Enabled": true,
     "python.linting.enabled": true,
     "python.testing.autoTestDiscoverOnSaveEnabled": true,
     "python.testing.pytestArgs": [
@@ -18,5 +18,6 @@
     "python.testing.unittestEnabled": false,
     "python.testing.nosetestsEnabled": false,
     "python.testing.pytestEnabled": true,
-    "python.linting.pycodestyleEnabled": true
+    "python.linting.pycodestyleEnabled": false,
+    "python.pythonPath": "C:\\Users\\ogolovatyi\\Anaconda3\\envs\\Python 37\\python.exe"
 }

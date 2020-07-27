@@ -1,7 +1,7 @@
 import unittest
 import sys
 
-from tabpy.tabpy_tools.rest import RESTObject, RESTProperty, enum
+from tabpy.tools.rest import RESTObject, RESTProperty, enum
 
 
 class TestRESTObject(unittest.TestCase):

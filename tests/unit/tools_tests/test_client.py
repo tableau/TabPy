@@ -1,8 +1,8 @@
 import unittest
 from unittest.mock import Mock
 
-from tabpy.tabpy_tools.client import Client
-from tabpy.tabpy_tools.client import _check_endpoint_name
+from tabpy.tools.client import Client
+from tabpy.tools.client import _check_endpoint_name
 
 
 class TestClient(unittest.TestCase):

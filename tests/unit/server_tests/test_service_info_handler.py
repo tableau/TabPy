@@ -1,8 +1,8 @@
 import base64
 import json
 import os
-from tabpy.tabpy_server.app.app import TabPyApp
-from tabpy.tabpy_server.app.SettingsParameters import SettingsParameters
+from tabpy.server.app.app import TabPyApp
+from tabpy.server.app.SettingsParameters import SettingsParameters
 import tempfile
 from tornado.testing import AsyncHTTPTestCase
 
@@ -73,11 +73,11 @@ class TestServiceInfoHandlerWithAuth(BaseTestServiceInfoHandler):
         cls.tabpy_config = ["TABPY_PWD_FILE = ./tests/integration/resources/pwdfile.txt\n"]
         super(TestServiceInfoHandlerWithAuth, cls).setUpClass()
 
-    def test_given_tabpy_server_with_auth_expect_error_info_response(self):
+    def test_given_server_with_auth_expect_error_info_response(self):
         response = self.fetch("/info")
         self.assertEqual(response.code, 401)
 
-    def test_given_tabpy_server_with_auth_expect_correct_info_response(self):
+    def test_given_server_with_auth_expect_correct_info_response(self):
         header = {
             "Content-Type": "application/json",
             "TabPy-Client": "Integration test for deploying models with auth",
@@ -111,7 +111,7 @@ class TestServiceInfoHandlerWithoutAuth(BaseTestServiceInfoHandler):
         cls.prefix = "__TestServiceInfoHandlerWithoutAuth_"
         super(TestServiceInfoHandlerWithoutAuth, cls).setUpClass()
 
-    def test_tabpy_server_with_no_auth_expect_correct_info_response(self):
+    def test_server_with_no_auth_expect_correct_info_response(self):
         response = self.fetch("/info")
         self.assertEqual(response.code, 200)
         actual_response = json.loads(response.body)
@@ -128,7 +128,7 @@ class TestServiceInfoHandlerWithoutAuth(BaseTestServiceInfoHandler):
         features = v1["features"]
         self.assertDictEqual({}, features)
 
-    def test_given_tabpy_server_with_no_auth_and_password_expect_correct_info_response(self):
+    def test_given_server_with_no_auth_and_password_expect_correct_info_response(self):
         header = {
             "Content-Type": "application/json",
             "TabPy-Client": "Integration test for deploying models with auth",

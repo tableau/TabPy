@@ -1,7 +1,7 @@
-from tabpy.tabpy_server.handlers import BaseHandler
+from tabpy.server.handlers import BaseHandler
 import logging
 import time
-from tabpy.tabpy_server.common.messages import (
+from tabpy.server.common.messages import (
     Query,
     QuerySuccessful,
     QueryError,
@@ -10,7 +10,7 @@ from tabpy.tabpy_server.common.messages import (
 from hashlib import md5
 import uuid
 import json
-from tabpy.tabpy_server.common.util import format_exception
+from tabpy.server.common.util import format_exception
 import urllib
 from tornado import gen
 
