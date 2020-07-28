@@ -62,7 +62,7 @@ at [`logging.config` documentation page](https://docs.python.org/3.6/library/log
   [TabPy Tools documentation](tabpy-tools.md) for details. Default value -
   `/tmp/query_objects`.
 - `TABPY_STATE_PATH` - state folder location (absolute path) for Tornado web
-   server. Default value - `tabpy/server` subfolder in TabPy package
+   server. Default value - `tabpy/tabpy_server` subfolder in TabPy package
    folder.
 - `TABPY_STATIC_PATH` - absolute path for location of static files (index.html
   page) for TabPy instance. Default value - `tabpy/tabpy_server/static`
@@ -101,7 +101,7 @@ settings._
 [TabPy]
 # TABPY_QUERY_OBJECT_PATH = /tmp/query_objects
 # TABPY_PORT = 9004
-# TABPY_STATE_PATH = <package-path>/tabpy/server
+# TABPY_STATE_PATH = <package-path>/tabpy/tabpy_server
 
 # Where static pages live
 # TABPY_STATIC_PATH = <package-path>/tabpy/tabpy_server/static
