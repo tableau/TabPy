@@ -29,12 +29,12 @@ documentation page.
 
 To configure Tableau Server 2018.2 and newer versions to connect to TabPy server
 follow instructions on Tableau
-[Configure Connections to Analytics Extensions](https://onlinehelp.tableau.com/current/server/en-us/tsm.htm)
+[Configure Connections to Analytics Extensions](https://onlinehelp.tableau.com/current/tabpy_server/en-us/tsm.htm)
 page.
 
 Specific details about how to configure a secure connection to TabPy, enable or
 disable connections and other setting can be found at Tableau
-[TSM Security documentation](https://onlinehelp.tableau.com/current/server/en-us/cli_security_tsm.htm#tsm_security_vizql-extsvc-ssl-enable)
+[TSM Security documentation](https://onlinehelp.tableau.com/current/tabpy_server/en-us/cli_security_tsm.htm#tsm_security_vizql-extsvc-ssl-enable)
 page.
 
 For how to configure TabPy instance follow instructions at
@@ -44,7 +44,7 @@ For how to configure TabPy instance follow instructions at
 
 For Tableau workbooks with embedded Python code to work on Tableau Server 10.1
 or later, you need to go through a similar setup but using the
-[tabadmin](https://onlinehelp.tableau.com/current/server/en-us/tabadmin.htm)
+[tabadmin](https://onlinehelp.tableau.com/current/tabpy_server/en-us/tabadmin.htm)
 command line utility. The two server settings that need to be configured are
 `vizqlserver.extsvc.host` and `vizqlserver.extsvc.port`.
 

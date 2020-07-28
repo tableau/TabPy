@@ -65,7 +65,7 @@ at [`logging.config` documentation page](https://docs.python.org/3.6/library/log
    server. Default value - `tabpy/server` subfolder in TabPy package
    folder.
 - `TABPY_STATIC_PATH` - absolute path for location of static files (index.html
-  page) for TabPy instance. Default value - `tabpy/server/static`
+  page) for TabPy instance. Default value - `tabpy/tabpy_server/static`
   subfolder in TabPy package folder.
 - `TABPY_PWD_FILE` - absolute path to password file. Setting up this parameter
   makes TabPy require credentials with HTTP(S) requests. More details about
@@ -104,7 +104,7 @@ settings._
 # TABPY_STATE_PATH = <package-path>/tabpy/server
 
 # Where static pages live
-# TABPY_STATIC_PATH = <package-path>/tabpy/server/static
+# TABPY_STATIC_PATH = <package-path>/tabpy/tabpy_server/static
 
 # For how to configure TabPy authentication read
 # docs/server-config.md.
@@ -256,7 +256,7 @@ as explained in Python documentation at
 [Logging Configuration page](https://docs.python.org/3.6/library/logging.config.html).
 
 A default config provided with TabPy is at
-[`tabpy-server/server/common/default.conf`](tabpy-server/server/common/default.conf)
+[`tabpy-server/tabpy_server/common/default.conf`](tabpy-server/tabpy_server/common/default.conf)
 and has a configuration for console and file loggers. Changing the config file
 allows the user to modify the log level, format of the logged messages and
 add or remove loggers.
