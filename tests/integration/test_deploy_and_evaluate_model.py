@@ -1,4 +1,4 @@
-import integ_test_base
+from . import integ_test_base
 
 
 class TestDeployAndEvaluateModel(integ_test_base.IntegTestBase):

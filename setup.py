@@ -7,6 +7,7 @@ scripts and saved functions via Tableau's table calculations.
 
 import os
 from setuptools import setup, find_packages
+import unittest
 
 
 DOCLINES = (__doc__ or "").split("\n")
@@ -106,7 +107,7 @@ def setup_package():
             "sklearn",
             "textblob",
         ],
-        test_suite="pytest",
+        test_suite="tests",
     )
 
 
