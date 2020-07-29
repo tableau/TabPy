@@ -25,6 +25,7 @@ build:
           -
             command: pylint-run
             use_website_config: true
+    tests: false
 checks:
   python:
     code_rating: true
