@@ -123,8 +123,9 @@ tabpy/tabpy_server/staging
 
 # VS Code
 *.code-workspace
-.vscode
+.vscode/
 
 # etc
 setup.bat
 *~
+tabpy_log.log.1

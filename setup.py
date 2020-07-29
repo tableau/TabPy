@@ -7,6 +7,7 @@ scripts and saved functions via Tableau's table calculations.
 
 import os
 from setuptools import setup, find_packages
+import unittest
 
 
 DOCLINES = (__doc__ or "").split("\n")
@@ -97,16 +98,20 @@ def setup_package():
         },
         setup_requires=["pytest-runner"],
         tests_require=[
+            "coverage",
+            "coveralls",
+            "hypothesis",
             "mock",
             "nltk",
             "numpy",
             "pandas",
             "pytest",
+            "pytest-cov",
             "scipy",
             "sklearn",
             "textblob",
         ],
-        test_suite="pytest",
+        test_suite="tests",
     )
 
 

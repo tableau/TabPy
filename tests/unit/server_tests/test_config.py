@@ -143,7 +143,7 @@ class TestPartialConfigFile(unittest.TestCase):
         )
         config_file.close()
 
-        with self.assertRaises(ValueError) as err:
+        with self.assertRaises(ValueError):
             TabPyApp(self.config_file.name)
 
     @patch("tabpy.tabpy_server.app.app.os")

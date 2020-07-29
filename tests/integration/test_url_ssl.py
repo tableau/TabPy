@@ -3,7 +3,7 @@ All other misc. URL-related integration tests for
 when SSL is turned on for TabPy.
 """
 
-import integ_test_base
+from . import integ_test_base
 import requests
 
 

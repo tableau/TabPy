@@ -15,7 +15,6 @@
 - [Documentation Updates](#documentation-updates)
 - [TabPy with Swagger](#tabpy-with-swagger)
 - [Code styling](#code-styling)
-- [Publishing TabPy Package](#publishing-tabpy-package)
 
 <!-- tocstop -->
 
@@ -31,7 +30,7 @@ and run it locally.
 These are prerequisites for an environment required for a contributor to
 be able to work on TabPy changes:
 
-- Python 3.6 or 3.7:
+- Python 3.6, 3.7 or 3.8:
   - To see which version of Python you have installed, run `python --version`.
 - git
 - Node.js for npm packages - install from <https://nodejs.org>.
@@ -145,26 +144,4 @@ Access-Control-Allow-Methods = GET, OPTIONS, POST
 
 ```sh
 flake8 .
-```
-
-## Publishing TabPy Package
-
-Execute the following commands to build and publish a new version of
-TabPy package:
-
-```sh
-python setup.py sdist bdist_wheel
-python -m twine upload dist/*
-```
-
-To publish test version of the package use the following command:
-
-```sh
-python -m twine upload --repository-url https://test.pypi.org/legacy/ dist/*
-```
-
-To install package from TestPyPi use the command:
-
-```sh
-pip install --upgrade -i https://test.pypi.org/simple/ tabpy
 ```

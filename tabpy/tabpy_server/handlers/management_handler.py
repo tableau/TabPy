@@ -49,13 +49,13 @@ class ManagementHandler(MainHandler):
         """
         self.logger.log(logging.DEBUG, f"Adding/updating model {name}...")
 
-        _name_checker = _compile(r"^[a-zA-Z0-9-_\s]+$")
         if not isinstance(name, str):
             msg = "Endpoint name must be a string"
             self.logger.log(logging.CRITICAL, msg)
             raise TypeError(msg)
 
-        if not _name_checker.match(name):
+        name_checker = _compile(r"^[a-zA-Z0-9-_\s]+$")
+        if not name_checker.match(name):
             raise gen.Return(
                 "endpoint name can only contain: a-z, A-Z, 0-9,"
                 " underscore, hyphens and spaces."
@@ -69,48 +69,38 @@ class ManagementHandler(MainHandler):
             self.logger.log(logging.CRITICAL, msg)
             raise RuntimeError(msg)
 
-        request_uuid = random_uuid()
-        self.settings["add_or_updating_endpoint"] = request_uuid
+        self.settings["add_or_updating_endpoint"] = random_uuid()
         try:
-            description = (
-                request_data["description"] if "description" in request_data else None
-            )
+            docstring = None
             if "docstring" in request_data:
                 docstring = str(
                     bytes(request_data["docstring"], "utf-8").decode("unicode_escape")
                 )
-            else:
-                docstring = None
-            endpoint_type = request_data["type"] if "type" in request_data else None
-            methods = request_data["methods"] if "methods" in request_data else []
-            dependencies = (
-                request_data["dependencies"] if "dependencies" in request_data else None
-            )
-            target = request_data["target"] if "target" in request_data else None
-            schema = request_data["schema"] if "schema" in request_data else None
 
-            src_path = request_data["src_path"] if "src_path" in request_data else None
+            description = request_data.get("description", None)
+            endpoint_type = request_data.get("type", None)
+            methods = request_data.get("methods", [])
+            dependencies = request_data.get("dependencies", None)
+            target = request_data.get("target", None)
+            schema = request_data.get("schema", None)
+            src_path = request_data.get("src_path", None)
             target_path = get_query_object_path(
                 self.settings[SettingsParameters.StateFilePath], name, version
             )
-            self.logger.log(logging.DEBUG, f"Checking source path {src_path}...")
-            _path_checker = _compile(r"^[\\\:a-zA-Z0-9-_~\s/\.\(\)]+$")
+
+            path_checker = _compile(r"^[\\\:a-zA-Z0-9-_~\s/\.\(\)]+$")
             # copy from staging
             if src_path:
-                if not isinstance(request_data["src_path"], str):
+                if not isinstance(src_path, str):
                     raise gen.Return("src_path must be a string.")
-                if not _path_checker.match(src_path):
-                    raise gen.Return(
-                        "Endpoint source path name can only contain: "
-                        "a-z, A-Z, 0-9, underscore, hyphens and spaces."
-                    )
+                if not path_checker.match(src_path):
+                    raise gen.Return(f"Invalid source path for endpoint {name}")
 
                 yield self._copy_po_future(src_path, target_path)
             elif endpoint_type != "alias":
-                raise gen.Return("src_path is required to add/update an " "endpoint.")
-
-            # alias special logic:
-            if endpoint_type == "alias":
+                raise gen.Return("src_path is required to add/update an endpoint.")
+            else:
+                # alias special logic:
                 if not target:
                     raise gen.Return("Target is required for alias endpoint.")
                 dependencies = [target]

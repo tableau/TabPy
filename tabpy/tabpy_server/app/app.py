@@ -1,13 +1,12 @@
 import concurrent.futures
 import configparser
 import logging
-from logging import config
 import multiprocessing
 import os
 import shutil
 import signal
 import sys
-import tabpy.tabpy_server
+import tabpy
 from tabpy.tabpy import __version__
 from tabpy.tabpy_server.app.ConfigParameters import ConfigParameters
 from tabpy.tabpy_server.app.SettingsParameters import SettingsParameters
@@ -61,7 +60,7 @@ class TabPyApp:
     python_service = None
     credentials = {}
 
-    def __init__(self, config_file=None):
+    def __init__(self, config_file):
         if config_file is None:
             config_file = os.path.join(
                 os.path.dirname(__file__), os.path.pardir, "common", "default.conf"
@@ -69,7 +68,8 @@ class TabPyApp:
 
         if os.path.isfile(config_file):
             try:
-                logging.config.fileConfig(config_file, disable_existing_loggers=False)
+                from logging import config
+                config.fileConfig(config_file, disable_existing_loggers=False)
             except KeyError:
                 logging.basicConfig(level=logging.DEBUG)
 
@@ -243,13 +243,20 @@ class TabPyApp:
         pkg_path = os.path.dirname(tabpy.__file__)
 
         parser = configparser.ConfigParser(os.environ)
+        logger.info(f"Parsing config file {config_file}")
 
+        file_exists = False
         if os.path.isfile(config_file):
-            with open(config_file) as f:
-                parser.read_string(f.read())
-        else:
+            try:
+                with open(config_file, 'r') as f:
+                    parser.read_string(f.read())
+                    file_exists = True
+            except Exception:
+                pass
+
+        if not file_exists:
             logger.warning(
-                f"Unable to find config file at {config_file}, "
+                f"Unable to open config file {config_file}, "
                 "using default settings."
             )
 

@@ -44,21 +44,14 @@ def get_creds():
 
 def deploy_model(funcName, func, funcDescription):
     # running from deploy_models.py
-    if len(sys.argv) > 1:
-        config_file_path = sys.argv[1]
-    else:
-        config_file_path = get_default_config_file_path()
+    config_file_path = sys.argv[1] if len(sys.argv) > 1 else get_default_config_file_path()
     port, auth_on, prefix = parse_config(config_file_path)
 
     connection = Client(f"{prefix}://localhost:{port}/")
 
     if auth_on:
         # credentials are passed in from setup.py
-        if len(sys.argv) == 4:
-            user, passwd = sys.argv[2], sys.argv[3]
-        # running Sentiment Analysis independently
-        else:
-            user, passwd = get_creds()
+        user, passwd = sys.argv[2], sys.argv[3] if len(sys.argv) == 4 else get_creds()
         connection.set_credentials(user, passwd)
 
     connection.deploy(funcName, func, funcDescription, override=True)

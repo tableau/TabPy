@@ -1,6 +1,5 @@
 import concurrent.futures
 import logging
-from tabpy.tabpy_tools.query_object import QueryObject
 from tabpy.tabpy_server.common.util import format_exception
 from tabpy.tabpy_server.common.messages import (
     LoadObject,
@@ -20,6 +19,7 @@ from tabpy.tabpy_server.common.messages import (
     ObjectCount,
     ObjectList,
 )
+from tabpy.tabpy_tools.query_object import QueryObject
 
 
 logger = logging.getLogger(__name__)
