@@ -169,7 +169,7 @@ class IntegTestBase(unittest.TestCase):
         config_file = open(os.path.join(self.tmp_dir, "test.conf"), "w+")
         config_file.write(
             "[TabPy]\n"
-            f"TABPY_QUERY_OBJECT_PATH = ./query_objects\n"
+            f"TABPY_QUERY_OBJECT_PATH = {self.tmp_dir}/query_objects\n"
             f"TABPY_PORT = {self._get_port()}\n"
             f"TABPY_STATE_PATH = {self.tmp_dir}\n"
         )
@@ -232,6 +232,7 @@ class IntegTestBase(unittest.TestCase):
                 self.py = "python"
             else:
                 self.py = "python3"
+                cmd.append("&")
                 preexec_fn = os.setsid
 
             coverage.process_startup()
