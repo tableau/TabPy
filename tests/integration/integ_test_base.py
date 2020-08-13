@@ -232,7 +232,6 @@ class IntegTestBase(unittest.TestCase):
                 self.py = "python"
             else:
                 self.py = "python3"
-                cmd.append("&")
                 preexec_fn = os.setsid
 
             coverage.process_startup()
