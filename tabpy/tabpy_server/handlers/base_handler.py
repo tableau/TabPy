@@ -138,10 +138,6 @@ class BaseHandler(tornado.web.RequestHandler):
         self.set_status(code)
         self.write(json.dumps({"message": log_message, "info": info or {}}))
 
-        # We want to duplicate error message in console for
-        # loggers are misconfigured or causing the failure
-        # themselves
-        print(info)
         self.logger.log(
             logging.ERROR,
             'Responding with status={}, message="{}", info="{}"'.format(
