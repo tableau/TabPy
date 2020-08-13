@@ -22,9 +22,13 @@ class EndpointHandler(ManagementHandler):
         super(EndpointHandler, self).initialize(app)
 
     def get(self, endpoint_name):
-        if self.should_fail_with_not_authorized():
-            self.fail_with_not_authorized()
-            return
+        if self.should_fail_with_error():
+            if self.fail_with_authentication_not_required():
+                self.fail_with_bad_request()
+                return
+            else:
+                self.fail_with_not_authorized()
+                return
 
         self.logger.log(logging.DEBUG, f"Processing GET for /endpoints/{endpoint_name}")
 
@@ -43,9 +47,13 @@ class EndpointHandler(ManagementHandler):
 
     @gen.coroutine
     def put(self, name):
-        if self.should_fail_with_not_authorized():
-            self.fail_with_not_authorized()
-            return
+        if self.should_fail_with_error():
+            if self.fail_with_authentication_not_required():
+                self.fail_with_bad_request()
+                return
+            else:
+                self.fail_with_not_authorized()
+                return
 
         self.logger.log(logging.DEBUG, f"Processing PUT for /endpoints/{name}")
 
@@ -89,9 +97,13 @@ class EndpointHandler(ManagementHandler):
 
     @gen.coroutine
     def delete(self, name):
-        if self.should_fail_with_not_authorized():
-            self.fail_with_not_authorized()
-            return
+        if self.should_fail_with_error():
+            if self.fail_with_authentication_not_required():
+                self.fail_with_bad_request()
+                return
+            else:
+                self.fail_with_not_authorized()
+                return
 
         self.logger.log(logging.DEBUG, f"Processing DELETE for /endpoints/{name}")
 

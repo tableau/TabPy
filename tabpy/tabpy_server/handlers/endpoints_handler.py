@@ -18,18 +18,26 @@ class EndpointsHandler(ManagementHandler):
         super(EndpointsHandler, self).initialize(app)
 
     def get(self):
-        if self.should_fail_with_not_authorized():
-            self.fail_with_not_authorized()
-            return
+        if self.should_fail_with_error():
+            if self.fail_with_authentication_not_required():
+                self.fail_with_bad_request()
+                return
+            else:
+                self.fail_with_not_authorized()
+                return
 
         self._add_CORS_header()
         self.write(json.dumps(self.tabpy_state.get_endpoints()))
 
     @gen.coroutine
     def post(self):
-        if self.should_fail_with_not_authorized():
-            self.fail_with_not_authorized()
-            return
+        if self.should_fail_with_error():
+            if self.fail_with_authentication_not_required():
+                self.fail_with_bad_request()
+                return
+            else:
+                self.fail_with_not_authorized()
+                return
 
         try:
             if not self.request.body:

@@ -8,9 +8,13 @@ class ServiceInfoHandler(ManagementHandler):
         super(ServiceInfoHandler, self).initialize(app)
 
     def get(self):
-        if self.should_fail_with_not_authorized():
-            self.fail_with_not_authorized()
-            return
+        if self.should_fail_with_error():
+            if self.fail_with_authentication_not_required():
+                self.fail_with_bad_request()
+                return
+            else:
+                self.fail_with_not_authorized()
+                return
 
         self._add_CORS_header()
         info = {}

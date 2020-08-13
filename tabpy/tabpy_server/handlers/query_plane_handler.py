@@ -67,9 +67,13 @@ class QueryPlaneHandler(BaseHandler):
     # don't check API key (client does not send or receive data for OPTIONS,
     # it just allows the client to subsequently make a POST request)
     def options(self, pred_name):
-        if self.should_fail_with_not_authorized():
-            self.fail_with_not_authorized()
-            return
+        if self.should_fail_with_error():
+            if self.fail_with_authentication_not_required():
+                self.fail_with_bad_request()
+                return
+            else:
+                self.fail_with_not_authorized()
+                return
 
         self.logger.log(logging.DEBUG, f"Processing OPTIONS for /query/{pred_name}")
 
@@ -212,9 +216,13 @@ class QueryPlaneHandler(BaseHandler):
 
     @gen.coroutine
     def get(self, endpoint_name):
-        if self.should_fail_with_not_authorized():
-            self.fail_with_not_authorized()
-            return
+        if self.should_fail_with_error():
+            if self.fail_with_authentication_not_required():
+                self.fail_with_bad_request()
+                return
+            else:
+                self.fail_with_not_authorized()
+                return
 
         start = time.time()
         endpoint_name = urllib.parse.unquote(endpoint_name)
@@ -224,9 +232,13 @@ class QueryPlaneHandler(BaseHandler):
     def post(self, endpoint_name):
         self.logger.log(logging.DEBUG, f"Processing POST for /query/{endpoint_name}...")
 
-        if self.should_fail_with_not_authorized():
-            self.fail_with_not_authorized()
-            return
+        if self.should_fail_with_error():
+            if self.fail_with_authentication_not_required():
+                self.fail_with_bad_request()
+                return
+            else:
+                self.fail_with_not_authorized()
+                return
 
         start = time.time()
         endpoint_name = urllib.parse.unquote(endpoint_name)
