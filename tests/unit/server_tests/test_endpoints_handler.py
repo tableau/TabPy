@@ -94,3 +94,53 @@ class TestEndpointsHandlerWithAuth(AsyncHTTPTestCase):
             },
         )
         self.assertEqual(200, response.code)
+
+
+class TestEndpointsHandlerWithoutAuth(AsyncHTTPTestCase):
+    @classmethod
+    def setUpClass(cls):
+        prefix = "__TestEndpointsHandlerWithoutAuth_"
+
+        # create state.ini dir and file
+        cls.state_dir = tempfile.mkdtemp(prefix=prefix)
+        cls.state_file = open(os.path.join(cls.state_dir, "state.ini"), "w+")
+        cls.state_file.write(
+            "[Service Info]\n"
+            "Name = TabPy Serve\n"
+            "Description = \n"
+            "Creation Time = 0\n"
+            "Access-Control-Allow-Origin = \n"
+            "Access-Control-Allow-Headers = \n"
+            "Access-Control-Allow-Methods = \n"
+            "\n"
+            "[Query Objects Service Versions]\n"
+            "\n"
+            "[Query Objects Docstrings]\n"
+            "\n"
+            "[Meta]\n"
+            "Revision Number = 1\n"
+        )
+        cls.state_file.close()
+
+    @classmethod
+    def tearDownClass(cls):
+        os.remove(cls.state_file.name)
+        os.rmdir(cls.state_dir)
+
+    def get_app(self):
+        self.app = TabPyApp(None)
+        return self.app._create_tornado_web_app()
+
+    def test_creds_no_auth_fails(self):
+        response = self.fetch(
+            "/endpoints",
+            method="GET",
+            headers={
+                "Authorization": "Basic {}".format(
+                    base64.b64encode("username:password".encode("utf-8")).decode(
+                        "utf-8"
+                    )
+                )
+            },
+        )
+        self.assertEqual(400, response.code)
