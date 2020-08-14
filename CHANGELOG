@@ -12,8 +12,6 @@
 - When TabPy is running with no console attached it is not failing
   with 500 when trying to respond with 401 status.
 
-## v1.2.0
-
 ### Improvements
 
 - Minor code cleanup.
