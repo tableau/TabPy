@@ -14,6 +14,7 @@ from tabpy.tabpy_server.handlers import ManagementHandler
 from tabpy.tabpy_server.handlers.base_handler import STAGING_THREAD
 from tabpy.tabpy_server.management.state import get_query_object_path
 from tabpy.tabpy_server.psws.callbacks import on_state_change
+from tabpy.tabpy_server.handlers.util import AuthErrorStates
 from tornado import gen
 
 
@@ -22,13 +23,9 @@ class EndpointHandler(ManagementHandler):
         super(EndpointHandler, self).initialize(app)
 
     def get(self, endpoint_name):
-        if self.should_fail_with_error():
-            if self.fail_with_authentication_not_required():
-                self.fail_with_bad_request()
-                return
-            else:
-                self.fail_with_not_authorized()
-                return
+        if self.should_fail_with_auth_error() != AuthErrorStates.NONE:
+            self.fail_with_auth_error()
+            return
 
         self.logger.log(logging.DEBUG, f"Processing GET for /endpoints/{endpoint_name}")
 
@@ -47,13 +44,9 @@ class EndpointHandler(ManagementHandler):
 
     @gen.coroutine
     def put(self, name):
-        if self.should_fail_with_error():
-            if self.fail_with_authentication_not_required():
-                self.fail_with_bad_request()
-                return
-            else:
-                self.fail_with_not_authorized()
-                return
+        if self.should_fail_with_auth_error() != AuthErrorStates.NONE:
+            self.fail_with_auth_error()
+            return
 
         self.logger.log(logging.DEBUG, f"Processing PUT for /endpoints/{name}")
 
@@ -97,13 +90,9 @@ class EndpointHandler(ManagementHandler):
 
     @gen.coroutine
     def delete(self, name):
-        if self.should_fail_with_error():
-            if self.fail_with_authentication_not_required():
-                self.fail_with_bad_request()
-                return
-            else:
-                self.fail_with_not_authorized()
-                return
+        if self.should_fail_with_auth_error() != AuthErrorStates.NONE:
+            self.fail_with_auth_error()
+            return
 
         self.logger.log(logging.DEBUG, f"Processing DELETE for /endpoints/{name}")
 

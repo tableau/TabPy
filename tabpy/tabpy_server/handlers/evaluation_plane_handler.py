@@ -6,6 +6,7 @@ from tabpy.tabpy_server.common.util import format_exception
 import requests
 from tornado import gen
 from datetime import timedelta
+from tabpy.tabpy_server.handlers.util import AuthErrorStates
 
 
 class RestrictedTabPy:
@@ -100,13 +101,9 @@ class EvaluationPlaneHandler(BaseHandler):
 
     @gen.coroutine
     def post(self):
-        if self.should_fail_with_error():
-            if self.fail_with_authentication_not_required():
-                self.fail_with_bad_request()
-                return
-            else:
-                self.fail_with_not_authorized()
-                return
+        if self.should_fail_with_auth_error() != AuthErrorStates.NONE:
+            self.fail_with_auth_error()
+            return
 
         self._add_CORS_header()
         try:
