@@ -1,6 +1,16 @@
 # Changelog
 
-## v1.2.0
+## v2.0.0
+
+### Breaking changes
+
+- TabPy fails with 400 when it is not configure for authentication
+  but credentials are provided by client.
+
+### Bug fixes
+
+- When TabPy is running with no console attached it is not failing
+  with 500 when trying to respond with 401 status.
 
 ### Improvements
 

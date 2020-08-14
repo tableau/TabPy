@@ -6,6 +6,7 @@ import logging
 import tornado.web
 from tabpy.tabpy_server.app.SettingsParameters import SettingsParameters
 from tabpy.tabpy_server.handlers.util import hash_password
+from tabpy.tabpy_server.handlers.util import AuthErrorStates
 import uuid
 
 
@@ -132,16 +133,12 @@ class BaseHandler(tornado.web.RequestHandler):
             app.settings[SettingsParameters.LogRequestContext]
         )
         self.logger.log(logging.DEBUG, "Checking if need to handle authentication")
-        self.not_authorized = not self.handle_authentication("v1")
+        self.auth_error = self.handle_authentication("v1")
 
     def error_out(self, code, log_message, info=None):
         self.set_status(code)
         self.write(json.dumps({"message": log_message, "info": info or {}}))
 
-        # We want to duplicate error message in console for
-        # loggers are misconfigured or causing the failure
-        # themselves
-        print(info)
         self.logger.log(
             logging.ERROR,
             'Responding with status={}, message="{}", info="{}"'.format(
@@ -364,7 +361,7 @@ class BaseHandler(tornado.web.RequestHandler):
         )
         return False
 
-    def handle_authentication(self, api_version) -> bool:
+    def handle_authentication(self, api_version):
         """
         If authentication feature is configured checks provided
         credentials.
@@ -376,27 +373,36 @@ class BaseHandler(tornado.web.RequestHandler):
 
         Returns
         -------
-        bool
-            True if authentication is not required.
-            True if authentication is required and valid
-            credentials provided.
-            False otherwise.
+        String
+            None if authentication is not required and username and password are None.
+            None if authentication is required and valid credentials provided.
+            NotAuthorized if authenication is required and credentials are incorrect.
+            NotRequired if authentication is not required but credentials are provided.
         """
         self.logger.log(logging.DEBUG, "Handling authentication")
         found, method = self._get_auth_method(api_version)
         if not found:
-            return False
+            return AuthErrorStates.NotAuthorized
 
         if method == "":
-            # Do not validate credentials
-            return True
+            if not self._get_basic_auth_credentials():
+                self.logger.log(logging.DEBUG,
+                                "authentication not required, username and password are none")
+                return AuthErrorStates.NONE
+            else:
+                self.logger.log(logging.DEBUG,
+                                "authentication not required, username and password are not none")
+                return AuthErrorStates.NotRequired
 
         if not self._get_credentials(method):
-            return False
+            return AuthErrorStates.NotAuthorized
 
-        return self._validate_credentials(method)
+        if not self._validate_credentials(method):
+            return AuthErrorStates.NotAuthorized
 
-    def should_fail_with_not_authorized(self):
+        return AuthErrorStates.NONE
+
+    def should_fail_with_auth_error(self):
         """
         Checks if authentication is required:
         - if it is not returns false, None
@@ -405,21 +411,35 @@ class BaseHandler(tornado.web.RequestHandler):
         Returns
         -------
         bool
-            False if authentication is not required or is
-            required and validation for credentials passes.
-            True if validation for credentials failed.
+            False if authentication is not required and username
+            and password is None or isrequired and validation
+            for credentials passes.
+            True if validation for credentials failed or
+            if authentication is not required and username and password
+            fields are not empty.
         """
-        return self.not_authorized
+        return self.auth_error
 
-    def fail_with_not_authorized(self):
+    def fail_with_auth_error(self):
         """
-        Prepares server 401 response.
+        Prepares server 401 response and server 400 response depending
+        on the value of the self.auth_error flag
         """
-        self.logger.log(logging.ERROR, "Failing with 401 for unauthorized request")
-        self.set_status(401)
-        self.set_header("WWW-Authenticate", f'Basic realm="{self.tabpy_state.name}"')
-        self.error_out(
-            401,
-            info="Unauthorized request.",
-            log_message="Invalid credentials provided.",
-        )
+        if self.auth_error == AuthErrorStates.NotAuthorized:
+            self.logger.log(logging.ERROR, "Failing with 401 for unauthorized request")
+            self.set_status(401)
+            self.set_header("WWW-Authenticate", f'Basic realm="{self.tabpy_state.name}"')
+            self.error_out(
+                401,
+                info="Unauthorized request.",
+                log_message="Invalid credentials provided.",
+            )
+        else:
+            self.logger.log(logging.ERROR, "Failing with 400 for Bad Request")
+            self.set_status(400)
+            self.set_header("WWW-Authenticate", f'Basic realm="{self.tabpy_state.name}"')
+            self.error_out(
+                400,
+                info="Bad request.",
+                log_message="Username or Password provided when authentication not available",
+            )

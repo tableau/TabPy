@@ -6,19 +6,16 @@
 	},
 	"item": [
 		{
-			"name": "{{endpoint}}/info",
+			"name": "{{host}}:{{port}}/info",
 			"request": {
 				"method": "GET",
 				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
 				"url": {
-					"raw": "{{endpoint}}/info",
+					"raw": "{{host}}:{{port}}/info",
 					"host": [
-						"{{endpoint}}"
+						"{{host}}"
 					],
+					"port": "{{port}}",
 					"path": [
 						"info"
 					]
@@ -27,8 +24,23 @@
 			"response": []
 		},
 		{
-			"name": "{{endpoint}}/evaluate",
+			"name": "{{host}}:{{port}}/evaluate",
 			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "P@ssw0rd",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "user1",
+							"type": "string"
+						}
+					]
+				},
 				"method": "POST",
 				"header": [
 					{
@@ -36,19 +48,45 @@
 						"name": "Content-Type",
 						"value": "application/json",
 						"type": "text"
+					},
+					{
+						"key": "TabPy-Client",
+						"value": "Postman for manual testing",
+						"type": "text"
+					},
+					{
+						"key": "TabPy-User",
+						"value": "ogolovatyi",
+						"type": "text"
 					}
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"data\": \n\t{ \n\t\t\"_arg1\" : [1, 2, 3], \n\t\t\"_arg2\" : [3, -1, 5]\n\t},\n\t\"script\": \n\t\"res = []\\nfor i in range(len(_arg1)):\\n  res.append(_arg1[i] * _arg2[i])\\nreturn res\"\n}\n"
+					"raw": "{\n\t\"data\": \n\t{ \n\t\t\"_arg1\" : [1, 2, 3], \n\t\t\"_arg2\" : [3, -1, 5]\n\t},\n\t\"script\": \n\t\"return [x + y for x, y in zip(_arg1, _arg2)]\"\n}\n",
+					"options": {
+						"raw": {}
+					}
 				},
 				"url": {
-					"raw": "{{endpoint}}/evaluate",
+					"raw": "{{host}}:{{port}}/evaluate",
 					"host": [
-						"{{endpoint}}"
+						"{{host}}"
 					],
+					"port": "{{port}}",
 					"path": [
 						"evaluate"
+					],
+					"query": [
+						{
+							"key": "TabPy-Client",
+							"value": "Postman for Manual Testing",
+							"disabled": true
+						},
+						{
+							"key": "TabPy-User",
+							"value": "ogolovatyi",
+							"disabled": true
+						}
 					]
 				}
 			},
@@ -59,15 +97,12 @@
 			"request": {
 				"method": "GET",
 				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
 				"url": {
-					"raw": "{{endpoint}}/status",
+					"raw": "{{host}}:{{port}}/status",
 					"host": [
-						"{{endpoint}}"
+						"{{host}}"
 					],
+					"port": "{{port}}",
 					"path": [
 						"status"
 					]
@@ -76,19 +111,16 @@
 			"response": []
 		},
 		{
-			"name": "{{endpoint}}/endpoints",
+			"name": "{{host}}:{{port}}/endpoints",
 			"request": {
 				"method": "GET",
 				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
 				"url": {
-					"raw": "{{endpoint}}/endpoints",
+					"raw": "{{host}}:{{port}}/endpoints",
 					"host": [
-						"{{endpoint}}"
+						"{{host}}"
 					],
+					"port": "{{port}}",
 					"path": [
 						"endpoints"
 					]
@@ -97,7 +129,7 @@
 			"response": []
 		},
 		{
-			"name": "{{endpoint}}/query/add",
+			"name": "{{host}}:{{port}}/query/model_name",
 			"request": {
 				"method": "POST",
 				"header": [
@@ -113,35 +145,33 @@
 					"raw": "{\r\n  \"data\": {\r\n    \"x\": [\r\n      6.35,\r\n      6.4,\r\n      6.65,\r\n      8.6,\r\n      8.9,\r\n      9,\r\n      9.1\r\n    ],\r\n    \"y\": [\r\n      1.95,\r\n      1.95,\r\n      2.05,\r\n      3.05,\r\n      3.05,\r\n      3.1,\r\n      3.15\r\n    ]\r\n  }\r\n}"
 				},
 				"url": {
-					"raw": "{{endpoint}}/query/add",
+					"raw": "{{host}}:{{port}}/query/model_name",
 					"host": [
-						"{{endpoint}}"
+						"{{host}}"
 					],
+					"port": "{{port}}",
 					"path": [
 						"query",
-						"add"
+						"model_name"
 					]
 				}
 			},
 			"response": []
 		},
 		{
-			"name": "{{endpoint}}/endpoints/add",
+			"name": "{{host}}:{{port}}/endpoints/model_name",
 			"request": {
 				"method": "GET",
 				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
 				"url": {
-					"raw": "{{endpoint}}/endpoints/add",
+					"raw": "{{host}}:{{port}}/endpoints/model_name",
 					"host": [
-						"{{endpoint}}"
+						"{{host}}"
 					],
+					"port": "{{port}}",
 					"path": [
 						"endpoints",
-						"add"
+						"model_name"
 					]
 				}
 			},
