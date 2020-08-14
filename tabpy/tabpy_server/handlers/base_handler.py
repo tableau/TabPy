@@ -127,7 +127,9 @@ class BaseHandler(tornado.web.RequestHandler):
         self.password = None
         self.eval_timeout = self.settings[SettingsParameters.EvaluateTimeout]
 
-        self.authentication_not_required_error = None # this is fragile, depends on handle_authentication function because this gets set in the handle_authentication function
+        # this is fragile, depends on handle_authentication function because 
+        # this gets set in the handle_authentication function
+        self.authentication_not_required_error = None
 
         self.logger = ContextLoggerWrapper(self.request)
         self.logger.enable_context_logging(
@@ -390,11 +392,13 @@ class BaseHandler(tornado.web.RequestHandler):
             return False
 
         if method == "":
-            if not self._get_basic_auth_credentials(): 
-                self.logger.log(logging.DEBUG, "authentication not required, username and password are none")
+            if not self._get_basic_auth_credentials():
+                self.logger.log(logging.DEBUG,
+                    "authentication not required, username and password are none")
                 return True
-            else: 
-                self.logger.log(logging.DEBUG, "authentication not required, username and password are not none")
+            else:
+                self.logger.log(logging.DEBUG,
+                    "authentication not required, username and password are not none")
                 self.authentication_not_required_error = True
                 return False
 
@@ -460,4 +464,3 @@ class BaseHandler(tornado.web.RequestHandler):
             info="Bad request.",
             log_message="Username or Password provided when authentication not available",
         )
-

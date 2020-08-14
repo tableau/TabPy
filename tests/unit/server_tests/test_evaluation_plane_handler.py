@@ -286,3 +286,4 @@ class TestEvaluationPlainHandlerWithoutAuth(AsyncHTTPTestCase):
             },
         )
         self.assertEqual(400, response.code)
+        

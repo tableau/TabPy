@@ -112,7 +112,6 @@ class TestEndpointHandlerWithAuth(AsyncHTTPTestCase):
         )
         self.assertEqual(404, response.code)
 
-    
 class TestEndpointHandlerWithoutAuth(AsyncHTTPTestCase):
     @classmethod
     def setUpClass(cls):
@@ -162,3 +161,4 @@ class TestEndpointHandlerWithoutAuth(AsyncHTTPTestCase):
             },
         )
         self.assertEqual(400, response.code)
+        
