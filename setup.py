@@ -35,7 +35,7 @@ def setup_package():
             "Source Code": "https://github.com/tableau/TabPy",
         },
         classifiers=[
-            "Development Status :: 4 - Beta",
+            "Development Status :: 5 - Production/Stable",
             "Intended Audience :: Developers",
             "Intended Audience :: Science/Research",
             "License :: OSI Approved :: MIT License",
@@ -111,7 +111,7 @@ def setup_package():
             "sklearn",
             "textblob",
         ],
-        test_suite="tests",
+        test_suite="pytest",
     )
 
 
