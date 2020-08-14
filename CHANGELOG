@@ -1,5 +1,14 @@
 # Changelog
 
+## v2.0.0
+
+### Improvements
+
+- When TabPy receives a request with authN credentials, 
+  and it is not configured with authentication enabled, 
+  it now returns a 400 Bad Request status so users are not 
+  led to believe that they are in an authorized session
+
 ## v1.2.0
 
 ### Improvements

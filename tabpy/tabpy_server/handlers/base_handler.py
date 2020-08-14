@@ -377,7 +377,7 @@ class BaseHandler(tornado.web.RequestHandler):
 
         Returns
         -------
-        String 
+        String
             None if authentication is not required and username and password are None.
             None if authentication is required and valid credentials provided.
             NotAuthorized if authenication is required and credentials are incorrect.
@@ -391,11 +391,11 @@ class BaseHandler(tornado.web.RequestHandler):
         if method == "":
             if not self._get_basic_auth_credentials():
                 self.logger.log(logging.DEBUG,
-                    "authentication not required, username and password are none")
+                            "authentication not required, username and password are none")
                 return AuthErrorStates.NONE
             else:
                 self.logger.log(logging.DEBUG,
-                    "authentication not required, username and password are not none")
+                            "authentication not required, username and password are not none")
                 return AuthErrorStates.NotRequired
 
         if not self._get_credentials(method):
@@ -403,7 +403,7 @@ class BaseHandler(tornado.web.RequestHandler):
 
         if not self._validate_credentials(method):
             return AuthErrorStates.NotAuthorized
-        
+    
         return AuthErrorStates.NONE
 
     def should_fail_with_auth_error(self):
@@ -416,9 +416,9 @@ class BaseHandler(tornado.web.RequestHandler):
         -------
         bool
             False if authentication is not required and username
-            and password is None or isrequired and validation 
+            and password is None or isrequired and validation
             for credentials passes.
-            True if validation for credentials failed or 
+            True if validation for credentials failed or
             if authentication is not required and username and password
             fields are not empty.
         """
