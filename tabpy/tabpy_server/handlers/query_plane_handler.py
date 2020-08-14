@@ -13,6 +13,7 @@ import json
 from tabpy.tabpy_server.common.util import format_exception
 import urllib
 from tornado import gen
+from tabpy.tabpy_server.handlers.util import AuthErrorStates
 
 
 def _get_uuid():
@@ -67,8 +68,8 @@ class QueryPlaneHandler(BaseHandler):
     # don't check API key (client does not send or receive data for OPTIONS,
     # it just allows the client to subsequently make a POST request)
     def options(self, pred_name):
-        if self.should_fail_with_not_authorized():
-            self.fail_with_not_authorized()
+        if self.should_fail_with_auth_error() != AuthErrorStates.NONE:
+            self.fail_with_auth_error()
             return
 
         self.logger.log(logging.DEBUG, f"Processing OPTIONS for /query/{pred_name}")
@@ -212,8 +213,8 @@ class QueryPlaneHandler(BaseHandler):
 
     @gen.coroutine
     def get(self, endpoint_name):
-        if self.should_fail_with_not_authorized():
-            self.fail_with_not_authorized()
+        if self.should_fail_with_auth_error() != AuthErrorStates.NONE:
+            self.fail_with_auth_error()
             return
 
         start = time.time()
@@ -224,8 +225,8 @@ class QueryPlaneHandler(BaseHandler):
     def post(self, endpoint_name):
         self.logger.log(logging.DEBUG, f"Processing POST for /query/{endpoint_name}...")
 
-        if self.should_fail_with_not_authorized():
-            self.fail_with_not_authorized()
+        if self.should_fail_with_auth_error() != AuthErrorStates.NONE:
+            self.fail_with_auth_error()
             return
 
         start = time.time()

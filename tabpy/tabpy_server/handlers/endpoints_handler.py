@@ -10,6 +10,7 @@ import json
 import logging
 from tabpy.tabpy_server.common.util import format_exception
 from tabpy.tabpy_server.handlers import ManagementHandler
+from tabpy.tabpy_server.handlers.util import AuthErrorStates
 from tornado import gen
 
 
@@ -18,8 +19,8 @@ class EndpointsHandler(ManagementHandler):
         super(EndpointsHandler, self).initialize(app)
 
     def get(self):
-        if self.should_fail_with_not_authorized():
-            self.fail_with_not_authorized()
+        if self.should_fail_with_auth_error() != AuthErrorStates.NONE:
+            self.fail_with_auth_error()
             return
 
         self._add_CORS_header()
@@ -27,8 +28,8 @@ class EndpointsHandler(ManagementHandler):
 
     @gen.coroutine
     def post(self):
-        if self.should_fail_with_not_authorized():
-            self.fail_with_not_authorized()
+        if self.should_fail_with_auth_error() != AuthErrorStates.NONE:
+            self.fail_with_auth_error()
             return
 
         try:

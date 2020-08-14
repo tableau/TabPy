@@ -1,15 +1,15 @@
 import json
 from tabpy.tabpy_server.app.SettingsParameters import SettingsParameters
 from tabpy.tabpy_server.handlers import ManagementHandler
-
+from tabpy.tabpy_server.handlers.util import AuthErrorStates
 
 class ServiceInfoHandler(ManagementHandler):
     def initialize(self, app):
         super(ServiceInfoHandler, self).initialize(app)
 
     def get(self):
-        if self.should_fail_with_not_authorized():
-            self.fail_with_not_authorized()
+        if self.should_fail_with_auth_error() != AuthErrorStates.NONE:
+            self.fail_with_auth_error()
             return
 
         self._add_CORS_header()

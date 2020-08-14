@@ -137,20 +137,4 @@ class TestServiceInfoHandlerWithoutAuth(BaseTestServiceInfoHandler):
         }
 
         response = self.fetch("/info", headers=header)
-        self.assertEqual(response.code, 200)
-        actual_response = json.loads(response.body)
-        expected_response = _create_expected_info_response(
-            self.app.settings, self.app.tabpy_state
-        )
-
-        self.assertDictEqual(actual_response, expected_response)
-        self.assertTrue("versions" in actual_response)
-        versions = actual_response["versions"]
-        self.assertTrue("v1" in versions)
-        v1 = versions["v1"]
-        self.assertTrue("features" in v1)
-        features = v1["features"]
-        self.assertDictEqual(
-            {},
-            features,
-        )
+        self.assertEqual(response.code, 400)
