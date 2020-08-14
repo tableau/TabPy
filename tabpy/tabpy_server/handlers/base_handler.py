@@ -134,7 +134,7 @@ class BaseHandler(tornado.web.RequestHandler):
             app.settings[SettingsParameters.LogRequestContext]
         )
         self.logger.log(logging.DEBUG, "Checking if need to handle authentication")
-        self.not_authorized = not self.handle_authentication("v1")
+        self.authentication_error = not self.handle_authentication("v1")
 
     def error_out(self, code, log_message, info=None):
         self.set_status(code)
@@ -419,7 +419,7 @@ class BaseHandler(tornado.web.RequestHandler):
             if authentication is not required and username and password
             fields are not empty.
         """
-        return self.not_authorized
+        return self.authentication_error
 
     def fail_with_not_authorized(self):
         """
