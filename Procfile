@@ -1,1 +1,1 @@
-web: python main.py --port=$PORT
+web: tabpy --config=test.conf
