@@ -125,7 +125,6 @@ class EvaluationPlaneHandler(BaseHandler):
 
     @gen.coroutine
     def _call_subprocess(self, function_to_evaluate, arguments):
-        print(self.request.headers)
         restricted_tabpy = RestrictedTabPy(
             self.protocol, self.port, self.logger, self.eval_timeout, self.request.headers
         )
