@@ -16,7 +16,7 @@ class TestDeployAndEvaluateModelAuthOn(integ_test_base.IntegTestBase):
 
         self.deploy_models(self._get_username(), self._get_password())
 
-        headers =  {
+        headers = {
             "Content-Type": "application/json",
             "Authorization": "Basic dXNlcjE6UEBzc3cwcmQ=",
             "Host": "localhost:9009",
@@ -32,3 +32,4 @@ class TestDeployAndEvaluateModelAuthOn(integ_test_base.IntegTestBase):
         SentimentAnalysis_eval = conn.getresponse()
         self.assertEqual(200, SentimentAnalysis_eval.status)
         SentimentAnalysis_eval.read()
+        
