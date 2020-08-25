@@ -32,4 +32,3 @@ class TestDeployAndEvaluateModelAuthOn(integ_test_base.IntegTestBase):
         SentimentAnalysis_eval = conn.getresponse()
         self.assertEqual(200, SentimentAnalysis_eval.status)
         SentimentAnalysis_eval.read()
-        
