@@ -2,14 +2,15 @@
 
 ## v2.0.0
 
-### Improvements
+### Breaking changes
 
-- When TabPy receives a request with authN credentials, 
-  and it is not configured with authentication enabled, 
-  it now returns a 400 Bad Request status so users are not 
-  led to believe that they are in an authorized session
+- TabPy fails with 400 when it is not configure for authentication
+  but credentials are provided by client.
 
-## v1.2.0
+### Bug fixes
+
+- When TabPy is running with no console attached it is not failing
+  with 500 when trying to respond with 401 status.
 
 ### Improvements
 

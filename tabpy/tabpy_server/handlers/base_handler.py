@@ -139,10 +139,6 @@ class BaseHandler(tornado.web.RequestHandler):
         self.set_status(code)
         self.write(json.dumps({"message": log_message, "info": info or {}}))
 
-        # We want to duplicate error message in console for
-        # loggers are misconfigured or causing the failure
-        # themselves
-        print(info)
         self.logger.log(
             logging.ERROR,
             'Responding with status={}, message="{}", info="{}"'.format(
@@ -391,11 +387,11 @@ class BaseHandler(tornado.web.RequestHandler):
         if method == "":
             if not self._get_basic_auth_credentials():
                 self.logger.log(logging.DEBUG,
-                            "authentication not required, username and password are none")
+                                "authentication not required, username and password are none")
                 return AuthErrorStates.NONE
             else:
                 self.logger.log(logging.DEBUG,
-                            "authentication not required, username and password are not none")
+                                "authentication not required, username and password are not none")
                 return AuthErrorStates.NotRequired
 
         if not self._get_credentials(method):
@@ -403,7 +399,7 @@ class BaseHandler(tornado.web.RequestHandler):
 
         if not self._validate_credentials(method):
             return AuthErrorStates.NotAuthorized
-    
+
         return AuthErrorStates.NONE
 
     def should_fail_with_auth_error(self):
