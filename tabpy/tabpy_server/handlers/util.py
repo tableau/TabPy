@@ -7,12 +7,6 @@ class AuthErrorStates(Enum):
     NotAuthorized = auto()
     NotRequired = auto()
 
-
-class AuthErrorStates(Enum):
-    NONE = auto()
-    NotAuthorized = auto()
-    NotRequired = auto()
-
 def hash_password(username, pwd):
     """
     Hashes password using PKDBF2 method:
