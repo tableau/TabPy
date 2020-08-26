@@ -2,6 +2,7 @@ import binascii
 from hashlib import pbkdf2_hmac
 from enum import Enum, auto
 
+
 class AuthErrorStates(Enum):
     NONE = auto()
     NotAuthorized = auto()

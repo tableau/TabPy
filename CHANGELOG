@@ -1,6 +1,6 @@
 # Changelog
 
-## v2.0.0
+## v2.2.0
 
 ### Breaking changes
 
@@ -11,6 +11,7 @@
 
 - When TabPy is running with no console attached it is not failing
   with 500 when trying to respond with 401 status.
+- tabpy.query() failing when auth is configured.
 
 ### Improvements
 
