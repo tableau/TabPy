@@ -10,18 +10,19 @@ from tabpy.tabpy_server.handlers.util import AuthErrorStates
 
 
 class RestrictedTabPy:
-    def __init__(self, protocol, port, logger, timeout):
+    def __init__(self, protocol, port, logger, timeout, headers):
         self.protocol = protocol
         self.port = port
         self.logger = logger
         self.timeout = timeout
+        self.headers = headers
 
     def query(self, name, *args, **kwargs):
         url = f"{self.protocol}://localhost:{self.port}/query/{name}"
         self.logger.log(logging.DEBUG, f"Querying {url}...")
         internal_data = {"data": args or kwargs}
         data = json.dumps(internal_data)
-        headers = {"content-type": "application/json"}
+        headers = self.headers
         response = requests.post(
             url=url, data=data, headers=headers, timeout=self.timeout, verify=False
         )
@@ -73,7 +74,6 @@ class EvaluationPlaneHandler(BaseHandler):
                     "the format _arg1, _arg2, _argN",
                 )
                 return
-
         function_to_evaluate = f"def _user_script(tabpy{arguments_str}):\n"
         for u in user_code.splitlines():
             function_to_evaluate += " " + u + "\n"
@@ -126,7 +126,7 @@ class EvaluationPlaneHandler(BaseHandler):
     @gen.coroutine
     def _call_subprocess(self, function_to_evaluate, arguments):
         restricted_tabpy = RestrictedTabPy(
-            self.protocol, self.port, self.logger, self.eval_timeout
+            self.protocol, self.port, self.logger, self.eval_timeout, self.request.headers
         )
         # Exec does not run the function, so it does not block.
         exec(function_to_evaluate, globals())
