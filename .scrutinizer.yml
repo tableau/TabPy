@@ -17,15 +17,10 @@ build:
               format: 'py-cc'
     analysis:
       project_setup:
-        override:
+        override: 
           - pip install -r requirements_test.txt
       tests:
-        override:
-          - py-scrutinizer-run
-          -
-            command: pylint-run
-            use_website_config: true
-    tests: true
+        override: [py-scrutinizer-run]
 checks:
   python:
     code_rating: true

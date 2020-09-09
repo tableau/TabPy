@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.3.0
+
+### Improvements
+
+- Switch to tox.
+
 ## v2.2.0
 
 ### Breaking changes
