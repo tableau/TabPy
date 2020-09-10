@@ -4,7 +4,7 @@
 
 ### Improvements
 
-- Switch to tox.
+- Fixed scrutinizer test run failure.
 
 ## v2.2.0
 
