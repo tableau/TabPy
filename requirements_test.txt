@@ -1,5 +1,0 @@
-coveralls
-hypothesis
-pytest
-pytest-cov
-twisted
