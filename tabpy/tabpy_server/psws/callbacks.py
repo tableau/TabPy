@@ -1,5 +1,5 @@
 import logging
-from tabpy.tabpy_server.app.SettingsParameters import SettingsParameters
+from tabpy.tabpy_server.app.app_parameters import SettingsParameters
 from tabpy.tabpy_server.common.messages import (
     LoadObject,
     DeleteObjects,

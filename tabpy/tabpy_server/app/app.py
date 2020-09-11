@@ -135,9 +135,6 @@ class TabPyApp:
         _init_asyncio_patch()
         application = TabPyTornadoApp(
             [
-                # skip MainHandler to use StaticFileHandler .* page requests and
-                # default to index.html
-                # (r"/", MainHandler),
                 (
                     self.subdirectory + r"/query/([^/]+)",
                     QueryPlaneHandler,

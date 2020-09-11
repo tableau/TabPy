@@ -1,5 +1,4 @@
 from tabpy.tabpy_server.handlers.base_handler import BaseHandler
-from tabpy.tabpy_server.handlers.main_handler import MainHandler
 from tabpy.tabpy_server.handlers.management_handler import ManagementHandler
 
 from tabpy.tabpy_server.handlers.endpoint_handler import EndpointHandler
