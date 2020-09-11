@@ -5,8 +5,7 @@ try:
     from ConfigParser import ConfigParser as _ConfigParser
 except ImportError:
     from configparser import ConfigParser as _ConfigParser
-from tabpy.tabpy_server.app.ConfigParameters import ConfigParameters
-from tabpy.tabpy_server.app.SettingsParameters import SettingsParameters
+from tabpy.tabpy_server.app.app_parameters import ConfigParameters, SettingsParameters
 
 
 def write_state_config(state, settings, logger=logging.getLogger(__name__)):
