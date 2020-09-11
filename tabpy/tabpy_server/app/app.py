@@ -8,8 +8,7 @@ import signal
 import sys
 import tabpy
 from tabpy.tabpy import __version__
-from tabpy.tabpy_server.app.ConfigParameters import ConfigParameters
-from tabpy.tabpy_server.app.SettingsParameters import SettingsParameters
+from tabpy.tabpy_server.app.app_parameters import ConfigParameters, SettingsParameters
 from tabpy.tabpy_server.app.util import parse_pwd_file
 from tabpy.tabpy_server.management.state import TabPyState
 from tabpy.tabpy_server.management.util import _get_state_from_file
@@ -136,9 +135,6 @@ class TabPyApp:
         _init_asyncio_patch()
         application = TabPyTornadoApp(
             [
-                # skip MainHandler to use StaticFileHandler .* page requests and
-                # default to index.html
-                # (r"/", MainHandler),
                 (
                     self.subdirectory + r"/query/([^/]+)",
                     QueryPlaneHandler,

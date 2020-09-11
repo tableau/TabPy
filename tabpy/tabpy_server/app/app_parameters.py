@@ -15,3 +15,22 @@ class ConfigParameters:
     TABPY_STATIC_PATH = "TABPY_STATIC_PATH"
     TABPY_MAX_REQUEST_SIZE_MB = "TABPY_MAX_REQUEST_SIZE_MB"
     TABPY_EVALUATE_TIMEOUT = "TABPY_EVALUATE_TIMEOUT"
+
+
+class SettingsParameters:
+    """
+    Application (TabPyApp) settings names
+    """
+
+    TransferProtocol = "transfer_protocol"
+    Port = "port"
+    ServerVersion = "server_version"
+    UploadDir = "upload_dir"
+    CertificateFile = "certificate_file"
+    KeyFile = "key_file"
+    StateFilePath = "state_file_path"
+    ApiVersions = "versions"
+    LogRequestContext = "log_request_context"
+    StaticPath = "static_path"
+    MaxRequestSizeInMb = "max_request_size_in_mb"
+    EvaluateTimeout = "evaluate_timeout"

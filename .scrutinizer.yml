@@ -6,7 +6,6 @@ build:
       project_setup:
         override:
           - pip install -r requirements.txt
-          - pip install -r requirements_test.txt
           - pip install -r requirements_dev.txt
       tests:
         override:
@@ -18,13 +17,12 @@ build:
     analysis:
       project_setup:
         override: 
-          - pip install -r requirements_test.txt
+          - pip install -r requirements.txt
       tests:
         override: [py-scrutinizer-run]
   tests:
     before:
       - pip install -r requirements.txt
-      - pip install -r requirements_test.txt
     override: [pytest]
 checks:
   python:

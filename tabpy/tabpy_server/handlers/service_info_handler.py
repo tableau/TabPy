@@ -1,5 +1,5 @@
 import json
-from tabpy.tabpy_server.app.SettingsParameters import SettingsParameters
+from tabpy.tabpy_server.app.app_parameters import SettingsParameters
 from tabpy.tabpy_server.handlers import ManagementHandler
 from tabpy.tabpy_server.handlers.util import AuthErrorStates
 

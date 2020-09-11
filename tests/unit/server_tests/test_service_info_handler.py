@@ -2,7 +2,7 @@ import base64
 import json
 import os
 from tabpy.tabpy_server.app.app import TabPyApp
-from tabpy.tabpy_server.app.SettingsParameters import SettingsParameters
+from tabpy.tabpy_server.app.app_parameters import SettingsParameters
 import tempfile
 from tornado.testing import AsyncHTTPTestCase
 
