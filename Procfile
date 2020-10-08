@@ -1,1 +1,1 @@
-web: tabpy
+web: export TABPY_PORT=$PORT && tabpy
