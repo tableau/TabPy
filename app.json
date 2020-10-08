@@ -3,5 +3,14 @@
     "description": "Analytics Extension implementation which expands Tableau's capabilities by allowing users to execute Python scripts and saved functions via Tableau's table calculations.",
     "repository": "https://github.com/tableau/TabPy",
     "logo": "",
-    "keywords": ["tableau", "python", "analytics-extension"]
+    "keywords": ["tableau", "python", "analytics-extension"],
+    "env": {
+        "TABPY_PORT": {
+          "description": "The port that TabPy listens for requests on",
+          "value": "9004"
+        }
+    },
+    "scripts": {
+        "postdeploy": "export TABPY_PORT=$PORT"
+    }
 }
