@@ -175,8 +175,8 @@ class TabPyState:
             endpoint_type, "endpoint type", defaultValue)
 
     def _check_target(self, target):
-        if target and not isinstance(target, str):	
-            raise ValueError("target must be a string.")	
+        if target and not isinstance(target, str):
+            raise ValueError("target must be a string.")
 
     def _check_and_set_dependencies(self, dependencies, defaultValue):
         if not dependencies:

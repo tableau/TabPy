@@ -77,4 +77,4 @@ class TestDeployModelSSLOnAuthOn(integ_test_base.IntegTestBase):
                 f"localhost:9004/endpoints/{m}",
                 headers=headers,
             )
-            self.assertEqual(200, m_response.status_code)  
+            self.assertEqual(200, m_response.status_code)
