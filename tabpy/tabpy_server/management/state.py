@@ -174,9 +174,9 @@ class TabPyState:
         return self._check_and_set_endpoint_str_value(
             endpoint_type, "endpoint type", defaultValue)
 
-    def _check_and_set_target(self, target, defaultValue):
-        return self._check_and_set_endpoint_str_value(
-            target, "target", defaultValue)
+    def _check_target(self, target):
+        if target and not isinstance(target, str):	
+            raise ValueError("target must be a string.")	
 
     def _check_and_set_dependencies(self, dependencies, defaultValue):
         if not dependencies:
@@ -232,7 +232,7 @@ class TabPyState:
             endpoint_type = self._check_and_set_endpoint_type(endpoint_type, None)
             dependencies = self._check_and_set_dependencies(dependencies, [])
 
-            target = self._check_and_set_target(target, "")
+            self._check_target(target)
             if target and target not in endpoints:
                 raise ValueError("target endpoint is not valid.")
 
@@ -331,7 +331,7 @@ class TabPyState:
             dependencies = self._check_and_set_dependencies(
                 dependencies, endpoint_info.get("dependencies", []))
 
-            target = self._check_and_set_target(target, None)
+            self._check_target(target)
             if target and target not in endpoints:
                 raise ValueError("target endpoint is not valid.")
             elif not target:

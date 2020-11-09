@@ -145,7 +145,6 @@ class BaseHandler(tornado.web.RequestHandler):
                 code, log_message, info
             ),
         )
-        self.finish()
 
     def options(self):
         # add CORS headers if TabPy has a cors_origin specified
