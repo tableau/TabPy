@@ -2,7 +2,7 @@ name: Publish Docker Image for Release
 
 on:
   release:
-    types: [released]
+    types: [published]
     
 env:
   IMAGE_NAME: tabpy
