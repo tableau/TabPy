@@ -1,3 +1,4 @@
+import sys
 from textblob import TextBlob
 import nltk
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
@@ -10,8 +11,18 @@ _ctx = ssl._create_unverified_context
 ssl._create_default_https_context = _ctx
 
 
-nltk.download("vader_lexicon")
-nltk.download("punkt")
+def setup():
+    file_path = sys.argv[1] if len(sys.argv) > 1 else setup_utils.get_default_config_file_path()
+    config = setup_utils.get_config(file_path)
+    download_dir = None
+    if "nltk" in config:
+        nltk_config = config["nltk"]
+        download_dir = nltk_config.get("NLTK_DOWNLOAD_PATH")
+        if "NLTK_PROXY" in nltk_config:
+            nltk.set_proxy(nltk_config["NLTK_PROXY"])
+
+    nltk.download("vader_lexicon", download_dir=download_dir)
+    nltk.download("punkt", download_dir=download_dir)
 
 
 def SentimentAnalysis(_arg1, library="nltk"):
@@ -45,6 +56,7 @@ def SentimentAnalysis(_arg1, library="nltk"):
 
 
 if __name__ == "__main__":
+    setup()
     setup_utils.deploy_model(
         "Sentiment Analysis",
         SentimentAnalysis,
