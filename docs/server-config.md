@@ -91,6 +91,12 @@ at [`logging.config` documentation page](https://docs.python.org/3.6/library/log
   value - `30`. This timeout does not apply when evaluating models either
   through the `/query` method, or using the `tabpy.query(...)` syntax with
   the `/evaluate` method.
+  
+`[nltk]` parameters:
+
+- `NLTK_DOWNLOAD_PATH` - Set the NLTK download path. Defaul '~/nltk_data'.
+- `NLTK_PROXY` - Set the proxy server used for for NLTK `nltk.download()`.
+
 
 ### Configuration File Example
 
@@ -129,6 +135,14 @@ settings._
 # will run before throwing a TimeoutError.
 # The value should be a float representing the timeout time in seconds.
 # TABPY_EVALUATE_TIMEOUT = 30
+
+[nltk]
+# Set the download directory for nltk downloads.
+# NLTK_DOWNLOAD_PATH = ~/nltk_data
+
+# If TabPy is behind a proxy and it needs to connect to the internet for
+# some tasks, you can define a proxy here.
+# NLTK_PROXY = http://proxy:3128
 
 [loggers]
 keys=root
