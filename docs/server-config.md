@@ -97,7 +97,6 @@ at [`logging.config` documentation page](https://docs.python.org/3.6/library/log
 - `NLTK_DOWNLOAD_PATH` - Set the NLTK download path. Defaul '~/nltk_data'.
 - `NLTK_PROXY` - Set the proxy server used for for NLTK `nltk.download()`.
 
-
 ### Configuration File Example
 
 **Note:** _Always use absolute paths for the configuration paths
