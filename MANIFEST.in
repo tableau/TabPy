@@ -4,7 +4,20 @@ exclude \
 include \
   CHANGELOG \
   LICENSE \
+  README.md \
+  Procfile \
   tabpy/VERSION \
   tabpy/tabpy_server/state.ini.template \
   tabpy/tabpy_server/static/* \
   tabpy/tabpy_server/common/default.conf
+
+# Docs and tests
+include requirements_dev.txt requirements.txt
+recursive-include docs *.md
+recursive-include docs *.png
+recursive-include misc *.json
+recursive-include misc *.yml
+recursive-include tests *.conf
+recursive-include tests *.crt
+recursive-include tests *.key
+recursive-include tests *.txt
