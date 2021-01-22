@@ -38,7 +38,7 @@ client = Client('http://localhost:9004/')
 
 The URL and port are where the Tableau-Python-Server process has been started -
 more info can be found in the
-[server section](server-startup.md#Command-Line-Arguments) of the documentation.
+[Starting TabPy](server-install.md#starting-tabpy) section of the documentation.
 
 ## Authentication
 
