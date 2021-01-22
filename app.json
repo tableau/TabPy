@@ -5,6 +5,6 @@
     "logo": "tabpy/tabpy_server/static/TabPy_logo.png",
     "keywords": ["tableau", "python", "analytics-extension"],
     "scripts": {
-        "postdeploy": "cp /app/tabpy/tabpy_server/common/default.conf . && sed -i "s/# TABPY_PORT = 9004/TABPY_PORT=$PORT/" && tabpy-deploy-models ./default.conf"
+        "postdeploy": "cp /app/tabpy/tabpy_server/common/default.conf . && sed -i \"s/# TABPY_PORT = 9004/TABPY_PORT=$PORT/\" && tabpy-deploy-models ./default.conf"
     }
 }
