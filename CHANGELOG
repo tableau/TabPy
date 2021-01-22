@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.3.2
+
+### Improvements
+
+- Test files added to tar.gz and zip releases.
+
 ## v2.3.1
 
 ### Bug fixes
