@@ -2,7 +2,7 @@
     "name": "TabPy",
     "description": "Analytics Extension implementation which expands Tableau's capabilities by allowing users to execute Python scripts and saved functions via Tableau's table calculations.",
     "repository": "https://github.com/tableau/TabPy",
-    "logo": "tabpy/tabpy_server/static/TabPy_logo.png",
+    "logo": "https://github.com/tableau/TabPy/blob/master/tabpy/tabpy_server/static/TabPy_logo.png",
     "keywords": ["tableau", "python", "analytics-extension"],
     "scripts": {
         "postdeploy": "cp /app/tabpy/tabpy_server/common/default.conf . && sed -i \"s/# TABPY_PORT = 9004/TABPY_PORT=$PORT/\" && tabpy-deploy-models ./default.conf"
