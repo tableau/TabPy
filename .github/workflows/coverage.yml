@@ -27,9 +27,13 @@ jobs:
         pip install -r requirements_dev.txt
 
     - name: Test with pytest
-      run: |
+      run: 
         pytest tests --cov=tabpy --cov-config=setup.cfg
-        coveralls --service=github
       env:
         COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+    
+    - name: Run coveralls
+      run: 
+        coveralls --service=github
+      env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
