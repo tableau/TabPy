@@ -3,5 +3,17 @@
     "description": "Analytics Extension implementation which expands Tableau's capabilities by allowing users to execute Python scripts and saved functions via Tableau's table calculations.",
     "repository": "https://github.com/tableau/TabPy",
     "logo": "",
-    "keywords": ["tableau", "python", "analytics-extension"]
+    "keywords": ["tableau", "python", "analytics-extension"],
+    "env":{
+        "USERNAME":{
+            "description": "Add your username",
+            "value": "gzanolli",
+            "required": true
+        },
+        "PASSWORD":{
+            "description": "Define your password",
+            "value": "P@ssw0rd",
+            "required": true
+        }
+    }
 }
