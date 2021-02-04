@@ -1,16 +1,20 @@
 # Using Python in Tableau Calculations
 
 <!-- markdownlint-disable MD004 -->
+
 <!-- toc -->
 
 - [Configuration](#configuration)
   * [Tableau Desktop](#tableau-desktop)
-  * [Tableau Server 2018.2 and Newer Versions](#tableau-server-20182-and-newer-versions)
+  * [Tableau Server 2020.2 and Newer Versions](#tableau-server-20202-and-newer-versions)
+  * [Tableau Server 2020.1 and older](#tableau-server-20201-and-older)
+  * [Tableau Server 2018.2 and 2018.3](#tableau-server-20182-and-20183)
   * [Tableau Server 2018.1 and Older Versions](#tableau-server-20181-and-older-versions)
 - [Anatomy of a Python Calculation](#anatomy-of-a-python-calculation)
 - [Using Deployed Functions](#using-deployed-functions)
 
 <!-- tocstop -->
+
 <!-- markdownlint-enable MD004 -->
 
 ## Configuration
@@ -25,7 +29,24 @@ follow steps at Tableau
 [Configure an Analytics Extension connection](https://help.tableau.com/current/pro/desktop/en-us/r_connection_manage.htm#configure-an-external-service-connection)
 documentation page.
 
-### Tableau Server 2018.2 and Newer Versions
+### Tableau Server 2020.2 and Newer Versions
+
+Starting from Tableau Server 2020.2 analytics extensions connections
+are configured on site level as shown of
+[Configure Connections to Analytics Extensions](https://help.tableau.com/current/server/en-us/config_r_tabpy.htm)
+page.
+
+### Tableau Server 2020.1 and older
+
+For older Tableau Server versions refer to version specific documentation:
+
+- [2020.1](https://help.tableau.com/v2020.1/server/en-us/config_r_tabpy.htm).
+- [2019.4](https://help.tableau.com/v2019.4/server/en-us/config_r_tabpy.htm).
+- [2019.3](https://help.tableau.com/v2019.3/server/en-us/cli_security_tsm.htm#tsm_security_vizql-extsvc-ssl-enable).
+- [2019.2](https://help.tableau.com/v2019.2/server/en-us/cli_security_tsm.htm#tsm_security_vizql-extsvc-ssl-enable).
+- [2019.1](https://help.tableau.com/v2019.1/server/en-us/cli_security_tsm.htm#tsm_security_vizql-extsvc-ssl-enable).
+
+### Tableau Server 2018.2 and 2018.3
 
 To configure Tableau Server 2018.2 and newer versions to connect to TabPy server
 follow instructions on Tableau
