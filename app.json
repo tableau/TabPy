@@ -4,7 +4,16 @@
     "repository": "https://github.com/tableau/TabPy",
     "logo": "https://raw.githubusercontent.com/tableau/TabPy/master/tabpy/tabpy_server/static/TabPy_logo.png",
     "keywords": ["tableau", "python", "analytics-extension"],
-    "scripts": {
-        "postdeploy": "cp /app/tabpy/tabpy_server/common/default.conf . && sed -i \"s/# TABPY_PORT = 9004/TABPY_PORT=$PORT/\" ./default.conf && tabpy-deploy-models ./default.conf"
+    "env":{
+        "USERNAME":{
+            "description": "Add your username",
+            "value": "gzanolli",
+            "required": true
+        },
+        "PASSWORD":{
+            "description": "Define your password",
+            "value": "P@ssw0rd",
+            "required": true
+        }
     }
 }
