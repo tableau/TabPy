@@ -45,7 +45,8 @@ class EvaluationPlaneHandler(BaseHandler):
     @gen.coroutine
     def _post_impl(self):
         if not self.eval_enabled:
-            self.error_out(400, "Evaluate endpoint is disabled.")
+            self.error_out(400, "Ad-hoc scripts have been disabled on this analytics extension, please contact your "
+                                "administrator.")
             return
 
         body = json.loads(self.request.body.decode("utf-8"))

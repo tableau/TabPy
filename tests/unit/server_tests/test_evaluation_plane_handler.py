@@ -299,7 +299,7 @@ class TestEvaluationPlainHandlerDisabled(AsyncHTTPTestCase):
         )
         cls.config_file.write(
             "[TabPy]\n"
-            f"TABPY_EVALUATE_ENABLE = true"
+            f"TABPY_EVALUATE_ENABLE = false"
         )
         cls.config_file.close()
 
