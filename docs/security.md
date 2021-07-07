@@ -14,3 +14,5 @@ you may want to consider the following as you use TabPy:
   - Install new Python packages which can contain binary code.
   - Execute operating system commands.
   - Open network connections to other servers and download files.
+- Evaluate endpoint can be disabled by setting "TABPY_EVALUATE_ENABLE" to
+  false in config file
