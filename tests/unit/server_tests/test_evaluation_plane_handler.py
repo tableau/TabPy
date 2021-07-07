@@ -286,3 +286,89 @@ class TestEvaluationPlainHandlerWithoutAuth(AsyncHTTPTestCase):
             },
         )
         self.assertEqual(400, response.code)
+
+class TestEvaluationPlainHandlerDisabled(AsyncHTTPTestCase):
+    @classmethod
+    def setUpClass(cls):
+        prefix = "__TestEvaluationPlainHandlerDisabled_"
+
+        # create state.ini dir and file
+        cls.state_dir = tempfile.mkdtemp(prefix=prefix)
+        cls.state_file = open(os.path.join(cls.state_dir, "state.ini"), "w+")
+        cls.state_file.write(
+            "[Service Info]\n"
+            "Name = TabPy Serve\n"
+            "Description = \n"
+            "Creation Time = 0\n"
+            "Access-Control-Allow-Origin = \n"
+            "Access-Control-Allow-Headers = \n"
+            "Access-Control-Allow-Methods = \n"
+            "\n"
+            "[Query Objects Service Versions]\n"
+            "\n"
+            "[Query Objects Docstrings]\n"
+            "\n"
+            "[Meta]\n"
+            "Revision Number = 1\n"
+        )
+        cls.state_file.close()
+
+        cls.script = (
+            '{"data":{"_arg1":[2,3],"_arg2":[3,-1]},'
+            '"script":"res=[]\\nfor i in range(len(_arg1)):\\n  '
+            'res.append(_arg1[i] * _arg2[i])\\nreturn res"}'
+        )
+
+        cls.script_not_present = (
+            '{"data":{"_arg1":[2,3],"_arg2":[3,-1]},'
+            '"":"res=[]\\nfor i in range(len(_arg1)):\\n  '
+            'res.append(_arg1[i] * _arg2[i])\\nreturn res"}'
+        )
+
+        cls.args_not_present = (
+            '{"script":"res=[]\\nfor i in range(len(_arg1)):\\n  '
+            'res.append(_arg1[i] * _arg2[i])\\nreturn res"}'
+        )
+
+        cls.args_not_sequential = (
+            '{"data":{"_arg1":[2,3],"_arg3":[3,-1]},'
+            '"script":"res=[]\\nfor i in range(len(_arg1)):\\n  '
+            'res.append(_arg1[i] * _arg3[i])\\nreturn res"}'
+        )
+
+        cls.nan_coverts_to_null =\
+            '{"data":{"_arg1":[2,3],"_arg2":[3,-1]},'\
+            '"script":"return [float(1), float(\\"NaN\\"), float(2)]"}'
+
+        cls.script_returns_none = (
+            '{"data":{"_arg1":[2,3],"_arg2":[3,-1]},'
+            '"script":"return None"}'
+        )
+
+        # create config file
+        cls.config_file = tempfile.NamedTemporaryFile(
+            mode="w+t", prefix=prefix, suffix=".conf", delete=False
+        )
+        cls.config_file.write(
+            "[TabPy]\n"
+            f"TABPY_EVALUATE_ENABLE = false"
+        )
+        cls.config_file.close()
+
+    @classmethod
+    def tearDownClass(cls):
+        os.remove(cls.state_file.name)
+        os.rmdir(cls.state_dir)
+        os.remove(cls.config_file.name)
+
+    def get_app(self):
+        self.app = TabPyApp(self.config_file.name)
+        return self.app._create_tornado_web_app()
+
+    def test_evaluation_disabled_fails(self):
+        response = self.fetch(
+            "/evaluate",
+            method="POST",
+            body=self.script
+        )
+        self.assertEqual(400, response.code)

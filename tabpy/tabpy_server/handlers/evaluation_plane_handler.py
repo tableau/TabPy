@@ -44,6 +44,10 @@ class EvaluationPlaneHandler(BaseHandler):
 
     @gen.coroutine
     def _post_impl(self):
+        if not self.eval_enabled:
+            self.error_out(400, "Evaluate action is disabled.")
+            return
+
         body = json.loads(self.request.body.decode("utf-8"))
         self.logger.log(logging.DEBUG, f"Processing POST request '{body}'...")
         if "script" not in body:
