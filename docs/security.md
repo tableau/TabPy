@@ -14,6 +14,6 @@ you may want to consider the following as you use TabPy:
   - Install new Python packages which can contain binary code.
   - Execute operating system commands.
   - Open network connections to other servers and download files.
-- Execution of ad-hoc Python scripts can be disabled by turning off the 
+- Execution of ad-hoc Python scripts can be disabled by turning off the
   /evaluate endpoint. To disable /evaluate endpoint, set "TABPY_EVALUATE_ENABLE"
   to false in config file.
