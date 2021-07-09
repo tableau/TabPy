@@ -126,7 +126,6 @@ class BaseHandler(tornado.web.RequestHandler):
         self.credentials = app.credentials
         self.username = None
         self.password = None
-        self.eval_enabled = self.settings[SettingsParameters.EvaluateEnabled]
         self.eval_timeout = self.settings[SettingsParameters.EvaluateTimeout]
 
         self.logger = ContextLoggerWrapper(self.request)

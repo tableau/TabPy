@@ -87,8 +87,8 @@ at [`logging.config` documentation page](https://docs.python.org/3.6/library/log
 - `TABPY_MAX_REQUEST_SIZE_MB` - maximal request size supported by TabPy server
   in Megabytes. All requests of exceeding size are rejected. Default value is
   100 Mb.
-- `TABPY_EVALUATE_ENABLE` - enable evaluate api. Default
-  value - `true`.
+- `TABPY_EVALUATE_ENABLE` - enable evaluate api to execute ad-hoc Python scripts
+  Default value - `true`.
 - `TABPY_EVALUATE_TIMEOUT` - script evaluation timeout in seconds. Default
   value - `30`. This timeout does not apply when evaluating models either
   through the `/query` method, or using the `tabpy.query(...)` syntax with
@@ -127,8 +127,8 @@ settings._
 # Default value is 100 Mb.
 # TABPY_MAX_REQUEST_SIZE_MB = 100
 
-# Toggle for evaluate API
-# Enabled by default. Disabling it will result in 400 error.
+# Enable evaluate api to execute ad-hoc Python scripts
+# Enabled by default. Disabling it will result in 404 error.
 # TABPY_EVALUATE_ENABLE = true
 
 # Configure how long a custom script provided to the /evaluate method

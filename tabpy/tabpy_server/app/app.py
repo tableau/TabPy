@@ -18,6 +18,7 @@ from tabpy.tabpy_server.handlers import (
     EndpointHandler,
     EndpointsHandler,
     EvaluationPlaneHandler,
+    EvaluationPlaneDisabledHandler,
     QueryPlaneHandler,
     ServiceInfoHandler,
     StatusHandler,
@@ -150,7 +151,8 @@ class TabPyApp:
                 ),
                 (
                     self.subdirectory + r"/evaluate",
-                    EvaluationPlaneHandler,
+                    EvaluationPlaneHandler if self.settings[SettingsParameters.EvaluateEnabled]
+                    else EvaluationPlaneDisabledHandler,
                     dict(executor=executor, app=self),
                 ),
                 (

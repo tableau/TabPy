@@ -323,7 +323,7 @@ class TestEvaluationPlainHandlerDisabled(AsyncHTTPTestCase):
             method="POST",
             body=self.script
         )
-        self.assertEqual(400, response.code)
+        self.assertEqual(404, response.code)
 
 
 class TestEvaluationPlainHandlerEnabled(AsyncHTTPTestCase):
