@@ -20,4 +20,5 @@ class ServiceInfoHandler(ManagementHandler):
         info["server_version"] = self.settings[SettingsParameters.ServerVersion]
         info["name"] = self.tabpy_state.name
         info["versions"] = self.settings[SettingsParameters.ApiVersions]
+        info["evaluate_enabled"] = self.settings[SettingsParameters.EvaluateEnabled]
         self.write(json.dumps(info))
