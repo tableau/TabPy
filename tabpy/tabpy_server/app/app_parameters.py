@@ -14,6 +14,7 @@ class ConfigParameters:
     TABPY_LOG_DETAILS = "TABPY_LOG_DETAILS"
     TABPY_STATIC_PATH = "TABPY_STATIC_PATH"
     TABPY_MAX_REQUEST_SIZE_MB = "TABPY_MAX_REQUEST_SIZE_MB"
+    TABPY_EVALUATE_ENABLE = "TABPY_EVALUATE_ENABLE"
     TABPY_EVALUATE_TIMEOUT = "TABPY_EVALUATE_TIMEOUT"
 
 
@@ -34,3 +35,4 @@ class SettingsParameters:
     StaticPath = "static_path"
     MaxRequestSizeInMb = "max_request_size_in_mb"
     EvaluateTimeout = "evaluate_timeout"
+    EvaluateEnabled = "evaluate_enabled"

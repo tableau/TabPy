@@ -18,6 +18,7 @@ from tabpy.tabpy_server.handlers import (
     EndpointHandler,
     EndpointsHandler,
     EvaluationPlaneHandler,
+    EvaluationPlaneDisabledHandler,
     QueryPlaneHandler,
     ServiceInfoHandler,
     StatusHandler,
@@ -150,7 +151,8 @@ class TabPyApp:
                 ),
                 (
                     self.subdirectory + r"/evaluate",
-                    EvaluationPlaneHandler,
+                    EvaluationPlaneHandler if self.settings[SettingsParameters.EvaluateEnabled]
+                    else EvaluationPlaneDisabledHandler,
                     dict(executor=executor, app=self),
                 ),
                 (
@@ -259,6 +261,8 @@ class TabPyApp:
         settings_parameters = [
             (SettingsParameters.Port, ConfigParameters.TABPY_PORT, 9004, None),
             (SettingsParameters.ServerVersion, None, __version__, None),
+            (SettingsParameters.EvaluateEnabled, ConfigParameters.TABPY_EVALUATE_ENABLE,
+             True, parser.getboolean),
             (SettingsParameters.EvaluateTimeout, ConfigParameters.TABPY_EVALUATE_TIMEOUT,
              30, parser.getfloat),
             (SettingsParameters.UploadDir, ConfigParameters.TABPY_QUERY_OBJECT_PATH,

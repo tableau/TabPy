@@ -29,6 +29,21 @@ class RestrictedTabPy:
         return response.json()
 
 
+class EvaluationPlaneDisabledHandler(BaseHandler):
+    """
+    EvaluationPlaneDisabledHandler responds with error message when ad-hoc scripts have been disabled.
+    """
+
+    def initialize(self, executor, app):
+        super(EvaluationPlaneDisabledHandler, self).initialize(app)
+        self.executor = executor
+
+    @gen.coroutine
+    def post(self):
+        self.error_out(404, "Ad-hoc scripts have been disabled on this analytics extension, please contact your "
+                            "administrator.")
+
+
 class EvaluationPlaneHandler(BaseHandler):
     """
     EvaluationPlaneHandler is responsible for running arbitrary python scripts.
