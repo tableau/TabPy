@@ -14,8 +14,7 @@ def _create_expected_info_response(settings, tabpy_state):
         "state_path": settings["state_file_path"],
         "server_version": settings[SettingsParameters.ServerVersion],
         "name": tabpy_state.name,
-        "versions": settings["versions"],
-        "evaluate_enabled": settings["evaluate_enabled"]
+        "versions": settings["versions"]
     }
 
 
@@ -101,10 +100,9 @@ class TestServiceInfoHandlerWithAuth(BaseTestServiceInfoHandler):
         self.assertTrue("features" in v1)
         features = v1["features"]
         self.assertDictEqual(
-            {"authentication": {"methods": {"basic-auth": {}}, "required": True}},
+            {"authentication": {"methods": {"basic-auth": {}}, "required": True}, 'evaluate_enabled': True},
             features,
         )
-        self.assertTrue(actual_response['evaluate_enabled'])
 
 
 class TestServiceInfoHandlerWithoutAuth(BaseTestServiceInfoHandler):
@@ -128,8 +126,7 @@ class TestServiceInfoHandlerWithoutAuth(BaseTestServiceInfoHandler):
         v1 = versions["v1"]
         self.assertTrue("features" in v1)
         features = v1["features"]
-        self.assertDictEqual({}, features)
-        self.assertTrue(actual_response['evaluate_enabled'])
+        self.assertDictEqual({'evaluate_enabled': True}, features)
 
     def test_given_server_with_no_auth_and_password_expect_correct_info_response(self):
         header = {

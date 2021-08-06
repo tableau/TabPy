@@ -416,6 +416,7 @@ class TabPyApp:
                 "methods": {"basic-auth": {}},
             }
 
+        features["evaluate_enabled"] = self.settings[SettingsParameters.EvaluateEnabled]
         return features
 
     def _build_tabpy_state(self):
