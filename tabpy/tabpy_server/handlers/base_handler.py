@@ -435,10 +435,10 @@ class BaseHandler(tornado.web.RequestHandler):
             )
         else:
             self.logger.log(logging.ERROR, "Failing with 400 for Bad Request")
-            self.set_status(400)
+            self.set_status(406)
             self.set_header("WWW-Authenticate", f'Basic realm="{self.tabpy_state.name}"')
             self.error_out(
-                400,
-                info="Bad request.",
+                406,
+                info="Not Acceptable.",
                 log_message="Username or Password provided when authentication not available",
             )
