@@ -143,4 +143,4 @@ class TestEndpointsHandlerWithoutAuth(AsyncHTTPTestCase):
                 )
             },
         )
-        self.assertEqual(400, response.code)
+        self.assertEqual(406, response.code)

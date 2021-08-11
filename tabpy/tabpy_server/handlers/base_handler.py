@@ -421,7 +421,7 @@ class BaseHandler(tornado.web.RequestHandler):
 
     def fail_with_auth_error(self):
         """
-        Prepares server 401 response and server 400 response depending
+        Prepares server 401 response and server 406 response depending
         on the value of the self.auth_error flag
         """
         if self.auth_error == AuthErrorStates.NotAuthorized:
@@ -434,11 +434,11 @@ class BaseHandler(tornado.web.RequestHandler):
                 log_message="Invalid credentials provided.",
             )
         else:
-            self.logger.log(logging.ERROR, "Failing with 400 for Bad Request")
+            self.logger.log(logging.ERROR, "Failing with 406 for not acceptable")
             self.set_status(406)
             self.set_header("WWW-Authenticate", f'Basic realm="{self.tabpy_state.name}"')
             self.error_out(
                 406,
-                info="Not Acceptable.",
-                log_message="Username or Password provided when authentication not available",
+                info="Not acceptable.",
+                log_message="Username or password provided when authentication not available.",
             )

@@ -137,4 +137,4 @@ class TestServiceInfoHandlerWithoutAuth(BaseTestServiceInfoHandler):
         }
 
         response = self.fetch("/info", headers=header)
-        self.assertEqual(response.code, 400)
+        self.assertEqual(response.code, 406)
