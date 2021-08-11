@@ -439,6 +439,6 @@ class BaseHandler(tornado.web.RequestHandler):
             self.set_header("WWW-Authenticate", f'Basic realm="{self.tabpy_state.name}"')
             self.error_out(
                 406,
-                info="Not acceptable.",
+                info="Not Acceptable",
                 log_message="Username or password provided when authentication not available.",
             )
