@@ -434,7 +434,7 @@ class BaseHandler(tornado.web.RequestHandler):
                 log_message="Invalid credentials provided.",
             )
         else:
-            self.logger.log(logging.ERROR, "Failing with 406 for not acceptable")
+            self.logger.log(logging.ERROR, "Failing with 406 for Not Acceptable")
             self.set_status(406)
             self.set_header("WWW-Authenticate", f'Basic realm="{self.tabpy_state.name}"')
             self.error_out(
