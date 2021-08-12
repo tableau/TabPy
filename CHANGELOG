@@ -1,5 +1,16 @@
 # Changelog
 
+## v2.4.0
+
+### Improvements
+
+- Add toggle to turn off evaluate API.
+
+### Breaking changes
+
+- Changing error code to 406 when server not configured for authentication
+  but credentials are provided by client.
+
 ## v2.3.2
 
 ### Improvements
