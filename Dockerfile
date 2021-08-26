@@ -8,5 +8,7 @@ RUN python3 -m pip install --upgrade pip && python3 -m pip install --upgrade tab
 # start TabPy
 CMD ["sh", "-c", "tabpy"]
 
-# deploy models
-RUN tabpy-deploy-models
+# run startup script
+ADD start.sh /
+RUN chmod +x /start.sh
+CMD ["/start.sh"]
