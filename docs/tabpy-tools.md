@@ -18,6 +18,7 @@ on TabPy server.
 - [Providing Schema Metadata](#providing-schema-metadata)
 - [Querying an Endpoint](#querying-an-endpoint)
 - [Evaluating Arbitrary Python Scripts](#evaluating-arbitrary-python-scripts)
+- [Deploying Models in TabPy Docker Container](#deploying-models-in-tabpy-docker-container)
 
 <!-- tocstop -->
 
@@ -433,3 +434,16 @@ using REST `Evaluate`.
 The convention for this is to use a provided function call `tabpy.query` in the
 code, which behaves like the `query` method in `tabpy-tools`. See the
 [REST API documentation](server-rest.md) for an example.
+
+## Deploying Models in TabPy Docker Container
+
+To deploy custom models for TabPy running in docker container, first copy all
+python model files onto host machine.
+
+For example, `myFunction.py` is the model we want to deploy.
+Run following from the folder containing `myFunction.py` on host machine
+
+```
+docker cp myFunction.py <container_id>:/app/scripts/myFunction.py
+docker exec -it <container_id> python /app/scripts/myFunction.py
+```
