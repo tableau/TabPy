@@ -443,7 +443,7 @@ python model files onto host machine.
 For example, `myFunction.py` is the model we want to deploy.
 Run following from the folder containing `myFunction.py` on host machine
 
-```
+```console
 docker cp myFunction.py <container_id>:/app/scripts/myFunction.py
 docker exec -it <container_id> python /app/scripts/myFunction.py
 ```
