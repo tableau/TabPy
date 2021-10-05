@@ -104,7 +104,7 @@ class QueryPlaneHandler(BaseHandler):
             elif response_type == QueryError:
                 self.error_out(400, "QueryError", info=response)
             else:
-                self.error_out(500, "Error querying GLS", info=response)
+                self.error_out(500, f"Error querying model '{po_name}'", info=response)
 
             return (None, None)
 
@@ -149,7 +149,7 @@ class QueryPlaneHandler(BaseHandler):
             # endpoint_name) is None
             if not po_name:
                 self.error_out(
-                    404, "UnknownURI", info=f'Endpoint "{endpoint_name}" does not exist'
+                    404, "UnknownURI", info=f"Endpoint '{endpoint_name}' does not exist"
                 )
                 return
 
