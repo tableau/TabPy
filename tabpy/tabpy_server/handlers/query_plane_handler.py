@@ -104,7 +104,7 @@ class QueryPlaneHandler(BaseHandler):
             elif response_type == QueryError:
                 self.error_out(400, "QueryError", info=response)
             else:
-                self.error_out(500, f"Error querying model '{po_name}'", info=response)
+                self.error_out(500, f"Error querying function '{po_name}'", info=response)
 
             return (None, None)
 
