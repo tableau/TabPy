@@ -7,6 +7,7 @@ import requests
 from tornado import gen
 from datetime import timedelta
 from tabpy.tabpy_server.handlers.util import AuthErrorStates
+import gzip
 
 
 class RestrictedTabPy:
@@ -59,7 +60,10 @@ class EvaluationPlaneHandler(BaseHandler):
 
     @gen.coroutine
     def _post_impl(self):
-        body = json.loads(self.request.body.decode("utf-8"))
+        
+        self.logger.log(logging.DEBUG, f"PreProcessing POST request ...")
+        body = json.loads(gzip.decompress(self.request.body).decode("utf-8"))
+        #body = json.loads(self.request.body)
         self.logger.log(logging.DEBUG, f"Processing POST request '{body}'...")
         if "script" not in body:
             self.error_out(400, "Script is empty.")
@@ -109,7 +113,9 @@ class EvaluationPlaneHandler(BaseHandler):
             return
 
         if result is not None:
-            self.write(simplejson.dumps(result, ignore_nan=True))
+            self.write(gzip.compress(simplejson.dumps(result, ignore_nan=True).encode('utf-8')))
+            #self.write(simplejson.dumps(result, ignore_nan=True).encode('utf-8'))
+            self.set_header("Content-Encoding", "gzip")
         else:
             self.write("null")
         self.finish()
