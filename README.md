@@ -8,7 +8,7 @@
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/tableau/TabPy/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/tableau/TabPy/?branch=master)
 [![Requirements Status](https://requires.io/github/tableau/TabPy/requirements.svg?branch=master)](https://requires.io/github/tableau/TabPy/requirements/?branch=master)
 
-![PyPI - Python Version](https://img.shields.io/pypi/pyversions/tabpy?label=PyPI%20Python%20versions)
+![PyPI - Python Version](https://img.shields.io/badge/python-3.7%7C3.8-blue.svg)
 [![PyPI version](https://badge.fury.io/py/tabpy.svg)](https://pypi.python.org/pypi/tabpy/)
 
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/tableau/tabpy)
