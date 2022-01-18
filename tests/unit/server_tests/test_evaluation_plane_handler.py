@@ -8,10 +8,10 @@ from tabpy.tabpy_server.app.app import TabPyApp
 from tabpy.tabpy_server.handlers.util import hash_password
 
 
-class TestEvaluationPlainHandlerWithAuth(AsyncHTTPTestCase):
+class TestEvaluationPlaneHandlerWithAuth(AsyncHTTPTestCase):
     @classmethod
     def setUpClass(cls):
-        prefix = "__TestEvaluationPlainHandlerWithAuth_"
+        prefix = "__TestEvaluationPlaneHandlerWithAuth_"
         # create password file
         cls.pwd_file = tempfile.NamedTemporaryFile(
             mode="w+t", prefix=prefix, suffix=".txt", delete=False
@@ -205,10 +205,10 @@ class TestEvaluationPlainHandlerWithAuth(AsyncHTTPTestCase):
         self.assertEqual(b'null', response.body)
 
 
-class TestEvaluationPlainHandlerWithoutAuth(AsyncHTTPTestCase):
+class TestEvaluationPlaneHandlerWithoutAuth(AsyncHTTPTestCase):
     @classmethod
     def setUpClass(cls):
-        prefix = "__TestEvaluationPlainHandlerWithoutAuth_"
+        prefix = "__TestEvaluationPlaneHandlerWithoutAuth_"
 
         # create state.ini dir and file
         cls.state_dir = tempfile.mkdtemp(prefix=prefix)
@@ -287,11 +287,10 @@ class TestEvaluationPlainHandlerWithoutAuth(AsyncHTTPTestCase):
         )
         self.assertEqual(406, response.code)
 
-
-class TestEvaluationPlainHandlerDisabled(AsyncHTTPTestCase):
+class TestEvaluationPlaneHandlerDisabledWithoutAuth(AsyncHTTPTestCase):
     @classmethod
     def setUpClass(cls):
-        prefix = "__TestEvaluationPlainHandlerDisabled_"
+        prefix = "__TestEvaluationPlaneHandlerDisabledWithoutAuth_"
 
         # create config file
         cls.config_file = tempfile.NamedTemporaryFile(
@@ -325,11 +324,105 @@ class TestEvaluationPlainHandlerDisabled(AsyncHTTPTestCase):
         )
         self.assertEqual(404, response.code)
 
-
-class TestEvaluationPlainHandlerEnabled(AsyncHTTPTestCase):
+class TestEvaluationPlaneHandlerDisabledWithAuth(AsyncHTTPTestCase):
     @classmethod
     def setUpClass(cls):
-        prefix = "__TestEvaluationPlainHandlerEnabled_"
+        prefix = "__TestEvaluationPlaneHandlerDisabledWithAuth_"
+
+        # create password file
+        cls.pwd_file = tempfile.NamedTemporaryFile(
+            mode="w+t", prefix=prefix, suffix=".txt", delete=False
+        )
+        username = "username"
+        password = "password"
+        cls.pwd_file.write(f"{username} {hash_password(username, password)}\n")
+        cls.pwd_file.close()
+
+        # create state.ini dir and file
+        cls.state_dir = tempfile.mkdtemp(prefix=prefix)
+        cls.state_file = open(os.path.join(cls.state_dir, "state.ini"), "w+")
+        cls.state_file.write(
+            "[Service Info]\n"
+            "Name = TabPy Serve\n"
+            "Description = \n"
+            "Creation Time = 0\n"
+            "Access-Control-Allow-Origin = \n"
+            "Access-Control-Allow-Headers = \n"
+            "Access-Control-Allow-Methods = \n"
+            "\n"
+            "[Query Objects Service Versions]\n"
+            "\n"
+            "[Query Objects Docstrings]\n"
+            "\n"
+            "[Meta]\n"
+            "Revision Number = 1\n"
+        )
+        cls.state_file.close()
+
+        # create config file
+        cls.config_file = tempfile.NamedTemporaryFile(
+            mode="w+t", prefix=prefix, suffix=".conf", delete=False
+        )
+        cls.config_file.write(
+            "[TabPy]\n"
+            f"TABPY_PWD_FILE = {cls.pwd_file.name}\n"
+            f"TABPY_STATE_PATH = {cls.state_dir}\n"
+            f"TABPY_EVALUATE_ENABLE = false"
+        )
+        cls.config_file.close()
+
+        cls.script = (
+            '{"data":{"_arg1":[2,3],"_arg2":[3,-1]},'
+            '"script":"res=[]\\nfor i in range(len(_arg1)):\\n  '
+            'res.append(_arg1[i] * _arg2[i])\\nreturn res"}'
+        )
+
+    @classmethod
+    def tearDownClass(cls):
+        os.remove(cls.pwd_file.name)
+        os.remove(cls.state_file.name)
+        os.remove(cls.config_file.name)
+        os.rmdir(cls.state_dir)
+
+    def get_app(self):
+        self.app = TabPyApp(self.config_file.name)
+        return self.app._create_tornado_web_app()
+
+    def test_evaluation_disabled_fails_with_invalid_creds(self):
+        response = self.fetch(
+            "/evaluate",
+            method="POST",
+            body=self.script,
+            headers={
+                "Authorization": "Basic {}".format(
+                    base64.b64encode("user:wrong_password".encode("utf-8")).decode(
+                        "utf-8"
+                    )
+                )
+            },
+        )
+        self.assertEqual(401, response.code)
+    
+    def test_evaluation_disabled_fails_with_valid_creds(self):
+        response = self.fetch(
+            "/evaluate",
+            method="POST",
+            body=self.script,
+            headers={
+                "Authorization": "Basic {}".format(
+                    base64.b64encode("username:password".encode("utf-8")).decode(
+                        "utf-8"
+                    )
+                )
+            },
+        )
+        self.assertEqual(404, response.code)
+
+
+class TestEvaluationPlaneHandlerEnabled(AsyncHTTPTestCase):
+    @classmethod
+    def setUpClass(cls):
+        prefix = "__TestEvaluationPlaneHandlerEnabled_"
 
         # create config file
         cls.config_file = tempfile.NamedTemporaryFile(
@@ -364,10 +457,10 @@ class TestEvaluationPlainHandlerEnabled(AsyncHTTPTestCase):
         self.assertEqual(200, response.code)
 
 
-class TestEvaluationPlainHandlerDefault(AsyncHTTPTestCase):
+class TestEvaluationPlaneHandlerDefault(AsyncHTTPTestCase):
     @classmethod
     def setUpClass(cls):
-        prefix = "__TestEvaluationPlainHandlerDefault_"
+        prefix = "__TestEvaluationPlaneHandlerDefault_"
 
         # create config file
         cls.config_file = tempfile.NamedTemporaryFile(
