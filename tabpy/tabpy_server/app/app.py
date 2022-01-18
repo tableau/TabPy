@@ -281,6 +281,8 @@ class TabPyApp:
              "false", None),
             (SettingsParameters.MaxRequestSizeInMb, ConfigParameters.TABPY_MAX_REQUEST_SIZE_MB,
              100, None),
+            (SettingsParameters.GzipEnabled, ConfigParameters.TABPY_GZIP_ENABLE,
+             True, parser.getboolean),
         ]
 
         for setting, parameter, default_val, parse_function in settings_parameters:

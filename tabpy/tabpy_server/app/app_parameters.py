@@ -16,6 +16,7 @@ class ConfigParameters:
     TABPY_MAX_REQUEST_SIZE_MB = "TABPY_MAX_REQUEST_SIZE_MB"
     TABPY_EVALUATE_ENABLE = "TABPY_EVALUATE_ENABLE"
     TABPY_EVALUATE_TIMEOUT = "TABPY_EVALUATE_TIMEOUT"
+    TABPY_GZIP_ENABLE = "TABPY_GZIP_ENABLE"
 
 
 class SettingsParameters:
@@ -36,3 +37,4 @@ class SettingsParameters:
     MaxRequestSizeInMb = "max_request_size_in_mb"
     EvaluateTimeout = "evaluate_timeout"
     EvaluateEnabled = "evaluate_enabled"
+    GzipEnabled = "gzip_enabled"

@@ -2,6 +2,7 @@ from tabpy.tabpy_server.handlers import BaseHandler
 import json
 import simplejson
 import logging
+from tabpy.tabpy_server.app.app_parameters import SettingsParameters
 from tabpy.tabpy_server.common.util import format_exception
 import requests
 from tornado import gen
@@ -62,8 +63,11 @@ class EvaluationPlaneHandler(BaseHandler):
     def _post_impl(self):
         
         self.logger.log(logging.DEBUG, f"PreProcessing POST request ...")
-        body = json.loads(gzip.decompress(self.request.body).decode("utf-8"))
-        #body = json.loads(self.request.body)
+        if self.settings[SettingsParameters.GzipEnabled] == True:
+            self.logger.log(logging.DEBUG, f"Decoding Gzipped POST request ...")
+            body = json.loads(gzip.decompress(self.request.body).decode("utf-8"))
+        else:
+            body = json.loads(self.request.body)
         self.logger.log(logging.DEBUG, f"Processing POST request '{body}'...")
         if "script" not in body:
             self.error_out(400, "Script is empty.")
