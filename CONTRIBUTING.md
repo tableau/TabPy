@@ -30,7 +30,7 @@ and run it locally.
 These are prerequisites for an environment required for a contributor to
 be able to work on TabPy changes:
 
-- Python 3.6, 3.7 or 3.8:
+- Python 3.7, 3.8 or 3.9:
   - To see which version of Python you have installed, run `python --version`.
 - git
 - Node.js for npm packages - install from <https://nodejs.org>.
