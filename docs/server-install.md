@@ -50,8 +50,9 @@ for more details.
 
 ## Starting a Local TabPy Project
 
-To create a version of TabPy that incorporates locally-made changes, use pip to create a package
-from your local TabPy project and install it within that directory (preferably a virtual environment):
+To create a version of TabPy that incorporates locally-made changes,
+use pip to create a package from your local TabPy project
+and install it within that directory (preferably a virtual environment):
 
 ```sh
 pip install -e .
