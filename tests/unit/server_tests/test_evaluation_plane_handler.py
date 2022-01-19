@@ -287,6 +287,7 @@ class TestEvaluationPlaneHandlerWithoutAuth(AsyncHTTPTestCase):
         )
         self.assertEqual(406, response.code)
 
+
 class TestEvaluationPlaneHandlerDisabledWithoutAuth(AsyncHTTPTestCase):
     @classmethod
     def setUpClass(cls):
@@ -323,6 +324,7 @@ class TestEvaluationPlaneHandlerDisabledWithoutAuth(AsyncHTTPTestCase):
             body=self.script
         )
         self.assertEqual(404, response.code)
+
 
 class TestEvaluationPlaneHandlerDisabledWithAuth(AsyncHTTPTestCase):
     @classmethod
@@ -402,7 +404,7 @@ class TestEvaluationPlaneHandlerDisabledWithAuth(AsyncHTTPTestCase):
             },
         )
         self.assertEqual(401, response.code)
-    
+
     def test_evaluation_disabled_fails_with_valid_creds(self):
         response = self.fetch(
             "/evaluate",
