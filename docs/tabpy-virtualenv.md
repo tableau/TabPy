@@ -33,10 +33,25 @@ To run TabPy in Python virtual environment follow the steps:
       ```
 
 4. Run TabPy:
+   1. Default TabPy
 
-   ```sh
-   tabpy
-   ```
+      ```sh
+      tabpy
+      ```
+
+   2. Local TabPy
+
+      To create a version of TabPy that incorporates locally-made changes, use pip to create a package from your local TabPy project and install it within that directory:
+
+         ```sh
+         pip install -e .
+         ```
+
+      Then start TabPy just like it was mentioned earlier
+
+         ```sh
+         tabpy
+         ```
 
 5. To deactivate virtual environment run:
 
