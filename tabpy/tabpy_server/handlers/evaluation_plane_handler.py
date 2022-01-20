@@ -117,9 +117,11 @@ class EvaluationPlaneHandler(BaseHandler):
             return
 
         if result is not None:
-            self.write(gzip.compress(simplejson.dumps(result, ignore_nan=True).encode('utf-8')))
-            #self.write(simplejson.dumps(result, ignore_nan=True).encode('utf-8'))
-            self.set_header("Content-Encoding", "gzip")
+            if self.settings[SettingsParameters.GzipEnabled] == True and 'Content-Encoding' in self.request.headers and 'gzip' in self.request.headers['Content-Encoding']:
+                self.write(gzip.compress(simplejson.dumps(result, ignore_nan=True).encode('utf-8')))
+                self.set_header("Content-Encoding", "gzip")
+            else:
+                self.write(simplejson.dumps(result, ignore_nan=True).encode('utf-8'))
         else:
             self.write("null")
         self.finish()
