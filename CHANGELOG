@@ -2,7 +2,8 @@
 
 ## v2.5.0
 
-###
+### Improvements
+
 - A server with Adhoc Disabled Flag on with the wrong credentials will now
   return wrong credentials error instead of telling the user
   that Adhoc Scripts are not allowed on this server.
