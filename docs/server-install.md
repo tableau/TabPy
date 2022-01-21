@@ -47,3 +47,19 @@ tabpy --config=path/to/my/config/file.conf
 It is highly recommended to use Python virtual environment for running TabPy.
 Check the [Running TabPy in Python Virtual Environment](tabpy-virtualenv.md) page
 for more details.
+
+## Starting a Local TabPy Project
+
+To create a version of TabPy that incorporates locally-made changes,
+use pip to create a package from your local TabPy project
+and install it within that directory (preferably a virtual environment):
+
+```sh
+pip install -e .
+```
+
+Then start TabPy just like it was mentioned earlier
+
+```sh
+tabpy
+```
