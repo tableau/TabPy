@@ -8,7 +8,6 @@ import requests
 from tornado import gen
 from datetime import timedelta
 from tabpy.tabpy_server.handlers.util import AuthErrorStates
-import gzip
 
 
 class RestrictedTabPy:
@@ -65,13 +64,7 @@ class EvaluationPlaneHandler(BaseHandler):
     @gen.coroutine
     def _post_impl(self):
         
-        self.logger.log(logging.DEBUG, f"PreProcessing POST request ...")
-        if self.settings[SettingsParameters.GzipEnabled] == True and 'Content-Encoding' in self.request.headers and 'gzip' in self.request.headers['Content-Encoding']:
-            self.logger.log(logging.DEBUG, f"Decoding Gzipped POST request ... '{self.request.body}'")
-            body = json.loads(gzip.decompress(self.request.body).decode("utf-8"))
-            self.logger.log(logging.DEBUG, f"Decoded Gzipped POST request ... '{body}'")
-        else:
-            body = json.loads(self.request.body)
+        body = json.loads(self.request.body.decode("utf-8"))
         self.logger.log(logging.DEBUG, f"Processing POST request '{body}'...")
         if "script" not in body:
             self.error_out(400, "Script is empty.")
@@ -121,11 +114,7 @@ class EvaluationPlaneHandler(BaseHandler):
             return
 
         if result is not None:
-            if self.settings[SettingsParameters.GzipEnabled] == True and 'Content-Encoding' in self.request.headers and 'gzip' in self.request.headers['Content-Encoding']:
-                self.write(gzip.compress(simplejson.dumps(result, ignore_nan=True).encode('utf-8')))
-                self.set_header("Content-Encoding", "gzip")
-            else:
-                self.write(simplejson.dumps(result, ignore_nan=True).encode('utf-8'))
+            self.write(simplejson.dumps(result, ignore_nan=True))
         else:
             self.write("null")
         self.finish()

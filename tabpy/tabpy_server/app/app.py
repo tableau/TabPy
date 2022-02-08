@@ -96,11 +96,15 @@ class TabPyApp:
             logger.critical(msg)
             raise RuntimeError(msg)
 
+        settings = {}
+        if self.settings[SettingsParameters.GzipEnabled] == True:
+            settings["decompress_request"] = True
         application.listen(
             self.settings[SettingsParameters.Port],
             ssl_options=ssl_options,
             max_buffer_size=max_request_size,
             max_body_size=max_request_size,
+            **settings,
         )
 
         logger.info(
