@@ -419,6 +419,7 @@ class TabPyApp:
             }
 
         features["evaluate_enabled"] = self.settings[SettingsParameters.EvaluateEnabled]
+        features["gzip_enabled"] = self.settings[SettingsParameters.GzipEnabled]
         return features
 
     def _build_tabpy_state(self):

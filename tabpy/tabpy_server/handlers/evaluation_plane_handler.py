@@ -67,8 +67,9 @@ class EvaluationPlaneHandler(BaseHandler):
         
         self.logger.log(logging.DEBUG, f"PreProcessing POST request ...")
         if self.settings[SettingsParameters.GzipEnabled] == True and 'Content-Encoding' in self.request.headers and 'gzip' in self.request.headers['Content-Encoding']:
-            self.logger.log(logging.DEBUG, f"Decoding Gzipped POST request ...")
+            self.logger.log(logging.DEBUG, f"Decoding Gzipped POST request ... '{self.request.body}'")
             body = json.loads(gzip.decompress(self.request.body).decode("utf-8"))
+            self.logger.log(logging.DEBUG, f"Decoded Gzipped POST request ... '{body}'")
         else:
             body = json.loads(self.request.body)
         self.logger.log(logging.DEBUG, f"Processing POST request '{body}'...")
