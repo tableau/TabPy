@@ -2,7 +2,6 @@ from tabpy.tabpy_server.handlers import BaseHandler
 import json
 import simplejson
 import logging
-from tabpy.tabpy_server.app.app_parameters import SettingsParameters
 from tabpy.tabpy_server.common.util import format_exception
 import requests
 from tornado import gen
@@ -63,7 +62,6 @@ class EvaluationPlaneHandler(BaseHandler):
 
     @gen.coroutine
     def _post_impl(self):
-        
         body = json.loads(self.request.body.decode("utf-8"))
         self.logger.log(logging.DEBUG, f"Processing POST request '{body}'...")
         if "script" not in body:

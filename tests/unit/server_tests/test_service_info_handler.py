@@ -100,7 +100,7 @@ class TestServiceInfoHandlerWithAuth(BaseTestServiceInfoHandler):
         self.assertTrue("features" in v1)
         features = v1["features"]
         self.assertDictEqual(
-            {"authentication": {"methods": {"basic-auth": {}}, "required": True}, 'evaluate_enabled': True},
+            {"authentication": {"methods": {"basic-auth": {}}, "required": True}, 'evaluate_enabled': True, 'gzip_enabled': True},
             features,
         )
 
@@ -126,7 +126,7 @@ class TestServiceInfoHandlerWithoutAuth(BaseTestServiceInfoHandler):
         v1 = versions["v1"]
         self.assertTrue("features" in v1)
         features = v1["features"]
-        self.assertDictEqual({'evaluate_enabled': True}, features)
+        self.assertDictEqual({'evaluate_enabled': True, 'gzip_enabled': True}, features)
 
     def test_given_server_with_no_auth_and_password_expect_correct_info_response(self):
         header = {
