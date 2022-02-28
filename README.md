@@ -1,5 +1,9 @@
 # TabPy
 
+<a href="https://bank.gov.ua/en/news/all/natsionalniy-bank-vidkriv-spetsrahunok-dlya-zboru-koshtiv-na-potrebi-armiyi">
+  <img src="https://img.shields.io/badge/Support-Ukraine-blue?style=flat&logo=adguard" alt="Support Ukraine" />
+</a>
+
 [![Tableau Supported](https://img.shields.io/badge/Support%20Level-Tableau%20Supported-53bd92.svg)](https://www.tableau.com/support-levels-it-and-developer-tools)
 [![GitHub](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://raw.githubusercontent.com/Tableau/TabPy/master/LICENSE)
 
@@ -7,10 +11,6 @@
 [![Coverage Status](https://coveralls.io/repos/github/tableau/TabPy/badge.svg?branch=master)](https://coveralls.io/github/tableau/TabPy?branch=master)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/tableau/TabPy/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/tableau/TabPy/?branch=master)
 [![Requirements Status](https://requires.io/github/tableau/TabPy/requirements.svg?branch=master)](https://requires.io/github/tableau/TabPy/requirements/?branch=master)
-
-<a href="https://bank.gov.ua/en/news/all/natsionalniy-bank-vidkriv-spetsrahunok-dlya-zboru-koshtiv-na-potrebi-armiyi">
-  <img src="https://img.shields.io/badge/Support-Ukraine-blue?style=flat&logo=adguard" alt="Support Ukraine" />
-</a>
 
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/tabpy?label=PyPI%20Python%20versions)
 [![PyPI version](https://badge.fury.io/py/tabpy.svg)](https://pypi.python.org/pypi/tabpy/)
