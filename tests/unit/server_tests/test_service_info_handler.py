@@ -101,8 +101,8 @@ class TestServiceInfoHandlerWithAuth(BaseTestServiceInfoHandler):
         features = v1["features"]
         self.assertDictEqual(
             {"authentication": {"methods": {"basic-auth": {}}, "required": True},
-            'evaluate_enabled': True, 'gzip_enabled': True},
-            features,
+                'evaluate_enabled': True, 'gzip_enabled': True},
+                features,
         )
 
 

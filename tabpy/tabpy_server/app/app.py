@@ -97,7 +97,7 @@ class TabPyApp:
             raise RuntimeError(msg)
 
         settings = {}
-        if self.settings[SettingsParameters.GzipEnabled] == True:
+        if self.settings[SettingsParameters.GzipEnabled] is True:
             settings["decompress_request"] = True
         application.listen(
             self.settings[SettingsParameters.Port],

@@ -272,7 +272,7 @@ class IntegTestBase(unittest.TestCase):
             url = "http://"
         url += "localhost:" + self._get_port()
         return url
- 
+
     def _get_connection(self) -> http.client.HTTPConnection:
         protocol = self._get_transfer_protocol()
         url = "localhost:" + self._get_port()

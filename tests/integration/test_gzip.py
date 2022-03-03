@@ -8,6 +8,7 @@ import gzip
 import os
 import requests
 
+
 class TestEvaluate(integ_test_base.IntegTestBase):
     def _get_config_file_name(self) -> str:
         """
@@ -70,7 +71,8 @@ class TestEvaluate(integ_test_base.IntegTestBase):
         }
 
         url = self._get_url() + "/evaluate"
-        response = requests.request("POST", url, data=gzip.compress(payload.encode('utf-8')), headers=headers)
+        response = requests.request("POST", url, data=gzip.compress(payload.encode('utf-8')),
+            headers=headers)
         result = json.loads(response.text)
 
         self.assertEqual(200, response.status_code)
@@ -90,7 +92,8 @@ class TestEvaluate(integ_test_base.IntegTestBase):
         }
 
         url = self._get_url() + "/evaluate"
-        response = requests.request("POST", url, data=gzip.compress(payload.encode('utf-8')), headers=headers)
+        response = requests.request("POST", url, data=gzip.compress(payload.encode('utf-8')),
+            headers=headers)
         result = json.loads(response.text)
 
         self.assertEqual(500, response.status_code)
