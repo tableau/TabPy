@@ -8,6 +8,7 @@
   * [Configuration File Content](#configuration-file-content)
   * [Configuration File Example](#configuration-file-example)
 - [Configuring HTTP vs HTTPS](#configuring-http-vs-https)
+- [Configuring TPS](#configuring-http-vs-https)
 - [Authentication](#authentication)
   * [Enabling Authentication](#enabling-authentication)
   * [Password File](#password-file)
@@ -93,6 +94,7 @@ at [`logging.config` documentation page](https://docs.python.org/3.6/library/log
   value - `30`. This timeout does not apply when evaluating models either
   through the `/query` method, or using the `tabpy.query(...)` syntax with
   the `/evaluate` method.
+- `TABPY_GZIP_ENABLE` - Enable Gzip support for requests. Enabled by default.
 
 ### Configuration File Example
 
