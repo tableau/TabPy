@@ -13,10 +13,14 @@ def get_default_config_file_path():
     return config_file_path
 
 
-def parse_config(config_file_path):
+def get_config(config_file_path):
     config = configparser.ConfigParser()
     config.read(config_file_path)
-    tabpy_config = config["TabPy"]
+    return config
+
+
+def parse_config(config_file_path):
+    tabpy_config = get_config(config_file_path)["TabPy"]
 
     port = 9004
     if "TABPY_PORT" in tabpy_config:
