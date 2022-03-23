@@ -39,7 +39,7 @@ More technical topics:
 
 Other useful resources:
 
-* [Tableau Sci-Fi Blog](http://tabscifi.com/) provides tips, tricks, under
+* [Tableau Sci-Fi Blog](http://tabscifi.golovatyi.info/) provides tips, tricks, under
   the hood, useful resources, and technical details for how to extend
   Tableau with data science.
 * [Known Issues for the Tableau Analytics Extensions API](https://tableau.github.io/analytics-extensions-api/docs/ae_known_issues.html).
