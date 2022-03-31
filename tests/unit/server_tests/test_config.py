@@ -161,6 +161,33 @@ class TestPartialConfigFile(unittest.TestCase):
         app = TabPyApp(self.config_file.name)
         self.assertEqual(app.settings["port"], "bazbar")
 
+    @patch("tabpy.tabpy_server.app.app.os.path.exists", return_value=True)
+    @patch("tabpy.tabpy_server.app.app._get_state_from_file")
+    @patch("tabpy.tabpy_server.app.app.TabPyState")
+    def test_gzip_setting_on_valid(
+        self, mock_state, mock_get_state_from_file, mock_path_exists
+    ):
+        self.assertTrue(self.config_file is not None)
+        config_file = self.config_file
+        config_file.write("[TabPy]\n" "TABPY_GZIP_ENABLE = true".encode())
+        config_file.close()
+
+        app = TabPyApp(self.config_file.name)
+        self.assertEqual(app.settings["gzip_enabled"], True)
+
+    @patch("tabpy.tabpy_server.app.app.os.path.exists", return_value=True)
+    @patch("tabpy.tabpy_server.app.app._get_state_from_file")
+    @patch("tabpy.tabpy_server.app.app.TabPyState")
+    def test_gzip_setting_off_valid(
+        self, mock_state, mock_get_state_from_file, mock_path_exists
+    ):
+        self.assertTrue(self.config_file is not None)
+        config_file = self.config_file
+        config_file.write("[TabPy]\n" "TABPY_GZIP_ENABLE = false".encode())
+        config_file.close()
+
+        app = TabPyApp(self.config_file.name)
+        self.assertEqual(app.settings["gzip_enabled"], False)
 
 class TestTransferProtocolValidation(unittest.TestCase):
     def assertTabPyAppRaisesRuntimeError(self, expected_message):

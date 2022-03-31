@@ -263,6 +263,16 @@ class IntegTestBase(unittest.TestCase):
 
         super(IntegTestBase, self).tearDown()
 
+    def _get_url(self) -> str:
+        protocol = self._get_transfer_protocol()
+        url = ""
+        if protocol is not None and protocol.lower() == "https":
+            url = "https://"
+        else:
+            url = "http://"
+        url += "localhost:" + self._get_port()
+        return url
+
     def _get_connection(self) -> http.client.HTTPConnection:
         protocol = self._get_transfer_protocol()
         url = "localhost:" + self._get_port()
