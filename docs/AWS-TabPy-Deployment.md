@@ -13,12 +13,16 @@ AWS EC2 instance is employed as a virtual server to host python and run TabPy. T
 From your AWS console go to EC2 and lunch an instance. 
 In the Lunch an instance section, select a name and the OS for your instance (ubuntu is recommended) as well as the instance type:
 
+![alt text](https://github.com/AmirMK/TabPy-Amir/blob/master/docs/img/AWS-Deployment/1-Create_EC2.png)
 
 Then you have the option to create key pair for your instance. That would be most useful when you want to transfer files from your local machine to your EC2 instance. So it is recommended to create the key with ppk format and store in the safe location:
 
+![alt text](https://github.com/AmirMK/TabPy-Amir/blob/master/docs/img/AWS-Deployment/2-EC2_Keypair.png)
+![alt text](https://github.com/AmirMK/TabPy-Amir/blob/master/docs/img/AWS-Deployment/3-EC2_Create_Keypair.png)
 
 Next step is to create the security group. To do that click the edit bottom for security group section:
 
+![alt text](https://github.com/AmirMK/TabPy-Amir/blob/master/docs/img/AWS-Deployment/4-Network_Setting.png)
 
 Pick a meaningful name and description for the security group and make sure two inbound rules are added: 
 
@@ -27,13 +31,19 @@ Pick a meaningful name and description for the security group and make sure two 
 
 Although TabPy by default runs on port 9004 the port number can be configured on the TabPy configuration. If you want to run TabPy with a different port number, make sure you have the corresponding inbound rule a.k.a. Custom TCP with your desirable port number.
 
+![alt text](https://github.com/AmirMK/TabPy-Amir/blob/master/docs/img/AWS-Deployment/5-TCP_Setting.png)
 
 In the last part you have the option to increase the storage or number of instance as well. Then go ahead a click ‘Lunch instance’. It may take few mins for AWS to lunch the instance. You can see the list of running instance by going to EC2 dashboard and Instance (running):
+
+![alt text](https://github.com/AmirMK/TabPy-Amir/blob/master/docs/img/AWS-Deployment/6-EC2_Running_1.png)
+
+![alt text](https://github.com/AmirMK/TabPy-Amir/blob/master/docs/img/AWS-Deployment/7-EC2_Running_2.png)
 
 ## 1.2. Install Python and TabPy
 
 To install any software or package you need to connect to your EC2 instance. There are multiple ways to connect to your instance including [ssh connection](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AccessingInstancesLinux.html) (for mac) and [putty](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/putty.html) (for windows) however the most straight forward method is using the AWS UI:
 
+![alt text](https://github.com/AmirMK/TabPy-Amir/blob/master/docs/img/AWS-Deployment/8-EC2_Connect.png)
 
 After connecting to the EC2 you need to run the following commands.  
 
@@ -87,19 +97,25 @@ From AWS console go to AWS Route 53 and select a domain name (usually there is a
 
 After submitting the request it may take couple of mins for AW to verify the domain registration. You will get a notification email when the domain is registered successfully. And then you will see it as part of ‘Registered domain“ 
 
+![alt text](https://github.com/AmirMK/TabPy-Amir/blob/master/docs/img/AWS-Deployment/9-Domain_Registory.png)
+
 ## 2.2. Request SSL Certificate 
 
 The next step is to request the SSL certification via AWS certificate manager. To do that, From AWS console go to AWS Certificate Manager and select request and then submit a request for a public certificate:
 
+![alt text](https://github.com/AmirMK/TabPy-Amir/blob/master/docs/img/AWS-Deployment/10-Request%20Certificate.png)
 
 Then you need to pick a valid name for your domain. When you pick the name, make sure you select ‘Add another name to this certificate’ and add *.your-domain as below:
 
+![alt text](https://github.com/AmirMK/TabPy-Amir/blob/master/docs/img/AWS-Deployment/11-Public_Certificate.png)
 
 When you submit the request may see the domain request as pending. Go back to AWS certificate manager portal and click on the ‘certification ID’ correspond to the registered domain and select ‘Create records’:
 
+![alt text](https://github.com/AmirMK/TabPy-Amir/blob/master/docs/img/AWS-Deployment/12-AWS_DNS_Record.png)
 
 Few mins after creating record the status of certificate will turn into ‘issued’:
 
+![alt text](https://github.com/AmirMK/TabPy-Amir/blob/master/docs/img/AWS-Deployment/13-AWD_DNS_Issued.png)
 
 # 3. Application Load Balancer
 
@@ -109,8 +125,11 @@ Application load balancer is used to route the requests to the EC2 instance on w
 
 From AWS console go to EC2 and then scroll down and find “Load Balancers” and create an “application load balancer”
 
+![alt text](https://github.com/AmirMK/TabPy-Amir/blob/master/docs/img/AWS-Deployment/14-Application_Load_Balancer.png)
 
 Pick a name for your load balancer and make sure the VPC is the same as VPC for your EC2 instance similar for mappings (you need to pick at least two availability zones):
+
+![alt text](https://github.com/AmirMK/TabPy-Amir/blob/master/docs/img/AWS-Deployment/15-APB_Setting.png)
 
 
 ## 3.2.Security Group and Target Group
@@ -118,23 +137,29 @@ Pick a name for your load balancer and make sure the VPC is the same as VPC for 
 the best practice is to create a new security group instead of using default ones. To do that remove any default security group and click on ‘create security group’. Pick a name and description for the security group and make sure the VPC is the same VPC that your TabPy EC2 instance is running on. 
 for the inbound and outbound rules make sure it is set to ‘HTTPS’ type with port range 443. The outbound type can be ‘All traffic’ 
 
+![alt text](https://github.com/AmirMK/TabPy-Amir/blob/master/docs/img/AWS-Deployment/16-APB_Security_Group_Basic.png)
 
 You can learn more about AWS application load balancer security group [here](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-update-security-groups.html).
 
 After creating the security group go back to the load balancer page and select the created security group;
 
+![alt text](https://github.com/AmirMK/TabPy-Amir/blob/master/docs/img/AWS-Deployment/17-APB_Security_Group_Setting.png)
 
 Next set up listeners and routing by selecting HTTPS as protocol with port 443 and then select “create a target group” 
 
+![alt text](https://github.com/AmirMK/TabPy-Amir/blob/master/docs/img/AWS-Deployment/18-APB_Security_Group_Listener.png)
 
 For the target group set the target type to ‘instance’, pick a name and make sure protocol is HTTP with port 9004 (This is port on which TabPy is running on EC2 instance):
 
+![alt text](https://github.com/AmirMK/TabPy-Amir/blob/master/docs/img/AWS-Deployment/19-APB_Security_Group_Config.png)
 
 Finally select the instance on which your are running TabPy and ‘include as pending below“
 
+![alt text](https://github.com/AmirMK/TabPy-Amir/blob/master/docs/img/AWS-Deployment/20-APB_Security_Group_Target.png)
 
 After creating the target group go back to your load balancer page and select the created target group (you should see it as part of drop down menu)
 
+![alt text](https://github.com/AmirMK/TabPy-Amir/blob/master/docs/img/AWS-Deployment/21-APB_Security_Group_HTTPS.png)
 
 In the last section ‘Secure listen setting’ select your registered domain as :
 
@@ -144,8 +169,10 @@ In the last section ‘Secure listen setting’ select your registered domain as
 The final step is to route the web traffic to the load balancer. 
 From AWS console go to AWS Route 53 dashboard and under ‘DSN management’ select ‘Hosted zones’ and then select the registers domain you created. Then create a record and assign a record name (This would be the host-name for TabPy connection to Tableau Cloud) and make sure rest of the configuration is as below: 
 
+![alt text](https://github.com/AmirMK/TabPy-Amir/blob/master/docs/img/AWS-Deployment/22-APB_Security_Group_Final.png)
 
 After creating the record you should have it as pat of:
 
+![alt text](https://github.com/AmirMK/TabPy-Amir/blob/master/docs/img/AWS-Deployment/23-Create_Record_1.png)
 
 It may take couple of mins for record to get effective and working.
