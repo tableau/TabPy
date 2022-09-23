@@ -24,6 +24,7 @@ Consider reading TabPy documentation in the following order:
 * [TabPy Server Configuration Instructions](docs/server-config.md)
 * [Running TabPy in Virtual Environment](docs/tabpy-virtualenv.md)
 * [Running TabPy on Heroku](docs/deploy-to-heroku.md)
+* [Running TabPy on AWS](docs/AWS-TabPy-Deployment.md)
 * [Authoring Python calculations in Tableau](docs/TableauConfiguration.md).
 * [TabPy Tools](docs/tabpy-tools.md)
 
