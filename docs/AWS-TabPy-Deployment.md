@@ -57,7 +57,7 @@ After connecting to the EC2 you need to run the following commands.
 
 This commands basically install the latest version of Python and install TabPy package. If you need any other python package you can install it similarly with pip command:
 
-'sudo pip3 install [your-python-package]'
+`sudo pip3 install [your-python-package]`
 
 ## 1.3. TabPy Configuration
 
