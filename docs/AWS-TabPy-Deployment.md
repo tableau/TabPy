@@ -1,5 +1,5 @@
 # TabPy Deployment for Tableau Cloud (AWS)
-The goal of this document is to walk through the end-to-end solution building process. While in the document we are using AWS cloud, the architecture and solution can be generalized to any cloud platform. The solution building process comprises three main steps: 
+The goal of this document is to walk through all steps required to deploy TabPy on AWS with SSL connection. In the document we are using AWS cloud, however the architecture and solution can be generalized to any cloud platform. The solution building process comprises three main steps:
 
 * Running TabPy on EC2 instance
 * Request SSL certification with a registered domain 
