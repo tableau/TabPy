@@ -127,6 +127,10 @@ From AWS console go to EC2 and then scroll down and find “Load Balancers” an
 
 ![alt text](https://github.com/AmirMK/TabPy-Amir/blob/master/docs/img/AWS-Deployment/rr2.png)
 
+this:
+
+![alt text](https://github.com/AmirMK/TabPy-Amir/blob/master/docs/img/AWS-Deployment/14-Application_Load_Balancer.png)
+
 Pick a name for your load balancer and make sure the VPC is the same as VPC for your EC2 instance similar for mappings (you need to pick at least two availability zones):
 
 ![alt text](https://github.com/AmirMK/TabPy-Amir/blob/master/docs/img/AWS-Deployment/15-APB_Setting.png)
