@@ -15,7 +15,7 @@ In the **Lunch an instance** section, select a name and the OS for your instance
 
 ![alt text](https://github.com/AmirMK/TabPy-Amir/blob/master/docs/img/AWS-Deployment/1-Create_EC2.png)
 
-Then you have the option to create **key pair** for your instance. That would be most useful when you want to transfer files from your local machine to your EC2 instance. So it is recommended to create the key with * *ppk* * format and store in the safe location:
+Then you have the option to create **key pair** for your instance. That would be most useful when you want to transfer files from your local machine to your EC2 instance. So it is recommended to create the key with *ppk* format and store in the safe location:
 
 ![alt text](https://github.com/AmirMK/TabPy-Amir/blob/master/docs/img/AWS-Deployment/2-EC2_Keypair.png)
 ![alt text](https://github.com/AmirMK/TabPy-Amir/blob/master/docs/img/AWS-Deployment/3-EC2_Create_Keypair.png)
@@ -26,10 +26,10 @@ Next step is to create the **security group**. To do that click the edit bottom 
 
 Pick a meaningful name and description for the security group and make sure two **inbound rules** are added: 
 
-* * *ssh* * type with port 22 (Assuming the OS for your VM is Linux then we should enable ssh port othewise it should be the port consitent to the OS for example if the OS was Window the we would need to enable RDP)
-* * *Custom TCP* * type with port 9004. 
+* *ssh* type with port 22 (Assuming the OS for your VM is Linux then we should enable ssh port othewise it should be the port consitent to the OS for example if the OS was Window the we would need to enable RDP)
+* *Custom TCP* type with port 9004. 
 
-Although TabPy by default runs on port 9004 the port number can be configured on the TabPy configuration. If you want to run TabPy with a different port number, make sure you have the corresponding inbound rule a.k.a. * *Custom TCP with your desirable port number* *.
+Although TabPy by default runs on port 9004 the port number can be configured on the TabPy configuration. If you want to run TabPy with a different port number, make sure you have the corresponding inbound rule a.k.a. *Custom TCP with your desirable port number*.
 
 ![alt text](https://github.com/AmirMK/TabPy-Amir/blob/master/docs/img/AWS-Deployment/5-TCP_Setting.png)
 
@@ -109,7 +109,7 @@ Then you need to pick a valid name for your domain. When you pick the name, make
 
 ![alt text](https://github.com/AmirMK/TabPy-Amir/blob/master/docs/img/AWS-Deployment/11-Public_Certificate.png)
 
-When you submit the request you may see the domain request as * *pending* *. Go back to **AWS certificate manager** portal and click on the * *certification ID* * correspond to the registered domain and select **Create records**:
+When you submit the request you may see the domain request as *pending*. Go back to **AWS certificate manager** portal and click on the *certification ID* correspond to the registered domain and select **Create records**:
 
 ![alt text](https://github.com/AmirMK/TabPy-Amir/blob/master/docs/img/AWS-Deployment/12-AWS_DNS_Record.png)
 
@@ -135,7 +135,7 @@ Pick a name for your load balancer and make sure the VPC is the same as VPC for 
 ## 3.2.Security Group and Target Group
 
 The best practice is to create a new security group instead of using default ones. To do that remove any default security group and click on **create security group**. Pick a name and description for the security group and make sure the VPC is the same VPC that your TabPy EC2 instance is running on. 
-For the inbound and outbound rules make sure it is set to * *HTTPS* * type with port range 443. The outbound type can be * *All traffic* * 
+For the inbound and outbound rules make sure it is set to *HTTPS* type with port range 443. The outbound type can be *All traffic* 
 
 ![alt text](https://github.com/AmirMK/TabPy-Amir/blob/master/docs/img/AWS-Deployment/16-APB_Security_Group_Basic.png)
 
