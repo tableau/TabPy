@@ -178,5 +178,4 @@ After creating the record you should have it as pat of:
 It may take couple of mins for record to get effective and working. When the record gets effective you will be able to connect Tableau cloud/Desktop/Server to the TabPy server with secured connection via SSL. To connect to TabPy, your hostname would be the record name, port number is 443:
 
 ![alt text](https://github.com/AmirMK/TabPy-Amir/blob/master/docs/img/AWS-Deployment/25-TOL_Connection.png)
-![alt text](https://github.com/AmirMK/TabPy-Amir/blob/master/docs/img/AWS-Deployment/tt2.png)
 
