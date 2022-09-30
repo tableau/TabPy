@@ -1,12 +1,18 @@
 # TabPy Deployment for Tableau Cloud (AWS)
-The goal of this document is to walk through all steps required to deploy TabPy on AWS with SSL connection. In the document we are using AWS cloud, however the architecture and solution can be generalized to any cloud platform. The solution building process comprises three main steps:
+The goal of this document is to walk through all steps required to deploy TabPy on AWS with SSL connection. Although in the document we are using AWS cloud as the deployment platform, the architecture and solution is generalized to any other cloud platforms. The solution building process comprises three main steps:
 
 * Running TabPy on EC2 instance
 * Request SSL certification with a registered domain 
 * Set up an application load balancer with HTTPS
 
 ## 1. Running TabPy on EC2 Instance
-AWS EC2 instance is employed as a virtual server to host python and run TabPy. The most important point in this part is we are not going to configure TabPy with HTTPS, However it still should be configured with authentication. Below is the walk through process to set-up an EC2 instance and install and configure TabPy. If you already have EC2 instance with TabPy up and run you may skip this section. You can find the official AWS documentation on set up Amazon EC2 [here](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/get-set-up-for-amazon-ec2.html).
+AWS EC2 instance is employed as a virtual server to host python and run TabPy. The most important point in this part is we are not going to configure TabPy with HTTPS and will use load balancer with HTTPS instead: 
+
+
+![alt text](https://github.com/AmirMK/TabPy-Amir/blob/master/docs/img/AWS-Deployment/0-Overall.png)
+
+
+Below is the walk through process to set-up an EC2 instance and install and configure TabPy. If you already have EC2 instance with TabPy up and run you may skip this section. You can find the official AWS documentation on set up Amazon EC2 [here](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/get-set-up-for-amazon-ec2.html).
 
 ## 1.1. EC2 Instance Set-up
 
