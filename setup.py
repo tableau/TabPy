@@ -89,8 +89,7 @@ def setup_package():
             "textblob",
             "tornado",
             "twisted",
-            "urllib3",
-            "networkx",
+            "urllib3",            
         ],
         entry_points={
             "console_scripts": [
