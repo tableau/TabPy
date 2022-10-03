@@ -18,4 +18,6 @@ you may want to consider the following as you use TabPy:
   /evaluate endpoint. To disable /evaluate endpoint, set "TABPY_EVALUATE_ENABLE"
   to false in config file.
 - Always use the most up-to-date version of Python.
-  Using earlier versions can leave scripts vulnerable to malicious attacks.
+  TabPy relies on Tornado and if older verions of Python are used with Tornado
+  then malicious users can potentially poison python server web caches
+  with parameter cloaking.
