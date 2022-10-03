@@ -19,5 +19,5 @@ you may want to consider the following as you use TabPy:
   to false in config file.
 - Always use the most up-to-date version of Python.
   TabPy relies on Tornado and if older verions of Python are used with Tornado
-  then malicious users can potentially poison python server web caches
+  then malicious users can potentially poison Python server web caches
   with parameter cloaking.
