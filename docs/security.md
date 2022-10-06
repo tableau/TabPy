@@ -17,3 +17,7 @@ you may want to consider the following as you use TabPy:
 - Execution of ad-hoc Python scripts can be disabled by turning off the
   /evaluate endpoint. To disable /evaluate endpoint, set "TABPY_EVALUATE_ENABLE"
   to false in config file.
+- Always use the most up-to-date version of Python.
+  TabPy relies on Tornado and if older verions of Python are used with Tornado
+  then malicious users can potentially poison Python server web caches
+  with parameter cloaking.
