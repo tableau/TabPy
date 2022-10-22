@@ -89,7 +89,14 @@ def setup_package():
             "textblob",
             "tornado",
             "twisted",
-            "urllib3",            
+            "urllib3",
+            "networkx",
+            "community",
+            "opencv-python",
+            "pillow",
+            "h5py",
+            "keras",
+            "ImageAI",
         ],
         entry_points={
             "console_scripts": [
