@@ -92,11 +92,7 @@ def setup_package():
             "urllib3",
             "networkx",
             "community",
-            "opencv-python",
-            "pillow",
-            "h5py",
-            "keras",
-            "ImageAI",
+            "opencv-python",            
         ],
         entry_points={
             "console_scripts": [
