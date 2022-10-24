@@ -92,8 +92,7 @@ def setup_package():
             "urllib3",
             "networkx",
             "community",
-            "opencv-python-headless",
-            "opencv-python",
+            "opencv-python-headless",            
         ],
         entry_points={
             "console_scripts": [
