@@ -93,6 +93,7 @@ def setup_package():
             "networkx",
             "community",
             "opencv-python-headless", 
+            "spacy",
         ],
         entry_points={
             "console_scripts": [
