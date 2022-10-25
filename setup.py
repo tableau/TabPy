@@ -89,7 +89,10 @@ def setup_package():
             "textblob",
             "tornado",
             "twisted",
-            "urllib3",            
+            "urllib3",
+            "networkx",
+            "community",
+            "opencv-python-headless", 
         ],
         entry_points={
             "console_scripts": [
