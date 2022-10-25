@@ -11,7 +11,7 @@
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/tabpy?label=PyPI%20Python%20versions)
 [![PyPI version](https://badge.fury.io/py/tabpy.svg)](https://pypi.python.org/pypi/tabpy/)
 
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/tableau/tabpy)
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/AmirMK/TabPy-Amir)
 
 TabPy (the Tableau Python Server) is an Analytics Extension implementation which
 expands Tableau's capabilities by allowing users to execute Python scripts and
