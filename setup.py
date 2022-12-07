@@ -94,6 +94,8 @@ def setup_package():
             "community",
             "opencv-python-headless", 
             "spacy",
+            "pyflightdata",
+            "salesforce-merlion",
         ],
         entry_points={
             "console_scripts": [
