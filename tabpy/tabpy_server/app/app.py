@@ -89,15 +89,15 @@ class TabPyApp:
         protocol = self.settings[SettingsParameters.TransferProtocol]
         ssl_options = None
         
-        secure_headers = secure.Secure()
+        #secure_headers = secure.Secure()
         
         if protocol == "https":
             ssl_options = {
                 "certfile": self.settings[SettingsParameters.CertificateFile],
                 "keyfile": self.settings[SettingsParameters.KeyFile],
             }
-            hsts_value = (secure.StrictTransportSecurity().include_subdomains().preload().max_age(2592000))
-            secure_headers = secure.Secure(hsts=hsts_value)
+            #hsts_value = (secure.StrictTransportSecurity().include_subdomains().preload().max_age(2592000))
+            #secure_headers = secure.Secure(hsts=hsts_value)
 
         elif protocol != "http":
             msg = f"Unsupported transfer protocol {protocol}."
