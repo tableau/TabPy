@@ -94,8 +94,8 @@ class TabPyApp:
                 "keyfile": self.settings[SettingsParameters.KeyFile],
             }
             hsts_value = (secure.StrictTransportSecurity().include_subdomains().preload().max_age(2592000))
+            secure_headers = secure.Secure(hsts=hsts_value)
 
-secure_headers = secure.Secure(hsts=hsts_value)
         elif protocol != "http":
             msg = f"Unsupported transfer protocol {protocol}."
             logger.critical(msg)
