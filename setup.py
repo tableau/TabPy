@@ -93,7 +93,7 @@ def setup_package():
             #"networkx",
             #"community",
             #"opencv-python-headless", 
-            "spacy",
+            #"spacy",
             #"pyflightdata",
             #"salesforce-merlion",
             "secure",
