@@ -59,6 +59,7 @@ class QueryPlaneHandler(BaseHandler):
             response_json = response.to_json()
             md5_tag = md5(response_json.encode("utf-8")).hexdigest()
             self.set_header("Etag", f'"{md5_tag}"')
+            self.set_header(“Strict-Transport-Security”, “preload; max-age=2592000")
             return (QuerySuccessful, response.for_json(), gls_time)
         else:
             self.logger.log(logging.ERROR, f"Failed query, response: {response}")
