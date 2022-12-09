@@ -25,11 +25,11 @@ from tabpy.tabpy_server.handlers import (
     UploadDestinationHandler,
 )
 import tornado
-import secure
+#import secure
 
 
 logger = logging.getLogger(__name__)
-secure_headers = secure.Secure()
+#secure_headers = secure.Secure()
 
 
 def _init_asyncio_patch():
