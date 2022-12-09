@@ -88,6 +88,9 @@ class TabPyApp:
 
         protocol = self.settings[SettingsParameters.TransferProtocol]
         ssl_options = None
+        
+        secure_headers = secure.Secure()
+        
         if protocol == "https":
             ssl_options = {
                 "certfile": self.settings[SettingsParameters.CertificateFile],
