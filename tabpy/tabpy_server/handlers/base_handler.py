@@ -120,6 +120,7 @@ class BaseHandler(tornado.web.RequestHandler):
         self.tabpy_state = app.tabpy_state
         # set content type to application/json
         self.set_header("Content-Type", "application/json")
+        self.set_header("TestHeader", "ThisIsATest")
         self.protocol = self.settings[SettingsParameters.TransferProtocol]
         self.port = self.settings[SettingsParameters.Port]
         self.python_service = app.python_service

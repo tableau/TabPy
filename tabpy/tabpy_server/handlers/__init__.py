@@ -2,6 +2,7 @@ from tabpy.tabpy_server.handlers.base_handler import BaseHandler
 from tabpy.tabpy_server.handlers.management_handler import ManagementHandler
 
 from tabpy.tabpy_server.handlers.endpoint_handler import EndpointHandler
+from tabpy.tabpy_server.handlers.static_handler import BaseStaticHandler
 from tabpy.tabpy_server.handlers.endpoints_handler import EndpointsHandler
 from tabpy.tabpy_server.handlers.evaluation_plane_handler import EvaluationPlaneDisabledHandler
 from tabpy.tabpy_server.handlers.evaluation_plane_handler import EvaluationPlaneHandler

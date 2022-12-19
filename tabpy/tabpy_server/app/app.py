@@ -15,6 +15,7 @@ from tabpy.tabpy_server.management.util import _get_state_from_file
 from tabpy.tabpy_server.psws.callbacks import init_model_evaluator, init_ps_server
 from tabpy.tabpy_server.psws.python_service import PythonService, PythonServiceHandler
 from tabpy.tabpy_server.handlers import (
+    BaseStaticHandler,
     EndpointHandler,
     EndpointsHandler,
     EvaluationPlaneHandler,
@@ -166,7 +167,8 @@ class TabPyApp:
                 ),
                 (
                     self.subdirectory + r"/(.*)",
-                    tornado.web.StaticFileHandler,
+                    #tornado.web.StaticFileHandler,
+                    BaseStaticHandler,
                     dict(
                         path=self.settings[SettingsParameters.StaticPath],
                         default_filename="index.html",
