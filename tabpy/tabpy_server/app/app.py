@@ -15,6 +15,7 @@ from tabpy.tabpy_server.management.util import _get_state_from_file
 from tabpy.tabpy_server.psws.callbacks import init_model_evaluator, init_ps_server
 from tabpy.tabpy_server.psws.python_service import PythonService, PythonServiceHandler
 from tabpy.tabpy_server.handlers import (
+    BaseStaticHandler,  #add
     EndpointHandler,
     EndpointsHandler,
     EvaluationPlaneHandler,
@@ -25,11 +26,9 @@ from tabpy.tabpy_server.handlers import (
     UploadDestinationHandler,
 )
 import tornado
-#import secure
 
 
 logger = logging.getLogger(__name__)
-#secure_headers = secure.Secure()
 
 
 def _init_asyncio_patch():
@@ -87,18 +86,12 @@ class TabPyApp:
         init_model_evaluator(self.settings, self.tabpy_state, self.python_service)
 
         protocol = self.settings[SettingsParameters.TransferProtocol]
-        ssl_options = None
-        
-        #secure_headers = secure.Secure()
-        
+        ssl_options = None          
         if protocol == "https":
             ssl_options = {
                 "certfile": self.settings[SettingsParameters.CertificateFile],
                 "keyfile": self.settings[SettingsParameters.KeyFile],
-            }
-            #hsts_value = (secure.StrictTransportSecurity().include_subdomains().preload().max_age(2592000))
-            #secure_headers = secure.Secure(hsts=hsts_value)
-
+            }                    
         elif protocol != "http":
             msg = f"Unsupported transfer protocol {protocol}."
             logger.critical(msg)
@@ -174,7 +167,8 @@ class TabPyApp:
                 ),
                 (
                     self.subdirectory + r"/(.*)",
-                    tornado.web.StaticFileHandler,
+                    #tornado.web.StaticFileHandler,
+                    BaseStaticHandler,
                     dict(
                         path=self.settings[SettingsParameters.StaticPath],
                         default_filename="index.html",
