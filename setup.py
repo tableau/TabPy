@@ -85,7 +85,7 @@ def setup_package():
             "requests",
             "scipy",
             "simplejson",
-            "sklearn",
+            "scikit-learn",
             "textblob",
             "tornado",
             "twisted",
