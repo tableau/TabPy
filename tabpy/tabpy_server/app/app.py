@@ -15,7 +15,7 @@ from tabpy.tabpy_server.management.util import _get_state_from_file
 from tabpy.tabpy_server.psws.callbacks import init_model_evaluator, init_ps_server
 from tabpy.tabpy_server.psws.python_service import PythonService, PythonServiceHandler
 from tabpy.tabpy_server.handlers import (
-    BaseStaticHandler,  #add
+    BaseStaticHandler,  
     EndpointHandler,
     EndpointsHandler,
     EvaluationPlaneHandler,
