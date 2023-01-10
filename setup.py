@@ -71,7 +71,6 @@ def setup_package():
             "coverage",
             "coveralls",
             "docopt",
-            "future",
             "genson",
             "hypothesis",
             "jsonschema",
