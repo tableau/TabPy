@@ -1,5 +1,12 @@
 # Changelog
 
+## v2.6.0
+
+### Improvements
+
+- Fixes deprecation of sklearn in favor of current package name
+scikit-learn
+
 ## v2.5.1
 
 ### Improvements
