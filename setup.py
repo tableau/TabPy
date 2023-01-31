@@ -90,6 +90,12 @@ def setup_package():
             "tornado",
             "twisted",
             "urllib3",
+            "networkx",
+            "community",
+            "opencv-python-headless", 
+            "spacy",
+            "pyflightdata",
+            "salesforce-merlion",            
         ],
         entry_points={
             "console_scripts": [

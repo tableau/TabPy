@@ -15,6 +15,7 @@ from tabpy.tabpy_server.management.util import _get_state_from_file
 from tabpy.tabpy_server.psws.callbacks import init_model_evaluator, init_ps_server
 from tabpy.tabpy_server.psws.python_service import PythonService, PythonServiceHandler
 from tabpy.tabpy_server.handlers import (
+    BaseStaticHandler,  
     EndpointHandler,
     EndpointsHandler,
     EvaluationPlaneHandler,
@@ -85,12 +86,12 @@ class TabPyApp:
         init_model_evaluator(self.settings, self.tabpy_state, self.python_service)
 
         protocol = self.settings[SettingsParameters.TransferProtocol]
-        ssl_options = None
+        ssl_options = None          
         if protocol == "https":
             ssl_options = {
                 "certfile": self.settings[SettingsParameters.CertificateFile],
                 "keyfile": self.settings[SettingsParameters.KeyFile],
-            }
+            }                    
         elif protocol != "http":
             msg = f"Unsupported transfer protocol {protocol}."
             logger.critical(msg)
@@ -166,7 +167,8 @@ class TabPyApp:
                 ),
                 (
                     self.subdirectory + r"/(.*)",
-                    tornado.web.StaticFileHandler,
+                    #tornado.web.StaticFileHandler,
+                    BaseStaticHandler,
                     dict(
                         path=self.settings[SettingsParameters.StaticPath],
                         default_filename="index.html",
