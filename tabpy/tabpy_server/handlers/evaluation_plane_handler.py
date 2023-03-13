@@ -1,5 +1,6 @@
 import pandas
 import pyarrow
+import uuid
 
 from tabpy.tabpy_server.handlers import BaseHandler, arrow_client
 import json
@@ -71,8 +72,18 @@ class EvaluationPlaneHandler(BaseHandler):
         user_code = body["script"]
         arguments = None
         arguments_str = ""
-        if "data" in body:
+
+        if "dataPath" in body:
+            # arrow flight scenario
+            arrow_data = self.get_arrow_data(body["dataPath"])
+            if arrow_data is not None:
+                arguments = {
+                    '_arg1': arrow_data
+                }
+        elif "data" in body:
+            # backwarding
             arguments = body["data"]
+
 
         if arguments is not None:
             if not isinstance(arguments, dict):
@@ -100,8 +111,8 @@ class EvaluationPlaneHandler(BaseHandler):
         )
 
         print(f"function to evaluate={function_to_evaluate}")
-        arrow_data = self.get_arrow_data('input.csv')
-        arguments['_arg1'] = arrow_data
+        # arrow_data = self.get_arrow_data('input.csv')
+        # arguments['_arg1'] = arrow_data
 
         print(f"arguments={arguments}")
         # print(f"input arrow data={arrow_data}")
@@ -119,13 +130,19 @@ class EvaluationPlaneHandler(BaseHandler):
             return
 
         if result is not None:
-            # print('result', type(result))
-            self.upload_arrow_data(result, "output.csv")
-
-            # if isinstance(result, pandas.DataFrame):
-            #     result = result.to_json()
-            # self.write(simplejson.dumps(result, ignore_nan=True))
-            self.write("null")
+            if "dataPath" in body:
+                # arrow flight scenario
+                output_data_id = str(uuid.uuid4())
+                self.upload_arrow_data(result, output_data_id, {
+                    'removeOnDelete': 'True',
+                    'linkedIDs': body['dataPath']
+                })
+                result = { 'outputDataPath': output_data_id }
+                self.logger.log(logging.WARN, f'outputDataPath={output_data_id}')
+            else:
+                if isinstance(result, pandas.DataFrame):
+                    result = result.to_dict(orient='list')
+            self.write(simplejson.dumps(result, ignore_nan=True))
         else:
             self.write("null")
         self.finish()
@@ -139,14 +156,14 @@ class EvaluationPlaneHandler(BaseHandler):
         client = pyarrow.flight.FlightClient(f"{scheme}://{host}:{port}", **connection_args)
         return arrow_client.get_flight_by_path(filename, client)
 
-    def upload_arrow_data(self, data, filename):
+    def upload_arrow_data(self, data, filename, metadata):
         scheme = "grpc+tcp"
         host = "localhost"
         port = 5005
 
         connection_args = {}
         client = pyarrow.flight.FlightClient(f"{scheme}://{host}:{port}", **connection_args)
-        return arrow_client.upload_data(client, data, filename)
+        return arrow_client.upload_data(client, data, filename, metadata)
 
     @gen.coroutine
     def post(self):
@@ -158,6 +175,8 @@ class EvaluationPlaneHandler(BaseHandler):
         try:
             yield self._post_impl()
         except Exception as e:
+            import traceback
+            print(traceback.format_exc())
             err_msg = f"{e.__class__.__name__} : {str(e)}"
             if err_msg != "KeyError : 'response'":
                 err_msg = format_exception(e, "POST /evaluate")

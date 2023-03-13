@@ -83,8 +83,10 @@ def push_data(args, client, connection_args={}):
     writer.close()
 
 
-def upload_data(client, data, filename):
+def upload_data(client, data, filename, metadata = None):
     my_table = pyarrow.table(data)
+    if metadata is not None:
+        my_table.schema.with_metadata(metadata)
     print('Table rows=', str(len(my_table)))
     print("Uploading", data.head())
     writer, _ = client.do_put(

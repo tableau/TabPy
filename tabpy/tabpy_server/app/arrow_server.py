@@ -19,12 +19,15 @@
 
 import argparse
 import ast
+import logging
 import threading
 import time
+import uuid
 
 import pyarrow
 import pyarrow.flight
 
+logger = logging.getLogger(__name__)
 
 class FlightServer(pyarrow.flight.FlightServerBase):
     def __init__(self, host="localhost", location=None,
@@ -74,42 +77,58 @@ class FlightServer(pyarrow.flight.FlightServerBase):
 
     def get_flight_info(self, context, descriptor):
         key = FlightServer.descriptor_to_key(descriptor)
+        logger.info(f"get_flight_info: key={key}")
         if key in self.flights:
             table = self.flights[key]
             return self._make_flight_info(key, descriptor, table)
         raise KeyError('Flight not found.')
 
-    def do_put(self, context, descriptor, reader, writer):
+    def do_put(
+        self, context, descriptor, reader, writer
+    ):
         key = FlightServer.descriptor_to_key(descriptor)
-        print(key)
+        logger.info(f"do_put: key={key}")
         self.flights[key] = reader.read_all()
-        print(self.flights[key])
 
     def do_get(self, context, ticket):
+        logger.info(f"do_get: ticket={ticket}")
         key = ast.literal_eval(ticket.ticket.decode())
         if key not in self.flights:
+            logger.warn(f"do_get: key={key} not found")
             return None
+        logger.info(f"do_get: returning key={key}")
         return pyarrow.flight.RecordBatchStream(self.flights[key])
 
     def list_actions(self, context):
-        return [
+        return iter([
+            ("getUniquePath", "Get a unique FileDescriptor path to put data to"),
             ("clear", "Clear the stored flights."),
             ("shutdown", "Shut down this server."),
-        ]
+        ])
 
     def do_action(self, context, action):
-        if action.type == "clear":
-            raise NotImplementedError(
-                "{} is not implemented.".format(action.type))
+        logger.info(f"do_action action={action.type}")
+        if action.type == "getUniquePath":
+            uniqueID = str(uuid.uuid4())
+            logger.info(f"getUniquePath id={uniqueID}")
+            yield uniqueID.encode('utf-8')
+        elif action.type == "clear":
+            self._clear()
+            # raise NotImplementedError(
+            #     "{} is not implemented.".format(action.type))
         elif action.type == "healthcheck":
             pass
         elif action.type == "shutdown":
+            self._clear()
             yield pyarrow.flight.Result(pyarrow.py_buffer(b'Shutdown!'))
             # Shut down on background thread to avoid blocking current
             # request
             threading.Thread(target=self._shutdown).start()
         else:
             raise KeyError("Unknown action {!r}".format(action.type))
+
+    def _clear(self):
+        self.flights = {}
 
     def _shutdown(self):
         """Shut down after a delay."""
@@ -129,6 +148,7 @@ def start():
                         help="Enable transport-level security")
     parser.add_argument("--verify_client", type=bool, default=False,
                         help="enable mutual TLS and verify the client if True")
+    parser.add_argument("--config", type=str, default="", help="should be ignored")  # TODO: implement config
 
     args = parser.parse_args()
     tls_certificates = []
