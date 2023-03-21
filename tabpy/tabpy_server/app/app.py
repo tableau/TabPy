@@ -25,10 +25,10 @@ from tabpy.tabpy_server.handlers import (
     UploadDestinationHandler,
 )
 import tornado
-
+import tabpy.tabpy_server.app.arrow_server as pa
+import _thread
 
 logger = logging.getLogger(__name__)
-
 
 def _init_asyncio_patch():
     """
@@ -111,6 +111,17 @@ class TabPyApp:
             "Web service listening on port "
             f"{str(self.settings[SettingsParameters.Port])}"
         )
+
+        # Define a function for the thread
+        def start_pyarrow():
+            pa.start()
+
+        try:
+            _thread.start_new_thread(start_pyarrow, ())
+        except Exception as e:
+            print(e)
+            print("Error: unable to start pyarrow server")
+
         tornado.ioloop.IOLoop.instance().start()
 
     def _create_tornado_web_app(self):
