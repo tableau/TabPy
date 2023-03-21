@@ -39,9 +39,9 @@ def setup_package():
             "Intended Audience :: Developers",
             "Intended Audience :: Science/Research",
             "License :: OSI Approved :: MIT License",
-            "Programming Language :: Python :: 3.6",
             "Programming Language :: Python :: 3.7",
             "Programming Language :: Python :: 3.8",
+            "Programming Language :: Python :: 3.9",
             "Topic :: Scientific/Engineering",
             "Topic :: Scientific/Engineering :: Information Analysis",
             "Operating System :: Microsoft :: Windows",
@@ -60,7 +60,7 @@ def setup_package():
                 "tabpy_server/common/default.conf",
             ]
         },
-        python_requires=">=3.6",
+        python_requires=">=3.7",
         license="MIT",
         # Note: many of these required packages are included in base python
         # but are listed here because different linux distros use custom
@@ -85,7 +85,7 @@ def setup_package():
             "requests",
             "scipy",
             "simplejson",
-            "sklearn",
+            "scikit-learn",
             "textblob",
             "tornado",
             "twisted",

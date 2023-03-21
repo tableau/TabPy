@@ -1,5 +1,34 @@
 # Changelog
 
+## v2.6.0
+
+### Improvements
+
+- Fixes deprecation of sklearn in favor of current package name
+scikit-learn
+
+## v2.5.1
+
+### Improvements
+
+- Gzip encoded requests are now supported by default. This can be disabled in
+the config file.
+- The INFO method will return the enabled status of features.
+
+## v2.5.0
+
+### Improvements
+
+- A server with Adhoc Disabled Flag on with the wrong credentials will now
+  return wrong credentials error instead of telling the user
+  that Adhoc Scripts are not allowed on this server.
+- Added documentation for how to run TabPy projects with local changes
+
+### Breaking changes
+
+- Discontinued support for Python 3.6
+- Added support for Python 3.9
+
 ## v2.4.0
 
 ### Improvements

@@ -426,7 +426,7 @@ Response:
 
 The other core functionality aside from deploying and querying methods as endpoints
 is the ad-hoc execution of Python code, called `evaluate`. Evaluate does not
-have a Python API in `tabpy-tools`, only a raw [REST interface](server-rest.md#httppost-evaluate)
+have a Python API in `tabpy-tools`, only a raw [REST interface](server-rest.md)
 that other client bindings can easily implement. Tableau connects to TabPy
 using REST `Evaluate`.
 
