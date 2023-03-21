@@ -1,4 +1,7 @@
-from tabpy.tabpy_server.handlers import BaseHandler
+import pandas
+import pyarrow
+
+from tabpy.tabpy_server.handlers import BaseHandler, arrow_client
 import json
 import simplejson
 import logging
@@ -7,7 +10,6 @@ import requests
 from tornado import gen
 from datetime import timedelta
 from tabpy.tabpy_server.handlers.util import AuthErrorStates
-
 
 class RestrictedTabPy:
     def __init__(self, protocol, port, logger, timeout, headers):
@@ -100,8 +102,16 @@ class EvaluationPlaneHandler(BaseHandler):
             logging.INFO, f"function to evaluate={function_to_evaluate}"
         )
 
+        print(f"function to evaluate={function_to_evaluate}")
+        arrow_data = self.get_arrow_data('input.csv')
+        arguments['_arg1'] = arrow_data
+
+        print(f"arguments={arguments}")
+        # print(f"input arrow data={arrow_data}")
+
         try:
             result = yield self._call_subprocess(function_to_evaluate, arguments)
+            # result = yield self._call_subprocess(function_to_evaluate, arrowData)
         except (
             gen.TimeoutError,
             requests.exceptions.ConnectTimeout,
@@ -112,10 +122,34 @@ class EvaluationPlaneHandler(BaseHandler):
             return
 
         if result is not None:
-            self.write(simplejson.dumps(result, ignore_nan=True))
+            # print('result', type(result))
+            self.upload_arrow_data(result, "output.csv")
+
+            # if isinstance(result, pandas.DataFrame):
+            #     result = result.to_json()
+            # self.write(simplejson.dumps(result, ignore_nan=True))
+            self.write("null")
         else:
             self.write("null")
         self.finish()
+
+    def get_arrow_data(self, filename):
+        scheme = "grpc+tcp"
+        host = "localhost"
+        port = 5005
+
+        connection_args = {}
+        client = pyarrow.flight.FlightClient(f"{scheme}://{host}:{port}", **connection_args)
+        return arrow_client.get_flight_by_path(filename, client)
+
+    def upload_arrow_data(self, data, filename):
+        scheme = "grpc+tcp"
+        host = "localhost"
+        port = 5005
+
+        connection_args = {}
+        client = pyarrow.flight.FlightClient(f"{scheme}://{host}:{port}", **connection_args)
+        return arrow_client.upload_data(client, data, filename)
 
     @gen.coroutine
     def post(self):
