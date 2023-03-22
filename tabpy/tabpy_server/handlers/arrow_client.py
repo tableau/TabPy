@@ -161,7 +161,7 @@ def main():
     commands = {
         'list': list_flights,
         'do': do_action,
-        'get': get_flight,
+        'get': get_flight_by_path,
         'put': push_data,
     }
     host, port = args.host.split(':')
