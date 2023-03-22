@@ -25,10 +25,10 @@ from tabpy.tabpy_server.handlers import (
     UploadDestinationHandler,
 )
 import tornado
-
+import tabpy.tabpy_server.app.arrow_server as pa
+import _thread
 
 logger = logging.getLogger(__name__)
-
 
 def _init_asyncio_patch():
     """
@@ -96,21 +96,28 @@ class TabPyApp:
             logger.critical(msg)
             raise RuntimeError(msg)
 
-        settings = {}
-        if self.settings[SettingsParameters.GzipEnabled] is True:
-            settings["decompress_request"] = True
         application.listen(
             self.settings[SettingsParameters.Port],
             ssl_options=ssl_options,
             max_buffer_size=max_request_size,
             max_body_size=max_request_size,
-            **settings,
         )
 
         logger.info(
             "Web service listening on port "
             f"{str(self.settings[SettingsParameters.Port])}"
         )
+
+        # Define a function for the thread
+        def start_pyarrow():
+            pa.start()
+
+        try:
+            _thread.start_new_thread(start_pyarrow, ())
+        except Exception as e:
+            print(e)
+            print("Error: unable to start pyarrow server")
+
         tornado.ioloop.IOLoop.instance().start()
 
     def _create_tornado_web_app(self):
@@ -285,8 +292,6 @@ class TabPyApp:
              "false", None),
             (SettingsParameters.MaxRequestSizeInMb, ConfigParameters.TABPY_MAX_REQUEST_SIZE_MB,
              100, None),
-            (SettingsParameters.GzipEnabled, ConfigParameters.TABPY_GZIP_ENABLE,
-             True, parser.getboolean),
         ]
 
         for setting, parameter, default_val, parse_function in settings_parameters:
@@ -423,7 +428,6 @@ class TabPyApp:
             }
 
         features["evaluate_enabled"] = self.settings[SettingsParameters.EvaluateEnabled]
-        features["gzip_enabled"] = self.settings[SettingsParameters.GzipEnabled]
         return features
 
     def _build_tabpy_state(self):
