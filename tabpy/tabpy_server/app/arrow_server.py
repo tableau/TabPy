@@ -15,187 +15,159 @@
 # specific language governing permissions and limitations
 # under the License.
 
-"""An example Flight CLI client."""
+"""An example Flight Python server."""
 
 import argparse
-import sys
+import ast
+import logging
+import threading
+import time
+import uuid
 
 import pyarrow
 import pyarrow.flight
-import pyarrow.csv as csv
 
+logger = logging.getLogger(__name__)
 
-def list_flights(args, client, connection_args={}):
-    print('Flights\n=======')
-    for flight in client.list_flights():
-        descriptor = flight.descriptor
-        if descriptor.descriptor_type == pyarrow.flight.DescriptorType.PATH:
-            print("Path:", descriptor.path)
-        elif descriptor.descriptor_type == pyarrow.flight.DescriptorType.CMD:
-            print("Command:", descriptor.command)
+class FlightServer(pyarrow.flight.FlightServerBase):
+    def __init__(self, host="localhost", location=None,
+                 tls_certificates=None, verify_client=False,
+                 root_certificates=None, auth_handler=None):
+        super(FlightServer, self).__init__(
+            location, auth_handler, tls_certificates, verify_client,
+            root_certificates)
+        self.flights = {}
+        self.host = host
+        self.tls_certificates = tls_certificates
+
+    @classmethod
+    def descriptor_to_key(self, descriptor):
+        return (descriptor.descriptor_type.value, descriptor.command,
+                tuple(descriptor.path or tuple()))
+
+    def _make_flight_info(self, key, descriptor, table):
+        if self.tls_certificates:
+            location = pyarrow.flight.Location.for_grpc_tls(
+                self.host, self.port)
         else:
-            print("Unknown descriptor type")
+            location = pyarrow.flight.Location.for_grpc_tcp(
+                self.host, self.port)
+        endpoints = [pyarrow.flight.FlightEndpoint(repr(key), [location]), ]
 
-        print("Total records:", end=" ")
-        if flight.total_records >= 0:
-            print(flight.total_records)
+        mock_sink = pyarrow.MockOutputStream()
+        stream_writer = pyarrow.RecordBatchStreamWriter(
+            mock_sink, table.schema)
+        stream_writer.write_table(table)
+        stream_writer.close()
+        data_size = mock_sink.size()
+
+        return pyarrow.flight.FlightInfo(table.schema,
+                                         descriptor, endpoints,
+                                         table.num_rows, data_size)
+
+    def list_flights(self, context, criteria):
+        for key, table in self.flights.items():
+            if key[1] is not None:
+                descriptor = \
+                    pyarrow.flight.FlightDescriptor.for_command(key[1])
+            else:
+                descriptor = pyarrow.flight.FlightDescriptor.for_path(*key[2])
+
+            yield self._make_flight_info(key, descriptor, table)
+
+    def get_flight_info(self, context, descriptor):
+        key = FlightServer.descriptor_to_key(descriptor)
+        logger.info(f"get_flight_info: key={key}")
+        if key in self.flights:
+            table = self.flights[key]
+            return self._make_flight_info(key, descriptor, table)
+        raise KeyError('Flight not found.')
+
+    def do_put(self, context, descriptor, reader, writer):
+        key = FlightServer.descriptor_to_key(descriptor)
+        logger.info(f"do_put: key={key}")
+        self.flights[key] = reader.read_all()
+
+    def do_get(self, context, ticket):
+        logger.info(f"do_get: ticket={ticket}")
+        key = ast.literal_eval(ticket.ticket.decode())
+        if key not in self.flights:
+            logger.warn(f"do_get: key={key} not found")
+            return None
+        logger.info(f"do_get: returning key={key}")
+        return pyarrow.flight.RecordBatchStream(self.flights[key])
+
+    def list_actions(self, context):
+        return iter([
+            ("getUniquePath", "Get a unique FileDescriptor path to put data to."),
+            ("clear", "Clear the stored flights."),
+            ("shutdown", "Shut down this server."),
+        ])
+
+    def do_action(self, context, action):
+        logger.info(f"do_action: action={action.type}")
+        if action.type == "getUniquePath":
+            uniqueId = str(uuid.uuid4())
+            logger.info(f"getUniquePath id={uniqueId}")
+            yield uniqueId.encode('utf-8')
+        elif action.type == "clear":
+            self._clear()
+            # raise NotImplementedError(
+            #     "{} is not implemented.".format(action.type))
+        elif action.type == "healthcheck":
+            pass
+        elif action.type == "shutdown":
+            self._clear()
+            yield pyarrow.flight.Result(pyarrow.py_buffer(b'Shutdown!'))
+            # Shut down on background thread to avoid blocking current
+            # request
+            threading.Thread(target=self._shutdown).start()
         else:
-            print("Unknown")
+            raise KeyError("Unknown action {!r}".format(action.type))
 
-        print("Total bytes:", end=" ")
-        if flight.total_bytes >= 0:
-            print(flight.total_bytes)
-        else:
-            print("Unknown")
+    def _clear(self):
+        """Clear the stored flights."""
+        self.flights = {}
 
-        print("Number of endpoints:", len(flight.endpoints))
-        print("Schema:")
-        print(flight.schema)
-        print('---')
-
-    print('\nActions\n=======')
-    for action in client.list_actions():
-        print("Type:", action.type)
-        print("Description:", action.description)
-        print('---')
+    def _shutdown(self):
+        """Shut down after a delay."""
+        print("Server is shutting down...")
+        time.sleep(2)
+        self.shutdown()
 
 
-def do_action(args, client, connection_args={}):
-    try:
-        buf = pyarrow.allocate_buffer(0)
-        action = pyarrow.flight.Action(args.action_type, buf)
-        print('Running action', args.action_type)
-        for result in client.do_action(action):
-            print("Got result", result.body.to_pybytes())
-    except pyarrow.lib.ArrowIOError as e:
-        print("Error calling action:", e)
-
-
-def push_data(args, client, connection_args={}):
-    print('File Name:', args.file)
-    my_table = csv.read_csv(args.file)
-    print('Table rows=', str(len(my_table)))
-    df = my_table.to_pandas()
-    print(df.head())
-    writer, _ = client.do_put(
-        pyarrow.flight.FlightDescriptor.for_path(args.file), my_table.schema)
-    writer.write_table(my_table)
-    writer.close()
-
-
-def upload_data(client, data, filename, metadata=None):
-    my_table = pyarrow.table(data)
-    if metadata is not None:
-        my_table.schema.with_metadata(metadata)
-    print('Table rows=', str(len(my_table)))
-    print("Uploading", data.head())
-    writer, _ = client.do_put(
-        pyarrow.flight.FlightDescriptor.for_path(filename), my_table.schema)
-    writer.write_table(my_table)
-    writer.close()
-
-
-def get_flight_by_path(path, client, connection_args={}):
-    descriptor = pyarrow.flight.FlightDescriptor.for_path(path)
-
-    info = client.get_flight_info(descriptor)
-    for endpoint in info.endpoints:
-        print('Ticket:', endpoint.ticket)
-        for location in endpoint.locations:
-            print(location)
-            get_client = pyarrow.flight.FlightClient(location,
-                                                     **connection_args)
-            reader = get_client.do_get(endpoint.ticket)
-            df = reader.read_pandas()
-            print(df)
-            return df
-    print("no data found for get")
-    return ''
-
-def _add_common_arguments(parser):
-    parser.add_argument('--tls', action='store_true',
-                        help='Enable transport-level security')
-    parser.add_argument('--tls-roots', default=None,
-                        help='Path to trusted TLS certificate(s)')
-    parser.add_argument("--mtls", nargs=2, default=None,
+def start():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--host", type=str, default="localhost",
+                        help="Address or hostname to listen on")
+    parser.add_argument("--port", type=int, default=5005,
+                        help="Port number to listen on")
+    parser.add_argument("--tls", nargs=2, default=None,
                         metavar=('CERTFILE', 'KEYFILE'),
                         help="Enable transport-level security")
-    parser.add_argument('host', type=str,
-                        help="Address or hostname to connect to")
-
-
-def main():
-    parser = argparse.ArgumentParser()
-    subcommands = parser.add_subparsers()
-
-    cmd_list = subcommands.add_parser('list')
-    cmd_list.set_defaults(action='list')
-    _add_common_arguments(cmd_list)
-    cmd_list.add_argument('-l', '--list', action='store_true',
-                          help="Print more details.")
-
-    cmd_do = subcommands.add_parser('do')
-    cmd_do.set_defaults(action='do')
-    _add_common_arguments(cmd_do)
-    cmd_do.add_argument('action_type', type=str,
-                        help="The action type to run.")
-
-    cmd_put = subcommands.add_parser('put')
-    cmd_put.set_defaults(action='put')
-    _add_common_arguments(cmd_put)
-    cmd_put.add_argument('file', type=str,
-                         help="CSV file to upload.")
-
-    cmd_get = subcommands.add_parser('get')
-    cmd_get.set_defaults(action='get')
-    _add_common_arguments(cmd_get)
-    cmd_get_descriptor = cmd_get.add_mutually_exclusive_group(required=True)
-    cmd_get_descriptor.add_argument('-p', '--path', type=str, action='append',
-                                    help="The path for the descriptor.")
-    cmd_get_descriptor.add_argument('-c', '--command', type=str,
-                                    help="The command for the descriptor.")
+    parser.add_argument("--verify_client", type=bool, default=False,
+                        help="enable mutual TLS and verify the client if True")
+    parser.add_argument("--config", type=str, default="", help="should be ignored") # TODO: implement config
 
     args = parser.parse_args()
-    if not hasattr(args, 'action'):
-        parser.print_help()
-        sys.exit(1)
-
-    commands = {
-        'list': list_flights,
-        'do': do_action,
-        'get': get_flight_by_path,
-        'put': push_data,
-    }
-    host, port = args.host.split(':')
-    port = int(port)
+    tls_certificates = []
     scheme = "grpc+tcp"
-    connection_args = {}
     if args.tls:
         scheme = "grpc+tls"
-        if args.tls_roots:
-            with open(args.tls_roots, "rb") as root_certs:
-                connection_args["tls_root_certs"] = root_certs.read()
-    if args.mtls:
-        with open(args.mtls[0], "rb") as cert_file:
+        with open(args.tls[0], "rb") as cert_file:
             tls_cert_chain = cert_file.read()
-        with open(args.mtls[1], "rb") as key_file:
+        with open(args.tls[1], "rb") as key_file:
             tls_private_key = key_file.read()
-        connection_args["cert_chain"] = tls_cert_chain
-        connection_args["private_key"] = tls_private_key
-    client = pyarrow.flight.FlightClient(f"{scheme}://{host}:{port}",
-                                         **connection_args)
-    while True:
-        try:
-            action = pyarrow.flight.Action("healthcheck", b"")
-            options = pyarrow.flight.FlightCallOptions(timeout=1)
-            list(client.do_action(action, options=options))
-            break
-        except pyarrow.ArrowIOError as e:
-            if "Deadline" in str(e):
-                print("Server is not ready, waiting...")
-    commands[args.action](args, client, connection_args)
+        tls_certificates.append((tls_cert_chain, tls_private_key))
 
+    location = "{}://{}:{}".format(scheme, args.host, args.port)
+
+    server = FlightServer(args.host, location,
+                          tls_certificates=tls_certificates,
+                          verify_client=args.verify_client)
+    print("Serving on", location)
+    server.serve()
 
 
 if __name__ == '__main__':
-    main()
+    start()
