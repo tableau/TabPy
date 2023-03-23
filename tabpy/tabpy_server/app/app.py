@@ -97,7 +97,7 @@ class TabPyApp:
             raise RuntimeError(msg)
 
         settings = {}
-        if self.settings[SettingsParameters.GzipEnabled]:
+        if self.settings[SettingsParameters.GzipEnabled] is True:
             settings["decompress_request"] = True
 
         application.listen(
@@ -106,7 +106,7 @@ class TabPyApp:
             max_buffer_size=max_request_size,
             max_body_size=max_request_size,
             **settings,
-        )
+        ) 
 
         logger.info(
             "Web service listening on port "
@@ -297,7 +297,7 @@ class TabPyApp:
              "false", None),
             (SettingsParameters.MaxRequestSizeInMb, ConfigParameters.TABPY_MAX_REQUEST_SIZE_MB,
              100, None),
-            (SettingsParameters.Parameters.GzipEnabled, ConfigParameters.TABPY_GZIP_ENABLED,
+            (SettingsParameters.GzipEnabled, ConfigParameters.TABPY_GZIP_ENABLED,
              True, parser.getboolean),
         ]
 
