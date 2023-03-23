@@ -27,7 +27,7 @@ import uuid
 import pyarrow
 import pyarrow.flight
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('__main__.' + __name__)
 
 class FlightServer(pyarrow.flight.FlightServerBase):
     def __init__(self, host="localhost", location=None,
@@ -95,7 +95,8 @@ class FlightServer(pyarrow.flight.FlightServerBase):
             logger.warn(f"do_get: key={key} not found")
             return None
         logger.info(f"do_get: returning key={key}")
-        return pyarrow.flight.RecordBatchStream(self.flights[key])
+        flight = self.flights.pop(key)
+        return pyarrow.flight.RecordBatchStream(flight)
 
     def list_actions(self, context):
         return iter([
@@ -131,7 +132,7 @@ class FlightServer(pyarrow.flight.FlightServerBase):
 
     def _shutdown(self):
         """Shut down after a delay."""
-        print("Server is shutting down...")
+        logger.info("Server is shutting down...")
         time.sleep(2)
         self.shutdown()
 
@@ -140,7 +141,7 @@ def start():
     parser = argparse.ArgumentParser()
     parser.add_argument("--host", type=str, default="localhost",
                         help="Address or hostname to listen on")
-    parser.add_argument("--port", type=int, default=5005,
+    parser.add_argument("--port", type=int, default=13622,
                         help="Port number to listen on")
     parser.add_argument("--tls", nargs=2, default=None,
                         metavar=('CERTFILE', 'KEYFILE'),
@@ -165,7 +166,7 @@ def start():
     server = FlightServer(args.host, location,
                           tls_certificates=tls_certificates,
                           verify_client=args.verify_client)
-    print("Serving on", location)
+    logger.info(f"Serving on {location}")
     server.serve()
 
 

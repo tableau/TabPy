@@ -66,7 +66,7 @@ class EvaluationPlaneHandler(BaseHandler):
     @gen.coroutine
     def _post_impl(self):
         body = json.loads(self.request.body.decode("utf-8"))
-        self.logger.log(logging.DEBUG, f"Processing POST request '{body}'...")
+        self.logger.log(logging.DEBUG, f"Processing POST request...")
         if "script" not in body:
             self.error_out(400, "Script is empty.")
             return
@@ -109,16 +109,8 @@ class EvaluationPlaneHandler(BaseHandler):
             logging.INFO, f"function to evaluate={function_to_evaluate}"
         )
 
-        print(f"function to evaluate={function_to_evaluate}")
-        # arrow_data = self.get_arrow_data('input.csv')
-        # arguments['_arg1'] = arrow_data
-
-        print(f"arguments={arguments}")
-        # print(f"input arrow data={arrow_data}")
-
         try:
             result = yield self._call_subprocess(function_to_evaluate, arguments)
-            # result = yield self._call_subprocess(function_to_evaluate, arrowData)
         except (
             gen.TimeoutError,
             requests.exceptions.ConnectTimeout,
@@ -149,7 +141,7 @@ class EvaluationPlaneHandler(BaseHandler):
     def get_arrow_data(self, filename):
         scheme = "grpc+tcp"
         host = "localhost"
-        port = 5005
+        port = 13622
 
         connection_args = {}
         client = pyarrow.flight.FlightClient(f"{scheme}://{host}:{port}", **connection_args)
@@ -158,7 +150,7 @@ class EvaluationPlaneHandler(BaseHandler):
     def upload_arrow_data(self, data, filename, metadata):
         scheme = "grpc+tcp"
         host = "localhost"
-        port = 5005
+        port = 13622
 
         connection_args = {}
         client = pyarrow.flight.FlightClient(f"{scheme}://{host}:{port}", **connection_args)
