@@ -297,7 +297,7 @@ class TabPyApp:
              "false", None),
             (SettingsParameters.MaxRequestSizeInMb, ConfigParameters.TABPY_MAX_REQUEST_SIZE_MB,
              100, None),
-            (SettingsParameters.GzipEnabled, ConfigParameters.TABPY_GZIP_ENABLED,
+            (SettingsParameters.GzipEnabled, ConfigParameters.TABPY_GZIP_ENABLE,
              True, parser.getboolean),
         ]
 
