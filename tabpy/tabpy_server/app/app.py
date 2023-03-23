@@ -96,11 +96,16 @@ class TabPyApp:
             logger.critical(msg)
             raise RuntimeError(msg)
 
+        settings = {}
+        if self.settings[SettingsParameters.GzipEnabled]:
+            settings["decompress_request"] = True
+
         application.listen(
             self.settings[SettingsParameters.Port],
             ssl_options=ssl_options,
             max_buffer_size=max_request_size,
             max_body_size=max_request_size,
+            **settings,
         )
 
         logger.info(
@@ -292,6 +297,8 @@ class TabPyApp:
              "false", None),
             (SettingsParameters.MaxRequestSizeInMb, ConfigParameters.TABPY_MAX_REQUEST_SIZE_MB,
              100, None),
+            (SettingsParameters.Parameters.GzipEnabled, ConfigParameters.TABPY_GZIP_ENABLED,
+             True, parser.getboolean),
         ]
 
         for setting, parameter, default_val, parse_function in settings_parameters:
@@ -428,6 +435,7 @@ class TabPyApp:
             }
 
         features["evaluate_enabled"] = self.settings[SettingsParameters.EvaluateEnabled]
+        features["gzip_enabled"] = self.settings[SettingsParameters.GzipEnabled]
         return features
 
     def _build_tabpy_state(self):
