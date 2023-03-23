@@ -25,10 +25,10 @@ from tabpy.tabpy_server.handlers import (
     UploadDestinationHandler,
 )
 import tornado
-
+import tabpy.tabpy_server.app.arrow_server as pa
+import _thread
 
 logger = logging.getLogger(__name__)
-
 
 def _init_asyncio_patch():
     """
@@ -99,18 +99,30 @@ class TabPyApp:
         settings = {}
         if self.settings[SettingsParameters.GzipEnabled] is True:
             settings["decompress_request"] = True
+
         application.listen(
             self.settings[SettingsParameters.Port],
             ssl_options=ssl_options,
             max_buffer_size=max_request_size,
             max_body_size=max_request_size,
             **settings,
-        )
+        ) 
 
         logger.info(
             "Web service listening on port "
             f"{str(self.settings[SettingsParameters.Port])}"
         )
+
+        # Define a function for the thread
+        def start_pyarrow():
+            pa.start()
+
+        try:
+            _thread.start_new_thread(start_pyarrow, ())
+        except Exception as e:
+            print(e)
+            print("Error: unable to start pyarrow server")
+
         tornado.ioloop.IOLoop.instance().start()
 
     def _create_tornado_web_app(self):
