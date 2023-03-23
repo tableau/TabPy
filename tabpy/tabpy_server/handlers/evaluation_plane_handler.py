@@ -43,6 +43,9 @@ class EvaluationPlaneDisabledHandler(BaseHandler):
 
     @gen.coroutine
     def post(self):
+        if self.should_fail_with_auth_error() != AuthErrorStates.NONE:
+            self.fail_with_auth_error()
+            return
         self.error_out(404, "Ad-hoc scripts have been disabled on this analytics extension, please contact your "
                             "administrator.")
 
