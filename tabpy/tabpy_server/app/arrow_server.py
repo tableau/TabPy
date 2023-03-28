@@ -27,6 +27,9 @@ import uuid
 import pyarrow
 import pyarrow.flight
 
+from tabpy.tabpy_server.app.app_parameters import SettingsParameters
+
+
 logger = logging.getLogger('__main__.' + __name__)
 
 class FlightServer(pyarrow.flight.FlightServerBase):
@@ -136,32 +139,39 @@ class FlightServer(pyarrow.flight.FlightServerBase):
         time.sleep(2)
         self.shutdown()
 
-
-def start():
+def _parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--host", type=str, default="localhost",
                         help="Address or hostname to listen on")
-    parser.add_argument("--port", type=int, default=13622,
-                        help="Port number to listen on")
     parser.add_argument("--tls", nargs=2, default=None,
                         metavar=('CERTFILE', 'KEYFILE'),
                         help="Enable transport-level security")
     parser.add_argument("--verify_client", type=bool, default=False,
                         help="enable mutual TLS and verify the client if True")
-    parser.add_argument("--config", type=str, default="", help="should be ignored") # TODO: implement config
+    parser.add_argument("--config", type=str, default=None, help="should be ignored") # TODO: implement config
 
-    args = parser.parse_args()
+    return parser.parse_args()
+
+def _get_tls_certificates(args):
     tls_certificates = []
+    with open(args.tls[0], "rb") as cert_file:
+        tls_cert_chain = cert_file.read()
+    with open(args.tls[1], "rb") as key_file:
+        tls_private_key = key_file.read()
+    tls_certificates.append((tls_cert_chain, tls_private_key))
+    return tls_certificates
+
+def start(config):
+    args = _parse_args()
+
+    tls_certificates = None
     scheme = "grpc+tcp"
     if args.tls:
         scheme = "grpc+tls"
-        with open(args.tls[0], "rb") as cert_file:
-            tls_cert_chain = cert_file.read()
-        with open(args.tls[1], "rb") as key_file:
-            tls_private_key = key_file.read()
-        tls_certificates.append((tls_cert_chain, tls_private_key))
+        tls_certificates = _get_tls_certificates(args)
 
-    location = "{}://{}:{}".format(scheme, args.host, args.port)
+    port = config.get(SettingsParameters.ArrowFlightPort)
+    location = "{}://{}:{}".format(scheme, args.host, port)
 
     server = FlightServer(args.host, location,
                           tls_certificates=tls_certificates,
