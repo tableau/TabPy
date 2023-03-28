@@ -18,6 +18,9 @@ class ConfigParameters:
     TABPY_EVALUATE_TIMEOUT = "TABPY_EVALUATE_TIMEOUT"
     TABPY_GZIP_ENABLE = "TABPY_GZIP_ENABLE"
 
+    # Arrow specific settings
+    TABPY_ARROWFLIGHT_PORT = "TABPY_ARROWFLIGHT_PORT"
+
 
 class SettingsParameters:
     """
@@ -38,3 +41,6 @@ class SettingsParameters:
     EvaluateTimeout = "evaluate_timeout"
     EvaluateEnabled = "evaluate_enabled"
     GzipEnabled = "gzip_enabled"
+
+    # Arrow specific settings
+    ArrowFlightPort = "arrowflight_port"
