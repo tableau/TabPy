@@ -115,7 +115,7 @@ class TabPyApp:
 
         # Define a function for the thread
         def start_pyarrow():
-            pa.start()
+            pa.start(self.settings)
 
         try:
             _thread.start_new_thread(start_pyarrow, ())
@@ -299,6 +299,7 @@ class TabPyApp:
              100, None),
             (SettingsParameters.GzipEnabled, ConfigParameters.TABPY_GZIP_ENABLE,
              True, parser.getboolean),
+            (SettingsParameters.ArrowFlightPort, ConfigParameters.TABPY_ARROWFLIGHT_PORT, 13622, parser.getint),
         ]
 
         for setting, parameter, default_val, parse_function in settings_parameters:

@@ -95,6 +95,9 @@ at [`logging.config` documentation page](https://docs.python.org/3.6/library/log
   through the `/query` method, or using the `tabpy.query(...)` syntax with
   the `/evaluate` method.
 - `TABPY_GZIP_ENABLE` - Enable Gzip support for requests. Enabled by default.
+- `TABPY_ARROWFLIGHT_PORT` - port for
+  [Arrow Flight](https://arrow.apache.org/docs/format/Flight.html)
+  connection used in streaming mode.
 
 ### Configuration File Example
 
