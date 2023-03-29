@@ -138,23 +138,21 @@ class EvaluationPlaneHandler(BaseHandler):
         else:
             self.write("null")
         self.finish()
-
-    def get_arrow_data(self, filename):
+    
+    def _get_flight_client(self):
         scheme = "grpc+tcp"
         host = "localhost"
         port = self.settings[SettingsParameters.ArrowFlightPort]
 
         connection_args = {}
-        client = pyarrow.flight.FlightClient(f"{scheme}://{host}:{port}", **connection_args)
+        return pyarrow.flight.FlightClient(f"{scheme}://{host}:{port}", **connection_args)
+
+    def get_arrow_data(self, filename):
+        client = self._get_flight_client()
         return arrow_client.get_flight_by_path(filename, client)
 
     def upload_arrow_data(self, data, filename, metadata):
-        scheme = "grpc+tcp"
-        host = "localhost"
-        port = port = self.settings[SettingsParameters.ArrowFlightPort]
-
-        connection_args = {}
-        client = pyarrow.flight.FlightClient(f"{scheme}://{host}:{port}", **connection_args)
+        client = self._get_flight_client()
         return arrow_client.upload_data(client, data, filename, metadata)
 
     @gen.coroutine
