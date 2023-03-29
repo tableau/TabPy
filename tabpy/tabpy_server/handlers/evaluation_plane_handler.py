@@ -11,6 +11,7 @@ import requests
 from tornado import gen
 from datetime import timedelta
 from tabpy.tabpy_server.handlers.util import AuthErrorStates
+from tabpy.tabpy_server.app.app_parameters import SettingsParameters
 
 class RestrictedTabPy:
     def __init__(self, protocol, port, logger, timeout, headers):
@@ -141,7 +142,7 @@ class EvaluationPlaneHandler(BaseHandler):
     def get_arrow_data(self, filename):
         scheme = "grpc+tcp"
         host = "localhost"
-        port = 13622
+        port = self.settings[SettingsParameters.ArrowFlightPort]
 
         connection_args = {}
         client = pyarrow.flight.FlightClient(f"{scheme}://{host}:{port}", **connection_args)
@@ -150,7 +151,7 @@ class EvaluationPlaneHandler(BaseHandler):
     def upload_arrow_data(self, data, filename, metadata):
         scheme = "grpc+tcp"
         host = "localhost"
-        port = 13622
+        port = port = self.settings[SettingsParameters.ArrowFlightPort]
 
         connection_args = {}
         client = pyarrow.flight.FlightClient(f"{scheme}://{host}:{port}", **connection_args)
