@@ -95,7 +95,7 @@ def upload_data(client, data, filename, metadata=None):
     writer.close()
 
 
-def get_flight_by_path(path, client, connection_args={}):
+def get_flight_by_path(path, client, client_factory):
     descriptor = pyarrow.flight.FlightDescriptor.for_path(path)
 
     info = client.get_flight_info(descriptor)
@@ -103,8 +103,7 @@ def get_flight_by_path(path, client, connection_args={}):
         print('Ticket:', endpoint.ticket)
         for location in endpoint.locations:
             print(location)
-            get_client = pyarrow.flight.FlightClient(location,
-                                                     **connection_args)
+            get_client = client_factory()
             reader = get_client.do_get(endpoint.ticket)
             df = reader.read_pandas()
             print(df)

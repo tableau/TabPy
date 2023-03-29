@@ -27,7 +27,9 @@ import uuid
 import pyarrow
 import pyarrow.flight
 
-from tabpy.tabpy_server.app.app_parameters import SettingsParameters
+from tabpy.tabpy_server.app.app_parameters import SettingsParameters, ConfigParameters
+from tabpy.tabpy_server.app.util import parse_pwd_file
+from tabpy.tabpy_server.handlers import NoOpAuthHandler, BasicAuthServerMiddlewareFactory
 
 
 logger = logging.getLogger('__main__.' + __name__)
@@ -35,10 +37,10 @@ logger = logging.getLogger('__main__.' + __name__)
 class FlightServer(pyarrow.flight.FlightServerBase):
     def __init__(self, host="localhost", location=None,
                  tls_certificates=None, verify_client=False,
-                 root_certificates=None, auth_handler=None):
+                 root_certificates=None, auth_handler=None, middleware=None):
         super(FlightServer, self).__init__(
             location, auth_handler, tls_certificates, verify_client,
-            root_certificates)
+            root_certificates, middleware)
         self.flights = {}
         self.host = host
         self.tls_certificates = tls_certificates
@@ -173,9 +175,17 @@ def start(config):
     port = config.get(SettingsParameters.ArrowFlightPort)
     location = "{}://{}:{}".format(scheme, args.host, port)
 
+    auth_middleware = None
+    if "authentication" in config[SettingsParameters.ApiVersions]["v1"]["features"]:
+        success, creds = parse_pwd_file(config[ConfigParameters.TABPY_PWD_FILE])
+        auth_middleware = {
+            "basic": BasicAuthServerMiddlewareFactory(creds)
+        }
+
     server = FlightServer(args.host, location,
                           tls_certificates=tls_certificates,
-                          verify_client=args.verify_client)
+                          verify_client=args.verify_client, auth_handler=NoOpAuthHandler(),
+                          middleware=auth_middleware)
     logger.info(f"Serving on {location}")
     server.serve()
 

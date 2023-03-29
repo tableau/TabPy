@@ -10,6 +10,7 @@ from tabpy.tabpy_server.common.util import format_exception
 import requests
 from tornado import gen
 from datetime import timedelta
+from tabpy.tabpy_server.handlers.basic_auth_client_middleware_factory import BasicAuthClientMiddlewareFactory
 from tabpy.tabpy_server.handlers.util import AuthErrorStates
 from tabpy.tabpy_server.app.app_parameters import SettingsParameters
 
@@ -140,16 +141,21 @@ class EvaluationPlaneHandler(BaseHandler):
         self.finish()
     
     def _get_flight_client(self):
+        # TODO: handle TLS
         scheme = "grpc+tcp"
         host = "localhost"
         port = self.settings[SettingsParameters.ArrowFlightPort]
-
+        middleware = None
+        if "authentication" in self.settings[SettingsParameters.ApiVersions]["v1"]["features"]:
+            middleware = [
+                BasicAuthClientMiddlewareFactory(self.username, self.password)
+            ]
         connection_args = {}
-        return pyarrow.flight.FlightClient(f"{scheme}://{host}:{port}", **connection_args)
+        return pyarrow.flight.FlightClient(location=f"{scheme}://{host}:{port}", middleware=middleware, **connection_args)
 
     def get_arrow_data(self, filename):
         client = self._get_flight_client()
-        return arrow_client.get_flight_by_path(filename, client)
+        return arrow_client.get_flight_by_path(filename, client, client_factory=self._get_flight_client)
 
     def upload_arrow_data(self, data, filename, metadata):
         client = self._get_flight_client()

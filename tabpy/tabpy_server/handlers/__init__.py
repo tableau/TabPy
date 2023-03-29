@@ -11,3 +11,7 @@ from tabpy.tabpy_server.handlers.status_handler import StatusHandler
 from tabpy.tabpy_server.handlers.upload_destination_handler import (
     UploadDestinationHandler,
 )
+from tabpy.tabpy_server.handlers.no_op_auth_handler import NoOpAuthHandler
+from tabpy.tabpy_server.handlers.basic_auth_server_middleware_factory import (
+    BasicAuthServerMiddlewareFactory,
+)
