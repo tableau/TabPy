@@ -15,9 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
-"""An example Flight Python server."""
 
-import argparse
 import ast
 import logging
 import threading
@@ -141,50 +139,40 @@ class FlightServer(pyarrow.flight.FlightServerBase):
         time.sleep(2)
         self.shutdown()
 
-def _parse_args():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--host", type=str, default="localhost",
-                        help="Address or hostname to listen on")
-    parser.add_argument("--tls", nargs=2, default=None,
-                        metavar=('CERTFILE', 'KEYFILE'),
-                        help="Enable transport-level security")
-    parser.add_argument("--verify_client", type=bool, default=False,
-                        help="enable mutual TLS and verify the client if True")
-    parser.add_argument("--config", type=str, default=None, help="should be ignored") # TODO: implement config
-
-    return parser.parse_args()
-
-def _get_tls_certificates(args):
+def _get_tls_certificates(config):
     tls_certificates = []
-    with open(args.tls[0], "rb") as cert_file:
+    cert = config[SettingsParameters.CertificateFile]
+    key = config[SettingsParameters.KeyFile]
+    with open(cert, "rb") as cert_file:
         tls_cert_chain = cert_file.read()
-    with open(args.tls[1], "rb") as key_file:
+    with open(key, "rb") as key_file:
         tls_private_key = key_file.read()
     tls_certificates.append((tls_cert_chain, tls_private_key))
     return tls_certificates
 
 def start(config):
-    args = _parse_args()
-
+    verify_client = None
     tls_certificates = None
     scheme = "grpc+tcp"
-    if args.tls:
+    if config[SettingsParameters.TABPY_TRANSFER_PROTOCOL] == "https":
+        verify_client = True
         scheme = "grpc+tls"
-        tls_certificates = _get_tls_certificates(args)
+        tls_certificates = _get_tls_certificates(config)
 
+    host = "localhost"
     port = config.get(SettingsParameters.ArrowFlightPort)
-    location = "{}://{}:{}".format(scheme, args.host, port)
+    location = "{}://{}:{}".format(scheme, host, port)
 
     auth_middleware = None
     if "authentication" in config[SettingsParameters.ApiVersions]["v1"]["features"]:
-        success, creds = parse_pwd_file(config[ConfigParameters.TABPY_PWD_FILE])
+        _, creds = parse_pwd_file(config[ConfigParameters.TABPY_PWD_FILE])
         auth_middleware = {
             "basic": BasicAuthServerMiddlewareFactory(creds)
         }
 
-    server = FlightServer(args.host, location,
+    server = FlightServer(host, location,
                           tls_certificates=tls_certificates,
-                          verify_client=args.verify_client, auth_handler=NoOpAuthHandler(),
+                          verify_client=verify_client, auth_handler=NoOpAuthHandler(),
                           middleware=auth_middleware)
     logger.info(f"Serving on {location}")
     server.serve()
