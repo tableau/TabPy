@@ -42,6 +42,7 @@ class FlightServer(pyarrow.flight.FlightServerBase):
         self.flights = {}
         self.host = host
         self.tls_certificates = tls_certificates
+        self.location = location
 
     @classmethod
     def descriptor_to_key(self, descriptor):
@@ -139,42 +140,8 @@ class FlightServer(pyarrow.flight.FlightServerBase):
         time.sleep(2)
         self.shutdown()
 
-def _get_tls_certificates(config):
-    tls_certificates = []
-    cert = config[SettingsParameters.CertificateFile]
-    key = config[SettingsParameters.KeyFile]
-    with open(cert, "rb") as cert_file:
-        tls_cert_chain = cert_file.read()
-    with open(key, "rb") as key_file:
-        tls_private_key = key_file.read()
-    tls_certificates.append((tls_cert_chain, tls_private_key))
-    return tls_certificates
-
-def start(config):
-    verify_client = None
-    tls_certificates = None
-    scheme = "grpc+tcp"
-    if config[SettingsParameters.TABPY_TRANSFER_PROTOCOL] == "https":
-        verify_client = True
-        scheme = "grpc+tls"
-        tls_certificates = _get_tls_certificates(config)
-
-    host = "localhost"
-    port = config.get(SettingsParameters.ArrowFlightPort)
-    location = "{}://{}:{}".format(scheme, host, port)
-
-    auth_middleware = None
-    if "authentication" in config[SettingsParameters.ApiVersions]["v1"]["features"]:
-        _, creds = parse_pwd_file(config[ConfigParameters.TABPY_PWD_FILE])
-        auth_middleware = {
-            "basic": BasicAuthServerMiddlewareFactory(creds)
-        }
-
-    server = FlightServer(host, location,
-                          tls_certificates=tls_certificates,
-                          verify_client=verify_client, auth_handler=NoOpAuthHandler(),
-                          middleware=auth_middleware)
-    logger.info(f"Serving on {location}")
+def start(server):
+    logger.info(f"Serving on {server.location}")
     server.serve()
 
 

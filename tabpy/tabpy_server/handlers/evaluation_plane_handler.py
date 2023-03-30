@@ -2,7 +2,7 @@ import pandas
 import pyarrow
 import uuid
 
-from tabpy.tabpy_server.handlers import BaseHandler, arrow_client
+from tabpy.tabpy_server.handlers import BaseHandler
 import json
 import simplejson
 import logging
@@ -10,9 +10,7 @@ from tabpy.tabpy_server.common.util import format_exception
 import requests
 from tornado import gen
 from datetime import timedelta
-from tabpy.tabpy_server.handlers.basic_auth_client_middleware_factory import BasicAuthClientMiddlewareFactory
 from tabpy.tabpy_server.handlers.util import AuthErrorStates
-from tabpy.tabpy_server.app.app_parameters import SettingsParameters
 
 class RestrictedTabPy:
     def __init__(self, protocol, port, logger, timeout, headers):
@@ -59,6 +57,7 @@ class EvaluationPlaneHandler(BaseHandler):
 
     def initialize(self, executor, app):
         super(EvaluationPlaneHandler, self).initialize(app)
+        self.arrow_server = app.arrow_server
         self.executor = executor
         self._error_message_timeout = (
             f"User defined script timed out. "
@@ -79,6 +78,7 @@ class EvaluationPlaneHandler(BaseHandler):
         arguments_str = ""
         if "dataPath" in body:
             # arrow flight scenario
+            print("arrow flight scenario")
             arrow_data = self.get_arrow_data(body["dataPath"])
             if arrow_data is not None:
                 arguments = {"_arg1": arrow_data}
@@ -139,27 +139,31 @@ class EvaluationPlaneHandler(BaseHandler):
         else:
             self.write("null")
         self.finish()
-    
-    def _get_flight_client(self):
-        # TODO: handle TLS
-        scheme = "grpc+tcp"
-        host = "localhost"
-        port = self.settings[SettingsParameters.ArrowFlightPort]
-        middleware = None
-        if "authentication" in self.settings[SettingsParameters.ApiVersions]["v1"]["features"]:
-            middleware = [
-                BasicAuthClientMiddlewareFactory(self.username, self.password)
-            ]
-        connection_args = {}
-        return pyarrow.flight.FlightClient(location=f"{scheme}://{host}:{port}", middleware=middleware, **connection_args)
 
     def get_arrow_data(self, filename):
-        client = self._get_flight_client()
-        return arrow_client.get_flight_by_path(filename, client, client_factory=self._get_flight_client)
+        descriptor = pyarrow.flight.FlightDescriptor.for_path(filename)
+        info = self.arrow_server.get_flight_info(None, descriptor)
+        for endpoint in info.endpoints:
+            print('Ticket:', endpoint.ticket)
+            for location in endpoint.locations:
+                print(location)
+                key = (descriptor.descriptor_type.value, descriptor.command,
+                       tuple(descriptor.path or tuple()))
+                df = self.arrow_server.flights.pop(key).to_pandas()
+                return df
+        print('no data found for get')
+        return ''
 
     def upload_arrow_data(self, data, filename, metadata):
-        client = self._get_flight_client()
-        return arrow_client.upload_data(client, data, filename, metadata)
+        my_table = pyarrow.table(data)
+        if metadata is not None:
+            my_table.schema.with_metadata(metadata)
+        print('Table rows=', str(len(my_table)))
+        print("Uploading", data.head())
+        descriptor = pyarrow.flight.FlightDescriptor.for_path(filename)
+        key = (descriptor.descriptor_type.value, descriptor.command,
+                tuple(descriptor.path or tuple()))
+        self.arrow_server.flights[key] = my_table
 
     @gen.coroutine
     def post(self):
