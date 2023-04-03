@@ -15,9 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
-"""An example Flight Python server."""
 
-import argparse
 import ast
 import logging
 import threading
@@ -27,7 +25,9 @@ import uuid
 import pyarrow
 import pyarrow.flight
 
-from tabpy.tabpy_server.app.app_parameters import SettingsParameters
+from tabpy.tabpy_server.app.app_parameters import SettingsParameters, ConfigParameters
+from tabpy.tabpy_server.app.util import parse_pwd_file
+from tabpy.tabpy_server.handlers import NoOpAuthHandler, BasicAuthServerMiddlewareFactory
 
 
 logger = logging.getLogger('__main__.' + __name__)
@@ -35,13 +35,14 @@ logger = logging.getLogger('__main__.' + __name__)
 class FlightServer(pyarrow.flight.FlightServerBase):
     def __init__(self, host="localhost", location=None,
                  tls_certificates=None, verify_client=False,
-                 root_certificates=None, auth_handler=None):
+                 root_certificates=None, auth_handler=None, middleware=None):
         super(FlightServer, self).__init__(
             location, auth_handler, tls_certificates, verify_client,
-            root_certificates)
+            root_certificates, middleware)
         self.flights = {}
         self.host = host
         self.tls_certificates = tls_certificates
+        self.location = location
 
     @classmethod
     def descriptor_to_key(self, descriptor):
@@ -139,44 +140,8 @@ class FlightServer(pyarrow.flight.FlightServerBase):
         time.sleep(2)
         self.shutdown()
 
-def _parse_args():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--host", type=str, default="localhost",
-                        help="Address or hostname to listen on")
-    parser.add_argument("--tls", nargs=2, default=None,
-                        metavar=('CERTFILE', 'KEYFILE'),
-                        help="Enable transport-level security")
-    parser.add_argument("--verify_client", type=bool, default=False,
-                        help="enable mutual TLS and verify the client if True")
-    parser.add_argument("--config", type=str, default=None, help="should be ignored") # TODO: implement config
-
-    return parser.parse_args()
-
-def _get_tls_certificates(args):
-    tls_certificates = []
-    with open(args.tls[0], "rb") as cert_file:
-        tls_cert_chain = cert_file.read()
-    with open(args.tls[1], "rb") as key_file:
-        tls_private_key = key_file.read()
-    tls_certificates.append((tls_cert_chain, tls_private_key))
-    return tls_certificates
-
-def start(config):
-    args = _parse_args()
-
-    tls_certificates = None
-    scheme = "grpc+tcp"
-    if args.tls:
-        scheme = "grpc+tls"
-        tls_certificates = _get_tls_certificates(args)
-
-    port = config.get(SettingsParameters.ArrowFlightPort)
-    location = "{}://{}:{}".format(scheme, args.host, port)
-
-    server = FlightServer(args.host, location,
-                          tls_certificates=tls_certificates,
-                          verify_client=args.verify_client)
-    logger.info(f"Serving on {location}")
+def start(server):
+    logger.info(f"Serving on {server.location}")
     server.serve()
 
 

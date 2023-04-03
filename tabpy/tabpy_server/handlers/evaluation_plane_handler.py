@@ -2,7 +2,7 @@ import pandas
 import pyarrow
 import uuid
 
-from tabpy.tabpy_server.handlers import BaseHandler, arrow_client
+from tabpy.tabpy_server.handlers import BaseHandler
 import json
 import simplejson
 import logging
@@ -57,6 +57,7 @@ class EvaluationPlaneHandler(BaseHandler):
 
     def initialize(self, executor, app):
         super(EvaluationPlaneHandler, self).initialize(app)
+        self.arrow_server = app.arrow_server
         self.executor = executor
         self._error_message_timeout = (
             f"User defined script timed out. "
@@ -77,6 +78,7 @@ class EvaluationPlaneHandler(BaseHandler):
         arguments_str = ""
         if "dataPath" in body:
             # arrow flight scenario
+            print("arrow flight scenario")
             arrow_data = self.get_arrow_data(body["dataPath"])
             if arrow_data is not None:
                 arguments = {"_arg1": arrow_data}
@@ -139,22 +141,29 @@ class EvaluationPlaneHandler(BaseHandler):
         self.finish()
 
     def get_arrow_data(self, filename):
-        scheme = "grpc+tcp"
-        host = "localhost"
-        port = 13622
-
-        connection_args = {}
-        client = pyarrow.flight.FlightClient(f"{scheme}://{host}:{port}", **connection_args)
-        return arrow_client.get_flight_by_path(filename, client)
+        descriptor = pyarrow.flight.FlightDescriptor.for_path(filename)
+        info = self.arrow_server.get_flight_info(None, descriptor)
+        for endpoint in info.endpoints:
+            print('Ticket:', endpoint.ticket)
+            for location in endpoint.locations:
+                print(location)
+                key = (descriptor.descriptor_type.value, descriptor.command,
+                       tuple(descriptor.path or tuple()))
+                df = self.arrow_server.flights.pop(key).to_pandas()
+                return df
+        print('no data found for get')
+        return ''
 
     def upload_arrow_data(self, data, filename, metadata):
-        scheme = "grpc+tcp"
-        host = "localhost"
-        port = 13622
-
-        connection_args = {}
-        client = pyarrow.flight.FlightClient(f"{scheme}://{host}:{port}", **connection_args)
-        return arrow_client.upload_data(client, data, filename, metadata)
+        my_table = pyarrow.table(data)
+        if metadata is not None:
+            my_table.schema.with_metadata(metadata)
+        print('Table rows=', str(len(my_table)))
+        print("Uploading", data.head())
+        descriptor = pyarrow.flight.FlightDescriptor.for_path(filename)
+        key = (descriptor.descriptor_type.value, descriptor.command,
+                tuple(descriptor.path or tuple()))
+        self.arrow_server.flights[key] = my_table
 
     @gen.coroutine
     def post(self):

@@ -10,6 +10,8 @@ import tabpy
 from tabpy.tabpy import __version__
 from tabpy.tabpy_server.app.app_parameters import ConfigParameters, SettingsParameters
 from tabpy.tabpy_server.app.util import parse_pwd_file
+from tabpy.tabpy_server.handlers.basic_auth_server_middleware_factory import BasicAuthServerMiddlewareFactory
+from tabpy.tabpy_server.handlers.no_op_auth_handler import NoOpAuthHandler
 from tabpy.tabpy_server.management.state import TabPyState
 from tabpy.tabpy_server.management.util import _get_state_from_file
 from tabpy.tabpy_server.psws.callbacks import init_model_evaluator, init_ps_server
@@ -59,6 +61,7 @@ class TabPyApp:
     tabpy_state = None
     python_service = None
     credentials = {}
+    arrow_server = None
 
     def __init__(self, config_file):
         if config_file is None:
@@ -74,6 +77,42 @@ class TabPyApp:
                 logging.basicConfig(level=logging.DEBUG)
 
         self._parse_config(config_file)
+
+    def _get_tls_certificates(self, config):
+        tls_certificates = []
+        cert = config[SettingsParameters.CertificateFile]
+        key = config[SettingsParameters.KeyFile]
+        with open(cert, "rb") as cert_file:
+            tls_cert_chain = cert_file.read()
+        with open(key, "rb") as key_file:
+            tls_private_key = key_file.read()
+        tls_certificates.append((tls_cert_chain, tls_private_key))
+        return tls_certificates
+    
+    def _get_arrow_server(self, config):
+        verify_client = None
+        tls_certificates = None
+        scheme = "grpc+tcp"
+        if config[SettingsParameters.TransferProtocol] == "https":
+            scheme = "grpc+tls"
+            tls_certificates = self._get_tls_certificates(config)
+
+        host = "localhost"
+        port = config.get(SettingsParameters.ArrowFlightPort)
+        location = "{}://{}:{}".format(scheme, host, port)
+
+        auth_middleware = None
+        if "authentication" in config[SettingsParameters.ApiVersions]["v1"]["features"]:
+            _, creds = parse_pwd_file(config[ConfigParameters.TABPY_PWD_FILE])
+            auth_middleware = {
+                "basic": BasicAuthServerMiddlewareFactory(creds)
+            }
+
+        server = pa.FlightServer(host, location,
+                            tls_certificates=tls_certificates,
+                            verify_client=verify_client, auth_handler=NoOpAuthHandler(),
+                            middleware=auth_middleware)
+        return server
 
     def run(self):
         application = self._create_tornado_web_app()
@@ -115,7 +154,8 @@ class TabPyApp:
 
         # Define a function for the thread
         def start_pyarrow():
-            pa.start(self.settings)
+            self.arrow_server = self._get_arrow_server(self.settings)
+            pa.start(self.arrow_server)
 
         try:
             _thread.start_new_thread(start_pyarrow, ())
