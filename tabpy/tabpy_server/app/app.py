@@ -94,7 +94,6 @@ class TabPyApp:
         tls_certificates = None
         scheme = "grpc+tcp"
         if config[SettingsParameters.TransferProtocol] == "https":
-            verify_client = True
             scheme = "grpc+tls"
             tls_certificates = self._get_tls_certificates(config)
 
