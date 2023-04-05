@@ -76,7 +76,7 @@ class EvaluationPlaneHandler(BaseHandler):
         user_code = body["script"]
         arguments = None
         arguments_str = ""
-        if "dataPath" in body:
+        if self.arrow_server is not None and "dataPath" in body:
             # arrow flight scenario
             print("arrow flight scenario")
             arrow_data = self.get_arrow_data(body["dataPath"])
@@ -123,7 +123,7 @@ class EvaluationPlaneHandler(BaseHandler):
             return
 
         if result is not None:
-            if "dataPath" in body:
+            if self.arrow_server is not None and "dataPath" in body:
                 # arrow flight scenario
                 output_data_id = str(uuid.uuid4())
                 self.upload_arrow_data(result, output_data_id, {

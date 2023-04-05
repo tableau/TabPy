@@ -18,6 +18,7 @@ class ConfigParameters:
     TABPY_GZIP_ENABLE = "TABPY_GZIP_ENABLE"
 
     # Arrow specific settings
+    TABPY_ENABLE_ARROW = "TABPY_ENABLE_ARROW"
     TABPY_ARROWFLIGHT_PORT = "TABPY_ARROWFLIGHT_PORT"
 
 
@@ -42,4 +43,5 @@ class SettingsParameters:
     GzipEnabled = "gzip_enabled"
 
     # Arrow specific settings
+    ArrowEnabled = "arrow_enabled"
     ArrowFlightPort = "arrowflight_port"

@@ -152,16 +152,16 @@ class TabPyApp:
             f"{str(self.settings[SettingsParameters.Port])}"
         )
 
-        # Define a function for the thread
-        def start_pyarrow():
-            self.arrow_server = self._get_arrow_server(self.settings)
-            pa.start(self.arrow_server)
+        if self.settings[SettingsParameters.ArrowEnabled]:
+            def start_pyarrow():
+                self.arrow_server = self._get_arrow_server(self.settings)
+                pa.start(self.arrow_server)
 
-        try:
-            _thread.start_new_thread(start_pyarrow, ())
-        except Exception as e:
-            print(e)
-            print("Error: unable to start pyarrow server")
+            try:
+                _thread.start_new_thread(start_pyarrow, ())
+            except Exception as e:
+                print(e)
+                print("Error: unable to start pyarrow server")
 
         tornado.ioloop.IOLoop.instance().start()
 
@@ -339,6 +339,7 @@ class TabPyApp:
              100, None),
             (SettingsParameters.GzipEnabled, ConfigParameters.TABPY_GZIP_ENABLE,
              True, parser.getboolean),
+            (SettingsParameters.ArrowEnabled, ConfigParameters.TABPY_ENABLE_ARROW, False, parser.getboolean), 
             (SettingsParameters.ArrowFlightPort, ConfigParameters.TABPY_ARROWFLIGHT_PORT, 13622, parser.getint),
         ]
 
