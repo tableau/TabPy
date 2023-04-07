@@ -12,7 +12,7 @@ class TestArrowServer(unittest.TestCase):
         self.resources_path = os.path.join(os.path.dirname(__file__), "resources")
         # Set up a flight server and start it
         host = "localhost"
-        port = 13623
+        port = 13620
         scheme = "grpc+tcp"
         location = "{}://{}:{}".format(scheme, host, port)
         self.arrow_server = FlightServer(host, location)
