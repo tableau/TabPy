@@ -1,5 +1,6 @@
 import unittest
 import threading
+import _thread
 import pyarrow
 import os
 import pyarrow.csv as csv
@@ -20,7 +21,7 @@ class TestArrowServer(unittest.TestCase):
             pa.start(self.arrow_server)
         t = threading.Thread(target=start_server, args=(), daemon=True)
         t.start()
-
+        # _thread.start_new_thread(start_server, ())
         # Set up a flight client
         self.arrow_client = pyarrow.flight.FlightClient(location)
 
