@@ -9,28 +9,25 @@ from tabpy.tabpy_server.app.arrow_server import FlightServer
 import tabpy.tabpy_server.app.arrow_server as pa
 
 class TestArrowServer(unittest.TestCase):
-    def setUp(self):
-        self.resources_path = os.path.join(os.path.dirname(__file__), "resources")
-        # Set up a flight server and start it
+    @classmethod
+    def setUpClass(cls):
         host = "localhost"
         port = 13620
         scheme = "grpc+tcp"
         location = "{}://{}:{}".format(scheme, host, port)
-        self.arrow_server = FlightServer(host, location)
+        cls.arrow_server = FlightServer(host, location)
         def start_server():
-            pa.start(self.arrow_server)
+            pa.start(cls.arrow_server)
         _thread.start_new_thread(start_server, ())
-        # Set up a flight client
-        self.arrow_client = pyarrow.flight.FlightClient(location)
+        cls.arrow_client = pyarrow.flight.FlightClient(location)
+    
+    @classmethod
+    def tearDownClass(cls):
+        cls.arrow_server.shutdown()
 
-    def tearDown(self):
-        self.arrow_server.shutdown()
-        self.arrow_server = None
-        self.arrow_client = None
-
-    def test_list_flights_on_new_server(self):
-        flight_info = list(self.arrow_server.list_flights(None, None))
-        self.assertEqual(len(flight_info), 0)
+    def setUp(self):
+        self.resources_path = os.path.join(os.path.dirname(__file__), "resources")
+        self.arrow_server.flights = {}
 
     def test_server_do_put(self):
         data_path = os.path.join(self.resources_path, "data.csv")
@@ -41,3 +38,7 @@ class TestArrowServer(unittest.TestCase):
         writer.close()
         flight_info = list(self.arrow_server.list_flights(None, None))
         self.assertEqual(len(flight_info), 1)
+
+    def test_list_flights_on_new_server(self):
+        flight_info = list(self.arrow_server.list_flights(None, None))
+        self.assertEqual(len(flight_info), 0)
