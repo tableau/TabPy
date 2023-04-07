@@ -18,7 +18,7 @@ class TestArrowServer(unittest.TestCase):
         self.arrow_server = FlightServer(host, location)
         def start_server():
             pa.start(self.arrow_server)
-        t = threading.Thread(target=start_server, args=())
+        t = threading.Thread(target=start_server, args=(), daemon=True)
         t.start()
 
         # Set up a flight client
