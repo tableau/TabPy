@@ -25,10 +25,6 @@ import uuid
 import pyarrow
 import pyarrow.flight
 
-from tabpy.tabpy_server.app.app_parameters import SettingsParameters, ConfigParameters
-from tabpy.tabpy_server.app.util import parse_pwd_file
-from tabpy.tabpy_server.handlers import NoOpAuthHandler, BasicAuthServerMiddlewareFactory
-
 
 logger = logging.getLogger('__main__.' + __name__)
 
