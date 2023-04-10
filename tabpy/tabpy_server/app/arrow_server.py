@@ -100,7 +100,7 @@ class FlightServer(pyarrow.flight.FlightServerBase):
 
     def list_actions(self, context):
         return iter([
-            ("getUniquePath", "Get a unique FileDescriptor path to put data to."),
+            ("getUniquePath", "Get a unique FlightDescriptor path to put data to."),
             ("clear", "Clear the stored flights."),
             ("shutdown", "Shut down this server."),
         ])
