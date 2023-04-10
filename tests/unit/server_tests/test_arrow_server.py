@@ -39,6 +39,20 @@ class TestArrowServer(unittest.TestCase):
         flight_info = list(self.arrow_server.list_flights(None, None))
         self.assertEqual(len(flight_info), 1)
 
+    def test_server_do_get(self):
+        data_path = os.path.join(self.resources_path, "data.csv")
+        table = csv.read_csv(data_path)
+        descriptor = pyarrow.flight.FlightDescriptor.for_path(data_path)
+        writer, _ = self.arrow_client.do_put(descriptor, table.schema)
+        writer.write_table(table)
+        writer.close()
+        self.assertEqual(len(self.arrow_server.flights), 1)
+        info = self.arrow_client.get_flight_info(descriptor)
+        endpoint = info.endpoints[0]
+        reader = self.arrow_client.do_get(endpoint.ticket)
+        self.assertTrue(reader.read_all().equals(table))
+        self.assertEqual(len(self.arrow_server.flights), 0)
+
     def test_list_flights_on_new_server(self):
         flight_info = list(self.arrow_server.list_flights(None, None))
         self.assertEqual(len(flight_info), 0)
