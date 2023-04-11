@@ -142,6 +142,13 @@ settings._
 # The value should be a float representing the timeout time in seconds.
 # TABPY_EVALUATE_TIMEOUT = 30
 
+# Configure TabPy to support streaming data via Arrow Flight.
+# This will cause an Arrow Flight server start up. The Arrow
+# Flight port defaults to 13622 if not set here.
+# TABPY_ARROW_ENABLE = True
+# TABPY_ARROWFLIGHT_PORT = 13622
+
+
 [loggers]
 keys=root
 
@@ -260,6 +267,13 @@ line with the user name.
 ### Endpoint Security
 
 All endpoints require authentication if it is enabled for the server.
+
+## Arrow Flight
+
+TabPy can be configured to enable Arrow Flight. This will cause a Flight
+server to start up alongside the HTTP server and will allow for handling
+incoming streamed data in the Arrow columnar format.
+TODO: Add details about how to use API to leverage this
 
 ## Logging
 
