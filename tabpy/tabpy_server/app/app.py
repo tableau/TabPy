@@ -160,8 +160,7 @@ class TabPyApp:
             try:
                 _thread.start_new_thread(start_pyarrow, ())
             except Exception as e:
-                print(e)
-                print("Error: unable to start pyarrow server")
+                logger.critical(f"Failed to start PyArrow server: {e}")
 
         tornado.ioloop.IOLoop.instance().start()
 
@@ -478,6 +477,7 @@ class TabPyApp:
 
         features["evaluate_enabled"] = self.settings[SettingsParameters.EvaluateEnabled]
         features["gzip_enabled"] = self.settings[SettingsParameters.GzipEnabled]
+        features["arrow_enabled"] = self.settings[SettingsParameters.ArrowEnabled]
         return features
 
     def _build_tabpy_state(self):
