@@ -274,7 +274,15 @@ All endpoints require authentication if it is enabled for the server.
 TabPy can be configured to enable Arrow Flight. This will cause a Flight
 server to start up alongside the HTTP server and will allow for handling
 incoming streamed data in the Arrow columnar format.
-TODO: Add details about how to use API to leverage this
+
+To leverage the Flight server, use an existing Flight Client API. There
+are implementations available in C++, Java, and Python. To begin streaming
+data to the server, a Flight Descriptor must be generated. One can be obtained
+via the TabPy Flight server by using the client to submit a `getUniquePath`
+Action to the server or it can be randomly generated locally. The client's
+`do_put` interface can then be used to begin sending data to the server.
+
+The mechanism for sending the Python script to the server does not change.
 
 ## Logging
 
