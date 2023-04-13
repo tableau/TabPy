@@ -78,12 +78,11 @@ class EvaluationPlaneHandler(BaseHandler):
         arguments_str = ""
         if self.arrow_server is not None and "dataPath" in body:
             # arrow flight scenario
-            print("arrow flight scenario")
             arrow_data = self.get_arrow_data(body["dataPath"])
             if arrow_data is not None:
                 arguments = {"_arg1": arrow_data}
         elif "data" in body:
-            # backwarding
+            # legacy scenario
             arguments = body["data"]
 
         if arguments is not None:
@@ -144,9 +143,7 @@ class EvaluationPlaneHandler(BaseHandler):
         descriptor = pyarrow.flight.FlightDescriptor.for_path(filename)
         info = self.arrow_server.get_flight_info(None, descriptor)
         for endpoint in info.endpoints:
-            print('Ticket:', endpoint.ticket)
             for location in endpoint.locations:
-                print(location)
                 key = (descriptor.descriptor_type.value, descriptor.command,
                        tuple(descriptor.path or tuple()))
                 df = self.arrow_server.flights.pop(key).to_pandas()
@@ -158,8 +155,6 @@ class EvaluationPlaneHandler(BaseHandler):
         my_table = pyarrow.table(data)
         if metadata is not None:
             my_table.schema.with_metadata(metadata)
-        print('Table rows=', str(len(my_table)))
-        print("Uploading", data.head())
         descriptor = pyarrow.flight.FlightDescriptor.for_path(filename)
         key = (descriptor.descriptor_type.value, descriptor.command,
                 tuple(descriptor.path or tuple()))

@@ -95,10 +95,10 @@ at [`logging.config` documentation page](https://docs.python.org/3.6/library/log
   through the `/query` method, or using the `tabpy.query(...)` syntax with
   the `/evaluate` method.
 - `TABPY_GZIP_ENABLE` - Enable Gzip support for requests. Enabled by default.
-- `TABPY_ARROW_ENABLE` - Enable Arrow connection for data streaming.
+- `TABPY_ARROW_ENABLE` - Enable Arrow connection for data streaming. Default value is False.
 - `TABPY_ARROWFLIGHT_PORT` - port for
   [Arrow Flight](https://arrow.apache.org/docs/format/Flight.html)
-  connection used in streaming mode.
+  connection used in streaming mode. Default value is 13622.
 
 ### Configuration File Example
 
@@ -141,6 +141,13 @@ settings._
 # will run before throwing a TimeoutError.
 # The value should be a float representing the timeout time in seconds.
 # TABPY_EVALUATE_TIMEOUT = 30
+
+# Configure TabPy to support streaming data via Arrow Flight.
+# This will cause an Arrow Flight server start up. The Arrow
+# Flight port defaults to 13622 if not set here.
+# TABPY_ARROW_ENABLE = True
+# TABPY_ARROWFLIGHT_PORT = 13622
+
 
 [loggers]
 keys=root
@@ -260,6 +267,13 @@ line with the user name.
 ### Endpoint Security
 
 All endpoints require authentication if it is enabled for the server.
+
+## Arrow Flight
+
+TabPy can be configured to enable Arrow Flight. This will cause a Flight
+server to start up alongside the HTTP server and will allow for handling
+incoming streamed data in the Arrow columnar format.
+TODO: Add details about how to use API to leverage this
 
 ## Logging
 
