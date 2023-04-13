@@ -277,10 +277,15 @@ incoming streamed data in the Arrow columnar format.
 
 To leverage the Flight server, use an existing Flight Client API. There
 are implementations available in C++, Java, and Python. To begin streaming
-data to the server, a Flight Descriptor must be generated. One can be obtained
-via the TabPy Flight server by using the client to submit a `getUniquePath`
-Action to the server or it can be randomly generated locally. The client's
-`do_put` interface can then be used to begin sending data to the server.
+data to the server, a Flight Descriptor (data path) must be generated.
+One can be obtained via the TabPy Flight server by using the client to
+submit a `getUniquePath` Action to the server or it can be randomly generated
+locally. The client's `do_put` interface can then be used to begin sending
+data to the server.
+
+Structure the data payload in Arrow format according to the client's API
+requirements. Continue using the client to append the data path with the
+data stream.
 
 The mechanism for sending the Python script to the server does not change.
 
