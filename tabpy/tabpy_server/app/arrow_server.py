@@ -113,8 +113,6 @@ class FlightServer(pyarrow.flight.FlightServerBase):
             yield uniqueId.encode('utf-8')
         elif action.type == "clear":
             self._clear()
-            # raise NotImplementedError(
-            #     "{} is not implemented.".format(action.type))
         elif action.type == "healthcheck":
             pass
         elif action.type == "shutdown":
