@@ -275,6 +275,13 @@ TabPy can be configured to enable Arrow Flight. This will cause a Flight
 server to start up alongside the HTTP server and will allow for handling
 incoming streamed data in the Arrow columnar format.
 
+**As of May 2023, the Arrow Flight feature can only be used by compatible
+versions of Tableau Prep. The Arrow Flight feature is not used by Tableau
+Desktop, Tableau Server, or Tableau Cloud, regardless of the
+`TABPY_ARROW_ENABLE` setting. In other words, those products will continue
+to send the data in a single payload when Arrow Flight is both enabled
+and disabled.**
+
 To leverage the Flight server, use an existing Flight Client API. There
 are implementations available in C++, Java, and Python. To begin streaming
 data to the server, a Flight Descriptor (data path) must be generated.
