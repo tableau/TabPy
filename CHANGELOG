@@ -1,5 +1,12 @@
 # Changelog
 
+## v2.7.0
+
+### Improvements
+
+- Adds support for data streaming in Arrow columnar format via Apache
+Arrow Flight.
+
 ## v2.6.0
 
 ### Improvements
