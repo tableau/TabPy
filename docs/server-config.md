@@ -95,6 +95,11 @@ at [`logging.config` documentation page](https://docs.python.org/3.6/library/log
   through the `/query` method, or using the `tabpy.query(...)` syntax with
   the `/evaluate` method.
 - `TABPY_GZIP_ENABLE` - Enable Gzip support for requests. Enabled by default.
+- `TABPY_ARROW_ENABLE` - Enable Arrow connection for data streaming. Default
+  value is False.
+- `TABPY_ARROWFLIGHT_PORT` - port for
+  [Arrow Flight](https://arrow.apache.org/docs/format/Flight.html)
+  connection used in streaming mode. Default value is 13622.
 
 ### Configuration File Example
 
@@ -137,6 +142,13 @@ settings._
 # will run before throwing a TimeoutError.
 # The value should be a float representing the timeout time in seconds.
 # TABPY_EVALUATE_TIMEOUT = 30
+
+# Configure TabPy to support streaming data via Arrow Flight.
+# This will cause an Arrow Flight server start up. The Arrow
+# Flight port defaults to 13622 if not set here.
+# TABPY_ARROW_ENABLE = True
+# TABPY_ARROWFLIGHT_PORT = 13622
+
 
 [loggers]
 keys=root
@@ -256,6 +268,33 @@ line with the user name.
 ### Endpoint Security
 
 All endpoints require authentication if it is enabled for the server.
+
+## Arrow Flight
+
+TabPy can be configured to enable Arrow Flight. This will cause a Flight
+server to start up alongside the HTTP server and will allow for handling
+incoming streamed data in the Arrow columnar format.
+
+**As of May 2023, the Arrow Flight feature can only be used by compatible
+versions of Tableau Prep. The Arrow Flight feature is not used by Tableau
+Desktop, Tableau Server, or Tableau Cloud, regardless of the
+`TABPY_ARROW_ENABLE` setting. In other words, those products will continue
+to send the data in a single payload when Arrow Flight is both enabled
+and disabled.**
+
+To leverage the Flight server, use an existing Flight Client API. There
+are implementations available in C++, Java, and Python. To begin streaming
+data to the server, a Flight Descriptor (data path) must be generated.
+One can be obtained via the TabPy Flight server by using the client to
+submit a `getUniquePath` Action to the server or it can be randomly generated
+locally. The client's `do_put` interface can then be used to begin sending
+data to the server.
+
+Structure the data payload in Arrow format according to the client's API
+requirements. Continue using the client to append the data path with the
+data stream.
+
+The mechanism for sending the Python script to the server does not change.
 
 ## Logging
 

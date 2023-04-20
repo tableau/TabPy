@@ -10,6 +10,8 @@ import tabpy
 from tabpy.tabpy import __version__
 from tabpy.tabpy_server.app.app_parameters import ConfigParameters, SettingsParameters
 from tabpy.tabpy_server.app.util import parse_pwd_file
+from tabpy.tabpy_server.handlers.basic_auth_server_middleware_factory import BasicAuthServerMiddlewareFactory
+from tabpy.tabpy_server.handlers.no_op_auth_handler import NoOpAuthHandler
 from tabpy.tabpy_server.management.state import TabPyState
 from tabpy.tabpy_server.management.util import _get_state_from_file
 from tabpy.tabpy_server.psws.callbacks import init_model_evaluator, init_ps_server
@@ -25,10 +27,10 @@ from tabpy.tabpy_server.handlers import (
     UploadDestinationHandler,
 )
 import tornado
-
+import tabpy.tabpy_server.app.arrow_server as pa
+import _thread
 
 logger = logging.getLogger(__name__)
-
 
 def _init_asyncio_patch():
     """
@@ -59,6 +61,7 @@ class TabPyApp:
     tabpy_state = None
     python_service = None
     credentials = {}
+    arrow_server = None
 
     def __init__(self, config_file):
         if config_file is None:
@@ -74,6 +77,42 @@ class TabPyApp:
                 logging.basicConfig(level=logging.DEBUG)
 
         self._parse_config(config_file)
+
+    def _get_tls_certificates(self, config):
+        tls_certificates = []
+        cert = config[SettingsParameters.CertificateFile]
+        key = config[SettingsParameters.KeyFile]
+        with open(cert, "rb") as cert_file:
+            tls_cert_chain = cert_file.read()
+        with open(key, "rb") as key_file:
+            tls_private_key = key_file.read()
+        tls_certificates.append((tls_cert_chain, tls_private_key))
+        return tls_certificates
+    
+    def _get_arrow_server(self, config):
+        verify_client = None
+        tls_certificates = None
+        scheme = "grpc+tcp"
+        if config[SettingsParameters.TransferProtocol] == "https":
+            scheme = "grpc+tls"
+            tls_certificates = self._get_tls_certificates(config)
+
+        host = "localhost"
+        port = config.get(SettingsParameters.ArrowFlightPort)
+        location = "{}://{}:{}".format(scheme, host, port)
+
+        auth_middleware = None
+        if "authentication" in config[SettingsParameters.ApiVersions]["v1"]["features"]:
+            _, creds = parse_pwd_file(config[ConfigParameters.TABPY_PWD_FILE])
+            auth_middleware = {
+                "basic": BasicAuthServerMiddlewareFactory(creds)
+            }
+
+        server = pa.FlightServer(host, location,
+                            tls_certificates=tls_certificates,
+                            verify_client=verify_client, auth_handler=NoOpAuthHandler(),
+                            middleware=auth_middleware)
+        return server
 
     def run(self):
         application = self._create_tornado_web_app()
@@ -99,18 +138,30 @@ class TabPyApp:
         settings = {}
         if self.settings[SettingsParameters.GzipEnabled] is True:
             settings["decompress_request"] = True
+
         application.listen(
             self.settings[SettingsParameters.Port],
             ssl_options=ssl_options,
             max_buffer_size=max_request_size,
             max_body_size=max_request_size,
             **settings,
-        )
+        ) 
 
         logger.info(
             "Web service listening on port "
             f"{str(self.settings[SettingsParameters.Port])}"
         )
+
+        if self.settings[SettingsParameters.ArrowEnabled]:
+            def start_pyarrow():
+                self.arrow_server = self._get_arrow_server(self.settings)
+                pa.start(self.arrow_server)
+
+            try:
+                _thread.start_new_thread(start_pyarrow, ())
+            except Exception as e:
+                logger.critical(f"Failed to start PyArrow server: {e}")
+
         tornado.ioloop.IOLoop.instance().start()
 
     def _create_tornado_web_app(self):
@@ -287,6 +338,8 @@ class TabPyApp:
              100, None),
             (SettingsParameters.GzipEnabled, ConfigParameters.TABPY_GZIP_ENABLE,
              True, parser.getboolean),
+            (SettingsParameters.ArrowEnabled, ConfigParameters.TABPY_ARROW_ENABLE, False, parser.getboolean), 
+            (SettingsParameters.ArrowFlightPort, ConfigParameters.TABPY_ARROWFLIGHT_PORT, 13622, parser.getint),
         ]
 
         for setting, parameter, default_val, parse_function in settings_parameters:
@@ -424,6 +477,7 @@ class TabPyApp:
 
         features["evaluate_enabled"] = self.settings[SettingsParameters.EvaluateEnabled]
         features["gzip_enabled"] = self.settings[SettingsParameters.GzipEnabled]
+        features["arrow_enabled"] = self.settings[SettingsParameters.ArrowEnabled]
         return features
 
     def _build_tabpy_state(self):

@@ -10,13 +10,16 @@ class ConfigParameters:
     TABPY_TRANSFER_PROTOCOL = "TABPY_TRANSFER_PROTOCOL"
     TABPY_CERTIFICATE_FILE = "TABPY_CERTIFICATE_FILE"
     TABPY_KEY_FILE = "TABPY_KEY_FILE"
-    TABPY_PWD_FILE = "TABPY_PWD_FILE"
     TABPY_LOG_DETAILS = "TABPY_LOG_DETAILS"
     TABPY_STATIC_PATH = "TABPY_STATIC_PATH"
     TABPY_MAX_REQUEST_SIZE_MB = "TABPY_MAX_REQUEST_SIZE_MB"
     TABPY_EVALUATE_ENABLE = "TABPY_EVALUATE_ENABLE"
     TABPY_EVALUATE_TIMEOUT = "TABPY_EVALUATE_TIMEOUT"
     TABPY_GZIP_ENABLE = "TABPY_GZIP_ENABLE"
+
+    # Arrow specific settings
+    TABPY_ARROW_ENABLE = "TABPY_ARROW_ENABLE"
+    TABPY_ARROWFLIGHT_PORT = "TABPY_ARROWFLIGHT_PORT"
 
 
 class SettingsParameters:
@@ -38,3 +41,7 @@ class SettingsParameters:
     EvaluateTimeout = "evaluate_timeout"
     EvaluateEnabled = "evaluate_enabled"
     GzipEnabled = "gzip_enabled"
+
+    # Arrow specific settings
+    ArrowEnabled = "arrow_enabled"
+    ArrowFlightPort = "arrowflight_port"

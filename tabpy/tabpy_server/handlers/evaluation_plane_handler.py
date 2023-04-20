@@ -1,3 +1,7 @@
+import pandas
+import pyarrow
+import uuid
+
 from tabpy.tabpy_server.handlers import BaseHandler
 import json
 import simplejson
@@ -7,7 +11,6 @@ import requests
 from tornado import gen
 from datetime import timedelta
 from tabpy.tabpy_server.handlers.util import AuthErrorStates
-
 
 class RestrictedTabPy:
     def __init__(self, protocol, port, logger, timeout, headers):
@@ -54,6 +57,7 @@ class EvaluationPlaneHandler(BaseHandler):
 
     def initialize(self, executor, app):
         super(EvaluationPlaneHandler, self).initialize(app)
+        self.arrow_server = app.arrow_server
         self.executor = executor
         self._error_message_timeout = (
             f"User defined script timed out. "
@@ -63,7 +67,7 @@ class EvaluationPlaneHandler(BaseHandler):
     @gen.coroutine
     def _post_impl(self):
         body = json.loads(self.request.body.decode("utf-8"))
-        self.logger.log(logging.DEBUG, f"Processing POST request '{body}'...")
+        self.logger.log(logging.DEBUG, f"Processing POST request...")
         if "script" not in body:
             self.error_out(400, "Script is empty.")
             return
@@ -72,7 +76,13 @@ class EvaluationPlaneHandler(BaseHandler):
         user_code = body["script"]
         arguments = None
         arguments_str = ""
-        if "data" in body:
+        if self.arrow_server is not None and "dataPath" in body:
+            # arrow flight scenario
+            arrow_data = self.get_arrow_data(body["dataPath"])
+            if arrow_data is not None:
+                arguments = {"_arg1": arrow_data}
+        elif "data" in body:
+            # legacy scenario
             arguments = body["data"]
 
         if arguments is not None:
@@ -112,10 +122,43 @@ class EvaluationPlaneHandler(BaseHandler):
             return
 
         if result is not None:
+            if self.arrow_server is not None and "dataPath" in body:
+                # arrow flight scenario
+                output_data_id = str(uuid.uuid4())
+                self.upload_arrow_data(result, output_data_id, {
+                    'removeOnDelete': 'True',
+                    'linkedIDs': body["dataPath"]
+                })
+                result = { 'outputDataPath': output_data_id }
+                self.logger.log(logging.WARN, f'outputDataPath={output_data_id}')
+            else:
+                if isinstance(result, pandas.DataFrame):
+                    result = result.to_dict(orient='list')
             self.write(simplejson.dumps(result, ignore_nan=True))
         else:
             self.write("null")
         self.finish()
+
+    def get_arrow_data(self, filename):
+        descriptor = pyarrow.flight.FlightDescriptor.for_path(filename)
+        info = self.arrow_server.get_flight_info(None, descriptor)
+        for endpoint in info.endpoints:
+            for location in endpoint.locations:
+                key = (descriptor.descriptor_type.value, descriptor.command,
+                       tuple(descriptor.path or tuple()))
+                df = self.arrow_server.flights.pop(key).to_pandas()
+                return df
+        self.logger.log(logging.INFO, f'no data found for {filename}')
+        return ''
+
+    def upload_arrow_data(self, data, filename, metadata):
+        my_table = pyarrow.table(data)
+        if metadata is not None:
+            my_table.schema.with_metadata(metadata)
+        descriptor = pyarrow.flight.FlightDescriptor.for_path(filename)
+        key = (descriptor.descriptor_type.value, descriptor.command,
+                tuple(descriptor.path or tuple()))
+        self.arrow_server.flights[key] = my_table
 
     @gen.coroutine
     def post(self):
@@ -127,6 +170,8 @@ class EvaluationPlaneHandler(BaseHandler):
         try:
             yield self._post_impl()
         except Exception as e:
+            import traceback
+            self.logger.log(logging.ERROR, traceback.format_exc())
             err_msg = f"{e.__class__.__name__} : {str(e)}"
             if err_msg != "KeyError : 'response'":
                 err_msg = format_exception(e, "POST /evaluate")
