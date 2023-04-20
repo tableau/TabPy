@@ -148,7 +148,7 @@ class EvaluationPlaneHandler(BaseHandler):
                        tuple(descriptor.path or tuple()))
                 df = self.arrow_server.flights.pop(key).to_pandas()
                 return df
-        print('no data found for get')
+        self.logger.log(logging.INFO, f'no data found for {filename}')
         return ''
 
     def upload_arrow_data(self, data, filename, metadata):
@@ -171,7 +171,7 @@ class EvaluationPlaneHandler(BaseHandler):
             yield self._post_impl()
         except Exception as e:
             import traceback
-            print(traceback.format_exc())
+            self.logger.log(logging.ERROR, traceback.format_exc())
             err_msg = f"{e.__class__.__name__} : {str(e)}"
             if err_msg != "KeyError : 'response'":
                 err_msg = format_exception(e, "POST /evaluate")
