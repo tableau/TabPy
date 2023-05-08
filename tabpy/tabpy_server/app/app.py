@@ -97,7 +97,7 @@ class TabPyApp:
             scheme = "grpc+tls"
             tls_certificates = self._get_tls_certificates(config)
 
-        host = "localhost"
+        host = "0.0.0.0"
         port = config.get(SettingsParameters.ArrowFlightPort)
         location = "{}://{}:{}".format(scheme, host, port)
 
