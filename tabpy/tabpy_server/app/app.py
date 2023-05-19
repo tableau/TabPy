@@ -27,6 +27,7 @@ from tabpy.tabpy_server.handlers import (
     UploadDestinationHandler,
 )
 import tornado
+from tornado.http1connection import HTTP1Connection
 import tabpy.tabpy_server.app.arrow_server as pa
 import _thread
 
@@ -497,3 +498,16 @@ class TabPyApp:
         logger.info(f"Loading state from state file {state_file_path}")
         tabpy_state = _get_state_from_file(state_file_dir)
         return tabpy_state, TabPyState(config=tabpy_state, settings=self.settings)
+
+
+# Override _read_body to allow content with size exceeding max_body_size
+# This enables proper handling of 413 errors in base_handler
+def _read_body_allow_max_size(self, code, headers, delegate):
+    if "Content-Length" in headers:
+        content_length = int(headers["Content-Length"])
+        if content_length > self._max_body_size:
+            return
+    return self.original_read_body(code, headers, delegate)
+
+HTTP1Connection.original_read_body = HTTP1Connection._read_body
+HTTP1Connection._read_body = _read_body_allow_max_size
