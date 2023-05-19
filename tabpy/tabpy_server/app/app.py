@@ -63,6 +63,7 @@ class TabPyApp:
     python_service = None
     credentials = {}
     arrow_server = None
+    max_request_size = 0
 
     def __init__(self, config_file):
         if config_file is None:
@@ -117,10 +118,10 @@ class TabPyApp:
 
     def run(self):
         application = self._create_tornado_web_app()
-        max_request_size = (
+        self.max_request_size = (
             int(self.settings[SettingsParameters.MaxRequestSizeInMb]) * 1024 * 1024
         )
-        logger.info(f"Setting max request size to {max_request_size} bytes")
+        logger.info(f"Setting max request size to {self.max_request_size} bytes")
 
         init_model_evaluator(self.settings, self.tabpy_state, self.python_service)
 
@@ -143,8 +144,8 @@ class TabPyApp:
         application.listen(
             self.settings[SettingsParameters.Port],
             ssl_options=ssl_options,
-            max_buffer_size=max_request_size,
-            max_body_size=max_request_size,
+            max_buffer_size=self.max_request_size,
+            max_body_size=self.max_request_size,
             **settings,
         ) 
 
