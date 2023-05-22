@@ -462,7 +462,7 @@ class BaseHandler(tornado.web.RequestHandler):
                 self.error_out(
                     413,
                     info="Request Entity Too Large",
-                    log_message="Request body size exceeds the specified limit.",
+                    log_message=f"Request with size {content_length} exceeded limit of {self.max_request_size} (bytes).",
                 )
                 return False
         
