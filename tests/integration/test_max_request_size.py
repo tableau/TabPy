@@ -82,3 +82,12 @@ class TestMaxRequestSize(integ_test_base.IntegTestBase):
         response = requests.post(url, data=self.create_large_payload(), headers=headers)
         self.assertEqual(413, response.status_code)
 
+    def test_no_content_length_header_present(self):
+        headers = { "Content-Type": "application/json" }
+        url = self._get_url() + "/evaluate"
+        response = requests.post(url, headers=headers)
+        message = json.loads(response.text)["message"]
+        # Ensure it gets to processing message stage in EvaluationPlaneHandler.post
+        self.assertEqual("Error processing script", message)
+        self.assertEqual(500, response.status_code)
+
