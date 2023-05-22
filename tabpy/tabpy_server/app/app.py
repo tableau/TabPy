@@ -6,7 +6,13 @@ import os
 import shutil
 import signal
 import sys
+import _thread
+
+import tornado
+from tornado.http1connection import HTTP1Connection
+
 import tabpy
+import tabpy.tabpy_server.app.arrow_server as pa
 from tabpy.tabpy import __version__
 from tabpy.tabpy_server.app.app_parameters import ConfigParameters, SettingsParameters
 from tabpy.tabpy_server.app.util import parse_pwd_file
@@ -26,10 +32,6 @@ from tabpy.tabpy_server.handlers import (
     StatusHandler,
     UploadDestinationHandler,
 )
-import tornado
-from tornado.http1connection import HTTP1Connection
-import tabpy.tabpy_server.app.arrow_server as pa
-import _thread
 
 logger = logging.getLogger(__name__)
 
