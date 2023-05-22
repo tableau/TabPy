@@ -1,6 +1,8 @@
 import base64
+import json
 import os
 import tempfile
+import string
 
 from tornado.testing import AsyncHTTPTestCase
 
@@ -457,6 +459,67 @@ class TestEvaluationPlaneHandlerEnabled(AsyncHTTPTestCase):
             body=self.script
         )
         self.assertEqual(200, response.code)
+
+class TestEvaluationPlaneHandlerMaxRequestSize(AsyncHTTPTestCase):
+    @classmethod
+    def setUpClass(cls):
+        prefix = "__TestEvaluationPlaneHandlerMaxRequestSize_"
+
+        # create config file
+        cls.config_file = tempfile.NamedTemporaryFile(
+            mode="w+t", prefix=prefix, suffix=".conf", delete=False
+        )
+        cls.config_file.write(
+            "[TabPy]\n"
+            "TABPY_MAX_REQUEST_SIZE_MB = 1"
+        )
+        cls.config_file.close()
+
+    @classmethod
+    def tearDownClass(cls):
+        os.remove(cls.config_file.name)
+
+    def get_app(self):
+        self.app = TabPyApp(self.config_file.name)
+        return self.app._create_tornado_web_app()
+
+    def create_large_payload(self):
+        num_chars = 2 * 1024 * 1024 # 2MB Size
+        large_string = string.printable * (num_chars // len(string.printable))
+        large_string += string.printable[:num_chars % len(string.printable)]
+        payload = {
+            "data": { "_arg1": [1, large_string] },
+            "script": "return _arg1"
+        }
+        return json.dumps(payload).encode('utf-8')
+
+    def test_evaluation_payload_exceeds_max_request_size(self):
+        response = self.fetch(
+            "/evaluate",
+            method="POST",
+            body=self.create_large_payload()
+        )
+        self.assertEqual(413, response.code)
+
+    def test_evaluation_max_request_size_not_applied(self):
+        self.app.max_request_size = None
+        response = self.fetch(
+            "/evaluate",
+            method="POST",
+            body=self.create_large_payload()
+        )
+        self.assertEqual(200, response.code)
+        self.assertEqual(1, json.loads(response.body)[0])
+
+    def test_no_content_length_header_present(self):
+        response = self.fetch(
+            "/evaluate",
+            method="POST",
+            allow_nonstandard_methods=True
+        )
+        message = json.loads(response.body)["message"]
+        # Ensure it reaches script processing stage in EvaluationPlaneHandler.post
+        self.assertEqual("Error processing script", message)
 
 
 class TestEvaluationPlaneHandlerDefault(AsyncHTTPTestCase):

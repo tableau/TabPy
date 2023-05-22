@@ -60,8 +60,7 @@ class TestMaxRequestSize(integ_test_base.IntegTestBase):
         return config_file.name
 
     def create_large_payload(self):
-        size_mb = 2
-        num_chars = size_mb * 1024 * 1024
+        num_chars = 2 * 1024 * 1024 # 2MB Size
         large_string = string.printable * (num_chars // len(string.printable))
         large_string += string.printable[:num_chars % len(string.printable)]
         payload = {
@@ -70,12 +69,6 @@ class TestMaxRequestSize(integ_test_base.IntegTestBase):
         }
         return json.dumps(payload).encode('utf-8')
 
-    def test_payload_exceeds_max_request_size_evaluate(self):
-        headers = { "Content-Type": "application/json" }
-        url = self._get_url() + "/evaluate"
-        response = requests.post(url, data=self.create_large_payload(), headers=headers)
-        self.assertEqual(413, response.status_code)
-
     def test_payload_exceeds_max_request_size_query(self):
         headers = { "Content-Type": "application/json" }
         url = self._get_url() + "/query/model_name"
@@ -83,13 +76,3 @@ class TestMaxRequestSize(integ_test_base.IntegTestBase):
         self.assertEqual(413, response.status_code)
         response = requests.get(url, data=self.create_large_payload(), headers=headers)
         self.assertEqual(413, response.status_code)
-
-    def test_no_content_length_header_present(self):
-        headers = { "Content-Type": "application/json" }
-        url = self._get_url() + "/evaluate"
-        response = requests.post(url, headers=headers)
-        message = json.loads(response.text)["message"]
-        # Ensure it reaches script processing stage in EvaluationPlaneHandler.post
-        self.assertEqual("Error processing script", message)
-        self.assertEqual(500, response.status_code)
-
