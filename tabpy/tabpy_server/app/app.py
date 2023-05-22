@@ -63,7 +63,7 @@ class TabPyApp:
     python_service = None
     credentials = {}
     arrow_server = None
-    max_request_size = 0
+    max_request_size = None
 
     def __init__(self, config_file):
         if config_file is None:
@@ -121,6 +121,7 @@ class TabPyApp:
         self.max_request_size = (
             int(self.settings[SettingsParameters.MaxRequestSizeInMb]) * 1024 * 1024
         )
+        print(f"Setting max request size to {self.max_request_size} bytes")
         logger.info(f"Setting max request size to {self.max_request_size} bytes")
 
         init_model_evaluator(self.settings, self.tabpy_state, self.python_service)
