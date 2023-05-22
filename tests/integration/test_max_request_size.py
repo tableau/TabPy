@@ -1,5 +1,5 @@
 """
-Script evaluation tests.
+Max request size tests.
 """
 
 from . import integ_test_base
