@@ -120,11 +120,7 @@ class TabPyApp:
 
     def run(self):
         application = self._create_tornado_web_app()
-        self.max_request_size = (
-            int(self.settings[SettingsParameters.MaxRequestSizeInMb]) * 1024 * 1024
-        )
-        logger.info(f"Setting max request size to {self.max_request_size} bytes")
-
+        
         init_model_evaluator(self.settings, self.tabpy_state, self.python_service)
 
         protocol = self.settings[SettingsParameters.TransferProtocol]
@@ -358,6 +354,12 @@ class TabPyApp:
         ].lower()
 
         self._validate_transfer_protocol_settings()
+        
+        # Set max request size in bytes
+        self.max_request_size = (
+            int(self.settings[SettingsParameters.MaxRequestSizeInMb]) * 1024 * 1024
+        )
+        logger.info(f"Setting max request size to {self.max_request_size} bytes")
 
         # if state.ini does not exist try and create it - remove
         # last dependence on batch/shell script
