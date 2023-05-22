@@ -59,22 +59,26 @@ class TestMaxRequestSize(integ_test_base.IntegTestBase):
         self.delete_config_file = True
         return config_file.name
 
-    def test_payload_exceeds_max_request_size_evaluate(self):
+    def create_large_payload(self):
         size_mb = 2
         num_chars = size_mb * 1024 * 1024
         large_string = string.printable * (num_chars // len(string.printable))
         large_string += string.printable[:num_chars % len(string.printable)]
-    
         payload = {
             "data": { "_arg1": large_string },
             "script": "return _arg1"
         }
-        headers = {
-            "Content-Type": "application/json",
-        }
+        return json.dumps(payload).encode('utf-8')
+
+    def test_payload_exceeds_max_request_size_evaluate(self):
+        headers = { "Content-Type": "application/json" }
         url = self._get_url() + "/evaluate"
-        response = requests.request("POST", url, data=json.dumps(payload).encode('utf-8'),
-            headers=headers)
-        result = json.loads(response.text)
+        response = requests.post(url, data=self.create_large_payload(), headers=headers)
+        self.assertEqual(413, response.status_code)
+
+    def test_payload_exceeds_max_request_size_query(self):
+        headers = { "Content-Type": "application/json" }
+        url = self._get_url() + "/query/model_name"
+        response = requests.post(url, data=self.create_large_payload(), headers=headers)
         self.assertEqual(413, response.status_code)
 
