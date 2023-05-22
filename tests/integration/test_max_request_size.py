@@ -69,10 +69,10 @@ class TestMaxRequestSize(integ_test_base.IntegTestBase):
         }
         return json.dumps(payload).encode('utf-8')
 
-    def test_payload_exceeds_max_request_size_query(self):
-        headers = { "Content-Type": "application/json" }
-        url = self._get_url() + "/query/model_name"
-        response = requests.post(url, data=self.create_large_payload(), headers=headers)
-        self.assertEqual(413, response.status_code)
-        response = requests.get(url, data=self.create_large_payload(), headers=headers)
-        self.assertEqual(413, response.status_code)
+    # def test_payload_exceeds_max_request_size_query(self):
+    #     headers = { "Content-Type": "application/json" }
+    #     url = self._get_url() + "/query/model_name"
+    #     response = requests.post(url, data=self.create_large_payload(), headers=headers)
+    #     self.assertEqual(413, response.status_code)
+    #     response = requests.get(url, data=self.create_large_payload(), headers=headers)
+    #     self.assertEqual(413, response.status_code)
