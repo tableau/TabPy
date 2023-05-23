@@ -46,6 +46,10 @@ class EvaluationPlaneDisabledHandler(BaseHandler):
         if self.should_fail_with_auth_error() != AuthErrorStates.NONE:
             self.fail_with_auth_error()
             return
+
+        if not self.request_body_size_within_limit():
+            return
+            
         self.error_out(404, "Ad-hoc scripts have been disabled on this analytics extension, please contact your "
                             "administrator.")
 
@@ -164,6 +168,9 @@ class EvaluationPlaneHandler(BaseHandler):
     def post(self):
         if self.should_fail_with_auth_error() != AuthErrorStates.NONE:
             self.fail_with_auth_error()
+            return
+        
+        if not self.request_body_size_within_limit():
             return
 
         self._add_CORS_header()

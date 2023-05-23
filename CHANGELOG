@@ -1,5 +1,12 @@
 # Changelog
 
+## v2.8.0
+
+### Improvements
+
+- Returns 413 error code when request payload exceeds 
+TABPY_MAX_REQUEST_SIZE_MB config setting.
+
 ## v2.7.0
 
 ### Improvements

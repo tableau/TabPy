@@ -127,6 +127,7 @@ class BaseHandler(tornado.web.RequestHandler):
         self.username = None
         self.password = None
         self.eval_timeout = self.settings[SettingsParameters.EvaluateTimeout]
+        self.max_request_size = app.max_request_size
 
         self.logger = ContextLoggerWrapper(self.request)
         self.logger.enable_context_logging(
@@ -442,3 +443,25 @@ class BaseHandler(tornado.web.RequestHandler):
                 info="Not Acceptable",
                 log_message="Username or password provided when authentication not available.",
             )
+
+    def request_body_size_within_limit(self):
+        """
+        Determines if the request body size is within the specified limit.
+        
+        Returns
+        -------
+        bool
+            True if the request body size is within the limit, False otherwise.
+        """
+        if self.max_request_size is not None:
+            if "Content-Length" in self.request.headers:
+                content_length = int(self.request.headers["Content-Length"])
+                if content_length > self.max_request_size:
+                    self.error_out(
+                        413,
+                        info="Request Entity Too Large",
+                        log_message=f"Request with size {content_length} exceeded limit of {self.max_request_size} (bytes).",
+                    )
+                    return False
+
+        return True

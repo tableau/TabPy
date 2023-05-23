@@ -6,7 +6,13 @@ import os
 import shutil
 import signal
 import sys
+import _thread
+
+import tornado
+from tornado.http1connection import HTTP1Connection
+
 import tabpy
+import tabpy.tabpy_server.app.arrow_server as pa
 from tabpy.tabpy import __version__
 from tabpy.tabpy_server.app.app_parameters import ConfigParameters, SettingsParameters
 from tabpy.tabpy_server.app.util import parse_pwd_file
@@ -26,9 +32,6 @@ from tabpy.tabpy_server.handlers import (
     StatusHandler,
     UploadDestinationHandler,
 )
-import tornado
-import tabpy.tabpy_server.app.arrow_server as pa
-import _thread
 
 logger = logging.getLogger(__name__)
 
@@ -62,6 +65,7 @@ class TabPyApp:
     python_service = None
     credentials = {}
     arrow_server = None
+    max_request_size = None
 
     def __init__(self, config_file):
         if config_file is None:
@@ -116,11 +120,7 @@ class TabPyApp:
 
     def run(self):
         application = self._create_tornado_web_app()
-        max_request_size = (
-            int(self.settings[SettingsParameters.MaxRequestSizeInMb]) * 1024 * 1024
-        )
-        logger.info(f"Setting max request size to {max_request_size} bytes")
-
+        
         init_model_evaluator(self.settings, self.tabpy_state, self.python_service)
 
         protocol = self.settings[SettingsParameters.TransferProtocol]
@@ -142,8 +142,8 @@ class TabPyApp:
         application.listen(
             self.settings[SettingsParameters.Port],
             ssl_options=ssl_options,
-            max_buffer_size=max_request_size,
-            max_body_size=max_request_size,
+            max_buffer_size=self.max_request_size,
+            max_body_size=self.max_request_size,
             **settings,
         ) 
 
@@ -354,6 +354,12 @@ class TabPyApp:
         ].lower()
 
         self._validate_transfer_protocol_settings()
+        
+        # Set max request size in bytes
+        self.max_request_size = (
+            int(self.settings[SettingsParameters.MaxRequestSizeInMb]) * 1024 * 1024
+        )
+        logger.info(f"Setting max request size to {self.max_request_size} bytes")
 
         # if state.ini does not exist try and create it - remove
         # last dependence on batch/shell script
@@ -497,3 +503,16 @@ class TabPyApp:
         logger.info(f"Loading state from state file {state_file_path}")
         tabpy_state = _get_state_from_file(state_file_dir)
         return tabpy_state, TabPyState(config=tabpy_state, settings=self.settings)
+
+
+# Override _read_body to allow content with size exceeding max_body_size
+# This enables proper handling of 413 errors in base_handler
+def _read_body_allow_max_size(self, code, headers, delegate):
+    if "Content-Length" in headers:
+        content_length = int(headers["Content-Length"])
+        if content_length > self._max_body_size:
+            return
+    return self.original_read_body(code, headers, delegate)
+
+HTTP1Connection.original_read_body = HTTP1Connection._read_body
+HTTP1Connection._read_body = _read_body_allow_max_size

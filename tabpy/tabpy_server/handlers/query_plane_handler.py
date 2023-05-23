@@ -217,6 +217,9 @@ class QueryPlaneHandler(BaseHandler):
             self.fail_with_auth_error()
             return
 
+        if not self.request_body_size_within_limit():
+            return
+
         start = time.time()
         endpoint_name = urllib.parse.unquote(endpoint_name)
         self._process_query(endpoint_name, start)
@@ -227,6 +230,9 @@ class QueryPlaneHandler(BaseHandler):
 
         if self.should_fail_with_auth_error() != AuthErrorStates.NONE:
             self.fail_with_auth_error()
+            return
+
+        if not self.request_body_size_within_limit():
             return
 
         start = time.time()
