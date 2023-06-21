@@ -3,11 +3,12 @@ TabPy Server.
 
 Usage:
   tabpy [-h] | [--help]
-  tabpy [--config <CONFIG>]
+  tabpy [--config <CONFIG>] [--disable-auth-warning]
 
 Options:
-  -h --help         Show this screen.
-  --config <CONFIG> Path to a config file.
+  -h --help                 Show this screen.
+  --config <CONFIG>         Path to a config file.
+  --disable-auth-warning    Disable authentication warning.
 """
 
 import docopt
@@ -38,9 +39,13 @@ def main():
     args = docopt.docopt(__doc__)
     config = args["--config"] or None
 
+    disable_auth_warning = False
+    if args["--disable-auth-warning"]:
+        disable_auth_warning = True
+
     from tabpy.tabpy_server.app.app import TabPyApp
 
-    app = TabPyApp(config)
+    app = TabPyApp(config, disable_auth_warning)
     app.run()
 
 
