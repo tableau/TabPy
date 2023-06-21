@@ -394,10 +394,8 @@ class TabPyApp:
                 logger.critical(msg)
                 raise RuntimeError(msg)
         else:
-            logger.info(
-                "Password file is not specified: " "Authentication is not enabled"
-            )
-
+            self._handle_configuration_without_authentication()
+     
         features = self._get_features()
         self.settings[SettingsParameters.ApiVersions] = {"v1": {"features": features}}
 
@@ -470,6 +468,25 @@ class TabPyApp:
             succeeded = False
 
         return succeeded
+
+    def _handle_configuration_without_authentication(self):
+        confirm_no_auth_msg = "\nWARNING: No username/password authentication is configured for this TabPy server. "
+        
+        if self.settings[SettingsParameters.EvaluateEnabled]:
+            confirm_no_auth_msg += ("Since TABPY_EVALUATE_ENABLE is on, unauthenticated users can execute "
+                "remote code on this machine, posing significant security risks. ")
+        
+        confirm_no_auth_msg += ("Proceeding in this insecure state is strongly discouraged.\n\n"
+            "Are you sure you want to continue without authentication? (Y/N): ")
+        confirm_no_auth_input = input(confirm_no_auth_msg)
+        
+        if confirm_no_auth_input.lower() == 'y':
+            logger.info("Password file is not specified: Authentication is not enabled")
+        else:
+            print("\nAborting start up. To enable authentication for your TabPy server, see "
+                "https://github.com/tableau/TabPy/blob/master/docs/server-config.md#authentication.")
+            
+            exit()
 
     def _get_features(self):
         features = {}
