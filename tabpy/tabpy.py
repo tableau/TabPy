@@ -40,7 +40,7 @@ def main():
 
     from tabpy.tabpy_server.app.app import TabPyApp
 
-    app = TabPyApp(config)
+    app = TabPyApp(config, True)
     app.run()
 
 
