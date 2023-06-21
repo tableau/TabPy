@@ -67,7 +67,8 @@ class TabPyApp:
     arrow_server = None
     max_request_size = None
 
-    def __init__(self, config_file):
+    def __init__(self, config_file, disable_auth_warning=True):
+        self.disable_auth_warning = disable_auth_warning
         if config_file is None:
             config_file = os.path.join(
                 os.path.dirname(__file__), os.path.pardir, "common", "default.conf"
