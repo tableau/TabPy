@@ -247,7 +247,7 @@ class IntegTestBase(unittest.TestCase):
                     self.process.stdin.flush()
 
             # give the app some time to start up...
-            time.sleep(3)
+            time.sleep(5)
 
     def tearDown(self):
         # stop TabPy
