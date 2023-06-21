@@ -477,14 +477,14 @@ class TabPyApp:
             logger.info(std_no_auth_msg)
             return  
 
-        confirm_no_auth_msg = "\nWARNING: No username/password authentication is configured for this TabPy server. "
+        confirm_no_auth_msg = "\nWARNING: This TabPy server is not currently configured for username/password authentication. "
 
         if self.settings[SettingsParameters.EvaluateEnabled]:
-            confirm_no_auth_msg += ("Since TABPY_EVALUATE_ENABLE is on, unauthenticated users can execute "
-                "remote code on this machine, posing significant security risks. ")
+            confirm_no_auth_msg += ("This means that, because the TABPY_EVALUATE_ENABLE feature is enabled, there is " 
+                "the potential that unauthenticated individuals may be able to remotely execute code on this machine. ")
         
-        confirm_no_auth_msg += ("Proceeding in this insecure state is strongly discouraged.\n\n"
-            "Are you sure you want to continue without authentication? (y/N): ")
+        confirm_no_auth_msg += ("We strongly advise against proceeding without authentication as it poses a significant security risk.\n\n"
+            "Do you wish to proceed without authentication? (y/N): ")
 
         confirm_no_auth_input = input(confirm_no_auth_msg)
 
