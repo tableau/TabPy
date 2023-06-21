@@ -68,6 +68,26 @@ class TestConfigEnvironmentCalls(unittest.TestCase):
         TabPyApp(None)
         self.assertEqual(len(mock_os.makedirs.mock_calls), 1)
 
+    @patch('builtins.input', return_value='y')
+    @patch("tabpy.tabpy_server.app.app.os")
+    @patch("tabpy.tabpy_server.app.app.os.path.exists", return_value=False)
+    @patch("tabpy.tabpy_server.app.app.PythonServiceHandler")
+    @patch("tabpy.tabpy_server.app.app._get_state_from_file")
+    @patch("tabpy.tabpy_server.app.app.TabPyState")
+    def test_handle_configuration_without_authentication(
+        self,
+        mock_tabpy_state,
+        mock_get_state_from_file,
+        mock_psws,
+        mock_os_path_exists,
+        mock_os,
+        mock_input,
+    ):
+        TabPyApp(None)
+        mock_input.assert_not_called()
+
+        TabPyApp(None, False)
+        mock_input.assert_called()
 
 class TestPartialConfigFile(unittest.TestCase):
     def setUp(self):
