@@ -236,11 +236,18 @@ class IntegTestBase(unittest.TestCase):
 
             coverage.process_startup()
             self.process = subprocess.Popen(
-                cmd, preexec_fn=preexec_fn, stdout=outfile, stderr=outfile
+                cmd, preexec_fn=preexec_fn, stdout=outfile, stderr=outfile, stdin=subprocess.PIPE
             )
 
+            # check if there is a confirmation prompt for no authentication
+            time.sleep(3)
+            with open(self.tmp_dir + "/output.txt", "r") as infile:
+                if "WARNING: No username/password" in infile.read():
+                    self.process.stdin.write(b"Y\n")
+                    self.process.stdin.flush()
+
             # give the app some time to start up...
-            time.sleep(5)
+            time.sleep(3)
 
     def tearDown(self):
         # stop TabPy
