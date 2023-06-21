@@ -67,7 +67,8 @@ class TabPyApp:
     arrow_server = None
     max_request_size = None
 
-    def __init__(self, config_file):
+    def __init__(self, config_file, show_no_auth_warning=False):
+        self.show_no_auth_warning = show_no_auth_warning
         if config_file is None:
             config_file = os.path.join(
                 os.path.dirname(__file__), os.path.pardir, "common", "default.conf"
@@ -470,22 +471,28 @@ class TabPyApp:
         return succeeded
 
     def _handle_configuration_without_authentication(self):
+        std_no_auth_msg = "Password file is not specified: Authentication is not enabled"
+
+        if self.show_no_auth_warning != True:
+            logger.info(std_no_auth_msg)
+            return  
+
         confirm_no_auth_msg = "\nWARNING: No username/password authentication is configured for this TabPy server. "
-        
+
         if self.settings[SettingsParameters.EvaluateEnabled]:
             confirm_no_auth_msg += ("Since TABPY_EVALUATE_ENABLE is on, unauthenticated users can execute "
                 "remote code on this machine, posing significant security risks. ")
         
         confirm_no_auth_msg += ("Proceeding in this insecure state is strongly discouraged.\n\n"
-            "Are you sure you want to continue without authentication? (Y/N): ")
+            "Are you sure you want to continue without authentication? (y/N): ")
+
         confirm_no_auth_input = input(confirm_no_auth_msg)
-        
-        if confirm_no_auth_input.lower() == 'y':
-            logger.info("Password file is not specified: Authentication is not enabled")
+
+        if confirm_no_auth_input == 'y':
+            logger.info(std_no_auth_msg)
         else:
             print("\nAborting start up. To enable authentication for your TabPy server, see "
                 "https://github.com/tableau/TabPy/blob/master/docs/server-config.md#authentication.")
-            
             exit()
 
     def _get_features(self):
