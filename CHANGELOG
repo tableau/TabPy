@@ -1,5 +1,12 @@
 # Changelog
 
+## v2.9.0
+
+### Improvements
+
+- Require confirmation to continue when starting TabPy without authentication, 
+  with a warning that this is an insecure state and not recommended.
+
 ## v2.8.0
 
 ### Improvements
