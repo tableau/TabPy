@@ -29,14 +29,13 @@ Consider reading TabPy documentation in the following order:
 
 Important Security Note:
 
-* By default, TabPy is not configured with username/password authentication.
-This means that if the TABPY_EVALUATE_ENABLE feature is enabled
-(which is the default setting), there is the potential that unauthenticated
-individuals may be able to remotely execute code on the machine that TabPy
-is running on. We strongly advise against using TabPy without authentication
-as it poses a significant security risk. To use TabPy with authentication,
-please see
-[docs/server-config.md](https://github.com/tableau/TabPy/blob/master/docs/server-config.md#authentication).
+* By default, TabPy is configured without username/password authentication.
+We strongly advise using TabPy only with authentication enabled. For more information, see 
+[TabPy Server Configuration Instructions](docs/server-config.md#authentication). 
+Without authentication in place, if the TABPY_EVALUATE_ENABLE feature is enabled 
+(as it is by default), there is the possibility that unauthenticated individuals could 
+remotely execute code on the machine running TabPy. Leaving these two settings in their 
+default states together is highly discouraged.
 
 Troubleshooting:
 
