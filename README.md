@@ -27,6 +27,10 @@ Consider reading TabPy documentation in the following order:
 * [Authoring Python calculations in Tableau](docs/TableauConfiguration.md).
 * [TabPy Tools](docs/tabpy-tools.md)
 
+Important Security Note:
+
+- By default, TabPy is not configured with username/password authentication. This means that if the TABPY_EVALUATE_ENABLE feature is enabled (which is the default setting), there is the potential that unauthenticated individuals may be able to remotely execute code on the machine that TabPy is running on. We strongly advise against using TabPy without authentication as it poses a significant security risk. To use TabPy with authentication, please see [docs/server-config.md](https://github.com/tableau/TabPy/blob/master/docs/server-config.md#authentication).
+
 Troubleshooting:
 
 * [TabPy Wiki](https://github.com/tableau/TabPy/wiki)
