@@ -21,6 +21,7 @@ build:
       dependencies:
           before:
             - pip install --upgrade pip setuptools
+            - pip install zope-interface>=5
       project_setup:
         override: 
           - pip install -r requirements.txt
