@@ -1,10 +1,11 @@
 build:
   environment:
-    python: 3.9
+    python: 3.6
   nodes:
     coverage:
       dependencies:
         before:
+          - source /home/scrutinizer/virtualenv/binactivate
           - pip install --upgrade pip setuptools
       project_setup:
         override:
@@ -18,6 +19,10 @@ build:
               config_file: 'setup.cfg'
               format: 'py-cc'
     analysis:
+      dependencies:
+          before:
+            - source /home/scrutinizer/virtualenv/binactivate
+            - pip install --upgrade pip setuptools
       project_setup:
         override: 
           - pip install -r requirements.txt
