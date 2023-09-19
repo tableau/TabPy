@@ -5,6 +5,7 @@ build:
     coverage:
       dependencies:
         before:
+          - source /home/scrutinizer/virtualenv/bin/activate
           - pip install --upgrade pip setuptools
       project_setup:
         override:
@@ -20,6 +21,7 @@ build:
     analysis:
       dependencies:
           before:
+            - source /home/scrutinizer/virtualenv/bin/activate
             - pip config set global.trusted-host "pypi.org files.pythonhosted.org pypi.python.org"
       project_setup:
         override: 
