@@ -1,6 +1,6 @@
 build:
   environment:
-    python: 3.7.6
+    python: 3.10.11
   nodes:
     coverage:
       project_setup:
