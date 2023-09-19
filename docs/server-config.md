@@ -314,14 +314,14 @@ For extended logging (e.g. for auditing purposes) additional logging can be turn
 on with setting `TABPY_LOG_DETAILS` configuration file parameter to `true`.
 
 With the feature on additional information is logged for HTTP requests: caller ip,
-URL, client infomation (Tableau Desktop\Server), Tableau user name (for Tableau Server)
-and TabPy user name as shown in the example below:
+URL, client infomation (Tableau Desktop\Server) and TabPy user name as shown in
+the example below:
 
 <!-- markdownlint-disable MD013 -->
 <!-- markdownlint-disable MD040 -->
 
 ```
-2019-05-02,13:50:08 [INFO] (base_handler.py:base_handler:90): Call ID: 934073bd-0d29-46d3-b693-b1e4b1efa9e4, Caller: ::1, Method: POST, Resource: http://localhost:9004/evaluate, Client: Postman for manual testing, Tableau user: ogolovatyi
+2019-05-02,13:50:08 [INFO] (base_handler.py:base_handler:90): Call ID: 934073bd-0d29-46d3-b693-b1e4b1efa9e4, Caller: ::1, Method: POST, Resource: http://localhost:9004/evaluate, Client: Postman for manual testing
 2019-05-02,13:50:08 [DEBUG] (base_handler.py:base_handler:120): Checking if need to handle authentication, <<
 call ID: 934073bd-0d29-46d3-b693-b1e4b1efa9e4>>
 2019-05-02,13:50:08 [DEBUG] (base_handler.py:base_handler:120): Handling authentication, <<call ID: 934073bd-
