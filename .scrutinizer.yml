@@ -3,10 +3,6 @@ build:
     python: 3.7.6
   nodes:
     coverage:
-      dependencies:
-        before:
-          - which python
-          - pip install --upgrade pip setuptools
       project_setup:
         override:
           - pip install -r requirements.txt
@@ -19,11 +15,6 @@ build:
               config_file: 'setup.cfg'
               format: 'py-cc'
     analysis:
-      dependencies:
-          before:
-            - sleep 3
-            - source /home/scrutinizer/virtualenv/bin/activate
-            - pip install --upgrade pip setuptools
       project_setup:
         override: 
           - pip install -r requirements.txt
