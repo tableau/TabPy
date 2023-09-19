@@ -20,8 +20,7 @@ build:
     analysis:
       dependencies:
           before:
-            - pip install --upgrade pip setuptools
-            - sudo update-ca-certificates
+            - pip config set global.trusted-host "pypi.org files.pythonhosted.org pypi.python.org"
       project_setup:
         override: 
           - pip install -r requirements.txt
