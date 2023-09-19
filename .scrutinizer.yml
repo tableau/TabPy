@@ -27,9 +27,6 @@ build:
       tests:
         override: [py-scrutinizer-run]
   tests:
-    dependencies:
-          before:
-            - pip install --upgrade pip setuptools
     before:
       - pip install -r requirements.txt
     override: [pytest]
