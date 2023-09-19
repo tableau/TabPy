@@ -21,7 +21,7 @@ build:
       dependencies:
           before:
             - curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-            - get-pip.py
+            - python get-pip.py
       project_setup:
         override: 
           - pip install -r requirements.txt
