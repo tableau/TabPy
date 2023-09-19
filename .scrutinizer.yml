@@ -15,6 +15,9 @@ build:
               config_file: 'setup.cfg'
               format: 'py-cc'
     analysis:
+      dependencies:
+          override: 
+            - pip install .
       project_setup:
         override: 
           - pip install .
