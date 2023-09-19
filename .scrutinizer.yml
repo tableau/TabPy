@@ -17,11 +17,13 @@ build:
     analysis:
       project_setup:
         override: 
+          - pip install --upgrade pip setuptools
           - pip install -r requirements.txt
       tests:
         override: [py-scrutinizer-run]
   tests:
     before:
+      - pip install --upgrade pip setuptools
       - pip install -r requirements.txt
     override: [pytest]
 checks:
