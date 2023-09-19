@@ -15,14 +15,14 @@ build:
               config_file: 'setup.cfg'
               format: 'py-cc'
     analysis:
-      dependencies:
-          override: 
-            - pip install .
       project_setup:
         override: 
-          - pip install .
+          - pip install -r requirements.txt
       tests:
         override: [py-scrutinizer-run]
+  dependencies: 
+    override: 
+      - pip install .
   tests:
     before:
       - pip install -r requirements.txt
