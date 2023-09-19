@@ -20,6 +20,9 @@ build:
           - pip install -r requirements.txt
       tests:
         override: [py-scrutinizer-run]
+  dependencies: 
+    override: 
+      - pip install .
   tests:
     before:
       - pip install -r requirements.txt
