@@ -91,6 +91,7 @@ def setup_package():
             "twisted",
             "urllib3",
             "pyarrow",
+            "zope-interface",
         ],
         entry_points={
             "console_scripts": [
