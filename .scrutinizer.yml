@@ -1,11 +1,11 @@
 build:
   environment:
-    python: 3.7
+    python: 3.7.6
   nodes:
     coverage:
       dependencies:
         before:
-          - source /home/scrutinizer/virtualenv/bin/activate
+          - which python
           - pip install --upgrade pip setuptools
       project_setup:
         override:
@@ -21,6 +21,7 @@ build:
     analysis:
       dependencies:
           before:
+            - sleep 3
             - source /home/scrutinizer/virtualenv/bin/activate
             - pip install --upgrade pip setuptools
       project_setup:
