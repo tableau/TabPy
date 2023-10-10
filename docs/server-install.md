@@ -25,8 +25,6 @@ related to `pyarrow`.
 
 ### Installation
 
-> Note - TabPy only supports Python versions 3.7, 3.8, and 3.9
-
 To install TabPy on to an environment `pip` needs to be installed and
 updated first:
 
