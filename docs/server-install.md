@@ -15,6 +15,8 @@ These instructions explain how to install and start up TabPy Server.
 
 ## TabPy Installation
 
+> Note - TabPy only supports Python versions 3.7, 3.8, and 3.9
+
 To install TabPy on to an environment `pip` needs to be installed and
 updated first:
 
@@ -30,7 +32,7 @@ pip install tabpy
 
 ## Starting TabPy
 
-To start TabPy with default setting run the following command:
+To start TabPy with default settings run the following command:
 
 ```sh
 tabpy
