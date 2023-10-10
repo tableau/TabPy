@@ -15,6 +15,13 @@ These instructions explain how to install and start up TabPy Server.
 
 ## TabPy Installation
 
+### Prerequisites
+
+- TabPy only supports Python versions 3.7, 3.8, and 3.9
+- TabPy 2.7.0 added support for data streaming via Apache Arrow Flight (`pyarrow`). When using TabPy >= 2.7.0, we recommend using a Python 64-bit installer to avoid incompatibility issues related to `pyarrow`.
+
+### Installation
+
 > Note - TabPy only supports Python versions 3.7, 3.8, and 3.9
 
 To install TabPy on to an environment `pip` needs to be installed and
