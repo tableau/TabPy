@@ -11,7 +11,7 @@ jobs:
       matrix:
         # TODO: Add 3.7 to python-versions after GitHub action regression is resolved.
         # https://github.com/actions/setup-python/issues/682
-        python-version: [3.8, 3.9]
+        python-version: ['3.8', '3.9', '3.10']
         os: [ubuntu-latest, windows-latest, macos-latest]
 
     steps:
