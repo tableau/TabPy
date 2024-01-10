@@ -17,7 +17,7 @@ def validate_cert(cert_file_path):
     date_format, encoding = "%Y%m%d%H%M%SZ", "ascii"
     not_before = datetime.strptime(cert.get_notBefore().decode(encoding), date_format)
     not_after = datetime.strptime(cert.get_notAfter().decode(encoding), date_format)
-    now = datetime.now()
+    now = datetime.utcnow()
 
     https_error = "Error using HTTPS: "
     if now < not_before:
