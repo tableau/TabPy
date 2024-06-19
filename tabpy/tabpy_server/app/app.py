@@ -91,9 +91,9 @@ class TabPyApp:
             certfile=self.settings[SettingsParameters.CertificateFile],
             keyfile=self.settings[SettingsParameters.KeyFile]
         )
-        
+
         min_tls = self.settings.get(SettingsParameters.MinimumTLSVersion)
-        try: 
+        try:
             ssl_context.minimum_version = ssl.TLSVersion[min_tls]
             logger.info(f"Setting minimum TLS version to: {min_tls}")
         except KeyError:
@@ -343,7 +343,7 @@ class TabPyApp:
             (SettingsParameters.CertificateFile, ConfigParameters.TABPY_CERTIFICATE_FILE,
              None, None),
             (SettingsParameters.KeyFile, ConfigParameters.TABPY_KEY_FILE, None, None),
-            (SettingsParameters.MinimumTLSVersion, ConfigParameters.TABPY_MINIMUM_TLS_VERSION, 
+            (SettingsParameters.MinimumTLSVersion, ConfigParameters.TABPY_MINIMUM_TLS_VERSION,
              "TLSv1_2", None),
             (SettingsParameters.StateFilePath, ConfigParameters.TABPY_STATE_PATH,
              os.path.join(pkg_path, "tabpy_server"), None),
