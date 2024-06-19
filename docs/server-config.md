@@ -82,8 +82,8 @@ at [`logging.config` documentation page](https://docs.python.org/3.6/library/log
 - `TABPY_KEY_FILE` - absolute path to private key file to run TabPy with.
   Only used with `TABPY_TRANSFER_PROTOCOL` set to `https`. Default value -
   not set.
-- `TABPY_MINIMUM_TLS_VERSION` - set the minimum TLS version that the server 
-  will accept for secure connections (`TLSv1_2`, `TLSv1_3`, etc). Refer to 
+- `TABPY_MINIMUM_TLS_VERSION` - set the minimum TLS version that the server
+  will accept for secure connections (`TLSv1_2`, `TLSv1_3`, etc). Refer to
   [docs.python.org](https://docs.python.org/3/library/ssl.html#ssl.TLSVersion.MINIMUM_SUPPORTED)
   for acceptable values. Default value - `TLSv1_2`.
 - `TABPY_LOG_DETAILS` - when set to `true` additional call information
