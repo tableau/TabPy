@@ -209,6 +209,20 @@ class TestPartialConfigFile(unittest.TestCase):
         app = TabPyApp(self.config_file.name)
         self.assertEqual(app.settings["gzip_enabled"], False)
 
+    @patch("tabpy.tabpy_server.app.app.os.path.exists", return_value=True)
+    @patch("tabpy.tabpy_server.app.app._get_state_from_file")
+    @patch("tabpy.tabpy_server.app.app.TabPyState")
+    def test_min_tls_setting_valid(
+        self, mock_state, mock_get_state_from_file, mock_path_exists
+    ):
+        self.assertTrue(self.config_file is not None)
+        config_file = self.config_file
+        config_file.write("[TabPy]\n" "TABPY_MINIMUM_TLS_VERSION = TLSv1_3".encode())
+        config_file.close()
+
+        app = TabPyApp(self.config_file.name)
+        self.assertEqual(app.settings["minimum_tls_version"], "TLSv1_3")
+
 class TestTransferProtocolValidation(unittest.TestCase):
     def assertTabPyAppRaisesRuntimeError(self, expected_message):
         with self.assertRaises(RuntimeError) as err:
