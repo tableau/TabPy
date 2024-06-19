@@ -93,11 +93,12 @@ class TabPyApp:
         )
 
         min_tls = self.settings.get(SettingsParameters.MinimumTLSVersion)
-        try:
-            ssl_context.minimum_version = ssl.TLSVersion[min_tls]
-            logger.info(f"Setting minimum TLS version to: {min_tls}")
-        except KeyError:
+        if not hasattr(ssl.TLSVersion, min_tls):
             logger.warning(f"Unrecognized value for TABPY_MINIMUM_TLS_VERSION: {min_tls}")
+            min_tls = "TLSv1_2"
+            
+        logger.info(f"Setting minimum TLS version to {min_tls}") 
+        ssl_context.minimum_version = ssl.TLSVersion[min_tls]
 
         return ssl_context
 
