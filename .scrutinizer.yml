@@ -27,8 +27,9 @@ build:
   tests:
     before:
       - pip install -r requirements.txt
-    override: [pytest]
-      - idle_timeout: 300
+    override:
+      - command: 'pytest'
+        idle_timeout: 300
 checks:
   python:
     code_rating: true
