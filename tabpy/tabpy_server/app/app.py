@@ -85,7 +85,7 @@ class TabPyApp:
         self._parse_config(config_file)
 
     def _initialize_ssl_context(self):
-        ssl_context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
+        ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
 
         ssl_context.load_cert_chain(
             certfile=self.settings[SettingsParameters.CertificateFile],
