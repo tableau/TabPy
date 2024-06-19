@@ -12,14 +12,7 @@ jobs:
         # TODO: Add 3.7 to python-versions after GitHub action regression is resolved.
         # https://github.com/actions/setup-python/issues/682
         python-version: ['3.8', '3.9', '3.10']
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        include:
-          - os: macos-latest
-            runner: macos-latest@arm64
-          - os: ubuntu-latest
-            runner: ubuntu-latest
-          - os: windows-latest
-            runner: windows-latest
+        os: [ubuntu-latest, windows-latest, macos-latest@arm64]
 
     steps:
     - uses: actions/checkout@v1
