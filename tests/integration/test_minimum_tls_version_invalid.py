@@ -28,10 +28,6 @@ class TestMinimumTLSVersionInvalid(integ_test_base.IntegTestBase):
         return config_file.name
 
     def test_minimum_tls_version_invalid(self):
-        # Uncomment the following line to preserve
-        # test case output and other files (config, state, ect.)
-        # in system temp folder.
-        # self.set_delete_temp_folder(False)
         log_contents = self._get_log_contents()
         self.assertIn("Unrecognized value for TABPY_MINIMUM_TLS_VERSION", log_contents)
         self.assertIn("Setting minimum TLS version to TLSv1_2", log_contents)
