@@ -29,7 +29,7 @@ class TestMinimumTLSVersionValid(TestMinimumTLSVersion):
     def _get_config_file_name(self) -> str:
         return super()._get_config_file_name("TLSv1_3")
 
-    def test_minimum_tls_version(self):
+    def test_minimum_tls_version_valid(self):
         log_contents = self._get_log_contents()
         self.assertIn("Setting minimum TLS version to TLSv1_3", log_contents)
 
@@ -37,7 +37,7 @@ class TestMinimumTLSVersionInvalid(TestMinimumTLSVersion):
     def _get_config_file_name(self) -> str:
         return super()._get_config_file_name("TLSv-1.3")
 
-    def test_minimum_tls_version(self):
+    def test_minimum_tls_version_invalid(self):
         log_contents = self._get_log_contents()
         self.assertIn("Unrecognized value for TABPY_MINIMUM_TLS_VERSION", log_contents)
         self.assertIn("Setting minimum TLS version to TLSv1_2", log_contents)
