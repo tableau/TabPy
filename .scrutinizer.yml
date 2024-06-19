@@ -10,7 +10,7 @@ build:
       tests:
         override:
           - command: 'pytest tests --cov=tabpy --cov-config=setup.cfg'
-            idle_timeout: 300  
+            idle_timeout: 300
             coverage:
               file: '.coverage'
               config_file: 'setup.cfg'
@@ -28,7 +28,7 @@ build:
     before:
       - pip install -r requirements.txt
     override: [pytest]
-      idle_timeout: 300  
+      - idle_timeout: 300
 checks:
   python:
     code_rating: true
