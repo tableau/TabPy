@@ -8,7 +8,6 @@
   * [Configuration File Content](#configuration-file-content)
   * [Configuration File Example](#configuration-file-example)
 - [Configuring HTTP vs HTTPS](#configuring-http-vs-https)
-- [Configuring TPS](#configuring-http-vs-https)
 - [Authentication](#authentication)
   * [Enabling Authentication](#enabling-authentication)
   * [Password File](#password-file)
@@ -83,6 +82,10 @@ at [`logging.config` documentation page](https://docs.python.org/3.6/library/log
 - `TABPY_KEY_FILE` - absolute path to private key file to run TabPy with.
   Only used with `TABPY_TRANSFER_PROTOCOL` set to `https`. Default value -
   not set.
+- `TABPY_MINIMUM_TLS_VERSION` - set the minimum TLS version that the server 
+  will accept for secure connections (`TLSv1_2`, `TLSv1_3`, etc). Refer to 
+  [docs.python.org](https://docs.python.org/3/library/ssl.html#ssl.TLSVersion.MINIMUM_SUPPORTED)
+  for acceptable values. Default value - `TLSv1_2`.
 - `TABPY_LOG_DETAILS` - when set to `true` additional call information
   (caller IP, URL, client info, etc.) is logged. Default value - `false`.
 - `TABPY_MAX_REQUEST_SIZE_MB` - maximal request size supported by TabPy server
@@ -124,6 +127,7 @@ settings._
 # TABPY_TRANSFER_PROTOCOL = https
 # TABPY_CERTIFICATE_FILE = /path/to/certificate/file.crt
 # TABPY_KEY_FILE = /path/to/key/file.key
+# TABPY_MINIMUM_TLS_VERSION = TLSv1_2
 
 # Log additional request details including caller IP, full URL, client
 # end user info if provided.
