@@ -28,7 +28,7 @@ build:
     before:
       - pip install -r requirements.txt
     override:
-      - command: 'pytest'
+      pytest:
         idle_timeout: 300
 checks:
   python:
