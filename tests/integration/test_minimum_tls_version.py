@@ -14,8 +14,11 @@ class TestMinimumTLSVersion(integ_test_base.IntegTestBase):
             "TABPY_TRANSFER_PROTOCOL = https\n"
             "TABPY_CERTIFICATE_FILE = ./tests/integration/resources/2019_04_24_to_3018_08_25.crt\n"
             "TABPY_KEY_FILE = ./tests/integration/resources/2019_04_24_to_3018_08_25.key\n"
-            f"TABPY_MINIMUM_TLS_VERSION = {tls_version}"
         )
+
+        if tls_version is not None:
+            config_file.write(f"TABPY_MINIMUM_TLS_VERSION = {tls_version}")
+
         pwd_file = self._get_pwd_file()
         if pwd_file is not None:
             pwd_file = os.path.abspath(pwd_file)
@@ -40,4 +43,12 @@ class TestMinimumTLSVersionInvalid(TestMinimumTLSVersion):
     def test_minimum_tls_version_invalid(self):
         log_contents = self._get_log_contents()
         self.assertIn("Unrecognized value for TABPY_MINIMUM_TLS_VERSION", log_contents)
+        self.assertIn("Setting minimum TLS version to TLSv1_2", log_contents)
+
+class TestMinimumTLSVersionNotSpecified(TestMinimumTLSVersion):
+    def _get_config_file_name(self) -> str:
+        return super()._get_config_file_name(None)
+
+    def test_minimum_tls_version_invalid(self):
+        log_contents = self._get_log_contents()
         self.assertIn("Setting minimum TLS version to TLSv1_2", log_contents)
