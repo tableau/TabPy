@@ -5,6 +5,7 @@ import multiprocessing
 import os
 import shutil
 import signal
+import ssl
 import sys
 import _thread
 
@@ -83,6 +84,24 @@ class TabPyApp:
 
         self._parse_config(config_file)
 
+    def _initialize_ssl_context(self):
+        ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+
+        ssl_context.load_cert_chain(
+            certfile=self.settings[SettingsParameters.CertificateFile],
+            keyfile=self.settings[SettingsParameters.KeyFile]
+        )
+
+        min_tls = self.settings[SettingsParameters.MinimumTLSVersion]
+        if not hasattr(ssl.TLSVersion, min_tls):
+            logger.warning(f"Unrecognized value for TABPY_MINIMUM_TLS_VERSION: {min_tls}")
+            min_tls = "TLSv1_2"
+            
+        logger.info(f"Setting minimum TLS version to {min_tls}") 
+        ssl_context.minimum_version = ssl.TLSVersion[min_tls]
+
+        return ssl_context
+
     def _get_tls_certificates(self, config):
         tls_certificates = []
         cert = config[SettingsParameters.CertificateFile]
@@ -127,10 +146,7 @@ class TabPyApp:
         protocol = self.settings[SettingsParameters.TransferProtocol]
         ssl_options = None
         if protocol == "https":
-            ssl_options = {
-                "certfile": self.settings[SettingsParameters.CertificateFile],
-                "keyfile": self.settings[SettingsParameters.KeyFile],
-            }
+            ssl_options = self._initialize_ssl_context()
         elif protocol != "http":
             msg = f"Unsupported transfer protocol {protocol}."
             logger.critical(msg)
@@ -328,6 +344,8 @@ class TabPyApp:
             (SettingsParameters.CertificateFile, ConfigParameters.TABPY_CERTIFICATE_FILE,
              None, None),
             (SettingsParameters.KeyFile, ConfigParameters.TABPY_KEY_FILE, None, None),
+            (SettingsParameters.MinimumTLSVersion, ConfigParameters.TABPY_MINIMUM_TLS_VERSION,
+             "TLSv1_2", None),
             (SettingsParameters.StateFilePath, ConfigParameters.TABPY_STATE_PATH,
              os.path.join(pkg_path, "tabpy_server"), None),
             (SettingsParameters.StaticPath, ConfigParameters.TABPY_STATIC_PATH,

@@ -1,5 +1,13 @@
 # Changelog
 
+## v2.10.0
+
+### Improvements
+
+- Add TabPy parameter (TABPY_MINIMUM_TLS_VERSION) to specify the minimum TLS 
+  version that the server will accept for secure connections. Default is 
+  set to TLSv1_2.
+
 ## v2.9.0
 
 ### Improvements

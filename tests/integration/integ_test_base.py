@@ -225,7 +225,8 @@ class IntegTestBase(unittest.TestCase):
 
         # Platform specific - for integration tests we want to engage
         # startup script
-        with open(self.tmp_dir + "/output.txt", "w") as outfile:
+        self.log_file_path = os.path.join(self.tmp_dir, "output.txt")
+        with open(self.log_file_path, "w") as outfile:
             cmd = ["tabpy", "--config=" + self.config_file_name, "--disable-auth-warning"]
             preexec_fn = None
             if platform.system() == "Windows":
