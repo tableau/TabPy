@@ -360,9 +360,12 @@ class TabPyApp:
              100, None),
             (SettingsParameters.GzipEnabled, ConfigParameters.TABPY_GZIP_ENABLE,
              True, parser.getboolean),
-            (SettingsParameters.ArrowEnabled, ConfigParameters.TABPY_ARROW_ENABLE, False, parser.getboolean),
-            (SettingsParameters.ArrowFlightPort, ConfigParameters.TABPY_ARROWFLIGHT_PORT, 13622, parser.getint),
-            (SettingsParameters.ArrowFlightBindIp, ConfigParameters.TABPY_ARROWFLIGHT_BIND_IP, '0.0.0.0', None),
+            (SettingsParameters.ArrowEnabled, ConfigParameters.TABPY_ARROW_ENABLE,
+             False, parser.getboolean),
+            (SettingsParameters.ArrowFlightPort, ConfigParameters.TABPY_ARROWFLIGHT_PORT,
+             13622, parser.getint),
+            (SettingsParameters.ArrowFlightBindIp, ConfigParameters.TABPY_ARROWFLIGHT_BIND_IP,
+             '0.0.0.0', None),
         ]
 
         for setting, parameter, default_val, parse_function in settings_parameters:
@@ -502,8 +505,11 @@ class TabPyApp:
         confirm_no_auth_msg = "\nWARNING: This TabPy server is not currently configured for username/password authentication. "
 
         if self.settings[SettingsParameters.EvaluateEnabled]:
-            confirm_no_auth_msg += ("This means that, because the TABPY_EVALUATE_ENABLE feature is enabled, there is "
-                "the potential that unauthenticated individuals may be able to remotely execute code on this machine. ")
+            confirm_no_auth_msg += (
+              "This means that, because the TABPY_EVALUATE_ENABLE feature is enabled, there is "
+              "the potential that unauthenticated individuals may be able "
+              "to remotely execute code on this machine. "
+            )
 
         confirm_no_auth_msg += ("We strongly advise against proceeding without authentication as it poses a significant security risk.\n\n"
             "Do you wish to proceed without authentication? (y/N): ")
