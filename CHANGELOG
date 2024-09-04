@@ -4,7 +4,8 @@
 
 ### Improvements
 
-- Add support for Python 3.10, 3.11, and 3.12.
+- Add support for Python 3.10, 3.11, and 3.12. End support Python
+  3.7 and 3.8.
 
 ## v2.10.0
 
