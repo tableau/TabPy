@@ -86,7 +86,7 @@ Linux and Mac run shell.
 3. Create the virtual Anaconda environment
 
     ```sh
-    conda create --name my-tabpy-env python=3.7
+    conda create --name my-tabpy-env python=3.12
     ```
 
 4. Activate your virtual environment
