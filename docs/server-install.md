@@ -15,8 +15,8 @@ These instructions explain how to install and start up TabPy Server.
 
 ## TabPy Installation
 
-First, ensure that you are using a supported 64-bit Python version. 
-Refer to the [README](https://github.com/tableau/TabPy) for a list 
+First, ensure that you are using a supported 64-bit Python version.
+Refer to the [README](https://github.com/tableau/TabPy) for a list
 of compatible versions.
 
 ### Installation

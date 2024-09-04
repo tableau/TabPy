@@ -30,8 +30,8 @@ and run it locally.
 These are prerequisites for an environment required for a contributor to
 be able to work on TabPy changes:
 
-- Supported 64-bit Python version (see [README](https://github.com/tableau/TabPy) for a list 
-of compatible versions).
+- Supported 64-bit Python version (see
+[README](https://github.com/tableau/TabPy) for a list of compatible versions).
 - git
 - Node.js for npm packages - install from <https://nodejs.org>.
 - NPM packages - install all with
