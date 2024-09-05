@@ -188,12 +188,10 @@ class TabPyState:
         return dependencies
 
     def _check_and_set_is_public(self, isPublic, defaultValue):
-        try:
-            isPublic
-        except:
+        if isPublic is None:
             return defaultValue
-        else:
-            return isPublic
+        
+        return isPublic
 
     @state_lock
     def add_endpoint(
