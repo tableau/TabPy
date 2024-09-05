@@ -1,5 +1,12 @@
 # Changelog
 
+## v2.11.0
+
+### Improvements
+
+- Add support for Python 3.10, 3.11, and 3.12. End support Python for
+  3.7 and 3.8.
+
 ## v2.10.0
 
 ### Improvements

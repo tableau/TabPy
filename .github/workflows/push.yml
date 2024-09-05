@@ -9,10 +9,8 @@ jobs:
     
     strategy:
       matrix:
-        # TODO: Add 3.7 to python-versions after GitHub action regression is resolved.
-        # https://github.com/actions/setup-python/issues/682
-        # TODO: switch macos-13 to macos-latest@arm64
-        python-version: ['3.8', '3.9', '3.10']
+        python-version: ['3.9', '3.10', '3.11', '3.12']
+        # TODO: switch macos-13 to macos-latest
         os: [ubuntu-latest, windows-latest, macos-13]
   
     steps:
