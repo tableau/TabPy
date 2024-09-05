@@ -187,6 +187,12 @@ class TabPyState:
 
         return dependencies
 
+    def _check_and_set_is_public(self, isPublic, defaultValue):
+        if not isPublic:
+            return defaultValue
+
+        return isPublic
+
     @state_lock
     def add_endpoint(
         self,
@@ -198,6 +204,7 @@ class TabPyState:
         target=None,
         dependencies=None,
         schema=None,
+        isPublic=None,
     ):
         """
         Add a new endpoint to the TabPy.
@@ -231,6 +238,7 @@ class TabPyState:
                 docstring, "-- no docstring found in query function --")
             endpoint_type = self._check_and_set_endpoint_type(endpoint_type, None)
             dependencies = self._check_and_set_dependencies(dependencies, [])
+            isPublic = self._check_and_set_is_public(isPublic, False)
 
             self._check_target(target)
             if target and target not in endpoints:
@@ -246,6 +254,7 @@ class TabPyState:
                 "creation_time": int(time()),
                 "last_modified_time": int(time()),
                 "schema": schema,
+                "isPublic": isPublic,
             }
 
             endpoints[name] = endpoint_info
@@ -289,6 +298,7 @@ class TabPyState:
         target=None,
         dependencies=None,
         schema=None,
+        isPublic=None,
     ):
         """
         Update an existing endpoint on the TabPy.
@@ -330,6 +340,7 @@ class TabPyState:
                 endpoint_type, endpoint_info["type"])
             dependencies = self._check_and_set_dependencies(
                 dependencies, endpoint_info.get("dependencies", []))
+            isPublic = self._check_and_set_is_public(isPublic, endpoint_info["isPublic"])
 
             self._check_target(target)
             if target and target not in endpoints:
@@ -352,6 +363,7 @@ class TabPyState:
                 "creation_time": endpoint_info["creation_time"],
                 "last_modified_time": int(time()),
                 "schema": schema,
+                "isPublic": isPublic,
             }
 
             endpoints[name] = endpoint_info
