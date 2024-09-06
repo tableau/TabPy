@@ -118,7 +118,7 @@ class ManagementHandler(BaseHandler):
                         dependencies=dependencies,
                         target=target,
                         schema=schema,
-                        isPublic = isPublic,
+                        isPublic=isPublic,
                     )
                 else:
                     self.tabpy_state.update_endpoint(
@@ -131,7 +131,7 @@ class ManagementHandler(BaseHandler):
                         target=target,
                         schema=schema,
                         version=version,
-                        isPublic = isPublic,
+                        isPublic=isPublic,
                     )
 
             except Exception as e:

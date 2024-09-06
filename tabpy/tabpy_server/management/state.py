@@ -190,7 +190,7 @@ class TabPyState:
     def _check_and_set_is_public(self, isPublic, defaultValue):
         if isPublic is None:
             return defaultValue
-        
+
         return isPublic
 
     @state_lock

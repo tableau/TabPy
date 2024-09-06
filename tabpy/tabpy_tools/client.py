@@ -224,8 +224,8 @@ class Client:
 
         isPublic : bool, optional
             Whether a function should be public for viewing from within tableau. If
-            False, function will not appear in the custom functions explorer within 
-            Tableau. If True, function will be visible ta anyone on a site with this 
+            False, function will not appear in the custom functions explorer within
+            Tableau. If True, function will be visible ta anyone on a site with this
             analytics extension configured
 
         See Also
@@ -283,7 +283,7 @@ class Client:
             The version. Defaults to 1.
 
         isPublic : bool
-            True if function should be visible in the custom functions explorer 
+            True if function should be visible in the custom functions explorer
             within Tableau
 
         Returns
