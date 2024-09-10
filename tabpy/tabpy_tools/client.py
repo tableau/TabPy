@@ -174,7 +174,7 @@ class Client:
                "last_modified_time": 1469511182,
                "type": "model",
                "target": null,
-               "isPublic": True}
+               "is_public": True}
             "add": {
               "description": "",
               "docstring": "-- no docstring found in query function --",
@@ -184,7 +184,7 @@ class Client:
               "last_modified_time": 1469505967,
               "type": "model",
               "target": null,
-              "isPublic": False}
+              "is_public": False}
             }
         """
         return self._service.get_endpoints(type)
@@ -193,7 +193,7 @@ class Client:
         """Returns the endpoint upload destination."""
         return self._service.get_endpoint_upload_destination()["path"]
 
-    def deploy(self, name, obj, description="", schema=None, override=False, isPublic=False):
+    def deploy(self, name, obj, description="", schema=None, override=False, is_public=False):
         """Deploys a Python function as an endpoint in the server.
 
         Parameters
@@ -222,7 +222,7 @@ class Client:
             RuntimeError. If True and there is already an endpoint with that
             name, it will deploy a new version on top of it.
 
-        isPublic : bool, optional
+        is_public : bool, optional
             Whether a function should be public for viewing from within tableau. If
             False, function will not appear in the custom functions explorer within
             Tableau. If True, function will be visible ta anyone on a site with this
@@ -244,7 +244,7 @@ class Client:
 
             version = endpoint.version + 1
 
-        obj = self._gen_endpoint(name, obj, description, version, schema, isPublic)
+        obj = self._gen_endpoint(name, obj, description, version, schema, is_public)
 
         self._upload_endpoint(obj)
 
@@ -264,7 +264,7 @@ class Client:
             Endpoint name to remove'''
         self._service.remove_endpoint(name)
 
-    def _gen_endpoint(self, name, obj, description, version=1, schema=None, isPublic=False):
+    def _gen_endpoint(self, name, obj, description, version=1, schema=None, is_public=False):
         """Generates an endpoint dict.
 
         Parameters
@@ -282,7 +282,7 @@ class Client:
         version : int
             The version. Defaults to 1.
 
-        isPublic : bool
+        is_public : bool
             True if function should be visible in the custom functions explorer
             within Tableau
 
@@ -330,7 +330,7 @@ class Client:
             "required_files": [],
             "required_packages": [],
             "schema": copy.copy(schema),
-            "isPublic": isPublic,
+            "is_public": is_public,
         }
 
     def _upload_endpoint(self, obj):
