@@ -47,6 +47,7 @@ class Endpoint(RESTObject):
     evaluator = RESTProperty(str)
     schema_version = RESTProperty(int)
     schema = RESTProperty(str)
+    is_public = RESTProperty(bool)
 
     def __new__(cls, **kwargs):
         """Dispatch to the appropriate class."""
@@ -67,6 +68,7 @@ class Endpoint(RESTObject):
             and self.evaluator == other.evaluator
             and self.schema_version == other.schema_version
             and self.schema == other.schema
+            and self.is_public == other.is_public
         )
 
 

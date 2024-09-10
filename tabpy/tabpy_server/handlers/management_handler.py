@@ -84,6 +84,7 @@ class ManagementHandler(BaseHandler):
             target = request_data.get("target", None)
             schema = request_data.get("schema", None)
             src_path = request_data.get("src_path", None)
+            is_public = request_data.get("is_public", None)
             target_path = get_query_object_path(
                 self.settings[SettingsParameters.StateFilePath], name, version
             )
@@ -117,6 +118,7 @@ class ManagementHandler(BaseHandler):
                         dependencies=dependencies,
                         target=target,
                         schema=schema,
+                        is_public=is_public,
                     )
                 else:
                     self.tabpy_state.update_endpoint(
@@ -129,6 +131,7 @@ class ManagementHandler(BaseHandler):
                         target=target,
                         schema=schema,
                         version=version,
+                        is_public=is_public,
                     )
 
             except Exception as e:
