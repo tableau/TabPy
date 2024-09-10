@@ -264,6 +264,16 @@ class Client:
             Endpoint name to remove'''
         self._service.remove_endpoint(name)
 
+    def make_public(self, name):
+        '''Makes an existing endpoint public.
+
+        Parameters
+        ----------
+        name : str
+            Endpoint name to make public'''
+
+        self._service.make_public(name)
+
     def _gen_endpoint(self, name, obj, description, version=1, schema=None, isPublic=False):
         """Generates an endpoint dict.
 
