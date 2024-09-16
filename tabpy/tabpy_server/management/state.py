@@ -187,11 +187,11 @@ class TabPyState:
 
         return dependencies
 
-    def _check_and_set_is_public(self, isPublic, defaultValue):
-        if isPublic is None:
+    def _check_and_set_is_public(self, is_public, defaultValue):
+        if is_public is None:
             return defaultValue
 
-        return isPublic
+        return is_public
 
     @state_lock
     def add_endpoint(
@@ -204,7 +204,7 @@ class TabPyState:
         target=None,
         dependencies=None,
         schema=None,
-        isPublic=None,
+        is_public=None,
     ):
         """
         Add a new endpoint to the TabPy.
@@ -238,7 +238,7 @@ class TabPyState:
                 docstring, "-- no docstring found in query function --")
             endpoint_type = self._check_and_set_endpoint_type(endpoint_type, None)
             dependencies = self._check_and_set_dependencies(dependencies, [])
-            isPublic = self._check_and_set_is_public(isPublic, False)
+            is_public = self._check_and_set_is_public(is_public, False)
 
             self._check_target(target)
             if target and target not in endpoints:
@@ -254,7 +254,7 @@ class TabPyState:
                 "creation_time": int(time()),
                 "last_modified_time": int(time()),
                 "schema": schema,
-                "isPublic": isPublic,
+                "is_public": is_public,
             }
 
             endpoints[name] = endpoint_info
@@ -298,7 +298,7 @@ class TabPyState:
         target=None,
         dependencies=None,
         schema=None,
-        isPublic=None,
+        is_public=None,
     ):
         """
         Update an existing endpoint on the TabPy.
@@ -340,7 +340,7 @@ class TabPyState:
                 endpoint_type, endpoint_info["type"])
             dependencies = self._check_and_set_dependencies(
                 dependencies, endpoint_info.get("dependencies", []))
-            isPublic = self._check_and_set_is_public(isPublic, endpoint_info["isPublic"])
+            is_public = self._check_and_set_is_public(is_public, endpoint_info["is_public"])
 
             self._check_target(target)
             if target and target not in endpoints:
@@ -363,7 +363,7 @@ class TabPyState:
                 "creation_time": endpoint_info["creation_time"],
                 "last_modified_time": int(time()),
                 "schema": schema,
-                "isPublic": isPublic,
+                "is_public": is_public,
             }
 
             endpoints[name] = endpoint_info
@@ -455,7 +455,7 @@ class TabPyState:
         
         self.update_endpoint(
             name,
-            isPublic=True
+            is_public=True
         )
 
     @property

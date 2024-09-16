@@ -47,7 +47,7 @@ class Endpoint(RESTObject):
     evaluator = RESTProperty(str)
     schema_version = RESTProperty(int)
     schema = RESTProperty(str)
-    isPublic = RESTProperty(bool)
+    is_public = RESTProperty(bool)
 
     def __new__(cls, **kwargs):
         """Dispatch to the appropriate class."""
@@ -68,7 +68,7 @@ class Endpoint(RESTObject):
             and self.evaluator == other.evaluator
             and self.schema_version == other.schema_version
             and self.schema == other.schema
-            and self.isPublic == other.isPublic
+            and self.is_public == other.is_public
         )
 
 
@@ -216,17 +216,17 @@ class RESTServiceClient:
         """
         return self.service_client.PUT("endpoints/" + endpoint.name, endpoint.to_json())
 
-    def make_public(self, endpoint_name):
+    def make_public(self, endpoint):
         """Updates an existing endpoint to be public.
 
         Parameters
         ----------
 
-        endpoint_name : str
+        endpoint : Endpoint
 
-            The name of the endpoint.
+            The endpoint to make public.
         """
-        self.service_client.PUT("endpoints/" + endpoint_name)
+        self.service_client.PUT("endpoints/" + endpoint.name, endpoint.to_json())
 
     def remove_endpoint(self, endpoint_name):
         """Deletes an endpoint through the management API.
