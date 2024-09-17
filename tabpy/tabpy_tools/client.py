@@ -264,16 +264,55 @@ class Client:
             Endpoint name to remove'''
         self._service.remove_endpoint(name)
 
-    def make_public(self, name):
-        '''Makes an existing endpoint public.
+    def update(self, name, description=None, schema=None, is_public=None):
+        '''Updates description, schema, or is public for an existing endpoint
 
         Parameters
         ----------
         name : str
-            Endpoint name to make public'''
+            Endpoint name to make public
+
+        description : str, optional
+            The description for the endpoint. This string will be returned by
+            the ``endpoints`` API.
+
+        schema : dict, optional
+            The schema of the function, containing information about input and
+            output parameters, and respective examples. Providing a schema for
+            a deployed function lets other users of the service discover how to
+            use it. Refer to schema.generate_schema for more information on
+            how to generate the schema.
+
+        is_public : bool, optional
+            Whether a function should be public for viewing from within tableau. If
+            False, function will not appear in the custom functions explorer within
+            Tableau. If True, function will be visible ta anyone on a site with this
+            analytics extension configured
+        '''
 
         endpoint = self.get_endpoints().get(name)
-        self._service.make_public(endpoint)
+
+        if not endpoint:
+            raise RuntimeError(
+                f"No endpoint with that name ({name}) exists"
+                " Please select an existing endpoint to update"
+            )
+
+        if description is not None:
+            endpoint.description = description
+        if schema is not None:
+            endpoint.schema = schema
+        if is_public is not None:
+            endpoint.is_public = is_public
+
+        dest_path = self._get_endpoint_upload_destination()
+
+        # Upload the endpoint
+        endpoint.src_path = os.path.join(
+            dest_path, "endpoints", endpoint.name, str(endpoint.version)
+        )
+
+        self._service.set_endpoint(endpoint)
 
     def _gen_endpoint(self, name, obj, description, version=1, schema=None, is_public=False):
         """Generates an endpoint dict.

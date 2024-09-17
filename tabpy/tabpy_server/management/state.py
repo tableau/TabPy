@@ -428,36 +428,6 @@ class TabPyState:
             logger.error(f"Unable to delete endpoint {e}")
             raise ValueError(f"Unable to delete endpoint: {e}")
 
-
-    @state_lock
-    def make_endpoint_public(self, name):
-        """
-        Updates an existing endpoint on the TabPy Server to be public
-
-        Parameters
-        ----------
-        name : str
-            The name of the endpoint to be updated.
-
-        Returns
-        -------
-        updated endpoint object
-
-        """
-        if not name or name == "":
-            raise ValueError("Name of the endpoint must be a valid string.")
-        endpoints = self.get_endpoints()
-        if name not in endpoints:
-            raise ValueError(f"Endpoint {name} does not exist.")
-
-        endpoint_to_update = endpoints[name]
-
-        
-        self.update_endpoint(
-            name,
-            is_public=True
-        )
-
     @property
     def name(self):
         """

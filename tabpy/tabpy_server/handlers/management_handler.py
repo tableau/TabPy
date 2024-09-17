@@ -47,7 +47,7 @@ class ManagementHandler(BaseHandler):
         """
         Add or update an endpoint
         """
-        self.logger.log(logging.DEBUG, f"Adding/updating model {name}...")
+        self.logger.log(logging.INFO, f"Adding/updating model {name}...")
 
         if not isinstance(name, str):
             msg = "Endpoint name must be a string"
