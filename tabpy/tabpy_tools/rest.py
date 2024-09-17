@@ -117,7 +117,6 @@ class RequestsNetworkWrapper:
         data = self._encode_request(data)
 
         logger.info(f"PUT {url} with {data}")
-        logger.log(logging.INFO, f"PUT {url} with {data}")
 
         response = self.session.put(
             url,

@@ -95,7 +95,6 @@ class EndpointHandler(ManagementHandler):
             return
 
         self.logger.log(logging.DEBUG, f"Processing DELETE for /endpoints/{name}")
-        self.logger.log(logging.INFO, f"Processing DELETE for /endpoints/{name}")
 
         try:
             endpoints = self.tabpy_state.get_endpoints(name)

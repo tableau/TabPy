@@ -216,18 +216,6 @@ class RESTServiceClient:
         """
         return self.service_client.PUT("endpoints/" + endpoint.name, endpoint.to_json())
 
-    def make_public(self, endpoint):
-        """Updates an existing endpoint to be public.
-
-        Parameters
-        ----------
-
-        endpoint : Endpoint
-
-            The endpoint to make public.
-        """
-        self.service_client.PUT("endpoints/" + endpoint.name, endpoint.to_json())
-
     def remove_endpoint(self, endpoint_name):
         """Deletes an endpoint through the management API.
 
