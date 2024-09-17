@@ -307,7 +307,6 @@ class Client:
 
         dest_path = self._get_endpoint_upload_destination()
 
-        # Upload the endpoint
         endpoint.src_path = os.path.join(
             dest_path, "endpoints", endpoint.name, str(endpoint.version)
         )
