@@ -264,7 +264,7 @@ class Client:
             Endpoint name to remove'''
         self._service.remove_endpoint(name)
 
-    def update(self, name, description=None, schema=None, is_public=None):
+    def update_endpoint_info(self, name, description=None, schema=None, is_public=None):
         '''Updates description, schema, or is public for an existing endpoint
 
         Parameters
