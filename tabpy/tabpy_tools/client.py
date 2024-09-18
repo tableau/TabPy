@@ -264,6 +264,68 @@ class Client:
             Endpoint name to remove'''
         self._service.remove_endpoint(name)
 
+    def update_endpoint_info(self, name, description=None, schema=None, is_public=None):
+        '''Updates description, schema, or is public for an existing endpoint
+
+        Parameters
+        ----------
+        name : str
+            Name of the endpoint that to be updated. If endpoint does not exist
+            runtime error will be thrown
+
+        description : str, optional
+            The description for the endpoint. This string will be returned by
+            the ``endpoints`` API.
+
+        schema : dict, optional
+            The schema of the function, containing information about input and
+            output parameters, and respective examples. Providing a schema for
+            a deployed function lets other users of the service discover how to
+            use it. Refer to schema.generate_schema for more information on
+            how to generate the schema.
+
+        is_public : bool, optional
+            Whether a function should be public for viewing from within tableau. If
+            False, function will not appear in the custom functions explorer within
+            Tableau. If True, function will be visible to anyone on a site with this
+            analytics extension configured
+        '''
+
+        endpoint = self.get_endpoints().get(name)
+
+        if not endpoint:
+            raise RuntimeError(
+                f"No endpoint with that name ({name}) exists"
+                " Please select an existing endpoint to update"
+            )
+
+        if description is not None:
+            if type(description) is not str:
+                raise RuntimeError(
+                    f"Type of description must be string"
+                )
+            endpoint.description = description
+        if schema is not None:
+            if type(schema) is not dict:
+                raise RuntimeError(
+                    f"Type of schema must be dictionary"
+                )
+            endpoint.schema = schema
+        if is_public is not None:
+            if type(is_public) is not bool:
+                raise RuntimeError(
+                    f"Type of is_public must be bool"
+                )
+            endpoint.is_public = is_public
+
+        dest_path = self._get_endpoint_upload_destination()
+
+        endpoint.src_path = os.path.join(
+            dest_path, "endpoints", endpoint.name, str(endpoint.version)
+        )
+
+        self._service.set_endpoint(endpoint)
+
     def _gen_endpoint(self, name, obj, description, version=1, schema=None, is_public=False):
         """Generates an endpoint dict.
 
