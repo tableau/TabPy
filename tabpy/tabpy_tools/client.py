@@ -300,10 +300,22 @@ class Client:
             )
 
         if description is not None:
+            if type(description) is not str:
+                raise RuntimeError(
+                    f"Type of description must be string"
+                )
             endpoint.description = description
         if schema is not None:
+            if type(schema) is not dict:
+                raise RuntimeError(
+                    f"Type of schema must be dictionary"
+                )
             endpoint.schema = schema
         if is_public is not None:
+            if type(is_public) is not bool:
+                raise RuntimeError(
+                    f"Type of is_public must be bool"
+                )
             endpoint.is_public = is_public
 
         dest_path = self._get_endpoint_upload_destination()
