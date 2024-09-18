@@ -270,7 +270,8 @@ class Client:
         Parameters
         ----------
         name : str
-            Endpoint name to make public
+            Name of the endpoint that to be updated. If endpoint does not exist
+            runtime error will be thrown
 
         description : str, optional
             The description for the endpoint. This string will be returned by
@@ -286,7 +287,7 @@ class Client:
         is_public : bool, optional
             Whether a function should be public for viewing from within tableau. If
             False, function will not appear in the custom functions explorer within
-            Tableau. If True, function will be visible ta anyone on a site with this
+            Tableau. If True, function will be visible to anyone on a site with this
             analytics extension configured
         '''
 
