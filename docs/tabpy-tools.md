@@ -204,9 +204,9 @@ client.update_endpoint_info('add', schema = updatedSchema)
 To update `description`, `is_public`, and `schema` all at once:
 
 ```python
-client.update_endpoint_info('add', 
-                            is_public = True, 
-                            description = 'Updated description for add', 
+client.update_endpoint_info('add',
+                            is_public = True,
+                            description = 'Updated description for add',
                             schema=updatedSchema)
 ```
 
