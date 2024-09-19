@@ -184,7 +184,7 @@ client.update_endpoint_info('add', description = 'Updated description for add')
 To update whether an existing function is public:
 
 ```python
-client.update_endpoint_info('add', is_public = True)
+client.update_endpoint_info('add', is_public=True)
 ```
 
 To update the schema associated with an existing function:
@@ -198,15 +198,15 @@ updatedSchema = generate_schema(
   output_description='the sum of x and y')
 
 
-client.update_endpoint_info('add', schema = updatedSchema)
+client.update_endpoint_info('add', schema=updatedSchema)
 ```
 
 To update `description`, `is_public`, and `schema` all at once:
 
 ```python
 client.update_endpoint_info('add',
-                            is_public = True,
-                            description = 'Updated description for add',
+                            is_public=True,
+                            description='Updated description for add',
                             schema=updatedSchema)
 ```
 
