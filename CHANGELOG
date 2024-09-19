@@ -1,5 +1,14 @@
 # Changelog
 
+## v2.12.0
+
+### Improvements
+
+- Add support for public deployed functions that will be visible to users
+  in Tableau when using the Custom Functions Explorer
+- Add functionality to allow users to update existing deployed functions
+  without needing to redeploy the function itself
+
 ## v2.11.0
 
 ### Improvements
