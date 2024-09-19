@@ -71,6 +71,14 @@ def add(x,y):
 client.deploy('add', add, 'Adds two numbers x and y')
 ```
 
+If you would like your function to be visible in Tableau using the Custom Functions
+Explorer, you will need to deploy setting the optional `is_public` parameter to True.
+Functions that have `is_public` set to False, or unset will not be visible.
+
+```python
+client.deploy('add', add, 'Adds two numbers x and y', is_public=True)
+```
+
 The next example is more complex, using scikit-learn's clustering API:
 
 ```python
@@ -99,16 +107,6 @@ clusters to which each datapoint is assigned. We deploy this function as an
 endpoint named `clustering`.
 It is now reachable as a [REST API](server-rest.md#httppost-queryendpoint), as
 well as through the TabPy tools - for details see the next section.
-
-You can re-deploy a function (for example, after you modified its code) by setting
-the `override` parameter to `True`:
-
-```python
-client.deploy('add', add, 'Adds two numbers x and y', override=True)
-```
-
-Each re-deployment of an endpoint will increment its version number, which is also
-returned as part of the query result.
 
 When deploying endpoints which rely on supervised learning models, you may want to
 load a saved model instead of training on-the-fly for performance reasons.
@@ -160,6 +158,56 @@ The endpoints that are no longer needed can be removed the following way:
 client.remove('WillItDefault')
 
 ```
+## Updating Existing Functions
+
+You can re-deploy a function (for example, after you modified its code) by setting
+the `override` parameter to `True`:
+
+```python
+client.deploy('add', add, 'Adds two numbers x and y', override=True)
+```
+
+Each re-deployment of an endpoint will increment its version number, which is also
+returned as part of the query result.
+
+If you do not want to modify the code of a function, you have the option to update using
+`update_endpoint_info`. This allows users to update the description, schema, or whether a
+function is public using just the function name.
+
+To update the description of an existing function:
+
+```python
+client.update_endpoint_info('add', description = 'Updated description for add')
+```
+
+To update whether an existing function is public:
+
+```python
+client.update_endpoint_info('add', is_public = True)
+```
+
+To update the schema associated with an existing function:
+
+```python
+updatedSchema = generate_schema(
+  input={'x': 3, 'y': 2},
+  output=5,
+  input_description={'x': 'first value',
+                     'y': 'second value'},
+  output_description='the sum of x and y')
+
+
+client.update_endpoint_info('add', schema = updatedSchema)
+```
+
+To update `description`, `is_public`, and `schema` all at once:
+
+```python
+client.update_endpoint_info('add', is_public = True, description = 'Updated description for add', schema=updatedSchema)
+```
+
+Each update of an endpoint will increment its version number, which is also
+returned as part of the query result.
 
 ## Predeployed Functions
 
