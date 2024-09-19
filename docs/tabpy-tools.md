@@ -156,8 +156,8 @@ The endpoints that are no longer needed can be removed the following way:
 ```python
 
 client.remove('WillItDefault')
-
 ```
+
 ## Updating Existing Functions
 
 You can re-deploy a function (for example, after you modified its code) by setting
