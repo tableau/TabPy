@@ -170,9 +170,10 @@ client.deploy('add', add, 'Adds two numbers x and y', override=True)
 Each re-deployment of an endpoint will increment its version number, which is also
 returned as part of the query result.
 
-If you do not want to modify the code of a function, you have the option to update using
-`update_endpoint_info`. This allows users to update the description, schema, or whether a
-function is public using just the function name.
+If you do not want to modify the code of a function, you have the option to
+update using `update_endpoint_info`. This allows users to update the
+description, schema, or whether a function is public using just the function
+name.
 
 To update the description of an existing function:
 
@@ -203,7 +204,10 @@ client.update_endpoint_info('add', schema = updatedSchema)
 To update `description`, `is_public`, and `schema` all at once:
 
 ```python
-client.update_endpoint_info('add', is_public = True, description = 'Updated description for add', schema=updatedSchema)
+client.update_endpoint_info('add', 
+                            is_public = True, 
+                            description = 'Updated description for add', 
+                            schema=updatedSchema)
 ```
 
 Each update of an endpoint will increment its version number, which is also
