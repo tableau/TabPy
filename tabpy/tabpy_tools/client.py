@@ -323,8 +323,7 @@ class Client:
         endpoint.src_path = os.path.join(
             dest_path, "endpoints", endpoint.name, str(endpoint.version)
         )
-
-        self._service.set_endpoint(endpoint)
+        self._service.set_endpoint(endpoint, should_update_version=False)
 
     def _gen_endpoint(self, name, obj, description, version=1, schema=None, is_public=False):
         """Generates an endpoint dict.

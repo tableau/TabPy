@@ -71,7 +71,9 @@ class EndpointHandler(ManagementHandler):
                 self.finish()
                 return
 
-            new_version = int(endpoints[name]["version"]) + 1
+            new_version = int(endpoints[name]["version"])
+            if request_data.get('should_update_version'):
+                new_version = int(endpoints[name]["version"]) + 1
             self.logger.log(logging.INFO, f"Endpoint info: {request_data}")
             err_msg = yield self._add_or_update_endpoint(
                 "update", name, new_version, request_data
