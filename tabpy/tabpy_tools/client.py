@@ -251,7 +251,7 @@ class Client:
         if version == 1:
             self._service.add_endpoint(Endpoint(**obj))
         else:
-            self._service.set_endpoint(Endpoint(**obj))
+            self._service.set_endpoint(Endpoint(**obj), should_update_version=True)
 
         self._wait_for_endpoint_deployment(obj["name"], obj["version"])
 
