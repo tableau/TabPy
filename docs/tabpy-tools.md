@@ -210,8 +210,7 @@ client.update_endpoint_info('add',
                             schema=updatedSchema)
 ```
 
-Each update of an endpoint will increment its version number, which is also
-returned as part of the query result.
+Updating endpoints via `update_endpoint_info` will NOT increment version number
 
 ## Predeployed Functions
 
