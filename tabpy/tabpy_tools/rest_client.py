@@ -204,7 +204,7 @@ class RESTServiceClient:
         """
         return self.service_client.POST("endpoints", endpoint.to_json())
 
-    def set_endpoint(self, endpoint):
+    def set_endpoint(self, endpoint, should_update_version=True):
         """Updates an endpoint through the management API.
 
         Parameters
@@ -213,8 +213,16 @@ class RESTServiceClient:
         endpoint : Endpoint
 
             The endpoint to update.
+
+        should_update_version : bool
+
+            Whether this update should increment the version.
+            False if this is called from update_endpoint_info
+            True if called from deploy
         """
-        return self.service_client.PUT("endpoints/" + endpoint.name, endpoint.to_json())
+        request_body = endpoint.to_json()
+        request_body["should_update_version"] = should_update_version
+        return self.service_client.PUT("endpoints/" + endpoint.name, request_body)
 
     def remove_endpoint(self, endpoint_name):
         """Deletes an endpoint through the management API.

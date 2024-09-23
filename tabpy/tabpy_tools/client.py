@@ -251,7 +251,7 @@ class Client:
         if version == 1:
             self._service.add_endpoint(Endpoint(**obj))
         else:
-            self._service.set_endpoint(Endpoint(**obj))
+            self._service.set_endpoint(Endpoint(**obj), should_update_version=True)
 
         self._wait_for_endpoint_deployment(obj["name"], obj["version"])
 
@@ -323,8 +323,7 @@ class Client:
         endpoint.src_path = os.path.join(
             dest_path, "endpoints", endpoint.name, str(endpoint.version)
         )
-
-        self._service.set_endpoint(endpoint)
+        self._service.set_endpoint(endpoint, should_update_version=False)
 
     def _gen_endpoint(self, name, obj, description, version=1, schema=None, is_public=False):
         """Generates an endpoint dict.
