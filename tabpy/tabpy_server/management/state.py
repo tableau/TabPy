@@ -188,6 +188,7 @@ class TabPyState:
         return dependencies
 
     def _check_and_set_is_public(self, is_public, defaultValue):
+        logger.log(logging.INFO, f"set is_public")
         if is_public is None:
             return defaultValue
 
@@ -340,7 +341,12 @@ class TabPyState:
                 endpoint_type, endpoint_info["type"])
             dependencies = self._check_and_set_dependencies(
                 dependencies, endpoint_info.get("dependencies", []))
-            is_public = self._check_and_set_is_public(is_public, endpoint_info["is_public"])
+            # Adding is_public means that some existing functions do not have the is_public attribute set. 
+            # We need to check for this when updating and set to False by default 
+            current_is_public = False
+            if hasattr(endpoint_info, "is_public"):
+                current_is_public = endpoint_info["is_public"]
+            is_public = self._check_and_set_is_public(is_public, current_is_public)
 
             self._check_target(target)
             if target and target not in endpoints:
