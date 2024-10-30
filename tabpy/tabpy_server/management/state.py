@@ -188,7 +188,6 @@ class TabPyState:
         return dependencies
 
     def _check_and_set_is_public(self, is_public, defaultValue):
-        logger.log(logging.INFO, f"set is_public")
         if is_public is None:
             return defaultValue
 
