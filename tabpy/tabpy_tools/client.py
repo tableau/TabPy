@@ -50,7 +50,9 @@ def _check_endpoint_name(name):
 
 
 class Client:
-    def __init__(self, endpoint, query_timeout=1000, remote_server=False, localhost_endpoint=None):
+    def __init__(
+        self, endpoint, query_timeout=1000, remote_server=False, localhost_endpoint=None
+    ):
         """
         Connects to a running server.
 
@@ -64,13 +66,13 @@ class Client:
 
         query_timeout : float, optional
             The timeout for query operations.
-        
+
         remote_server : bool, optional
             Whether client is a remote TabPy server.
-        
+
         localhost_endpoint : str, optional
-            The localhost endpoint with potentially different protocol and 
-            port compared to the main endpoint parameter. 
+            The localhost endpoint with potentially different protocol and
+            port compared to the main endpoint parameter.
         """
         _check_hostname(endpoint)
 
@@ -244,7 +246,7 @@ class Client:
         """
         if self._remote_server:
             self._remote_deploy(
-                name, obj, 
+                name, obj,
                 description=description, schema=schema, override=override, is_public=is_public
             )
             return
@@ -467,7 +469,9 @@ class Client:
             logger.info(f"Sleeping {interval}...")
             time.sleep(interval)
 
-    def _remote_deploy(self, name, obj, description="", schema=None, override=False, is_public=False):
+    def _remote_deploy(
+        self, name, obj, description="", schema=None, override=False, is_public=False
+    ):
         """
         Remotely deploy a Python function using the /evaluate endpoint. Takes the same inputs
         as deploy.
@@ -499,9 +503,9 @@ class Client:
         remote_script.append(
             f"client.set_credentials('{auth.username}', '{auth.password}')"
         ) if (auth := self._service.service_client.network_wrapper.auth) else None
-        
+
         return "\n".join(remote_script) + "\n"
-    
+
     def _evaluate_remote_script(self, remote_script):
         """
         Uses TabPy /evaluate endpoint to execute a remote TabPy client script.
@@ -523,10 +527,10 @@ class Client:
             json=payload
         )
 
-        log_message = response.text.replace('null', 'success')
-        if "Ad-hoc scripts have been disabled" in log_message:
-            log_message += "\n[Connecting to this TabPy server with remote_server=True is not allowed.]"
-        print(f"\n{response.status_code} - {log_message}\n")
+        msg = response.text.replace('null', 'success')
+        if "Ad-hoc scripts have been disabled" in msg:
+            msg += "\n[Remote TabPy client not allowed.]"
+        print(f"\n{response.status_code} - {msg}\n")
 
     def set_credentials(self, username, password):
         """
