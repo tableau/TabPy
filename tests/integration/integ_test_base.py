@@ -308,7 +308,7 @@ class IntegTestBase(unittest.TestCase):
                 stdout=outfile,
                 stderr=outfile,
             )
-        time.sleep(2)
+            time.sleep(5)
 
     def _get_process(self):
         return self.process
