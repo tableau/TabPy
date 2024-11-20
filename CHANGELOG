@@ -1,5 +1,12 @@
 # Changelog
 
+## v2.13.0
+
+### Improvements
+
+- Add support for deploying functions to a remote TabPy server by setting 
+  `remote_server=True` when creating the Client instance.
+
 ## v2.12.0
 
 ### Improvements
