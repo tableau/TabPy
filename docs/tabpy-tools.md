@@ -41,6 +41,16 @@ The URL and port are where the Tableau-Python-Server process has been started -
 more info can be found in the
 [Starting TabPy](server-install.md#starting-tabpy) section of the documentation.
 
+When connecting to a remote TabPy server, configure the following parameters:
+
+- Set `remote_server` to `True` to indicate a remote connection
+- Set `localhost_endpoint` to the specific localhost address used by the remote server
+  - **Note:** The protocol and port may differ from the main endpoint
+
+```python
+client = Client('https://example.com:443/', remote_server=True, localhost_endpoint='http://localhost:9004/')
+```
+
 ## Authentication
 
 When TabPy is configured with the authentication feature on, client code
