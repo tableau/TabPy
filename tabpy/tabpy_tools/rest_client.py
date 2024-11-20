@@ -41,6 +41,7 @@ class Endpoint(RESTObject):
     version = RESTProperty(int)
     description = RESTProperty(str)
     dependencies = RESTProperty(list)
+    docstring = RESTProperty(str)
     methods = RESTProperty(list)
     creation_time = RESTProperty(datetime, from_epoch, to_epoch)
     last_modified_time = RESTProperty(datetime, from_epoch, to_epoch)
@@ -64,6 +65,7 @@ class Endpoint(RESTObject):
             and self.version == other.version
             and self.description == other.description
             and self.dependencies == other.dependencies
+            and self.docstring == other.docstring
             and self.methods == other.methods
             and self.evaluator == other.evaluator
             and self.schema_version == other.schema_version
