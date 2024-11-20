@@ -128,4 +128,4 @@ tabpy/tabpy_server/staging
 # etc
 setup.bat
 *~
-tabpy_log.log.1
+tabpy_log.log.*
