@@ -12,17 +12,24 @@ class TestClient(unittest.TestCase):
 
     def test_init(self):
         client = Client("http://example.com:9004")
-
         self.assertEqual(client._endpoint, "http://example.com:9004")
+        self.assertEqual(client._remote_server, False)
 
         client = Client("http://example.com/", 10.0)
-
         self.assertEqual(client._endpoint, "http://example.com/")
 
         client = Client(endpoint="https://example.com/", query_timeout=-10.0)
-
         self.assertEqual(client._endpoint, "https://example.com/")
         self.assertEqual(client.query_timeout, 0.0)
+        
+        client = Client(
+            "http://example.com:442/", 
+            remote_server=True, 
+            localhost_endpoint="http://localhost:9004/"
+        )
+        self.assertEqual(client._endpoint, "http://example.com:442/")
+        self.assertEqual(client._remote_server, True)
+        self.assertEqual(client._localhost_endpoint, "http://localhost:9004/")
 
         # valid name tests
         with self.assertRaises(ValueError):
@@ -90,3 +97,21 @@ class TestClient(unittest.TestCase):
             f"endpoint name {endpoint_name } can only contain: "
             "a-z, A-Z, 0-9, underscore, hyphens and spaces.",
         )
+
+    def test_deploy_with_remote_server(self):
+        client = Client("http://example.com:9004/", remote_server=True)
+        mock_evaluate_remote_script = Mock()
+        client._evaluate_remote_script = mock_evaluate_remote_script
+        client.deploy('name', lambda: True, 'description')
+        mock_evaluate_remote_script.assert_called()
+    
+    def test_gen_remote_script(self):
+        client = Client("http://example.com:9004/", remote_server=True)
+        script = client._gen_remote_script()
+        self.assertTrue("from tabpy.tabpy_tools.client import Client" in script)
+        self.assertTrue("client = Client('http://example.com:9004/')" in script)
+        self.assertFalse("client.set_credentials" in script)
+        
+        client.set_credentials("username", "password")
+        script = client._gen_remote_script()
+        self.assertTrue("client.set_credentials('username', 'password')" in script)
