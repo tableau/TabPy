@@ -380,7 +380,7 @@ class Client:
             description = obj.__doc__.strip() or "" if isinstance(obj.__doc__, str) else ""
 
         endpoint_object = CustomQueryObject(query=obj, description=description,)
-        docstring = inspect.getdoc(obj) or "-- no docstring found in query function --"
+        docstring = "-- no docstring found in query function --"
 
         return {
             "name": name,
