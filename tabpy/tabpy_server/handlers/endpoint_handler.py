@@ -115,13 +115,11 @@ class EndpointHandler(ManagementHandler):
 
             # delete files
             if endpoint_info["type"] != "alias":
-                query_path = get_query_object_path(
+                delete_path = get_query_object_path(
                     self.settings["state_file_path"], name, None
                 )
-                staging_path = query_path.replace("/query_objects/", "/staging/endpoints/")
                 try:
-                    yield self._delete_po_future(query_path)
-                    yield self._delete_po_future(staging_path)
+                    yield self._delete_po_future(delete_path)
                 except Exception as e:
                     self.error_out(400, f"Error while deleting: {e}")
                     self.finish()
