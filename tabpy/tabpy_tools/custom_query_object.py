@@ -71,7 +71,7 @@ class CustomQueryObject(_QueryObject):
 
     def get_doc_string(self):
         """Get doc string from customized query"""
-        if sys.platform != "win32" and self.custom_query.__doc__ is not None:
+        if self.custom_query.__doc__ is not None:
             return self.custom_query.__doc__
         else:
             return "-- no docstring found in query function --"

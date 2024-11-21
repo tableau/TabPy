@@ -1,4 +1,5 @@
 import copy
+import inspect
 from re import compile
 import time
 import requests
@@ -379,6 +380,10 @@ class Client:
             description = obj.__doc__.strip() or "" if isinstance(obj.__doc__, str) else ""
 
         endpoint_object = CustomQueryObject(query=obj, description=description,)
+        
+        docstring = "-- no docstring found in query function --"
+        if sys.platform != "win32":
+            docstring = inspect.getdoc(obj) or "-- no docstring found in query function --"
 
         return {
             "name": name,
@@ -390,7 +395,7 @@ class Client:
             "methods": endpoint_object.get_methods(),
             "required_files": [],
             "required_packages": [],
-            "docstring": endpoint_object.get_doc_string(),
+            "docstring": docstring,
             "schema": copy.copy(schema),
             "is_public": is_public,
         }
@@ -420,7 +425,6 @@ class Client:
         logger.info(
             f"Waiting for endpoint {endpoint_name} to deploy to " f"version {version}"
         )
-        time.sleep(interval)
         start = time.time()
         while True:
             ep_status = self.get_status()
