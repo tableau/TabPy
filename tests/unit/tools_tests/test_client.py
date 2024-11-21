@@ -21,10 +21,10 @@ class TestClient(unittest.TestCase):
         client = Client(endpoint="https://example.com/", query_timeout=-10.0)
         self.assertEqual(client._endpoint, "https://example.com/")
         self.assertEqual(client.query_timeout, 0.0)
-        
+
         client = Client(
-            "http://example.com:442/", 
-            remote_server=True, 
+            "http://example.com:442/",
+            remote_server=True,
             localhost_endpoint="http://localhost:9004/"
         )
         self.assertEqual(client._endpoint, "http://example.com:442/")
@@ -104,14 +104,14 @@ class TestClient(unittest.TestCase):
         client._evaluate_remote_script = mock_evaluate_remote_script
         client.deploy('name', lambda: True, 'description')
         mock_evaluate_remote_script.assert_called()
-    
+
     def test_gen_remote_script(self):
         client = Client("http://example.com:9004/", remote_server=True)
         script = client._gen_remote_script()
         self.assertTrue("from tabpy.tabpy_tools.client import Client" in script)
         self.assertTrue("client = Client('http://example.com:9004/')" in script)
         self.assertFalse("client.set_credentials" in script)
-        
+
         client.set_credentials("username", "password")
         script = client._gen_remote_script()
         self.assertTrue("client.set_credentials('username', 'password')" in script)

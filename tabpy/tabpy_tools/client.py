@@ -529,7 +529,7 @@ class Client:
         msg = response.text.replace('null', 'Success')
         if "Ad-hoc scripts have been disabled" in msg:
             msg += "\n[Remote TabPy client not allowed.]"
-        
+
         status_message = (f"{response.status_code} - {msg}\n")
         print(status_message)
         return status_message
