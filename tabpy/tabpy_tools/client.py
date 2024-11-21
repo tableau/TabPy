@@ -1,4 +1,5 @@
 import copy
+import inspect
 from re import compile
 import time
 import requests
@@ -379,6 +380,7 @@ class Client:
             description = obj.__doc__.strip() or "" if isinstance(obj.__doc__, str) else ""
 
         endpoint_object = CustomQueryObject(query=obj, description=description,)
+        docstring = inspect.getdoc(obj) or "-- no docstring found in query function --"
 
         return {
             "name": name,
@@ -390,6 +392,7 @@ class Client:
             "methods": endpoint_object.get_methods(),
             "required_files": [],
             "required_packages": [],
+            "docstring": docstring,
             "schema": copy.copy(schema),
             "is_public": is_public,
         }
