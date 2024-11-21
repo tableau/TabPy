@@ -1,5 +1,4 @@
 import copy
-import inspect
 from re import compile
 import time
 import requests
