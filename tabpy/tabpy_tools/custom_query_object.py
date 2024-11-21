@@ -1,4 +1,3 @@
-import inspect
 import logging
 import platform
 from .query_object import QueryObject as _QueryObject
@@ -74,13 +73,12 @@ class CustomQueryObject(_QueryObject):
     def get_doc_string(self):
         """Get doc string from customized query"""
         default_docstring = "-- no docstring found in query function --"
-        obj = self.custom_query
-        return obj.__doc__.strip() or default_docstring if isinstance(obj.__doc__, str) else default_docstring
         # Docstring parsing not working on Windows.
-        # if platform.system() == "Windows":
-        #     return default_docstring
-        # else:
-        #     return inspect.getdoc(self.custom_query) or default_docstring
+        if platform.system() == "Windows":
+            return default_docstring
+        else:
+            obj = self.custom_query
+            return obj.__doc__.strip() or default_docstring if isinstance(obj.__doc__, str) else default_docstring
 
     def get_methods(self):
         return [self.get_query_method()]
