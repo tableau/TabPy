@@ -241,7 +241,7 @@ class IntegTestBase(unittest.TestCase):
             )
 
             # give the app some time to start up...
-            time.sleep(5)
+            time.sleep(10)
 
     def tearDown(self):
         # stop TabPy
@@ -254,7 +254,7 @@ class IntegTestBase(unittest.TestCase):
 
             # after shutting down TabPy and before we start it again
             # for next test give it some time to terminate.
-            time.sleep(5)
+            time.sleep(10)
 
         # remove temporary files
         if self.delete_temp_folder:
