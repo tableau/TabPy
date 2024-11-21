@@ -71,7 +71,12 @@ class CustomQueryObject(_QueryObject):
 
     def get_doc_string(self):
         """Get doc string from customized query"""
-        return str(self.custom_query.__doc__ or "-- no docstring found in query function --")
+        try:
+            return str(
+                self.custom_query.__doc__ or "-- no docstring found in query function --"
+            )
+        except:
+            return "-- no docstring found in query function --"
 
     def get_methods(self):
         return [self.get_query_method()]
