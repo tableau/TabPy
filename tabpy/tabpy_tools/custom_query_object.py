@@ -1,4 +1,7 @@
+import inspect
 import logging
+import platform
+import sys
 from .query_object import QueryObject as _QueryObject
 
 
@@ -71,10 +74,11 @@ class CustomQueryObject(_QueryObject):
 
     def get_doc_string(self):
         """Get doc string from customized query"""
-        if self.custom_query.__doc__ is not None:
-            return self.custom_query.__doc__
+        default_docstring = "-- no docstring found in query function --"
+        if platform.system() == "Windows" and sys.maxsize <= 2**32:
+            return default_docstring
         else:
-            return "-- no docstring found in query function --"
+            return inspect.getdoc(self.custom_query) or default_docstring
 
     def get_methods(self):
         return [self.get_query_method()]
