@@ -75,7 +75,7 @@ class CustomQueryObject(_QueryObject):
         default_docstring = "-- no docstring found in query function --"
 
         # Skip docstring parsing on Windows 32-bit systems
-        if platform.system() == "Windows":
+        if platform.system() == "Windows" and platform.architecture()[0] == "32bit":
             return default_docstring
 
         docstring = getattr(self.custom_query, '__doc__', None)
