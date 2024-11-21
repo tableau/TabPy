@@ -29,5 +29,5 @@ jobs:
 
     - name: Test with pytest
       run: |
-        pytest -s tests/integration/test_deploy_and_evaluate_model.py
+        pytest -s tests
         
