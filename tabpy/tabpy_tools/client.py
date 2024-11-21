@@ -419,6 +419,7 @@ class Client:
         logger.info(
             f"Waiting for endpoint {endpoint_name} to deploy to " f"version {version}"
         )
+        time.sleep(interval)
         start = time.time()
         while True:
             ep_status = self.get_status()
