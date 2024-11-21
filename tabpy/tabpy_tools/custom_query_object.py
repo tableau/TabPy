@@ -71,12 +71,10 @@ class CustomQueryObject(_QueryObject):
 
     def get_doc_string(self):
         """Get doc string from customized query"""
-        if self.custom_query.__doc__:
-            encoding = "utf-8" if sys.platform != "win32" else "cp1252"
-            return str(
-                bytes(self.custom_query.__doc__, encoding).decode("unicode_escape")
-            )
-        return "-- no docstring found in query function --"
+        if self.custom_query.__doc__ is not None and sys.platform != "win32":
+            return self.custom_query.__doc__
+        else:
+            return "-- no docstring found in query function --"
 
     def get_methods(self):
         return [self.get_query_method()]
