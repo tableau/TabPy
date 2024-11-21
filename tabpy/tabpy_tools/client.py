@@ -245,11 +245,10 @@ class Client:
         remove, get_endpoints
         """
         if self._remote_server:
-            self._remote_deploy(
+            return self._remote_deploy(
                 name, obj,
                 description=description, schema=schema, override=override, is_public=is_public
             )
-            return
 
         endpoint = self.get_endpoints().get(name)
         version = 1
@@ -486,7 +485,7 @@ class Client:
             f")"
         )
 
-        self._evaluate_remote_script(remote_script)
+        return self._evaluate_remote_script(remote_script)
 
     def _gen_remote_script(self):
         """
@@ -515,7 +514,7 @@ class Client:
         remote_script : str
             The script to execute remotely.
         """
-        print(f"Remote script:\n{remote_script}")
+        print(f"Remote script:\n{remote_script}\n")
         url = f"{self._endpoint}evaluate"
         headers = {"Content-Type": "application/json"}
         payload = {"data": {}, "script": remote_script}
@@ -527,10 +526,13 @@ class Client:
             json=payload
         )
 
-        msg = response.text.replace('null', 'success')
+        msg = response.text.replace('null', 'Success')
         if "Ad-hoc scripts have been disabled" in msg:
             msg += "\n[Remote TabPy client not allowed.]"
-        print(f"\n{response.status_code} - {msg}\n")
+        
+        status_message = (f"{response.status_code} - {msg}\n")
+        print(status_message)
+        return status_message
 
     def set_credentials(self, username, password):
         """
