@@ -74,12 +74,15 @@ class CustomQueryObject(_QueryObject):
         """Get doc string from customized query"""
         default_docstring = "-- no docstring found in query function --"
 
-        # Skip docstring parsing on Windows 32-bit systems
-        if sys.platform == 'win32':
+        # TODO: fix docstring parsing on Windows systems
+        # if sys.platform == 'win32':
+        #     return default_docstring
+        try:
+            ds = getattr(self.custom_query, '__doc__', None)
+            return ds if ds and isinstance(ds, str) else default_docstring
+        except Exception as e:
+            print(e)
             return default_docstring
-
-        ds = getattr(self.custom_query, '__doc__', None)
-        return ds if ds and isinstance(ds, str) else default_docstring
 
     def get_methods(self):
         return [self.get_query_method()]
