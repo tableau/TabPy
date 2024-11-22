@@ -71,7 +71,7 @@ class CustomQueryObject(_QueryObject):
             )
             raise
 
-    def get_doc_string(self):
+    def get_docstring(self):
         """Get doc string from customized query"""
         default_docstring = "-- no docstring found in query function --"
 

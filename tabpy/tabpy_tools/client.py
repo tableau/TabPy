@@ -408,7 +408,7 @@ class Client:
             "methods": endpoint_object.get_methods(),
             "required_files": [],
             "required_packages": [],
-            "docstring": endpoint_object.get_doc_string(),
+            "docstring": endpoint_object.get_docstring(),
             "schema": copy.copy(schema),
             "is_public": is_public,
         }
