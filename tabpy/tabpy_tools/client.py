@@ -1,4 +1,5 @@
 import copy
+import inspect
 from re import compile
 import time
 import requests
@@ -49,7 +50,9 @@ def _check_endpoint_name(name):
 
 
 class Client:
-    def __init__(self, endpoint, query_timeout=1000):
+    def __init__(
+        self, endpoint, query_timeout=1000, remote_server=False, localhost_endpoint=None
+    ):
         """
         Connects to a running server.
 
@@ -63,10 +66,19 @@ class Client:
 
         query_timeout : float, optional
             The timeout for query operations.
+
+        remote_server : bool, optional
+            Whether client is a remote TabPy server.
+
+        localhost_endpoint : str, optional
+            The localhost endpoint with potentially different protocol and
+            port compared to the main endpoint parameter.
         """
         _check_hostname(endpoint)
 
         self._endpoint = endpoint
+        self._remote_server = remote_server
+        self._localhost_endpoint = localhost_endpoint
 
         session = requests.session()
         session.verify = False
@@ -232,6 +244,12 @@ class Client:
         --------
         remove, get_endpoints
         """
+        if self._remote_server:
+            return self._remote_deploy(
+                name, obj,
+                description=description, schema=schema, override=override, is_public=is_public
+            )
+
         endpoint = self.get_endpoints().get(name)
         version = 1
         if endpoint:
@@ -390,6 +408,7 @@ class Client:
             "methods": endpoint_object.get_methods(),
             "required_files": [],
             "required_packages": [],
+            "docstring": endpoint_object.get_docstring(),
             "schema": copy.copy(schema),
             "is_public": is_public,
         }
@@ -419,6 +438,7 @@ class Client:
         logger.info(
             f"Waiting for endpoint {endpoint_name} to deploy to " f"version {version}"
         )
+        time.sleep(interval)
         start = time.time()
         while True:
             ep_status = self.get_status()
@@ -446,6 +466,72 @@ class Client:
 
             logger.info(f"Sleeping {interval}...")
             time.sleep(interval)
+
+    def _remote_deploy(
+        self, name, obj, description="", schema=None, override=False, is_public=False
+    ):
+        """
+        Remotely deploy a Python function using the /evaluate endpoint. Takes the same inputs
+        as deploy.
+        """
+        remote_script = self._gen_remote_script()
+        remote_script += f"{inspect.getsource(obj)}\n"
+
+        remote_script += (
+            f"client.deploy("
+            f"'{name}', {obj.__name__}, '{description}', "
+            f"override={override}, is_public={is_public}, schema={schema}"
+            f")"
+        )
+
+        return self._evaluate_remote_script(remote_script)
+
+    def _gen_remote_script(self):
+        """
+        Generates a remote script for TabPy client connection with credential handling.
+
+        Returns:
+            str: A Python script to establish a TabPy client connection
+        """
+        remote_script = [
+            "from tabpy.tabpy_tools.client import Client",
+            f"client = Client('{self._localhost_endpoint or self._endpoint}')"
+        ]
+
+        remote_script.append(
+            f"client.set_credentials('{auth.username}', '{auth.password}')"
+        ) if (auth := self._service.service_client.network_wrapper.auth) else None
+
+        return "\n".join(remote_script) + "\n"
+
+    def _evaluate_remote_script(self, remote_script):
+        """
+        Uses TabPy /evaluate endpoint to execute a remote TabPy client script.
+
+        Parameters
+        ----------
+        remote_script : str
+            The script to execute remotely.
+        """
+        print(f"Remote script:\n{remote_script}\n")
+        url = f"{self._endpoint}evaluate"
+        headers = {"Content-Type": "application/json"}
+        payload = {"data": {}, "script": remote_script}
+
+        response = requests.post(
+            url,
+            headers=headers,
+            auth=self._service.service_client.network_wrapper.auth,
+            json=payload
+        )
+
+        msg = response.text.replace('null', 'Success')
+        if "Ad-hoc scripts have been disabled" in msg:
+            msg += "\n[Deployment to remote tabpy client not allowed.]"
+
+        status_message = (f"{response.status_code} - {msg}\n")
+        print(status_message)
+        return status_message
 
     def set_credentials(self, username, password):
         """

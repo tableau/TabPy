@@ -14,7 +14,7 @@ class QueryObject(abc.ABC):
     """
     Derived class needs to implement the following interface:
       * query() -- given input, return query result
-      * get_doc_string() -- returns documentation for the Query Object
+      * get_docstring() -- returns documentation for the Query Object
     """
 
     def __init__(self, description=""):
@@ -30,7 +30,7 @@ class QueryObject(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def get_doc_string(self):
+    def get_docstring(self):
         """Returns documentation for the query object
 
         By default, this method returns the docstring for 'query' method

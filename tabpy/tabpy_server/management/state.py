@@ -215,7 +215,7 @@ class TabPyState:
             Name of the endpoint
         description : str, optional
             Description of this endpoint
-        doc_string : str, optional
+        docstring : str, optional
             The doc string for this endpoint, if needed.
         endpoint_type : str
             The endpoint type (model, alias)
@@ -309,7 +309,7 @@ class TabPyState:
             Name of the endpoint
         description : str, optional
             Description of this endpoint
-        doc_string : str, optional
+        docstring : str, optional
             The doc string for this endpoint, if needed.
         endpoint_type : str, optional
             The endpoint type (model, alias)

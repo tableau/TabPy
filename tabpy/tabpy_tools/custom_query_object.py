@@ -1,4 +1,6 @@
 import logging
+import platform
+import sys
 from .query_object import QueryObject as _QueryObject
 
 
@@ -69,12 +71,16 @@ class CustomQueryObject(_QueryObject):
             )
             raise
 
-    def get_doc_string(self):
+    def get_docstring(self):
         """Get doc string from customized query"""
-        if self.custom_query.__doc__ is not None:
-            return self.custom_query.__doc__
-        else:
-            return "-- no docstring found in query function --"
+        default_docstring = "-- no docstring found in query function --"
+
+        # TODO: fix docstring parsing on Windows systems
+        if sys.platform == 'win32':
+            return default_docstring
+
+        ds = getattr(self.custom_query, '__doc__', None)
+        return ds if ds and isinstance(ds, str) else default_docstring
 
     def get_methods(self):
         return [self.get_query_method()]
