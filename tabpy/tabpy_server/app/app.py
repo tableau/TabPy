@@ -96,8 +96,8 @@ class TabPyApp:
         if not hasattr(ssl.TLSVersion, min_tls):
             logger.warning(f"Unrecognized value for TABPY_MINIMUM_TLS_VERSION: {min_tls}")
             min_tls = "TLSv1_2"
-            
-        logger.info(f"Setting minimum TLS version to {min_tls}") 
+
+        logger.info(f"Setting minimum TLS version to {min_tls}")
         ssl_context.minimum_version = ssl.TLSVersion[min_tls]
 
         return ssl_context
@@ -112,7 +112,7 @@ class TabPyApp:
             tls_private_key = key_file.read()
         tls_certificates.append((tls_cert_chain, tls_private_key))
         return tls_certificates
-    
+
     def _get_arrow_server(self, config):
         verify_client = None
         tls_certificates = None
@@ -121,7 +121,7 @@ class TabPyApp:
             scheme = "grpc+tls"
             tls_certificates = self._get_tls_certificates(config)
 
-        host = "0.0.0.0"
+        host = config.get(SettingsParameters.ArrowFlightBindIp)
         port = config.get(SettingsParameters.ArrowFlightPort)
         location = "{}://{}:{}".format(scheme, host, port)
 
@@ -140,7 +140,7 @@ class TabPyApp:
 
     def run(self):
         application = self._create_tornado_web_app()
-        
+
         init_model_evaluator(self.settings, self.tabpy_state, self.python_service)
 
         protocol = self.settings[SettingsParameters.TransferProtocol]
@@ -158,14 +158,16 @@ class TabPyApp:
 
         application.listen(
             self.settings[SettingsParameters.Port],
+            self.settings[SettingsParameters.BindIp],
             ssl_options=ssl_options,
             max_buffer_size=self.max_request_size,
             max_body_size=self.max_request_size,
             **settings,
-        ) 
+        )
 
         logger.info(
-            "Web service listening on port "
+            "Web service listening on "
+            f"{str(self.settings[SettingsParameters.BindIp])}:"
             f"{str(self.settings[SettingsParameters.Port])}"
         )
 
@@ -332,6 +334,7 @@ class TabPyApp:
 
         settings_parameters = [
             (SettingsParameters.Port, ConfigParameters.TABPY_PORT, 9004, None),
+            (SettingsParameters.BindIp, ConfigParameters.TABPY_BIND_IP, '0.0.0.0', None),
             (SettingsParameters.ServerVersion, None, __version__, None),
             (SettingsParameters.EvaluateEnabled, ConfigParameters.TABPY_EVALUATE_ENABLE,
              True, parser.getboolean),
@@ -357,8 +360,12 @@ class TabPyApp:
              100, None),
             (SettingsParameters.GzipEnabled, ConfigParameters.TABPY_GZIP_ENABLE,
              True, parser.getboolean),
-            (SettingsParameters.ArrowEnabled, ConfigParameters.TABPY_ARROW_ENABLE, False, parser.getboolean), 
-            (SettingsParameters.ArrowFlightPort, ConfigParameters.TABPY_ARROWFLIGHT_PORT, 13622, parser.getint),
+            (SettingsParameters.ArrowEnabled, ConfigParameters.TABPY_ARROW_ENABLE,
+             False, parser.getboolean),
+            (SettingsParameters.ArrowFlightPort, ConfigParameters.TABPY_ARROWFLIGHT_PORT,
+             13622, parser.getint),
+            (SettingsParameters.ArrowFlightBindIp, ConfigParameters.TABPY_ARROWFLIGHT_BIND_IP,
+             '0.0.0.0', None),
         ]
 
         for setting, parameter, default_val, parse_function in settings_parameters:
@@ -373,7 +380,7 @@ class TabPyApp:
         ].lower()
 
         self._validate_transfer_protocol_settings()
-        
+
         # Set max request size in bytes
         self.max_request_size = (
             int(self.settings[SettingsParameters.MaxRequestSizeInMb]) * 1024 * 1024
@@ -493,13 +500,16 @@ class TabPyApp:
 
         if self.disable_auth_warning == True:
             logger.info(std_no_auth_msg)
-            return  
+            return
 
         confirm_no_auth_msg = "\nWARNING: This TabPy server is not currently configured for username/password authentication. "
 
         if self.settings[SettingsParameters.EvaluateEnabled]:
-            confirm_no_auth_msg += ("This means that, because the TABPY_EVALUATE_ENABLE feature is enabled, there is " 
-                "the potential that unauthenticated individuals may be able to remotely execute code on this machine. ")
+            confirm_no_auth_msg += (
+              "This means that, because the TABPY_EVALUATE_ENABLE feature is enabled, there is "
+              "the potential that unauthenticated individuals may be able "
+              "to remotely execute code on this machine. "
+            )
 
         confirm_no_auth_msg += ("We strongly advise against proceeding without authentication as it poses a significant security risk.\n\n"
             "Do you wish to proceed without authentication? (y/N): ")
