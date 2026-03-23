@@ -58,6 +58,7 @@ at [`logging.config` documentation page](https://docs.python.org/3.6/library/log
 `[TabPy]` parameters:
 
 - `TABPY_PORT` - port for TabPy to listen on. Default value - `9004`.
+- `TABPY_BIND_IP` - ip address to bind to for TabPy to listen on. Default value - `0.0.0.0`.
 - `TABPY_QUERY_OBJECT_PATH` - query objects location. Used with models, see
   [TabPy Tools documentation](tabpy-tools.md) for details. Default value -
   `/tmp/query_objects`.
@@ -103,6 +104,7 @@ at [`logging.config` documentation page](https://docs.python.org/3.6/library/log
 - `TABPY_ARROWFLIGHT_PORT` - port for
   [Arrow Flight](https://arrow.apache.org/docs/format/Flight.html)
   connection used in streaming mode. Default value is 13622.
+- `TABPY_ARROWFLIGHT_BIND_IP` - ip address to bind to for Arrow Flight to listen on. Default value is `0.0.0.0`.
 
 ### Configuration File Example
 
@@ -113,6 +115,7 @@ settings._
 [TabPy]
 # TABPY_QUERY_OBJECT_PATH = /tmp/query_objects
 # TABPY_PORT = 9004
+# TABPY_BIND_IP = 0.0.0.0
 # TABPY_STATE_PATH = <package-path>/tabpy/tabpy_server
 
 # Where static pages live
@@ -152,6 +155,7 @@ settings._
 # Flight port defaults to 13622 if not set here.
 # TABPY_ARROW_ENABLE = True
 # TABPY_ARROWFLIGHT_PORT = 13622
+# TABPY_ARROWFLIGHT_BIND_IP = 0.0.0.0
 
 
 [loggers]
