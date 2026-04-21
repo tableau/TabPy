@@ -1,10 +1,16 @@
 # Changelog
 
+## v2.14.0
+
+### Improvements
+
+- Add support for Python 3.13 and 3.14. End support for Python 3.9.
+
 ## v2.13.0
 
 ### Improvements
 
-- Add support for deploying functions to a remote TabPy server by setting 
+- Add support for deploying functions to a remote TabPy server by setting
   `remote_server=True` when creating the Client instance.
 
 ## v2.12.0

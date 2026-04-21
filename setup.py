@@ -39,10 +39,11 @@ def setup_package():
             "Intended Audience :: Developers",
             "Intended Audience :: Science/Research",
             "License :: OSI Approved :: MIT License",
-            "Programming Language :: Python :: 3.9",
             "Programming Language :: Python :: 3.10",
             "Programming Language :: Python :: 3.11",
             "Programming Language :: Python :: 3.12",
+            "Programming Language :: Python :: 3.13",
+            "Programming Language :: Python :: 3.14",
             "Topic :: Scientific/Engineering",
             "Topic :: Scientific/Engineering :: Information Analysis",
             "Operating System :: Microsoft :: Windows",
@@ -61,7 +62,7 @@ def setup_package():
                 "tabpy_server/common/default.conf",
             ]
         },
-        python_requires=">=3.7",
+        python_requires=">=3.10",
         license="MIT",
         # Note: many of these required packages are included in base python
         # but are listed here because different linux distros use custom
