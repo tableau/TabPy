@@ -261,7 +261,7 @@ command:
 tabpy-user update -u <username> -p <password> -f <pwdfile>
 ```
 
-If the (recommended) `-p` agrument is not provided a password for the user name
+If the (recommended) `-p` argument is not provided a password for the user name
 will be generated and displayed in the command line.
 
 ### Deleting an Account
