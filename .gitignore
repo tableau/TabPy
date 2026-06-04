@@ -120,6 +120,7 @@ package-lock.json
 tabpy/tabpy_server/state.ini
 tabpy/tabpy_server/query_objects
 tabpy/tabpy_server/staging
+/tmp/
 
 # VS Code
 *.code-workspace
