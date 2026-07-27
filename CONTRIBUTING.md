@@ -105,7 +105,7 @@ or npm [markdownlint-cli](https://github.com/igorshubovych/markdownlint-cli).
 TOC for markdown file is built with [markdown-toc](https://www.npmjs.com/package/markdown-toc):
 
 ```sh
-markdown-toc -i docs/server-startup.md
+markdown-toc -i docs/server-install.md
 ```
 
 To check markdown style for all the documentation use `markdownlint`:
@@ -120,7 +120,7 @@ These checks will run as part of the build if you submit a pull request.
 
 You can invoke the TabPy Server API against a running TabPy instance with Swagger.
 
-- Make CORS related changes in TabPy configuration file: update `tabpy/tabpy-server/state.ini`
+- Make CORS related changes in TabPy configuration file: update `tabpy/tabpy_server/state.ini`
   file in your local repository to have the next settings:
 
 ```config
@@ -130,7 +130,7 @@ Access-Control-Allow-Headers = Origin, X-Requested-with, Content-Type
 Access-Control-Allow-Methods = GET, OPTIONS, POST
 ```
 
-- Start a local instance of TabPy server following [TabPy Server Startup Guide](docs/server-startup.md).
+- Start a local instance of TabPy server following [TabPy Server Startup Guide](docs/server-install.md).
 - Run a local copy of Swagger editor with steps provided at
   [https://github.com/swagger-api/swagger-editor](https://github.com/swagger-api/swagger-editor).
 - Open `misc/TabPy.yml` in Swagger editor.
