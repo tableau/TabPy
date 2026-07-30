@@ -4,17 +4,18 @@ import json
 import os
 import tempfile
 import unittest
-from unittest.mock import patch
 
-import jwt
 from cryptography.hazmat.primitives.asymmetric import rsa
 from tornado.testing import AsyncHTTPTestCase
 
 from tabpy.tabpy_server.app.app import TabPyApp
-
-ISSUER = "https://idp.example.com/"
-AUDIENCE = "tabpy"
-JWKS_URI = "https://idp.example.com/.well-known/jwks.json"
+from tests.unit.server_tests.jwt_test_helpers import (
+    AUDIENCE,
+    ISSUER,
+    JWKS_URI,
+    make_token,
+    patched_jwks_client,
+)
 
 
 class BaseTestOAuthHandler(AsyncHTTPTestCase):
@@ -61,27 +62,10 @@ class BaseTestOAuthHandler(AsyncHTTPTestCase):
         cls.config_file.close()
 
     def _make_token(self, claims_override=None):
-        now = datetime.datetime.now(datetime.timezone.utc)
-        claims = {
-            "iss": ISSUER,
-            "aud": AUDIENCE,
-            "sub": "user1",
-            "iat": now,
-            "exp": now + datetime.timedelta(minutes=5),
-        }
-        if claims_override:
-            claims.update(claims_override)
-        return jwt.encode(claims, self.private_key, algorithm="RS256")
+        return make_token(self.private_key, claims_override=claims_override)
 
     def _patched_jwks_client(self):
-        signing_key = type("SigningKey", (), {})()
-        signing_key.key = self.private_key.public_key()
-        signing_key.algorithm_name = "RS256"
-        signing_key.key_id = None
-        return patch(
-            "tabpy.tabpy_server.handlers.jwt_auth.PyJWKClient.get_signing_keys",
-            return_value=[signing_key],
-        )
+        return patched_jwks_client(self.private_key)
 
 
 class TestOAuthOnlyHandler(BaseTestOAuthHandler):

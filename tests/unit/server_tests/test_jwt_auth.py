@@ -11,10 +11,13 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 
 from tabpy.tabpy_server.handlers.jwt_auth import JwtValidationError, validate_jwt
-
-ISSUER = "https://idp.example.com/"
-AUDIENCE = "tabpy"
-JWKS_URI = "https://idp.example.com/.well-known/jwks.json"
+from tests.unit.server_tests.jwt_test_helpers import (
+    AUDIENCE,
+    ISSUER,
+    JWKS_URI,
+    make_token,
+    patched_jwks_client,
+)
 
 
 def b64url(data: bytes) -> str:
@@ -27,29 +30,12 @@ class TestJwtAuth(unittest.TestCase):
         cls.private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
 
     def _make_token(self, claims_override=None, headers=None):
-        now = datetime.datetime.now(datetime.timezone.utc)
-        claims = {
-            "iss": ISSUER,
-            "aud": AUDIENCE,
-            "sub": "user1",
-            "iat": now,
-            "exp": now + datetime.timedelta(minutes=5),
-        }
-        if claims_override:
-            claims.update(claims_override)
-        return jwt.encode(claims, self.private_key, algorithm="RS256", headers=headers)
+        return make_token(
+            self.private_key, claims_override=claims_override, headers=headers
+        )
 
     def _patched_jwks_client(self, kid=None):
-        """Patches PyJWKClient.get_signing_keys to return this test's RSA
-        public key instead of making a network call."""
-        signing_key = type("SigningKey", (), {})()
-        signing_key.key = self.private_key.public_key()
-        signing_key.algorithm_name = "RS256"
-        signing_key.key_id = kid
-        return patch(
-            "tabpy.tabpy_server.handlers.jwt_auth.PyJWKClient.get_signing_keys",
-            return_value=[signing_key],
-        )
+        return patched_jwks_client(self.private_key, kid=kid)
 
     def test_valid_jwt_is_accepted(self):
         token = self._make_token()
