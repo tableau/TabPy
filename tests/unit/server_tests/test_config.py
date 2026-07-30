@@ -397,3 +397,140 @@ class TestCertificateValidation(unittest.TestCase):
     def test_valid_cert(self):
         path = os.path.join(self.resources_path, "valid.crt")
         validate_cert(path)
+
+
+class TestOAuthConfigValidation(unittest.TestCase):
+    def __init__(self, *args, **kwargs):
+        super(TestOAuthConfigValidation, self).__init__(*args, **kwargs)
+        self.fp = None
+
+    def setUp(self):
+        self.fp = NamedTemporaryFile(mode="w+t", delete=False)
+
+    def tearDown(self):
+        os.remove(self.fp.name)
+        self.fp = None
+
+    def test_oauth_disabled_by_default(self):
+        self.fp.write("[TabPy]\n")
+        self.fp.close()
+
+        app = TabPyApp(self.fp.name)
+        self.assertFalse(app.settings["oauth_enabled"])
+        self.assertNotIn("authentication", app._get_features())
+
+    def test_oauth_enabled_with_all_required_settings_succeeds(self):
+        self.fp.write(
+            "[TabPy]\n"
+            "TABPY_OAUTH_ENABLED = true\n"
+            "TABPY_OAUTH_ISSUER = https://idp.example.com/\n"
+            "TABPY_OAUTH_JWKS_URI = https://idp.example.com/.well-known/jwks.json\n"
+            "TABPY_OAUTH_AUDIENCE = tabpy\n"
+        )
+        self.fp.close()
+
+        app = TabPyApp(self.fp.name)
+        self.assertTrue(app.settings["oauth_enabled"])
+        methods = app._get_features()["authentication"]["methods"]
+        self.assertIn("oauth-jwt", methods)
+
+    def test_oauth_enabled_missing_issuer_raises(self):
+        self.fp.write(
+            "[TabPy]\n"
+            "TABPY_OAUTH_ENABLED = true\n"
+            "TABPY_OAUTH_JWKS_URI = https://idp.example.com/.well-known/jwks.json\n"
+            "TABPY_OAUTH_AUDIENCE = tabpy\n"
+        )
+        self.fp.close()
+
+        with self.assertRaises(RuntimeError) as err:
+            TabPyApp(self.fp.name)
+        self.assertIn("TABPY_OAUTH_ISSUER", err.exception.args[0])
+
+    def test_oauth_enabled_missing_jwks_uri_raises(self):
+        self.fp.write(
+            "[TabPy]\n"
+            "TABPY_OAUTH_ENABLED = true\n"
+            "TABPY_OAUTH_ISSUER = https://idp.example.com/\n"
+            "TABPY_OAUTH_AUDIENCE = tabpy\n"
+        )
+        self.fp.close()
+
+        with self.assertRaises(RuntimeError) as err:
+            TabPyApp(self.fp.name)
+        self.assertIn("TABPY_OAUTH_JWKS_URI", err.exception.args[0])
+
+    def test_oauth_enabled_missing_audience_raises(self):
+        self.fp.write(
+            "[TabPy]\n"
+            "TABPY_OAUTH_ENABLED = true\n"
+            "TABPY_OAUTH_ISSUER = https://idp.example.com/\n"
+            "TABPY_OAUTH_JWKS_URI = https://idp.example.com/.well-known/jwks.json\n"
+        )
+        self.fp.close()
+
+        with self.assertRaises(RuntimeError) as err:
+            TabPyApp(self.fp.name)
+        self.assertIn("TABPY_OAUTH_AUDIENCE", err.exception.args[0])
+
+    def test_oauth_enabled_with_http_jwks_uri_raises(self):
+        self.fp.write(
+            "[TabPy]\n"
+            "TABPY_OAUTH_ENABLED = true\n"
+            "TABPY_OAUTH_ISSUER = https://idp.example.com/\n"
+            "TABPY_OAUTH_JWKS_URI = http://idp.example.com/.well-known/jwks.json\n"
+            "TABPY_OAUTH_AUDIENCE = tabpy\n"
+        )
+        self.fp.close()
+
+        with self.assertRaises(RuntimeError) as err:
+            TabPyApp(self.fp.name)
+        self.assertIn("TABPY_OAUTH_JWKS_URI", err.exception.args[0])
+
+    def test_oauth_enabled_with_http_issuer_raises(self):
+        self.fp.write(
+            "[TabPy]\n"
+            "TABPY_OAUTH_ENABLED = true\n"
+            "TABPY_OAUTH_ISSUER = http://idp.example.com/\n"
+            "TABPY_OAUTH_JWKS_URI = https://idp.example.com/.well-known/jwks.json\n"
+            "TABPY_OAUTH_AUDIENCE = tabpy\n"
+        )
+        self.fp.close()
+
+        with self.assertRaises(RuntimeError) as err:
+            TabPyApp(self.fp.name)
+        self.assertIn("TABPY_OAUTH_ISSUER", err.exception.args[0])
+
+    @patch('builtins.input')
+    def test_oauth_only_does_not_trigger_no_auth_warning(self, mock_input):
+        self.fp.write(
+            "[TabPy]\n"
+            "TABPY_OAUTH_ENABLED = true\n"
+            "TABPY_OAUTH_ISSUER = https://idp.example.com/\n"
+            "TABPY_OAUTH_JWKS_URI = https://idp.example.com/.well-known/jwks.json\n"
+            "TABPY_OAUTH_AUDIENCE = tabpy\n"
+        )
+        self.fp.close()
+
+        TabPyApp(self.fp.name)
+        mock_input.assert_not_called()
+
+    def test_basic_auth_and_oauth_both_enabled_advertises_both_methods(self):
+        pwd_file = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+            "integration", "resources", "pwdfile.txt",
+        )
+        self.fp.write(
+            "[TabPy]\n"
+            f"TABPY_PWD_FILE = {pwd_file}\n"
+            "TABPY_OAUTH_ENABLED = true\n"
+            "TABPY_OAUTH_ISSUER = https://idp.example.com/\n"
+            "TABPY_OAUTH_JWKS_URI = https://idp.example.com/.well-known/jwks.json\n"
+            "TABPY_OAUTH_AUDIENCE = tabpy\n"
+        )
+        self.fp.close()
+
+        app = TabPyApp(self.fp.name)
+        methods = app._get_features()["authentication"]["methods"]
+        self.assertIn("basic-auth", methods)
+        self.assertIn("oauth-jwt", methods)
