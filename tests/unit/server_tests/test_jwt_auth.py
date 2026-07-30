@@ -1,0 +1,377 @@
+import base64
+import datetime
+import hmac
+import hashlib
+import json
+import unittest
+from unittest.mock import patch
+
+import jwt
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import rsa
+
+from tabpy.tabpy_server.handlers.jwt_auth import JwtValidationError, validate_jwt
+
+ISSUER = "https://idp.example.com/"
+AUDIENCE = "tabpy"
+JWKS_URI = "https://idp.example.com/.well-known/jwks.json"
+
+
+def b64url(data: bytes) -> str:
+    return base64.urlsafe_b64encode(data).rstrip(b"=").decode()
+
+
+class TestJwtAuth(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+
+    def _make_token(self, claims_override=None, headers=None):
+        now = datetime.datetime.now(datetime.timezone.utc)
+        claims = {
+            "iss": ISSUER,
+            "aud": AUDIENCE,
+            "sub": "user1",
+            "iat": now,
+            "exp": now + datetime.timedelta(minutes=5),
+        }
+        if claims_override:
+            claims.update(claims_override)
+        return jwt.encode(claims, self.private_key, algorithm="RS256", headers=headers)
+
+    def _patched_jwks_client(self, kid=None):
+        """Patches PyJWKClient.get_signing_keys to return this test's RSA
+        public key instead of making a network call."""
+        signing_key = type("SigningKey", (), {})()
+        signing_key.key = self.private_key.public_key()
+        signing_key.algorithm_name = "RS256"
+        signing_key.key_id = kid
+        return patch(
+            "tabpy.tabpy_server.handlers.jwt_auth.PyJWKClient.get_signing_keys",
+            return_value=[signing_key],
+        )
+
+    def test_valid_jwt_is_accepted(self):
+        token = self._make_token()
+        with self._patched_jwks_client():
+            claims = validate_jwt(token, issuer=ISSUER, jwks_uri=JWKS_URI, audience=AUDIENCE)
+        self.assertEqual(claims["sub"], "user1")
+
+    def test_missing_token_raises(self):
+        with self.assertRaises(JwtValidationError):
+            validate_jwt("", issuer=ISSUER, jwks_uri=JWKS_URI, audience=AUDIENCE)
+
+    def test_expired_jwt_is_rejected(self):
+        past = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(hours=1)
+        token = self._make_token({"iat": past - datetime.timedelta(minutes=5), "exp": past})
+        with self._patched_jwks_client():
+            with self.assertRaises(JwtValidationError):
+                validate_jwt(token, issuer=ISSUER, jwks_uri=JWKS_URI, audience=AUDIENCE)
+
+    def test_wrong_issuer_is_rejected(self):
+        token = self._make_token({"iss": "https://wrong-idp.example.com/"})
+        with self._patched_jwks_client():
+            with self.assertRaises(JwtValidationError):
+                validate_jwt(token, issuer=ISSUER, jwks_uri=JWKS_URI, audience=AUDIENCE)
+
+    def test_wrong_audience_is_rejected(self):
+        token = self._make_token({"aud": "wrong-audience"})
+        with self._patched_jwks_client():
+            with self.assertRaises(JwtValidationError):
+                validate_jwt(token, issuer=ISSUER, jwks_uri=JWKS_URI, audience=AUDIENCE)
+
+    def test_missing_required_scope_is_rejected(self):
+        token = self._make_token({"scope": "tabpy:query"})
+        with self._patched_jwks_client():
+            with self.assertRaises(JwtValidationError):
+                validate_jwt(
+                    token,
+                    issuer=ISSUER,
+                    jwks_uri=JWKS_URI,
+                    audience=AUDIENCE,
+                    required_scopes="tabpy:query,tabpy:evaluate",
+                )
+
+    def test_non_string_scope_claim_is_rejected_not_raised(self):
+        """
+        Some IdPs emit `scope`/permissions as a JSON list rather than a
+        space-separated string. That must still fail closed as a
+        JwtValidationError (401), not escape as an uncaught exception (500).
+        """
+        token = self._make_token({"scope": ["tabpy:query", "tabpy:evaluate"]})
+        with self._patched_jwks_client():
+            with self.assertRaises(JwtValidationError):
+                validate_jwt(
+                    token,
+                    issuer=ISSUER,
+                    jwks_uri=JWKS_URI,
+                    audience=AUDIENCE,
+                    required_scopes="tabpy:query",
+                )
+
+    def test_present_required_scopes_are_accepted(self):
+        token = self._make_token({"scope": "tabpy:query tabpy:evaluate"})
+        with self._patched_jwks_client():
+            claims = validate_jwt(
+                token,
+                issuer=ISSUER,
+                jwks_uri=JWKS_URI,
+                audience=AUDIENCE,
+                required_scopes="tabpy:query,tabpy:evaluate",
+            )
+        self.assertEqual(claims["sub"], "user1")
+
+    def test_malformed_token_is_rejected(self):
+        with self.assertRaises(JwtValidationError):
+            validate_jwt(
+                "not-a-real-jwt", issuer=ISSUER, jwks_uri=JWKS_URI, audience=AUDIENCE
+            )
+
+    def test_wrong_signing_key_is_rejected(self):
+        token = self._make_token()
+        other_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+        signing_key = type("SigningKey", (), {})()
+        signing_key.key = other_key.public_key()
+        signing_key.algorithm_name = "RS256"
+        signing_key.key_id = None
+        with patch(
+            "tabpy.tabpy_server.handlers.jwt_auth.PyJWKClient.get_signing_keys",
+            return_value=[signing_key],
+        ):
+            with self.assertRaises(JwtValidationError):
+                validate_jwt(token, issuer=ISSUER, jwks_uri=JWKS_URI, audience=AUDIENCE)
+
+    def test_not_yet_valid_token_is_rejected(self):
+        future = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(minutes=10)
+        token = self._make_token({"nbf": future})
+        with self._patched_jwks_client():
+            with self.assertRaises(JwtValidationError):
+                validate_jwt(token, issuer=ISSUER, jwks_uri=JWKS_URI, audience=AUDIENCE)
+
+    def test_unresolvable_signing_key_is_rejected(self):
+        token = self._make_token()
+        with patch(
+            "tabpy.tabpy_server.handlers.jwt_auth.PyJWKClient.get_signing_keys",
+            side_effect=jwt.exceptions.PyJWKClientError("Unable to find a signing key"),
+        ):
+            with self.assertRaises(JwtValidationError):
+                validate_jwt(token, issuer=ISSUER, jwks_uri=JWKS_URI, audience=AUDIENCE)
+
+    def test_unexpected_jwks_error_is_rejected_not_raised(self):
+        """
+        A malformed JWKS response or other network-layer failure that PyJWT
+        doesn't wrap as PyJWKClientError/InvalidTokenError must still come
+        out as JwtValidationError (401), not an uncaught exception (500).
+        """
+        token = self._make_token()
+        with patch(
+            "tabpy.tabpy_server.handlers.jwt_auth.PyJWKClient.get_signing_keys",
+            side_effect=ValueError("Expecting value: line 1 column 1 (char 0)"),
+        ):
+            with self.assertRaises(JwtValidationError):
+                validate_jwt(token, issuer=ISSUER, jwks_uri=JWKS_URI, audience=AUDIENCE)
+
+    def test_jwks_client_is_created_with_bounded_timeout(self):
+        """
+        TabPy serves requests on a single IO-loop thread, so the JWKS HTTP
+        client must not be allowed to hang indefinitely on a slow/unreachable
+        IdP -- that would stall the entire server, not just one request.
+        """
+        import tabpy.tabpy_server.handlers.jwt_auth as jwt_auth_module
+
+        jwt_auth_module._jwks_clients.clear()
+        client = jwt_auth_module._get_jwks_client(JWKS_URI)
+        self.assertEqual(client.timeout, jwt_auth_module.JWKS_FETCH_TIMEOUT_SECONDS)
+        self.assertLess(jwt_auth_module.JWKS_FETCH_TIMEOUT_SECONDS, 30)
+
+    def test_algorithm_is_pinned_to_jwks_key_not_token_header(self):
+        """
+        Guards against algorithm-confusion attacks: even if a forged token
+        claims alg=none in its header, validate_jwt only ever decodes using
+        the algorithm associated with the resolved JWKS signing key.
+        """
+        now = datetime.datetime.now(datetime.timezone.utc)
+        header = b64url(json.dumps({"alg": "none", "typ": "JWT"}).encode())
+        payload = b64url(
+            json.dumps(
+                {
+                    "iss": ISSUER,
+                    "aud": AUDIENCE,
+                    "sub": "attacker",
+                    "iat": int(now.timestamp()),
+                    "exp": int((now + datetime.timedelta(minutes=5)).timestamp()),
+                }
+            ).encode()
+        )
+        forged_token = f"{header}.{payload}."
+
+        with self._patched_jwks_client():
+            with self.assertRaises(JwtValidationError):
+                validate_jwt(forged_token, issuer=ISSUER, jwks_uri=JWKS_URI, audience=AUDIENCE)
+
+    def test_matching_kid_is_selected_from_multi_key_jwks(self):
+        """
+        Every other test in this suite mocks a single signing key with
+        key_id=None matching a header-less token, which trivially matches
+        via `None == None` -- unrepresentative of a real JWKS, where every
+        entry has a non-empty kid (PyJWT filters out keys without one).
+        This exercises the actual kid-comparison logic against a JWKS with
+        multiple keys, matching the token's real `kid` header.
+        """
+        token = self._make_token(headers={"kid": "key-2"})
+
+        other_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+        wrong_key = type("SigningKey", (), {})()
+        wrong_key.key = other_key.public_key()
+        wrong_key.algorithm_name = "RS256"
+        wrong_key.key_id = "key-1"
+
+        right_key = type("SigningKey", (), {})()
+        right_key.key = self.private_key.public_key()
+        right_key.algorithm_name = "RS256"
+        right_key.key_id = "key-2"
+
+        with patch(
+            "tabpy.tabpy_server.handlers.jwt_auth.PyJWKClient.get_signing_keys",
+            return_value=[wrong_key, right_key],
+        ):
+            claims = validate_jwt(token, issuer=ISSUER, jwks_uri=JWKS_URI, audience=AUDIENCE)
+        self.assertEqual(claims["sub"], "user1")
+
+    def test_missing_kid_does_not_force_unbounded_jwks_refresh(self):
+        """
+        An unauthenticated caller can send a token with a made-up `kid`
+        (read from the unverified header, before any signature check).
+        Repeated unknown `kid`s must not each force a fresh JWKS fetch --
+        that fetch is a blocking network call on TabPy's single IO-loop
+        thread, so unbounded refetching is a pre-auth DoS vector. Only one
+        forced refresh per jwks_uri is allowed within
+        JWKS_MIN_REFRESH_INTERVAL_SECONDS.
+        """
+        import tabpy.tabpy_server.handlers.jwt_auth as jwt_auth_module
+
+        jwt_auth_module._jwks_clients.clear()
+        jwt_auth_module._jwks_last_failed_refresh.clear()
+
+        token1 = self._make_token(headers={"kid": "unknown-kid-1"})
+        token2 = self._make_token(headers={"kid": "unknown-kid-2"})
+
+        signing_key = type("SigningKey", (), {})()
+        signing_key.key = self.private_key.public_key()
+        signing_key.algorithm_name = "RS256"
+        signing_key.key_id = "the-real-kid"
+
+        with patch(
+            "tabpy.tabpy_server.handlers.jwt_auth.PyJWKClient.get_signing_keys",
+            return_value=[signing_key],
+        ) as mock_get_signing_keys:
+            with self.assertRaises(JwtValidationError):
+                validate_jwt(token1, issuer=ISSUER, jwks_uri=JWKS_URI, audience=AUDIENCE)
+            with self.assertRaises(JwtValidationError):
+                validate_jwt(token2, issuer=ISSUER, jwks_uri=JWKS_URI, audience=AUDIENCE)
+
+        # get_signing_keys(refresh=True) is only allowed once per token
+        # (the first cache-miss lookup), plus at most one forced refresh
+        # shared across both tokens -- not one forced refresh per token.
+        refresh_calls = [
+            call for call in mock_get_signing_keys.call_args_list
+            if call.kwargs.get("refresh") or (call.args and call.args[0])
+        ]
+        self.assertLessEqual(len(refresh_calls), 1)
+
+    def test_successful_refresh_is_not_rate_limited_after_a_bogus_kid(self):
+        """
+        Only a *failed* forced refresh should arm the cooldown. If a bogus
+        `kid` is sent right before an IdP genuinely rotates its signing
+        keys, a legitimate token using the newly-rotated key must still be
+        accepted -- otherwise an attacker could "prime" a denial window
+        against real users just by sending one throwaway bad-kid request.
+        """
+        import tabpy.tabpy_server.handlers.jwt_auth as jwt_auth_module
+
+        jwt_auth_module._jwks_clients.clear()
+        jwt_auth_module._jwks_last_failed_refresh.clear()
+
+        bogus_token = self._make_token(headers={"kid": "unknown-kid"})
+        rotated_signing_key = type("SigningKey", (), {})()
+        rotated_signing_key.key = self.private_key.public_key()
+        rotated_signing_key.algorithm_name = "RS256"
+        rotated_signing_key.key_id = "rotated-kid"
+
+        with patch(
+            "tabpy.tabpy_server.handlers.jwt_auth.PyJWKClient.get_signing_keys",
+            return_value=[],
+        ):
+            with self.assertRaises(JwtValidationError):
+                validate_jwt(bogus_token, issuer=ISSUER, jwks_uri=JWKS_URI, audience=AUDIENCE)
+
+        rotated_token = self._make_token(headers={"kid": "rotated-kid"})
+        with patch(
+            "tabpy.tabpy_server.handlers.jwt_auth.PyJWKClient.get_signing_keys",
+            return_value=[rotated_signing_key],
+        ):
+            claims = validate_jwt(
+                rotated_token, issuer=ISSUER, jwks_uri=JWKS_URI, audience=AUDIENCE
+            )
+        self.assertEqual(claims["sub"], "user1")
+
+    def test_hs256_substitution_using_public_key_is_rejected(self):
+        """
+        Guards against the classic RS256->HS256 confusion attack: an
+        attacker who knows the RSA public key forges an HS256 token using
+        that public key as the HMAC secret. This must be rejected because
+        the algorithm is pinned to the JWKS-resolved key's own
+        algorithm_name (RS256), never trusted from the token header.
+        """
+        public_pem = self.private_key.public_key().public_bytes(
+            serialization.Encoding.PEM,
+            serialization.PublicFormat.SubjectPublicKeyInfo,
+        )
+        now = datetime.datetime.now(datetime.timezone.utc)
+        header = b64url(json.dumps({"alg": "HS256", "typ": "JWT"}).encode())
+        payload = b64url(
+            json.dumps(
+                {
+                    "iss": ISSUER,
+                    "aud": AUDIENCE,
+                    "sub": "attacker",
+                    "iat": int(now.timestamp()),
+                    "exp": int((now + datetime.timedelta(minutes=5)).timestamp()),
+                }
+            ).encode()
+        )
+        signing_input = f"{header}.{payload}".encode()
+        signature = hmac.new(public_pem, signing_input, hashlib.sha256).digest()
+        forged_token = f"{header}.{payload}.{b64url(signature)}"
+
+        with self._patched_jwks_client():
+            with self.assertRaises(JwtValidationError):
+                validate_jwt(forged_token, issuer=ISSUER, jwks_uri=JWKS_URI, audience=AUDIENCE)
+
+    def test_jwks_client_is_reused_for_same_uri(self):
+        """
+        _get_jwks_client must return the same PyJWKClient instance for
+        repeat calls with the same jwks_uri, so PyJWKClient's own JWK Set
+        cache (avoiding per-request JWKS fetches) is actually effective.
+        """
+        import tabpy.tabpy_server.handlers.jwt_auth as jwt_auth_module
+
+        jwt_auth_module._jwks_clients.clear()
+        first = jwt_auth_module._get_jwks_client(JWKS_URI)
+        second = jwt_auth_module._get_jwks_client(JWKS_URI)
+        self.assertIs(first, second)
+
+    def test_validation_failure_does_not_log_raw_token(self):
+        token = self._make_token({"iss": "https://wrong-idp.example.com/"})
+        with self._patched_jwks_client():
+            with self.assertLogs(
+                "tabpy.tabpy_server.handlers.jwt_auth", level="ERROR"
+            ) as log_ctx:
+                with self.assertRaises(JwtValidationError):
+                    validate_jwt(token, issuer=ISSUER, jwks_uri=JWKS_URI, audience=AUDIENCE)
+        logged_text = " ".join(log_ctx.output)
+        self.assertNotIn(token, logged_text)
+
+
+if __name__ == "__main__":
+    unittest.main()
