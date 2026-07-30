@@ -5,6 +5,7 @@ class ConfigParameters:
 
     TABPY_PWD_FILE = "TABPY_PWD_FILE"
     TABPY_PORT = "TABPY_PORT"
+    TABPY_BIND_IP = "TABPY_BIND_IP"
     TABPY_QUERY_OBJECT_PATH = "TABPY_QUERY_OBJECT_PATH"
     TABPY_STATE_PATH = "TABPY_STATE_PATH"
     TABPY_TRANSFER_PROTOCOL = "TABPY_TRANSFER_PROTOCOL"
@@ -21,6 +22,7 @@ class ConfigParameters:
     # Arrow specific settings
     TABPY_ARROW_ENABLE = "TABPY_ARROW_ENABLE"
     TABPY_ARROWFLIGHT_PORT = "TABPY_ARROWFLIGHT_PORT"
+    TABPY_ARROWFLIGHT_BIND_IP = "TABPY_ARROWFLIGHT_BIND_IP"
 
 
 class SettingsParameters:
@@ -30,6 +32,7 @@ class SettingsParameters:
 
     TransferProtocol = "transfer_protocol"
     Port = "port"
+    BindIp = "bind_ip"
     ServerVersion = "server_version"
     UploadDir = "upload_dir"
     CertificateFile = "certificate_file"
@@ -47,3 +50,4 @@ class SettingsParameters:
     # Arrow specific settings
     ArrowEnabled = "arrow_enabled"
     ArrowFlightPort = "arrowflight_port"
+    ArrowFlightBindIp = "arrowflight_bind_ip"
