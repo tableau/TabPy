@@ -322,6 +322,11 @@ When both basic access authentication and OAuth are enabled, TabPy picks the
 method based on the scheme of the `Authorization` header sent by the client
 (`Basic` or `Bearer`), so both can be used against the same server.
 
+JWKS lookups are cached, but because TabPy serves requests on a single
+thread, a slow or unresponsive IdP during a cache-cold fetch (startup, or a
+key rotation) will briefly stall all concurrent requests, not just the one
+that triggered the fetch.
+
 ### Endpoint Security
 
 All endpoints require authentication if it is enabled for the server.

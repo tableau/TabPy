@@ -6,8 +6,15 @@ from jwt import PyJWKClient
 
 logger = logging.getLogger(__name__)
 
-# Bounds how long a slow/unresponsive JWKS endpoint can stall TabPy's
-# single IO-loop thread.
+# PyJWKClient fetches JWKS synchronously (via requests), and that call runs
+# directly on TabPy's single Tornado IO-loop thread -- a slow/unresponsive
+# IdP therefore stalls every concurrent request on the server, not just the
+# one that triggered the fetch, for up to this many seconds. Caching (see
+# _jwks_clients) and the refresh rate limit below bound how often this can
+# happen, but a cold start or a legitimate key rotation still pays this
+# cost. Moving the fetch to a thread pool (e.g. via IOLoop.run_in_executor)
+# would remove the stall entirely, at the cost of making the auth path
+# asynchronous; not done here.
 JWKS_FETCH_TIMEOUT_SECONDS = 10
 
 # An unauthenticated caller can force a fresh JWKS fetch just by sending a
@@ -21,8 +28,9 @@ JWKS_FETCH_TIMEOUT_SECONDS = 10
 JWKS_MIN_REFRESH_INTERVAL_SECONDS = 30
 
 # One PyJWKClient per JWKS URI, reused so its JWK Set cache actually avoids
-# per-request fetches. Not lock-protected: safe only on a single IO-loop
-# thread.
+# per-request fetches. Process-global and not lock-protected: safe only
+# because TabPy runs a single app instance per process on a single IO-loop
+# thread. Would need a lock (or per-app scoping) if that ever changes.
 _jwks_clients = {}
 
 # jwks_uri -> monotonic timestamp of the last failed forced refresh, used
