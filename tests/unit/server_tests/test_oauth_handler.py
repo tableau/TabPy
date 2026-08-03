@@ -2,8 +2,10 @@ import base64
 import datetime
 import json
 import os
+import socket
 import tempfile
 import unittest
+from unittest.mock import patch
 
 from cryptography.hazmat.primitives.asymmetric import rsa
 from tornado.testing import AsyncHTTPTestCase
@@ -17,10 +19,22 @@ from tests.unit.server_tests.jwt_test_helpers import (
     patched_jwks_client,
 )
 
+# The fake "idp.example.com" JWKS host used by these tests doesn't
+# resolve. TabPyApp resolves the JWKS host at startup to guard against
+# SSRF, so tests need a fake public resolution result in place of a real
+# DNS lookup.
+_PUBLIC_JWKS_ADDRINFO = [
+    (socket.AF_INET, socket.SOCK_STREAM, 6, "", ("93.184.216.34", 443)),
+]
+
 
 class BaseTestOAuthHandler(AsyncHTTPTestCase):
     def get_app(self):
-        self.app = TabPyApp(self.config_file.name)
+        with patch(
+            "tabpy.tabpy_server.app.app.socket.getaddrinfo",
+            return_value=_PUBLIC_JWKS_ADDRINFO,
+        ):
+            self.app = TabPyApp(self.config_file.name)
         return self.app._create_tornado_web_app()
 
     @classmethod
@@ -98,6 +112,35 @@ class TestOAuthOnlyHandler(BaseTestOAuthHandler):
         with self._patched_jwks_client():
             response = self.fetch("/info", headers=headers)
         self.assertEqual(response.code, 401)
+
+    def test_401_response_body_is_uniform_across_jwt_failure_reasons(self):
+        """
+        The specific reason a JWT was rejected (expired, wrong issuer,
+        wrong audience, unresolvable signing key, etc.) must never appear
+        in the response body -- that would let an unauthenticated caller
+        enumerate why a token failed. Every failure reason must produce
+        the exact same generic body.
+        """
+        past = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(hours=1)
+        expired_token = self._make_token(
+            {"iat": past - datetime.timedelta(minutes=5), "exp": past}
+        )
+        wrong_issuer_token = self._make_token({"iss": "https://wrong-idp.example.com/"})
+        wrong_audience_token = self._make_token({"aud": "wrong-audience"})
+
+        bodies = []
+        for token in (expired_token, wrong_issuer_token, wrong_audience_token):
+            headers = {"Authorization": f"Bearer {token}"}
+            with self._patched_jwks_client():
+                response = self.fetch("/info", headers=headers)
+            self.assertEqual(response.code, 401)
+            bodies.append(response.body)
+
+        missing_token_response = self.fetch("/info")
+        self.assertEqual(missing_token_response.code, 401)
+        bodies.append(missing_token_response.body)
+
+        self.assertEqual(len(set(bodies)), 1)
 
     def test_info_advertises_oauth_jwt_method(self):
         token = self._make_token()
