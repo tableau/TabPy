@@ -295,7 +295,8 @@ class BaseHandler(tornado.web.RequestHandler):
             or auth_header_list[0].lower() != expected_scheme.lower()
         ):
             self.logger.log(
-                logging.ERROR, f'Unknown authentication method "{auth_header}"'
+                logging.ERROR,
+                f'Authorization header did not match the expected "{expected_scheme}" scheme',
             )
             return None
 

@@ -108,6 +108,22 @@ class TestOAuthOnlyHandler(BaseTestOAuthHandler):
         features = body["versions"]["v1"]["features"]
         self.assertIn("oauth-jwt", features["authentication"]["methods"])
 
+    def test_malformed_bearer_header_is_rejected_without_logging_the_token(self):
+        """
+        A Bearer header that fails to parse into the expected two-part
+        "Bearer <token>" form (e.g. extra whitespace) still carries a
+        credential-bearing value. It must never be logged in full.
+        """
+        token = self._make_token()
+        headers = {"Authorization": f"Bearer  {token}"}
+        with self.assertLogs(
+            "tabpy.tabpy_server.handlers.base_handler", level="ERROR"
+        ) as log_ctx:
+            response = self.fetch("/info", headers=headers)
+        self.assertEqual(response.code, 401)
+        logged_text = " ".join(log_ctx.output)
+        self.assertNotIn(token, logged_text)
+
 
 class TestOAuthAndBasicAuthCoexist(BaseTestOAuthHandler):
     @classmethod
