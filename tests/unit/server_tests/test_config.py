@@ -515,6 +515,46 @@ class TestOAuthConfigValidation(unittest.TestCase):
         TabPyApp(self.fp.name)
         mock_input.assert_not_called()
 
+    def test_oauth_only_with_arrow_enabled_raises(self):
+        """
+        Arrow Flight's auth middleware only supports basic auth (see
+        TabPyApp._get_arrow_server), so OAuth-only + Arrow must be
+        rejected at startup rather than crashing the Arrow thread with a
+        KeyError looking for a password file that was never configured.
+        """
+        self.fp.write(
+            "[TabPy]\n"
+            "TABPY_ARROW_ENABLE = true\n"
+            "TABPY_OAUTH_ENABLED = true\n"
+            "TABPY_OAUTH_ISSUER = https://idp.example.com/\n"
+            "TABPY_OAUTH_JWKS_URI = https://idp.example.com/.well-known/jwks.json\n"
+            "TABPY_OAUTH_AUDIENCE = tabpy\n"
+        )
+        self.fp.close()
+
+        with self.assertRaises(RuntimeError) as err:
+            TabPyApp(self.fp.name)
+        self.assertIn("TABPY_ARROW_ENABLE", err.exception.args[0])
+
+    def test_oauth_and_basic_auth_with_arrow_enabled_succeeds(self):
+        pwd_file = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+            "integration", "resources", "pwdfile.txt",
+        )
+        self.fp.write(
+            "[TabPy]\n"
+            f"TABPY_PWD_FILE = {pwd_file}\n"
+            "TABPY_ARROW_ENABLE = true\n"
+            "TABPY_OAUTH_ENABLED = true\n"
+            "TABPY_OAUTH_ISSUER = https://idp.example.com/\n"
+            "TABPY_OAUTH_JWKS_URI = https://idp.example.com/.well-known/jwks.json\n"
+            "TABPY_OAUTH_AUDIENCE = tabpy\n"
+        )
+        self.fp.close()
+
+        app = TabPyApp(self.fp.name)
+        self.assertTrue(app.settings["oauth_enabled"])
+
     def test_basic_auth_and_oauth_both_enabled_advertises_both_methods(self):
         pwd_file = os.path.join(
             os.path.dirname(os.path.dirname(os.path.dirname(__file__))),

@@ -560,6 +560,24 @@ class TabPyApp:
             logger.critical(msg)
             raise RuntimeError(msg)
 
+        # Arrow Flight's auth middleware currently only supports basic auth
+        # (see _get_arrow_server): whenever any auth method is enabled it
+        # unconditionally reads TABPY_PWD_FILE, so OAuth-only + Arrow would
+        # otherwise crash at startup looking for a pwd file that was never
+        # configured. Revisit this check if Arrow Flight ever adds its own
+        # OAuth/JWT middleware option.
+        if (
+            self.settings[SettingsParameters.ArrowEnabled]
+            and ConfigParameters.TABPY_PWD_FILE not in self.settings
+        ):
+            msg = (
+                f"{ConfigParameters.TABPY_ARROW_ENABLE} requires "
+                f"{ConfigParameters.TABPY_PWD_FILE} to be set: Arrow Flight does not "
+                "support OAuth authentication"
+            )
+            logger.critical(msg)
+            raise RuntimeError(msg)
+
     def _get_features(self):
         features = {}
 
