@@ -579,19 +579,18 @@ class TabPyApp:
             )
             logger.critical(msg)
             raise RuntimeError(msg)
+        # Allowlist (require is_global) rather than denylist: a denylist of
+        # is_private/is_loopback/is_link_local/is_reserved misses ranges
+        # like IPv4-mapped IPv6 (::ffff:169.254.169.254) and CGNAT
+        # (100.64.0.0/10), which is_global correctly excludes.
         unsafe_addresses = [
             address for address in jwks_addresses
-            if (
-                ipaddress.ip_address(address).is_private
-                or ipaddress.ip_address(address).is_loopback
-                or ipaddress.ip_address(address).is_link_local
-                or ipaddress.ip_address(address).is_reserved
-            )
+            if not ipaddress.ip_address(address).is_global
         ]
         if unsafe_addresses:
             msg = (
                 f"{ConfigParameters.TABPY_OAUTH_JWKS_URI} host \"{jwks_host}\" "
-                f"resolves to a private/loopback/link-local address "
+                f"resolves to a non-public address "
                 f"({', '.join(unsafe_addresses)}): refusing to use it as the "
                 "JWKS endpoint"
             )

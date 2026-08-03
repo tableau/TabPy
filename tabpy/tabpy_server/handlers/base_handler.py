@@ -434,7 +434,7 @@ class BaseHandler(tornado.web.RequestHandler):
             self.logger.log(logging.ERROR, str(ex))
             return False
 
-        if self.settings.get(SettingsParameters.OAuthLogUser, True):
+        if self.settings.get(SettingsParameters.OAuthLogUser, False):
             subject = claims.get("sub")
             if subject:
                 self.username = subject

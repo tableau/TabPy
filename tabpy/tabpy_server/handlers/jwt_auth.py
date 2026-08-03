@@ -95,7 +95,7 @@ def _get_signing_key(jwks_client: PyJWKClient, jwks_uri: str, token: str):
     last_failure = _jwks_last_failed_refresh.get(jwks_uri, 0)
     if now - last_failure < JWKS_MIN_REFRESH_INTERVAL_SECONDS:
         raise jwt.exceptions.PyJWKClientError(
-            f'Unable to find a signing key that matches: "{kid}"'
+            f"Unable to find a signing key that matches: {kid!r}"
         )
 
     signing_keys = _fetch_signing_keys(jwks_client, jwks_uri, refresh=True)
@@ -103,7 +103,7 @@ def _get_signing_key(jwks_client: PyJWKClient, jwks_uri: str, token: str):
     if signing_key is None:
         _jwks_last_failed_refresh[jwks_uri] = now
         raise jwt.exceptions.PyJWKClientError(
-            f'Unable to find a signing key that matches: "{kid}"'
+            f"Unable to find a signing key that matches: {kid!r}"
         )
     return signing_key
 
