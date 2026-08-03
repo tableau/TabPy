@@ -1,4 +1,5 @@
 import os
+import socket
 import unittest
 from tempfile import NamedTemporaryFile
 import tabpy
@@ -6,6 +7,14 @@ from tabpy.tabpy_server.app.util import validate_cert
 from tabpy.tabpy_server.app.app import TabPyApp
 
 from unittest.mock import patch
+
+# The OAuth config tests below all use a fake, non-resolvable
+# "idp.example.com" JWKS host. TabPyApp resolves that host to guard
+# against JWKS URIs pointing at internal/link-local addresses (SSRF), so
+# tests need a fake public resolution result rather than a real DNS lookup.
+PUBLIC_JWKS_ADDRINFO = [
+    (socket.AF_INET, socket.SOCK_STREAM, 6, "", ("93.184.216.34", 443)),
+]
 
 
 class TestConfigEnvironmentCalls(unittest.TestCase):
@@ -419,7 +428,11 @@ class TestOAuthConfigValidation(unittest.TestCase):
         self.assertFalse(app.settings["oauth_enabled"])
         self.assertNotIn("authentication", app._get_features())
 
-    def test_oauth_enabled_with_all_required_settings_succeeds(self):
+    @patch(
+        "tabpy.tabpy_server.app.app.socket.getaddrinfo",
+        return_value=PUBLIC_JWKS_ADDRINFO,
+    )
+    def test_oauth_enabled_with_all_required_settings_succeeds(self, mock_getaddrinfo):
         self.fp.write(
             "[TabPy]\n"
             "TABPY_OAUTH_ENABLED = true\n"
@@ -501,8 +514,14 @@ class TestOAuthConfigValidation(unittest.TestCase):
             TabPyApp(self.fp.name)
         self.assertIn("TABPY_OAUTH_ISSUER", err.exception.args[0])
 
+    @patch(
+        "tabpy.tabpy_server.app.app.socket.getaddrinfo",
+        return_value=PUBLIC_JWKS_ADDRINFO,
+    )
     @patch('builtins.input')
-    def test_oauth_only_does_not_trigger_no_auth_warning(self, mock_input):
+    def test_oauth_only_does_not_trigger_no_auth_warning(
+        self, mock_input, mock_getaddrinfo
+    ):
         self.fp.write(
             "[TabPy]\n"
             "TABPY_OAUTH_ENABLED = true\n"
@@ -515,7 +534,55 @@ class TestOAuthConfigValidation(unittest.TestCase):
         TabPyApp(self.fp.name)
         mock_input.assert_not_called()
 
-    def test_oauth_only_with_arrow_enabled_raises(self):
+    def test_oauth_enabled_with_jwks_uri_resolving_to_link_local_address_raises(self):
+        """
+        TabPy fetches TABPY_OAUTH_JWKS_URI over the network, so a JWKS URI
+        that resolves to a link-local address (e.g. a cloud metadata
+        endpoint) must be rejected at startup rather than allowed through
+        as a server-side request forgery vector.
+        """
+        self.fp.write(
+            "[TabPy]\n"
+            "TABPY_OAUTH_ENABLED = true\n"
+            "TABPY_OAUTH_ISSUER = https://idp.example.com/\n"
+            "TABPY_OAUTH_JWKS_URI = https://idp.example.com/.well-known/jwks.json\n"
+            "TABPY_OAUTH_AUDIENCE = tabpy\n"
+        )
+        self.fp.close()
+
+        with patch(
+            "tabpy.tabpy_server.app.app.socket.getaddrinfo",
+            return_value=[
+                (socket.AF_INET, socket.SOCK_STREAM, 6, "", ("169.254.169.254", 443)),
+            ],
+        ):
+            with self.assertRaises(RuntimeError) as err:
+                TabPyApp(self.fp.name)
+        self.assertIn("TABPY_OAUTH_JWKS_URI", err.exception.args[0])
+
+    def test_oauth_enabled_with_unresolvable_jwks_uri_raises(self):
+        self.fp.write(
+            "[TabPy]\n"
+            "TABPY_OAUTH_ENABLED = true\n"
+            "TABPY_OAUTH_ISSUER = https://idp.example.com/\n"
+            "TABPY_OAUTH_JWKS_URI = https://idp.example.com/.well-known/jwks.json\n"
+            "TABPY_OAUTH_AUDIENCE = tabpy\n"
+        )
+        self.fp.close()
+
+        with patch(
+            "tabpy.tabpy_server.app.app.socket.getaddrinfo",
+            side_effect=socket.gaierror("Name or service not known"),
+        ):
+            with self.assertRaises(RuntimeError) as err:
+                TabPyApp(self.fp.name)
+        self.assertIn("TABPY_OAUTH_JWKS_URI", err.exception.args[0])
+
+    @patch(
+        "tabpy.tabpy_server.app.app.socket.getaddrinfo",
+        return_value=PUBLIC_JWKS_ADDRINFO,
+    )
+    def test_oauth_only_with_arrow_enabled_raises(self, mock_getaddrinfo):
         """
         Arrow Flight's auth middleware only supports basic auth (see
         TabPyApp._get_arrow_server), so OAuth-only + Arrow must be
@@ -536,7 +603,11 @@ class TestOAuthConfigValidation(unittest.TestCase):
             TabPyApp(self.fp.name)
         self.assertIn("TABPY_ARROW_ENABLE", err.exception.args[0])
 
-    def test_oauth_and_basic_auth_with_arrow_enabled_succeeds(self):
+    @patch(
+        "tabpy.tabpy_server.app.app.socket.getaddrinfo",
+        return_value=PUBLIC_JWKS_ADDRINFO,
+    )
+    def test_oauth_and_basic_auth_with_arrow_enabled_succeeds(self, mock_getaddrinfo):
         pwd_file = os.path.join(
             os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
             "integration", "resources", "pwdfile.txt",
@@ -555,7 +626,13 @@ class TestOAuthConfigValidation(unittest.TestCase):
         app = TabPyApp(self.fp.name)
         self.assertTrue(app.settings["oauth_enabled"])
 
-    def test_basic_auth_and_oauth_both_enabled_advertises_both_methods(self):
+    @patch(
+        "tabpy.tabpy_server.app.app.socket.getaddrinfo",
+        return_value=PUBLIC_JWKS_ADDRINFO,
+    )
+    def test_basic_auth_and_oauth_both_enabled_advertises_both_methods(
+        self, mock_getaddrinfo
+    ):
         pwd_file = os.path.join(
             os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
             "integration", "resources", "pwdfile.txt",

@@ -1,12 +1,15 @@
 import concurrent.futures
 import configparser
+import ipaddress
 import logging
 import multiprocessing
 import os
 import shutil
 import signal
+import socket
 import ssl
 import sys
+from urllib.parse import urlsplit
 import _thread
 
 import tornado
@@ -556,6 +559,41 @@ class TabPyApp:
             msg = (
                 f"{', '.join(insecure)} must use https: JWKS/issuer are the trust "
                 "anchor for JWT verification and must not be fetched over plain HTTP"
+            )
+            logger.critical(msg)
+            raise RuntimeError(msg)
+
+        # TABPY_OAUTH_JWKS_URI is fetched over the network, so a
+        # misconfigured or attacker-supplied host pointing at an
+        # internal/link-local address (e.g. a cloud metadata endpoint) would
+        # otherwise be an SSRF vector. Reject it here at startup.
+        jwks_host = urlsplit(self.settings[SettingsParameters.OAuthJwksUri]).hostname
+        try:
+            jwks_addresses = {
+                info[4][0] for info in socket.getaddrinfo(jwks_host, None)
+            }
+        except socket.gaierror as ex:
+            msg = (
+                f"Unable to resolve {ConfigParameters.TABPY_OAUTH_JWKS_URI} host "
+                f'"{jwks_host}": {ex}'
+            )
+            logger.critical(msg)
+            raise RuntimeError(msg)
+        unsafe_addresses = [
+            address for address in jwks_addresses
+            if (
+                ipaddress.ip_address(address).is_private
+                or ipaddress.ip_address(address).is_loopback
+                or ipaddress.ip_address(address).is_link_local
+                or ipaddress.ip_address(address).is_reserved
+            )
+        ]
+        if unsafe_addresses:
+            msg = (
+                f"{ConfigParameters.TABPY_OAUTH_JWKS_URI} host \"{jwks_host}\" "
+                f"resolves to a private/loopback/link-local address "
+                f"({', '.join(unsafe_addresses)}): refusing to use it as the "
+                "JWKS endpoint"
             )
             logger.critical(msg)
             raise RuntimeError(msg)

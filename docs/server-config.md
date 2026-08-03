@@ -292,7 +292,11 @@ all required when `TABPY_OAUTH_ENABLED` is `true`; TabPy will fail to start
 if any are missing. `TABPY_OAUTH_ISSUER` and `TABPY_OAUTH_JWKS_URI` must use
 `https://` -- the JWKS response is the trust anchor for verifying JWT
 signatures, so fetching it over plain HTTP would let anyone on the network
-path substitute their own keys.
+path substitute their own keys. `TABPY_OAUTH_JWKS_URI` is also resolved at
+startup, and TabPy will fail to start if it resolves to a private,
+loopback, or link-local address, since that endpoint is fetched over the
+network on TabPy's behalf and could otherwise be pointed at an internal
+service (e.g. a cloud metadata endpoint).
 
 - `TABPY_OAUTH_ISSUER` is the expected `iss` claim on incoming JWTs.
 - `TABPY_OAUTH_JWKS_URI` is the IdP's JWKS endpoint, used to fetch and cache
