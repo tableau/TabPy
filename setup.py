@@ -82,7 +82,7 @@ def setup_package():
             "nltk",
             "numpy",
             "pandas",
-            "pyjwt",
+            "pyjwt[crypto]>=2.9,<3",
             "pyopenssl",
             "pytest",
             "pytest-cov",
