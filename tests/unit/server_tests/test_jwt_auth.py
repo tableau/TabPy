@@ -29,6 +29,13 @@ class TestJwtAuth(unittest.TestCase):
     def setUpClass(cls):
         cls.private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
 
+    def setUp(self):
+        import tabpy.tabpy_server.handlers.jwt_auth as jwt_auth_module
+
+        jwt_auth_module._jwks_clients.clear()
+        jwt_auth_module._jwks_last_failed_refresh.clear()
+        jwt_auth_module._jwks_last_fetch_failure.clear()
+
     def _make_token(self, claims_override=None, headers=None):
         return make_token(
             self.private_key, claims_override=claims_override, headers=headers
@@ -224,15 +231,17 @@ class TestJwtAuth(unittest.TestCase):
             claims = validate_jwt(token, issuer=ISSUER, jwks_uri=JWKS_URI, audience=AUDIENCE)
         self.assertEqual(claims["sub"], "user1")
 
-    def test_missing_kid_does_not_force_unbounded_jwks_refresh(self):
+    def test_repeated_unknown_kid_does_not_force_unbounded_jwks_refresh(self):
         """
         An unauthenticated caller can send a token with a made-up `kid`
         (read from the unverified header, before any signature check).
-        Repeated unknown `kid`s must not each force a fresh JWKS fetch --
-        that fetch is a blocking network call on TabPy's single IO-loop
-        thread, so unbounded refetching is a pre-auth DoS vector. Only one
-        forced refresh per jwks_uri is allowed within
-        JWKS_MIN_REFRESH_INTERVAL_SECONDS.
+        Repeatedly retrying an unknown `kid` -- even a different one each
+        time -- must not each force a fresh JWKS fetch, since that fetch is
+        a blocking network call on TabPy's single IO-loop thread. The
+        cooldown is keyed only by jwks_uri (not by kid, since kid is
+        attacker-controlled pre-signature-check): only one forced refresh
+        per jwks_uri is allowed within JWKS_MIN_REFRESH_INTERVAL_SECONDS,
+        no matter how many distinct bogus kids are tried.
         """
         import tabpy.tabpy_server.handlers.jwt_auth as jwt_auth_module
 
@@ -258,20 +267,23 @@ class TestJwtAuth(unittest.TestCase):
 
         # get_signing_keys(refresh=True) is only allowed once per token
         # (the first cache-miss lookup), plus at most one forced refresh
-        # shared across both tokens -- not one forced refresh per token.
+        # shared across both requests -- not one forced refresh per
+        # request, regardless of how many distinct kids were tried.
         refresh_calls = [
             call for call in mock_get_signing_keys.call_args_list
             if call.kwargs.get("refresh") or (call.args and call.args[0])
         ]
         self.assertLessEqual(len(refresh_calls), 1)
 
-    def test_successful_refresh_is_not_rate_limited_after_a_bogus_kid(self):
+    def test_unknown_kid_refresh_cooldown_blocks_a_different_kid(self):
         """
-        Only a *failed* forced refresh should arm the cooldown. If a bogus
-        `kid` is sent right before an IdP genuinely rotates its signing
-        keys, a legitimate token using the newly-rotated key must still be
-        accepted -- otherwise an attacker could "prime" a denial window
-        against real users just by sending one throwaway bad-kid request.
+        The forced-refresh cooldown is keyed only by jwks_uri, not by kid:
+        a bogus `kid` arms a cooldown that also blocks a forced refresh for
+        a *different* kid seen shortly after, even a legitimately rotated
+        one. This is a deliberate tradeoff -- keying by kid would let an
+        attacker force a fresh blocking JWKS fetch on every request just by
+        varying the kid, which is a worse (unauthenticated DoS) outcome
+        than briefly delaying visibility of a rotated key.
         """
         import tabpy.tabpy_server.handlers.jwt_auth as jwt_auth_module
 
@@ -279,11 +291,6 @@ class TestJwtAuth(unittest.TestCase):
         jwt_auth_module._jwks_last_failed_refresh.clear()
 
         bogus_token = self._make_token(headers={"kid": "unknown-kid"})
-        rotated_signing_key = type("SigningKey", (), {})()
-        rotated_signing_key.key = self.private_key.public_key()
-        rotated_signing_key.algorithm_name = "RS256"
-        rotated_signing_key.key_id = "rotated-kid"
-
         with patch(
             "tabpy.tabpy_server.handlers.jwt_auth.PyJWKClient.get_signing_keys",
             return_value=[],
@@ -292,14 +299,47 @@ class TestJwtAuth(unittest.TestCase):
                 validate_jwt(bogus_token, issuer=ISSUER, jwks_uri=JWKS_URI, audience=AUDIENCE)
 
         rotated_token = self._make_token(headers={"kid": "rotated-kid"})
+        rotated_signing_key = type("SigningKey", (), {})()
+        rotated_signing_key.key = self.private_key.public_key()
+        rotated_signing_key.algorithm_name = "RS256"
+        rotated_signing_key.key_id = "rotated-kid"
+
         with patch(
             "tabpy.tabpy_server.handlers.jwt_auth.PyJWKClient.get_signing_keys",
-            return_value=[rotated_signing_key],
-        ):
-            claims = validate_jwt(
-                rotated_token, issuer=ISSUER, jwks_uri=JWKS_URI, audience=AUDIENCE
-            )
-        self.assertEqual(claims["sub"], "user1")
+            side_effect=[[], [rotated_signing_key]],
+        ) as mock_get_signing_keys:
+            with self.assertRaises(JwtValidationError):
+                validate_jwt(
+                    rotated_token, issuer=ISSUER, jwks_uri=JWKS_URI, audience=AUDIENCE
+                )
+        # The forced refresh for "rotated-kid" must have been skipped due
+        # to the cooldown armed by the bogus kid moments earlier.
+        self.assertEqual(mock_get_signing_keys.call_count, 1)
+
+    def test_failed_jwks_fetch_is_rate_limited(self):
+        """
+        A down/unreachable IdP must not be hammered with a fresh blocking
+        fetch (see JWKS_FETCH_TIMEOUT_SECONDS) on every single request --
+        that fetch runs directly on TabPy's single IO-loop thread. After
+        one failed fetch, subsequent requests within
+        JWKS_MIN_REFRESH_INTERVAL_SECONDS must fail fast without calling
+        get_signing_keys again.
+        """
+        import tabpy.tabpy_server.handlers.jwt_auth as jwt_auth_module
+
+        jwt_auth_module._jwks_clients.clear()
+        jwt_auth_module._jwks_last_fetch_failure.clear()
+
+        token = self._make_token()
+        with patch(
+            "tabpy.tabpy_server.handlers.jwt_auth.PyJWKClient.get_signing_keys",
+            side_effect=jwt.exceptions.PyJWKClientError("Unable to fetch JWKS"),
+        ) as mock_get_signing_keys:
+            with self.assertRaises(JwtValidationError):
+                validate_jwt(token, issuer=ISSUER, jwks_uri=JWKS_URI, audience=AUDIENCE)
+            with self.assertRaises(JwtValidationError):
+                validate_jwt(token, issuer=ISSUER, jwks_uri=JWKS_URI, audience=AUDIENCE)
+        self.assertEqual(mock_get_signing_keys.call_count, 1)
 
     def test_hs256_substitution_using_public_key_is_rejected(self):
         """

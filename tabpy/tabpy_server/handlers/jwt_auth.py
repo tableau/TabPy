@@ -19,12 +19,13 @@ JWKS_FETCH_TIMEOUT_SECONDS = 10
 
 # An unauthenticated caller can force a fresh JWKS fetch just by sending a
 # made-up `kid` (read from the token header pre-signature-check), and that
-# fetch blocks the single IO-loop thread. This bounds how often a *failed*
-# forced refresh (kid still not found) can refetch again, regardless of
-# how many distinct bogus `kid`s are tried. Only failures set the cooldown
-# -- a successful refresh (e.g. a genuine key rotation) must not be
-# penalized, or a bogus `kid` sent right before a real rotation could lock
-# out legitimate holders of the new key for the rest of the window.
+# fetch blocks the single IO-loop thread. This bounds, per jwks_uri, how
+# often a *failed* forced refresh (kid still not found) can refetch again.
+# Only failures set the cooldown -- a successful refresh (e.g. a genuine key
+# rotation) must not be penalized. Also used to rate-limit retrying a JWKS
+# endpoint that just failed to fetch at all (network error, timeout,
+# malformed response), so a down/unreachable IdP can't be hammered with a
+# fresh blocking fetch on every single request.
 JWKS_MIN_REFRESH_INTERVAL_SECONDS = 30
 
 # One PyJWKClient per JWKS URI, reused so its JWK Set cache actually avoids
@@ -33,8 +34,21 @@ JWKS_MIN_REFRESH_INTERVAL_SECONDS = 30
 # thread. Would need a lock (or per-app scoping) if that ever changes.
 _jwks_clients = {}
 
-# jwks_uri -> monotonic timestamp of the last failed forced refresh, used
-# to rate-limit that path. Same single-threaded caveat as _jwks_clients.
+# jwks_uri -> monotonic timestamp of the last failed JWKS fetch (network
+# error, timeout, malformed response -- not a kid mismatch). Rate-limits
+# retrying a broken/unreachable IdP, independent of which kid was
+# requested: every such failure means the fetch itself never completed, so
+# nothing in the cache could satisfy any kid anyway.
+_jwks_last_fetch_failure = {}
+
+# jwks_uri -> monotonic timestamp of the last forced refresh that fetched
+# successfully but still didn't find the requested kid. Keyed only by
+# jwks_uri, not by kid: the kid is read from the token header before the
+# signature is checked, so it's fully attacker-controlled. Keying by kid
+# would let an attacker force a fresh blocking JWKS fetch on every request
+# just by varying the kid -- an unauthenticated DoS. The tradeoff is that a
+# bogus kid can delay visibility of a legitimately rotated key by up to
+# JWKS_MIN_REFRESH_INTERVAL_SECONDS, which is an acceptable bound.
 _jwks_last_failed_refresh = {}
 
 
@@ -48,6 +62,20 @@ def _get_jwks_client(jwks_uri: str) -> PyJWKClient:
     return client
 
 
+def _fetch_signing_keys(jwks_client: PyJWKClient, jwks_uri: str, refresh: bool):
+    now = time.monotonic()
+    last_failure = _jwks_last_fetch_failure.get(jwks_uri, 0)
+    if now - last_failure < JWKS_MIN_REFRESH_INTERVAL_SECONDS:
+        raise jwt.exceptions.PyJWKClientError(
+            f'JWKS endpoint "{jwks_uri}" failed recently; not retrying yet'
+        )
+    try:
+        return jwks_client.get_signing_keys(refresh=refresh)
+    except Exception:
+        _jwks_last_fetch_failure[jwks_uri] = now
+        raise
+
+
 def _get_signing_key(jwks_client: PyJWKClient, jwks_uri: str, token: str):
     """
     Resolves the signing key for `token`'s `kid`, same as
@@ -58,7 +86,7 @@ def _get_signing_key(jwks_client: PyJWKClient, jwks_uri: str, token: str):
     header = jwt.get_unverified_header(token)
     kid = header.get("kid")
 
-    signing_keys = jwks_client.get_signing_keys()
+    signing_keys = _fetch_signing_keys(jwks_client, jwks_uri, refresh=False)
     signing_key = PyJWKClient.match_kid(signing_keys, kid)
     if signing_key is not None:
         return signing_key
@@ -70,7 +98,7 @@ def _get_signing_key(jwks_client: PyJWKClient, jwks_uri: str, token: str):
             f'Unable to find a signing key that matches: "{kid}"'
         )
 
-    signing_keys = jwks_client.get_signing_keys(refresh=True)
+    signing_keys = _fetch_signing_keys(jwks_client, jwks_uri, refresh=True)
     signing_key = PyJWKClient.match_kid(signing_keys, kid)
     if signing_key is None:
         _jwks_last_failed_refresh[jwks_uri] = now
