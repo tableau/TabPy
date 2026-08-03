@@ -313,8 +313,10 @@ TABPY_OAUTH_LOG_USER = true
 - `TABPY_OAUTH_REQUIRED_SCOPES` is a comma-separated list of scopes that
   must all be present in the JWT's `scope` claim for the request to be
   accepted. If unset, no scope check is performed.
-- `TABPY_OAUTH_LOG_USER` (default `true`) sets the JWT's `sub` claim as the
-  authenticated user for logging purposes.
+- `TABPY_OAUTH_LOG_USER` (default `false`) sets the JWT's `sub` claim as the
+  authenticated user for logging purposes. The `sub` claim is often a
+  user's email or SSO ID, so leave this disabled unless that's an
+  acceptable thing to write to logs in your environment.
 
 To authenticate a request, send the JWT as a Bearer token:
 

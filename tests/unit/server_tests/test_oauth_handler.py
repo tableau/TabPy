@@ -222,5 +222,36 @@ class TestOAuthLogUserDisabled(BaseTestOAuthHandler):
         self.assertNotIn("should-not-be-logged", logged_text)
 
 
+class TestOAuthLogUserDefault(BaseTestOAuthHandler):
+    @classmethod
+    def setUpClass(cls):
+        cls.prefix = "__TestOAuthLogUserDefault_"
+        cls.tabpy_config = [
+            "TABPY_OAUTH_ENABLED = true\n",
+            f"TABPY_OAUTH_ISSUER = {ISSUER}\n",
+            f"TABPY_OAUTH_JWKS_URI = {JWKS_URI}\n",
+            f"TABPY_OAUTH_AUDIENCE = {AUDIENCE}\n",
+            "TABPY_LOG_DETAILS = true\n",
+        ]
+        super().setUpClass()
+
+    def test_subject_is_not_logged_by_default(self):
+        """
+        TABPY_OAUTH_LOG_USER defaults to disabled: the `sub` claim is
+        often a user's email or SSO ID, so it must not be written to logs
+        unless an operator explicitly opts in.
+        """
+        token = self._make_token({"sub": "should-not-be-logged"})
+        headers = {"Authorization": f"Bearer {token}"}
+        with self._patched_jwks_client():
+            with self.assertLogs(
+                "tabpy.tabpy_server.handlers.base_handler", level="INFO"
+            ) as log_ctx:
+                response = self.fetch("/info", headers=headers)
+        self.assertEqual(response.code, 200)
+        logged_text = " ".join(log_ctx.output)
+        self.assertNotIn("should-not-be-logged", logged_text)
+
+
 if __name__ == "__main__":
     unittest.main()

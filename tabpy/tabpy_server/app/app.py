@@ -368,7 +368,7 @@ class TabPyApp:
             (SettingsParameters.OAuthAudience, ConfigParameters.TABPY_OAUTH_AUDIENCE, None, None),
             (SettingsParameters.OAuthRequiredScopes, ConfigParameters.TABPY_OAUTH_REQUIRED_SCOPES,
              None, None),
-            (SettingsParameters.OAuthLogUser, ConfigParameters.TABPY_OAUTH_LOG_USER, True, parser.getboolean),
+            (SettingsParameters.OAuthLogUser, ConfigParameters.TABPY_OAUTH_LOG_USER, False, parser.getboolean),
         ]
 
         for setting, parameter, default_val, parse_function in settings_parameters:
