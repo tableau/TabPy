@@ -71,6 +71,10 @@ at [`logging.config` documentation page](https://docs.python.org/3.6/library/log
   makes TabPy require credentials with HTTP(S) requests. More details about
   authentication can be found in [Authentication](#authentication)
   section. Default value - not set.
+- `TABPY_OAUTH_ENABLED`, `TABPY_OAUTH_ISSUER`, `TABPY_OAUTH_JWKS_URI`,
+  `TABPY_OAUTH_AUDIENCE`, `TABPY_OAUTH_REQUIRED_SCOPES`,
+  `TABPY_OAUTH_LOG_USER` - configure OAuth/JWT Bearer token authentication.
+  See [OAuth / JWT Bearer Token Authentication](#oauth--jwt-bearer-token-authentication).
 - `TABPY_TRANSFER_PROTOCOL` - transfer protocol. Default value - `http`. If
   set to `https` two additional parameters have to be specified:
   `TABPY_CERTIFICATE_FILE` and `TABPY_KEY_FILE`.
@@ -316,7 +320,10 @@ TABPY_OAUTH_LOG_USER = true
 - `TABPY_OAUTH_LOG_USER` (default `false`) sets the JWT's `sub` claim as the
   authenticated user for logging purposes. The `sub` claim is often a
   user's email or SSO ID, so leave this disabled unless that's an
-  acceptable thing to write to logs in your environment.
+  acceptable thing to write to logs in your environment. This has no
+  effect unless [`TABPY_LOG_DETAILS`](#request-context-logging) is also
+  enabled -- that's what actually logs the authenticated user, for both
+  basic auth and OAuth.
 
 To authenticate a request, send the JWT as a Bearer token:
 
