@@ -22,6 +22,14 @@ class ConfigParameters:
     TABPY_ARROW_ENABLE = "TABPY_ARROW_ENABLE"
     TABPY_ARROWFLIGHT_PORT = "TABPY_ARROWFLIGHT_PORT"
 
+    # OAuth/JWT specific settings
+    TABPY_OAUTH_ENABLED = "TABPY_OAUTH_ENABLED"
+    TABPY_OAUTH_ISSUER = "TABPY_OAUTH_ISSUER"
+    TABPY_OAUTH_JWKS_URI = "TABPY_OAUTH_JWKS_URI"
+    TABPY_OAUTH_AUDIENCE = "TABPY_OAUTH_AUDIENCE"
+    TABPY_OAUTH_REQUIRED_SCOPES = "TABPY_OAUTH_REQUIRED_SCOPES"
+    TABPY_OAUTH_LOG_USER = "TABPY_OAUTH_LOG_USER"
+
 
 class SettingsParameters:
     """
@@ -47,3 +55,11 @@ class SettingsParameters:
     # Arrow specific settings
     ArrowEnabled = "arrow_enabled"
     ArrowFlightPort = "arrowflight_port"
+
+    # OAuth/JWT specific settings
+    OAuthEnabled = "oauth_enabled"
+    OAuthIssuer = "oauth_issuer"
+    OAuthJwksUri = "oauth_jwks_uri"
+    OAuthAudience = "oauth_audience"
+    OAuthRequiredScopes = "oauth_required_scopes"
+    OAuthLogUser = "oauth_log_user"

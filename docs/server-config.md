@@ -71,6 +71,10 @@ at [`logging.config` documentation page](https://docs.python.org/3.6/library/log
   makes TabPy require credentials with HTTP(S) requests. More details about
   authentication can be found in [Authentication](#authentication)
   section. Default value - not set.
+- `TABPY_OAUTH_ENABLED`, `TABPY_OAUTH_ISSUER`, `TABPY_OAUTH_JWKS_URI`,
+  `TABPY_OAUTH_AUDIENCE`, `TABPY_OAUTH_REQUIRED_SCOPES`,
+  `TABPY_OAUTH_LOG_USER` - configure OAuth/JWT Bearer token authentication.
+  See [OAuth / JWT Bearer Token Authentication](#oauth--jwt-bearer-token-authentication).
 - `TABPY_TRANSFER_PROTOCOL` - transfer protocol. Default value - `http`. If
   set to `https` two additional parameters have to be specified:
   `TABPY_CERTIFICATE_FILE` and `TABPY_KEY_FILE`.
@@ -209,9 +213,10 @@ connection scenario.
 
 ## Authentication
 
-TabPy supports basic access authentication (see
+TabPy supports two authentication methods, which can be enabled independently
+or at the same time: basic access authentication (see
 [https://en.wikipedia.org/wiki/Basic_access_authentication](https://en.wikipedia.org/wiki/Basic_access_authentication)
-for more details).
+for more details) and OAuth/JWT Bearer token authentication.
 
 ### Enabling Authentication
 
@@ -268,6 +273,72 @@ will be generated and displayed in the command line.
 
 To delete an account open password file in any text editor and delete the
 line with the user name.
+
+### OAuth / JWT Bearer Token Authentication
+
+TabPy can validate OAuth 2.0 JWT Bearer tokens on incoming requests. This
+allows per-user credentials issued by an external identity provider (IdP)
+to be used instead of, or alongside, a single shared password-file
+credential.
+
+To enable it, specify the following parameters in the TabPy configuration
+file:
+
+```sh
+TABPY_OAUTH_ENABLED = true
+TABPY_OAUTH_ISSUER = https://idp.example.com/
+TABPY_OAUTH_JWKS_URI = https://idp.example.com/.well-known/jwks.json
+TABPY_OAUTH_AUDIENCE = tabpy
+```
+
+`TABPY_OAUTH_ISSUER`, `TABPY_OAUTH_JWKS_URI`, and `TABPY_OAUTH_AUDIENCE` are
+all required when `TABPY_OAUTH_ENABLED` is `true`; TabPy will fail to start
+if any are missing. `TABPY_OAUTH_ISSUER` and `TABPY_OAUTH_JWKS_URI` must use
+`https://` -- the JWKS response is the trust anchor for verifying JWT
+signatures, so fetching it over plain HTTP would let anyone on the network
+path substitute their own keys. `TABPY_OAUTH_JWKS_URI` is also resolved at
+startup, and TabPy will fail to start if it resolves to a private,
+loopback, or link-local address, since that endpoint is fetched over the
+network on TabPy's behalf and could otherwise be pointed at an internal
+service (e.g. a cloud metadata endpoint).
+
+- `TABPY_OAUTH_ISSUER` is the expected `iss` claim on incoming JWTs.
+- `TABPY_OAUTH_JWKS_URI` is the IdP's JWKS endpoint, used to fetch and cache
+  the signing keys used to verify JWT signatures.
+- `TABPY_OAUTH_AUDIENCE` is the expected `aud` claim on incoming JWTs.
+
+Two additional parameters are optional:
+
+```sh
+TABPY_OAUTH_REQUIRED_SCOPES = tabpy:query,tabpy:evaluate
+TABPY_OAUTH_LOG_USER = true
+```
+
+- `TABPY_OAUTH_REQUIRED_SCOPES` is a comma-separated list of scopes that
+  must all be present in the JWT's `scope` claim for the request to be
+  accepted. If unset, no scope check is performed.
+- `TABPY_OAUTH_LOG_USER` (default `false`) sets the JWT's `sub` claim as the
+  authenticated user for logging purposes. The `sub` claim is often a
+  user's email or SSO ID, so leave this disabled unless that's an
+  acceptable thing to write to logs in your environment. This has no
+  effect unless [`TABPY_LOG_DETAILS`](#request-context-logging) is also
+  enabled -- that's what actually logs the authenticated user, for both
+  basic auth and OAuth.
+
+To authenticate a request, send the JWT as a Bearer token:
+
+```sh
+curl -H "Authorization: Bearer <token>" http://localhost:9004/info
+```
+
+When both basic access authentication and OAuth are enabled, TabPy picks the
+method based on the scheme of the `Authorization` header sent by the client
+(`Basic` or `Bearer`), so both can be used against the same server.
+
+JWKS lookups are cached, but because TabPy serves requests on a single
+thread, a slow or unresponsive IdP during a cache-cold fetch (startup, or a
+key rotation) will briefly stall all concurrent requests, not just the one
+that triggered the fetch.
 
 ### Endpoint Security
 

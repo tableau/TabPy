@@ -1,12 +1,15 @@
 import concurrent.futures
 import configparser
+import ipaddress
 import logging
 import multiprocessing
 import os
 import shutil
 import signal
+import socket
 import ssl
 import sys
+from urllib.parse import urlsplit
 import _thread
 
 import tornado
@@ -357,8 +360,15 @@ class TabPyApp:
              100, None),
             (SettingsParameters.GzipEnabled, ConfigParameters.TABPY_GZIP_ENABLE,
              True, parser.getboolean),
-            (SettingsParameters.ArrowEnabled, ConfigParameters.TABPY_ARROW_ENABLE, False, parser.getboolean), 
+            (SettingsParameters.ArrowEnabled, ConfigParameters.TABPY_ARROW_ENABLE, False, parser.getboolean),
             (SettingsParameters.ArrowFlightPort, ConfigParameters.TABPY_ARROWFLIGHT_PORT, 13622, parser.getint),
+            (SettingsParameters.OAuthEnabled, ConfigParameters.TABPY_OAUTH_ENABLED, False, parser.getboolean),
+            (SettingsParameters.OAuthIssuer, ConfigParameters.TABPY_OAUTH_ISSUER, None, None),
+            (SettingsParameters.OAuthJwksUri, ConfigParameters.TABPY_OAUTH_JWKS_URI, None, None),
+            (SettingsParameters.OAuthAudience, ConfigParameters.TABPY_OAUTH_AUDIENCE, None, None),
+            (SettingsParameters.OAuthRequiredScopes, ConfigParameters.TABPY_OAUTH_REQUIRED_SCOPES,
+             None, None),
+            (SettingsParameters.OAuthLogUser, ConfigParameters.TABPY_OAUTH_LOG_USER, False, parser.getboolean),
         ]
 
         for setting, parameter, default_val, parse_function in settings_parameters:
@@ -403,6 +413,10 @@ class TabPyApp:
         if state_config.has_option("Service Info", "Subdirectory"):
             self.subdirectory = "/" + state_config.get("Service Info", "Subdirectory")
 
+        # Validate OAuth config if enabled
+        if self.settings[SettingsParameters.OAuthEnabled]:
+            self._validate_oauth_settings()
+
         # If passwords file specified load credentials
         if ConfigParameters.TABPY_PWD_FILE in self.settings:
             if not self._parse_pwd_file():
@@ -412,7 +426,7 @@ class TabPyApp:
                 )
                 logger.critical(msg)
                 raise RuntimeError(msg)
-        else:
+        elif not self.settings[SettingsParameters.OAuthEnabled]:
             self._handle_configuration_without_authentication()
 
         features = self._get_features()
@@ -513,14 +527,110 @@ class TabPyApp:
                 "https://github.com/tableau/TabPy/blob/master/docs/server-config.md#authentication.")
             exit()
 
+    def _validate_oauth_settings(self):
+        required = [
+            (SettingsParameters.OAuthIssuer, ConfigParameters.TABPY_OAUTH_ISSUER),
+            (SettingsParameters.OAuthJwksUri, ConfigParameters.TABPY_OAUTH_JWKS_URI),
+            (SettingsParameters.OAuthAudience, ConfigParameters.TABPY_OAUTH_AUDIENCE),
+        ]
+        missing = [
+            config_key for setting, config_key in required
+            if not self.settings.get(setting)
+        ]
+        if missing:
+            msg = (
+                f"{ConfigParameters.TABPY_OAUTH_ENABLED} is true but missing required "
+                f"setting(s): {', '.join(missing)}"
+            )
+            logger.critical(msg)
+            raise RuntimeError(msg)
+
+        # JWKS/issuer are the trust anchor for JWT verification, so both must
+        # be fetched over https to prevent an on-path attacker from substituting
+        # their own keys/issuer.
+        insecure = [
+            config_key for setting, config_key in (
+                (SettingsParameters.OAuthIssuer, ConfigParameters.TABPY_OAUTH_ISSUER),
+                (SettingsParameters.OAuthJwksUri, ConfigParameters.TABPY_OAUTH_JWKS_URI),
+            )
+            if not self.settings[setting].lower().startswith("https://")
+        ]
+        if insecure:
+            msg = (
+                f"{', '.join(insecure)} must use https: JWKS/issuer are the trust "
+                "anchor for JWT verification and must not be fetched over plain HTTP"
+            )
+            logger.critical(msg)
+            raise RuntimeError(msg)
+
+        # TABPY_OAUTH_JWKS_URI is fetched over the network, so a
+        # misconfigured or attacker-supplied host pointing at an
+        # internal/link-local address (e.g. a cloud metadata endpoint) would
+        # otherwise be an SSRF vector. Reject it here at startup.
+        jwks_host = urlsplit(self.settings[SettingsParameters.OAuthJwksUri]).hostname
+        try:
+            jwks_addresses = {
+                info[4][0] for info in socket.getaddrinfo(jwks_host, None)
+            }
+        except socket.gaierror as ex:
+            msg = (
+                f"Unable to resolve {ConfigParameters.TABPY_OAUTH_JWKS_URI} host "
+                f'"{jwks_host}": {ex}'
+            )
+            logger.critical(msg)
+            raise RuntimeError(msg)
+        # Allowlist (require is_global) rather than denylist: a denylist of
+        # is_private/is_loopback/is_link_local/is_reserved misses ranges
+        # like IPv4-mapped IPv6 (::ffff:169.254.169.254) and CGNAT
+        # (100.64.0.0/10), which is_global correctly excludes.
+        unsafe_addresses = [
+            address for address in jwks_addresses
+            if not ipaddress.ip_address(address).is_global
+        ]
+        if unsafe_addresses:
+            msg = (
+                f"{ConfigParameters.TABPY_OAUTH_JWKS_URI} host \"{jwks_host}\" "
+                f"resolves to a non-public address "
+                f"({', '.join(unsafe_addresses)}): refusing to use it as the "
+                "JWKS endpoint"
+            )
+            logger.critical(msg)
+            raise RuntimeError(msg)
+
+        # Arrow Flight's auth middleware currently only supports basic auth
+        # (see _get_arrow_server): whenever any auth method is enabled it
+        # unconditionally reads TABPY_PWD_FILE, so OAuth-only + Arrow would
+        # otherwise crash at startup looking for a pwd file that was never
+        # configured. Revisit this check if Arrow Flight ever adds its own
+        # OAuth/JWT middleware option.
+        if (
+            self.settings[SettingsParameters.ArrowEnabled]
+            and ConfigParameters.TABPY_PWD_FILE not in self.settings
+        ):
+            msg = (
+                f"{ConfigParameters.TABPY_ARROW_ENABLE} requires "
+                f"{ConfigParameters.TABPY_PWD_FILE} to be set: Arrow Flight does not "
+                "support OAuth authentication"
+            )
+            logger.critical(msg)
+            raise RuntimeError(msg)
+
     def _get_features(self):
         features = {}
 
         # Check for auth
-        if ConfigParameters.TABPY_PWD_FILE in self.settings:
+        if (
+            ConfigParameters.TABPY_PWD_FILE in self.settings
+            or self.settings[SettingsParameters.OAuthEnabled]
+        ):
+            methods = {}
+            if ConfigParameters.TABPY_PWD_FILE in self.settings:
+                methods["basic-auth"] = {}
+            if self.settings[SettingsParameters.OAuthEnabled]:
+                methods["oauth-jwt"] = {}
             features["authentication"] = {
                 "required": True,
-                "methods": {"basic-auth": {}},
+                "methods": methods,
             }
 
         features["evaluate_enabled"] = self.settings[SettingsParameters.EvaluateEnabled]

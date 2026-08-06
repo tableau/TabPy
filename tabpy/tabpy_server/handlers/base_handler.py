@@ -5,6 +5,7 @@ import json
 import logging
 import tornado.web
 from tabpy.tabpy_server.app.app_parameters import SettingsParameters
+from tabpy.tabpy_server.handlers.jwt_auth import JwtValidationError, validate_jwt
 from tabpy.tabpy_server.handlers.util import hash_password
 from tabpy.tabpy_server.handlers.util import AuthErrorStates
 import uuid
@@ -58,8 +59,19 @@ class ContextLoggerWrapper:
         """
         self.log_request_context = enable
 
+    def log_context_now(self):
+        """
+        Logs the request-context line, if not already logged for this
+        request. Call only after auth has resolved, since the line
+        includes self.tabpy_username.
+        """
+        self._log_context_info()
+
     def _log_context_info(self):
         if not self.log_request_context:
+            return
+
+        if self.request_context_logged:
             return
 
         context = f"Call ID: {self.call_id}"
@@ -91,6 +103,9 @@ class ContextLoggerWrapper:
         call ID added to any log entry is specified by if context logging
         is enabled (see CallContext.enable_context_logging for more details).
 
+        Does not trigger the request-context line itself; see
+        log_context_now.
+
         Parameters
         ----------
         level: int
@@ -107,9 +122,6 @@ class ContextLoggerWrapper:
         """
         extended_msg = msg
         if self.log_request_context:
-            if not self.request_context_logged:
-                self._log_context_info()
-
             extended_msg += f", <<call ID: {self.call_id}>>"
 
         logging.getLogger(__name__).log(level, extended_msg)
@@ -126,6 +138,8 @@ class BaseHandler(tornado.web.RequestHandler):
         self.credentials = app.credentials
         self.username = None
         self.password = None
+        self.jwt_token = None
+        self.auth_method = None
         self.eval_timeout = self.settings[SettingsParameters.EvaluateTimeout]
         self.max_request_size = app.max_request_size
 
@@ -135,6 +149,7 @@ class BaseHandler(tornado.web.RequestHandler):
         )
         self.logger.log(logging.DEBUG, "Checking if need to handle authentication")
         self.auth_error = self.handle_authentication("v1")
+        self.logger.log_context_now()
 
     def error_out(self, code, log_message, info=None):
         self.set_status(code)
@@ -224,8 +239,21 @@ class BaseHandler(tornado.web.RequestHandler):
             )
 
         methods = auth_feature["methods"]
-        if "basic-auth" in auth_feature["methods"]:
+
+        # If more than one method is configured, pick by the scheme the
+        # client sent so Basic Auth and OAuth can coexist on the same
+        # server. Case-insensitive per RFC 7235.
+        auth_header = self.request.headers.get("Authorization", "")
+        scheme = auth_header.split(" ")[0].lower() if auth_header else ""
+        if scheme == "bearer" and "oauth-jwt" in methods:
+            return True, "oauth-jwt"
+        if scheme == "basic" and "basic-auth" in methods:
             return True, "basic-auth"
+
+        if "basic-auth" in methods:
+            return True, "basic-auth"
+        if "oauth-jwt" in methods:
+            return True, "oauth-jwt"
         # Add new methods here...
 
         # No known methods were found
@@ -235,6 +263,44 @@ class BaseHandler(tornado.web.RequestHandler):
             f'for API "{api_version}"',
         )
         return False, ""
+
+    def _get_auth_header_value(self, expected_scheme: str) -> str:
+        """
+        Finds and returns the credential portion of the Authorization
+        header if it was sent with the given scheme (case-insensitive per
+        RFC 7235).
+
+        Parameters
+        ----------
+        expected_scheme: str
+            Auth scheme to match, e.g. "Basic" or "Bearer".
+
+        Returns
+        -------
+        str
+            The credential portion of the header if found and the scheme
+            matches. None otherwise.
+        """
+        self.logger.log(
+            logging.DEBUG, "Checking request headers for authentication data"
+        )
+        if "Authorization" not in self.request.headers:
+            self.logger.log(logging.INFO, "Authorization header not found")
+            return None
+
+        auth_header = self.request.headers["Authorization"]
+        auth_header_list = auth_header.split(" ")
+        if (
+            len(auth_header_list) != 2
+            or auth_header_list[0].lower() != expected_scheme.lower()
+        ):
+            self.logger.log(
+                logging.ERROR,
+                f'Authorization header did not match the expected "{expected_scheme}" scheme',
+            )
+            return None
+
+        return auth_header_list[1]
 
     def _get_basic_auth_credentials(self) -> bool:
         """
@@ -247,23 +313,12 @@ class BaseHandler(tornado.web.RequestHandler):
             True if valid credentials were found.
             False otherwise.
         """
-        self.logger.log(
-            logging.DEBUG, "Checking request headers for authentication data"
-        )
-        if "Authorization" not in self.request.headers:
-            self.logger.log(logging.INFO, "Authorization header not found")
-            return False
-
-        auth_header = self.request.headers["Authorization"]
-        auth_header_list = auth_header.split(" ")
-        if len(auth_header_list) != 2 or auth_header_list[0] != "Basic":
-            self.logger.log(
-                logging.ERROR, f'Unknown authentication method "{auth_header}"'
-            )
+        encoded_credentials = self._get_auth_header_value("Basic")
+        if encoded_credentials is None:
             return False
 
         try:
-            cred = base64.b64decode(auth_header_list[1]).decode("utf-8")
+            cred = base64.b64decode(encoded_credentials).decode("utf-8")
         except (binascii.Error, UnicodeDecodeError) as ex:
             self.logger.log(logging.CRITICAL, f"Cannot decode credentials: {str(ex)}")
             return False
@@ -276,6 +331,25 @@ class BaseHandler(tornado.web.RequestHandler):
         self.username = login_pwd[0]
         self.logger.set_tabpy_username(self.username)
         self.password = login_pwd[1]
+        return True
+
+    def _get_bearer_token(self) -> bool:
+        """
+        Extracts the Bearer token for the oauth-jwt authentication method.
+        The raw token is stored in self.jwt_token for validation by
+        _validate_credentials.
+
+        Returns
+        -------
+        bool
+            True if a Bearer token was found.
+            False otherwise.
+        """
+        token = self._get_auth_header_value("Bearer")
+        if token is None:
+            return False
+
+        self.jwt_token = token
         return True
 
     def _get_credentials(self, method) -> bool:
@@ -296,6 +370,8 @@ class BaseHandler(tornado.web.RequestHandler):
         """
         if method == "basic-auth":
             return self._get_basic_auth_credentials()
+        if method == "oauth-jwt":
+            return self._get_bearer_token()
         # Add new methods here...
 
         # No known methods were found
@@ -334,6 +410,38 @@ class BaseHandler(tornado.web.RequestHandler):
 
         return True
 
+    def _validate_jwt_credentials(self) -> bool:
+        """
+        Validates the Bearer token found by _get_bearer_token against the
+        configured IdP: signature (via JWKS), issuer, audience, expiry,
+        nbf, and optionally required scopes.
+
+        Returns
+        -------
+        bool
+            True if the JWT is valid.
+            False otherwise.
+        """
+        try:
+            claims = validate_jwt(
+                self.jwt_token,
+                issuer=self.settings[SettingsParameters.OAuthIssuer],
+                jwks_uri=self.settings[SettingsParameters.OAuthJwksUri],
+                audience=self.settings[SettingsParameters.OAuthAudience],
+                required_scopes=self.settings.get(SettingsParameters.OAuthRequiredScopes),
+            )
+        except JwtValidationError as ex:
+            self.logger.log(logging.ERROR, str(ex))
+            return False
+
+        if self.settings.get(SettingsParameters.OAuthLogUser, False):
+            subject = claims.get("sub")
+            if subject:
+                self.username = subject
+                self.logger.set_tabpy_username(self.username)
+
+        return True
+
     def _validate_credentials(self, method) -> bool:
         """
         Validates credentials according to specified methods if they
@@ -352,6 +460,8 @@ class BaseHandler(tornado.web.RequestHandler):
         """
         if method == "basic-auth":
             return self._validate_basic_auth_credentials()
+        if method == "oauth-jwt":
+            return self._validate_jwt_credentials()
         # Add new methods here...
 
         # No known methods were found
@@ -381,6 +491,7 @@ class BaseHandler(tornado.web.RequestHandler):
         """
         self.logger.log(logging.DEBUG, "Handling authentication")
         found, method = self._get_auth_method(api_version)
+        self.auth_method = method
         if not found:
             return AuthErrorStates.NotAuthorized
 
@@ -420,15 +531,28 @@ class BaseHandler(tornado.web.RequestHandler):
         """
         return self.auth_error
 
+    def _www_authenticate_scheme(self) -> str:
+        """
+        Returns the auth-scheme to challenge with in a WWW-Authenticate
+        header, matching whichever method was actually attempted so
+        OAuth clients aren't told to retry with Basic Auth (RFC 7235).
+        """
+        if self.auth_method == "oauth-jwt":
+            return "Bearer"
+        return "Basic"
+
     def fail_with_auth_error(self):
         """
         Prepares server 401 response and server 406 response depending
         on the value of the self.auth_error flag
         """
+        scheme = self._www_authenticate_scheme()
         if self.auth_error == AuthErrorStates.NotAuthorized:
             self.logger.log(logging.ERROR, "Failing with 401 for unauthorized request")
             self.set_status(401)
-            self.set_header("WWW-Authenticate", f'Basic realm="{self.tabpy_state.name}"')
+            self.set_header(
+                "WWW-Authenticate", f'{scheme} realm="{self.tabpy_state.name}"'
+            )
             self.error_out(
                 401,
                 info="Unauthorized request.",
@@ -437,7 +561,9 @@ class BaseHandler(tornado.web.RequestHandler):
         else:
             self.logger.log(logging.ERROR, "Failing with 406 for Not Acceptable")
             self.set_status(406)
-            self.set_header("WWW-Authenticate", f'Basic realm="{self.tabpy_state.name}"')
+            self.set_header(
+                "WWW-Authenticate", f'{scheme} realm="{self.tabpy_state.name}"'
+            )
             self.error_out(
                 406,
                 info="Not Acceptable",
