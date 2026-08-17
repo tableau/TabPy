@@ -20,7 +20,12 @@ import tabpy.tabpy_server.app.arrow_server as pa
 from tabpy.tabpy import __version__
 from tabpy.tabpy_server.app.app_parameters import ConfigParameters, SettingsParameters
 from tabpy.tabpy_server.app.util import parse_pwd_file
-from tabpy.tabpy_server.handlers.basic_auth_server_middleware_factory import BasicAuthServerMiddlewareFactory
+from tabpy.tabpy_server.handlers.basic_auth_server_middleware_factory import (
+    BasicAuthServerMiddlewareFactory,
+)
+from tabpy.tabpy_server.handlers.jwt_server_middleware_factory import (
+    JwtAuthServerMiddlewareFactory,
+)
 from tabpy.tabpy_server.handlers.no_op_auth_handler import NoOpAuthHandler
 from tabpy.tabpy_server.management.state import TabPyState
 from tabpy.tabpy_server.management.util import _get_state_from_file
@@ -129,11 +134,32 @@ class TabPyApp:
         location = "{}://{}:{}".format(scheme, host, port)
 
         auth_middleware = None
-        if "authentication" in config[SettingsParameters.ApiVersions]["v1"]["features"]:
-            _, creds = parse_pwd_file(config[ConfigParameters.TABPY_PWD_FILE])
-            auth_middleware = {
-                "basic": BasicAuthServerMiddlewareFactory(creds)
-            }
+        features = config[SettingsParameters.ApiVersions]["v1"]["features"]
+        if "authentication" in features:
+            basic_factory = None
+            if ConfigParameters.TABPY_PWD_FILE in config:
+                basic_factory = BasicAuthServerMiddlewareFactory(self.credentials)
+
+            # pyarrow invokes every registered middleware factory on each
+            # call. Installing Basic as a sibling key would reject valid
+            # Bearer tokens, so Basic is delegated through the JWT factory
+            # instead of registered alongside it.
+            if config.get(SettingsParameters.OAuthEnabled):
+                auth_middleware = {
+                    "jwt": JwtAuthServerMiddlewareFactory(
+                        issuer=config[SettingsParameters.OAuthIssuer],
+                        jwks_uri=config[SettingsParameters.OAuthJwksUri],
+                        audience=config[SettingsParameters.OAuthAudience],
+                        required_scopes=config.get(
+                            SettingsParameters.OAuthRequiredScopes
+                        ),
+                        basic_factory=basic_factory,
+                    )
+                }
+            elif basic_factory is not None:
+                auth_middleware = {
+                    "basic": basic_factory
+                }
 
         server = pa.FlightServer(host, location,
                             tls_certificates=tls_certificates,
@@ -593,24 +619,6 @@ class TabPyApp:
                 f"resolves to a non-public address "
                 f"({', '.join(unsafe_addresses)}): refusing to use it as the "
                 "JWKS endpoint"
-            )
-            logger.critical(msg)
-            raise RuntimeError(msg)
-
-        # Arrow Flight's auth middleware currently only supports basic auth
-        # (see _get_arrow_server): whenever any auth method is enabled it
-        # unconditionally reads TABPY_PWD_FILE, so OAuth-only + Arrow would
-        # otherwise crash at startup looking for a pwd file that was never
-        # configured. Revisit this check if Arrow Flight ever adds its own
-        # OAuth/JWT middleware option.
-        if (
-            self.settings[SettingsParameters.ArrowEnabled]
-            and ConfigParameters.TABPY_PWD_FILE not in self.settings
-        ):
-            msg = (
-                f"{ConfigParameters.TABPY_ARROW_ENABLE} requires "
-                f"{ConfigParameters.TABPY_PWD_FILE} to be set: Arrow Flight does not "
-                "support OAuth authentication"
             )
             logger.critical(msg)
             raise RuntimeError(msg)

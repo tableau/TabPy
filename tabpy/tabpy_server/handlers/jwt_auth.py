@@ -1,4 +1,5 @@
 import logging
+import threading
 import time
 
 import jwt
@@ -6,32 +7,36 @@ from jwt import PyJWKClient
 
 logger = logging.getLogger(__name__)
 
-# PyJWKClient fetches JWKS synchronously (via requests), and that call runs
-# directly on TabPy's single Tornado IO-loop thread -- a slow/unresponsive
-# IdP therefore stalls every concurrent request on the server, not just the
-# one that triggered the fetch, for up to this many seconds. Caching (see
-# _jwks_clients) and the refresh rate limit below bound how often this can
-# happen, but a cold start or a legitimate key rotation still pays this
-# cost. Moving the fetch to a thread pool (e.g. via IOLoop.run_in_executor)
-# would remove the stall entirely, at the cost of making the auth path
-# asynchronous; not done here.
+# PyJWKClient fetches JWKS synchronously (via requests). On the HTTP path
+# that call runs on TabPy's single Tornado IO-loop thread, so a
+# slow/unresponsive IdP stalls every concurrent HTTP request for up to this
+# many seconds. Caching (see _jwks_clients) bounds how often this happens.
+# A cold start or legitimate key rotation still pays this cost.
 JWKS_FETCH_TIMEOUT_SECONDS = 10
 
+# Bounds how long a JWT check waits for _jwks_lock. Arrow Flight auth runs
+# on the gRPC thread pool and HTTP auth runs on the Tornado IO loop, and
+# both share the lock, so without a bound an unauthenticated Flight caller
+# could force a slow JWKS fetch and stall every HTTP request behind it for
+# up to JWKS_FETCH_TIMEOUT_SECONDS. Callers that time out waiting fail
+# closed instead; a responsive IdP resolves well inside this window.
+JWKS_LOCK_WAIT_SECONDS = 1
+
 # An unauthenticated caller can force a fresh JWKS fetch just by sending a
-# made-up `kid` (read from the token header pre-signature-check), and that
-# fetch blocks the single IO-loop thread. This bounds, per jwks_uri, how
-# often a *failed* forced refresh (kid still not found) can refetch again.
-# Only failures set the cooldown -- a successful refresh (e.g. a genuine key
-# rotation) must not be penalized. Also used to rate-limit retrying a JWKS
-# endpoint that just failed to fetch at all (network error, timeout,
-# malformed response), so a down/unreachable IdP can't be hammered with a
-# fresh blocking fetch on every single request.
+# made-up `kid` (read from the token header pre-signature-check). This
+# bounds, per jwks_uri, how often a *failed* forced refresh (kid still not
+# found) can refetch again. Only failures set the cooldown -- a successful
+# refresh (e.g. a genuine key rotation) must not be penalized. Also used
+# to rate-limit retrying a JWKS endpoint that just failed to fetch at all
+# (network error, timeout, malformed response), so a down/unreachable IdP
+# can't be hammered with a fresh blocking fetch on every single request.
 JWKS_MIN_REFRESH_INTERVAL_SECONDS = 30
 
 # One PyJWKClient per JWKS URI, reused so its JWK Set cache actually avoids
-# per-request fetches. Process-global and not lock-protected: safe only
-# because TabPy runs a single app instance per process on a single IO-loop
-# thread. Would need a lock (or per-app scoping) if that ever changes.
+# per-request fetches. Process-global; mutations are serialized by
+# _jwks_lock because HTTP (IO-loop) and Arrow Flight (gRPC thread pool)
+# share these dicts.
+_jwks_lock = threading.Lock()
 _jwks_clients = {}
 
 # jwks_uri -> monotonic timestamp of the last failed JWKS fetch (network
@@ -152,8 +157,15 @@ def validate_jwt(
         raise JwtValidationError("Missing JWT")
 
     try:
-        jwks_client = _get_jwks_client(jwks_uri)
-        signing_key = _get_signing_key(jwks_client, jwks_uri, token)
+        if not _jwks_lock.acquire(timeout=JWKS_LOCK_WAIT_SECONDS):
+            raise jwt.exceptions.PyJWKClientError(
+                f'Timed out waiting on an in-flight JWKS fetch for "{jwks_uri}"'
+            )
+        try:
+            jwks_client = _get_jwks_client(jwks_uri)
+            signing_key = _get_signing_key(jwks_client, jwks_uri, token)
+        finally:
+            _jwks_lock.release()
     except (jwt.exceptions.PyJWKClientError, jwt.exceptions.InvalidTokenError) as ex:
         logger.log(logging.ERROR, f"Unable to resolve JWT signing key: {str(ex)}")
         raise JwtValidationError("Unable to resolve JWT signing key") from ex
@@ -174,6 +186,11 @@ def validate_jwt(
     except jwt.exceptions.InvalidTokenError as ex:
         logger.log(logging.ERROR, f"JWT validation failed: {str(ex)}")
         raise JwtValidationError(f"JWT validation failed: {str(ex)}") from ex
+    except Exception as ex:
+        # Must still fail closed as a 401 / UNAUTHENTICATED, not a 500
+        # or an ArrowInvalid traceback to an unauthenticated caller.
+        logger.log(logging.ERROR, f"Unexpected error decoding JWT: {str(ex)}")
+        raise JwtValidationError("JWT validation failed") from ex
 
     if required_scopes:
         try:
@@ -191,6 +208,9 @@ def validate_jwt(
 
 def _check_scopes(claims: dict, required_scopes: str) -> None:
     granted = set(claims.get("scope", "").split())
-    missing = [s for s in (s.strip() for s in required_scopes.split(",")) if s and s not in granted]
+    missing = [
+        s for s in (s.strip() for s in required_scopes.split(","))
+        if s and s not in granted
+    ]
     if missing:
         raise JwtValidationError(f"JWT missing required scope(s): {', '.join(missing)}")

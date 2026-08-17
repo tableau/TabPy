@@ -582,12 +582,11 @@ class TestOAuthConfigValidation(unittest.TestCase):
         "tabpy.tabpy_server.app.app.socket.getaddrinfo",
         return_value=PUBLIC_JWKS_ADDRINFO,
     )
-    def test_oauth_only_with_arrow_enabled_raises(self, mock_getaddrinfo):
+    def test_oauth_only_with_arrow_enabled_succeeds(self, mock_getaddrinfo):
         """
-        Arrow Flight's auth middleware only supports basic auth (see
-        TabPyApp._get_arrow_server), so OAuth-only + Arrow must be
-        rejected at startup rather than crashing the Arrow thread with a
-        KeyError looking for a password file that was never configured.
+        Arrow Flight JWT middleware authenticates OAuth-only deployments,
+        so OAuth-only + Arrow is a valid startup configuration and must
+        not KeyError looking for a password file.
         """
         self.fp.write(
             "[TabPy]\n"
@@ -599,9 +598,22 @@ class TestOAuthConfigValidation(unittest.TestCase):
         )
         self.fp.close()
 
-        with self.assertRaises(RuntimeError) as err:
-            TabPyApp(self.fp.name)
-        self.assertIn("TABPY_ARROW_ENABLE", err.exception.args[0])
+        app = TabPyApp(self.fp.name)
+        self.assertTrue(app.settings["oauth_enabled"])
+        self.assertTrue(app.settings["arrow_enabled"])
+        with patch("tabpy.tabpy_server.app.app.pa.FlightServer") as mock_fs:
+            app._get_arrow_server(app.settings)
+        middleware = mock_fs.call_args.kwargs["middleware"]
+        jwt_mw = middleware["jwt"]
+        self.assertIn("jwt", middleware)
+        self.assertNotIn("basic", middleware)
+        self.assertEqual(jwt_mw.issuer, "https://idp.example.com/")
+        self.assertEqual(
+            jwt_mw.jwks_uri, "https://idp.example.com/.well-known/jwks.json"
+        )
+        self.assertEqual(jwt_mw.audience, "tabpy")
+        self.assertIsNone(jwt_mw.required_scopes)
+        self.assertIsNone(jwt_mw.basic_factory)
 
     @patch(
         "tabpy.tabpy_server.app.app.socket.getaddrinfo",
@@ -620,11 +632,44 @@ class TestOAuthConfigValidation(unittest.TestCase):
             "TABPY_OAUTH_ISSUER = https://idp.example.com/\n"
             "TABPY_OAUTH_JWKS_URI = https://idp.example.com/.well-known/jwks.json\n"
             "TABPY_OAUTH_AUDIENCE = tabpy\n"
+            "TABPY_OAUTH_REQUIRED_SCOPES = tabpy:query\n"
         )
         self.fp.close()
 
         app = TabPyApp(self.fp.name)
         self.assertTrue(app.settings["oauth_enabled"])
+        with patch("tabpy.tabpy_server.app.app.pa.FlightServer") as mock_fs:
+            app._get_arrow_server(app.settings)
+        middleware = mock_fs.call_args.kwargs["middleware"]
+        jwt_mw = middleware["jwt"]
+        self.assertIn("jwt", middleware)
+        self.assertNotIn("basic", middleware)
+        self.assertEqual(jwt_mw.issuer, "https://idp.example.com/")
+        self.assertEqual(
+            jwt_mw.jwks_uri, "https://idp.example.com/.well-known/jwks.json"
+        )
+        self.assertEqual(jwt_mw.audience, "tabpy")
+        self.assertEqual(jwt_mw.required_scopes, "tabpy:query")
+        self.assertIsNotNone(jwt_mw.basic_factory)
+
+    def test_basic_auth_with_arrow_installs_basic_middleware(self):
+        pwd_file = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+            "integration", "resources", "pwdfile.txt",
+        )
+        self.fp.write(
+            "[TabPy]\n"
+            f"TABPY_PWD_FILE = {pwd_file}\n"
+            "TABPY_ARROW_ENABLE = true\n"
+        )
+        self.fp.close()
+
+        app = TabPyApp(self.fp.name)
+        with patch("tabpy.tabpy_server.app.app.pa.FlightServer") as mock_fs:
+            app._get_arrow_server(app.settings)
+        middleware = mock_fs.call_args.kwargs["middleware"]
+        self.assertIn("basic", middleware)
+        self.assertNotIn("jwt", middleware)
 
     @patch(
         "tabpy.tabpy_server.app.app.socket.getaddrinfo",

@@ -331,14 +331,31 @@ To authenticate a request, send the JWT as a Bearer token:
 curl -H "Authorization: Bearer <token>" http://localhost:9004/info
 ```
 
+The same Bearer token is accepted on the Arrow Flight (gRPC) path when Arrow
+is enabled. Failed Flight authentication is rejected with gRPC
+`UNAUTHENTICATED` rather than HTTP 401. Using Basic on Flight while OAuth is
+enabled also requires `TABPY_PWD_FILE`. When `TABPY_OAUTH_ENABLED` is false,
+Flight continues to use basic-auth middleware unchanged.
+
 When both basic access authentication and OAuth are enabled, TabPy picks the
 method based on the scheme of the `Authorization` header sent by the client
 (`Basic` or `Bearer`), so both can be used against the same server.
 
-JWKS lookups are cached, but because TabPy serves requests on a single
-thread, a slow or unresponsive IdP during a cache-cold fetch (startup, or a
-key rotation) will briefly stall all concurrent requests, not just the one
-that triggered the fetch.
+With `TABPY_TRANSFER_PROTOCOL = http`, Flight uses `grpc+tcp` and the Bearer
+token is sent in cleartext, the same as HTTP Basic/Bearer on an unencrypted
+port.
+
+JWKS lookups are cached. On the HTTP path a cache-cold fetch runs on TabPy's
+single IO-loop thread. Arrow Flight auth runs on the gRPC thread pool. JWKS
+client creation and fetches are serialized with a shared lock so concurrent
+Flight calls cannot bypass the refresh rate limit. A JWT check that can't
+take that lock within one second is rejected rather than left waiting for
+the in-flight fetch, so a slow or unresponsive identity provider can't stall
+concurrent requests for the full fetch timeout.
+
+A request carrying two conflicting `Authorization` values is rejected,
+because which one wins would otherwise decide the caller's identity.
+Repeating the same value is accepted.
 
 ### Endpoint Security
 
@@ -349,6 +366,16 @@ All endpoints require authentication if it is enabled for the server.
 TabPy can be configured to enable Arrow Flight. This will cause a Flight
 server to start up alongside the HTTP server and will allow for handling
 incoming streamed data in the Arrow columnar format.
+
+When authentication is enabled, Flight accepts the same credentials as HTTP.
+See [Authentication](#authentication). Failed Flight auth is rejected with
+gRPC `UNAUTHENTICATED` rather than HTTP 401.
+
+After a successful Basic call, Flight also returns an opaque session token
+in the response `authorization` header. A client may send that token back as
+a Bearer credential instead of repeating its Basic credentials. The token is
+server-issued, is not a JWT, and expires an hour after it is issued, at
+which point the client authenticates with Basic again.
 
 **As of May 2023, the Arrow Flight feature can only be used by compatible
 versions of Tableau Prep. The Arrow Flight feature is not used by Tableau

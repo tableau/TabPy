@@ -1,7 +1,8 @@
 """
-Shared JWT test fixtures for test_jwt_auth.py and test_oauth_handler.py,
-so the two suites can't silently drift apart on how tokens/signing keys
-are faked.
+Shared JWT test fixtures for test_jwt_auth.py, test_oauth_handler.py,
+and test_jwt_server_middleware_factory.py, so the suites can't silently
+drift apart on how tokens/signing keys are faked or how JWKS module
+state is reset.
 """
 import datetime
 from unittest.mock import patch
@@ -11,6 +12,15 @@ import jwt
 ISSUER = "https://idp.example.com/"
 AUDIENCE = "tabpy"
 JWKS_URI = "https://idp.example.com/.well-known/jwks.json"
+
+
+def reset_jwks_state():
+    """Clears process-global JWKS caches used by jwt_auth."""
+    import tabpy.tabpy_server.handlers.jwt_auth as jwt_auth_module
+
+    jwt_auth_module._jwks_clients.clear()
+    jwt_auth_module._jwks_last_failed_refresh.clear()
+    jwt_auth_module._jwks_last_fetch_failure.clear()
 
 
 def make_token(private_key, claims_override=None, headers=None):

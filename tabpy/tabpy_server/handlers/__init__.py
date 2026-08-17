@@ -15,3 +15,6 @@ from tabpy.tabpy_server.handlers.no_op_auth_handler import NoOpAuthHandler
 from tabpy.tabpy_server.handlers.basic_auth_server_middleware_factory import (
     BasicAuthServerMiddlewareFactory,
 )
+from tabpy.tabpy_server.handlers.jwt_server_middleware_factory import (
+    JwtAuthServerMiddlewareFactory,
+)

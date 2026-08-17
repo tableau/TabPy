@@ -3,6 +3,8 @@ import datetime
 import hmac
 import hashlib
 import json
+import threading
+import time
 import unittest
 from unittest.mock import patch
 
@@ -17,6 +19,7 @@ from tests.unit.server_tests.jwt_test_helpers import (
     JWKS_URI,
     make_token,
     patched_jwks_client,
+    reset_jwks_state,
 )
 
 
@@ -30,11 +33,7 @@ class TestJwtAuth(unittest.TestCase):
         cls.private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
 
     def setUp(self):
-        import tabpy.tabpy_server.handlers.jwt_auth as jwt_auth_module
-
-        jwt_auth_module._jwks_clients.clear()
-        jwt_auth_module._jwks_last_failed_refresh.clear()
-        jwt_auth_module._jwks_last_fetch_failure.clear()
+        reset_jwks_state()
 
     def _make_token(self, claims_override=None, headers=None):
         return make_token(
@@ -166,13 +165,14 @@ class TestJwtAuth(unittest.TestCase):
 
     def test_jwks_client_is_created_with_bounded_timeout(self):
         """
-        TabPy serves requests on a single IO-loop thread, so the JWKS HTTP
-        client must not be allowed to hang indefinitely on a slow/unreachable
-        IdP -- that would stall the entire server, not just one request.
+        TabPy's HTTP path serves requests on a single IO-loop thread, so
+        the JWKS HTTP client must not be allowed to hang indefinitely on a
+        slow/unreachable IdP -- that would stall concurrent HTTP requests.
+        Arrow Flight auth shares the same client on the gRPC thread pool.
         """
         import tabpy.tabpy_server.handlers.jwt_auth as jwt_auth_module
 
-        jwt_auth_module._jwks_clients.clear()
+        reset_jwks_state()
         client = jwt_auth_module._get_jwks_client(JWKS_URI)
         self.assertEqual(client.timeout, jwt_auth_module.JWKS_FETCH_TIMEOUT_SECONDS)
         self.assertLess(jwt_auth_module.JWKS_FETCH_TIMEOUT_SECONDS, 30)
@@ -237,16 +237,13 @@ class TestJwtAuth(unittest.TestCase):
         (read from the unverified header, before any signature check).
         Repeatedly retrying an unknown `kid` -- even a different one each
         time -- must not each force a fresh JWKS fetch, since that fetch is
-        a blocking network call on TabPy's single IO-loop thread. The
+        a blocking network call (HTTP IO-loop or a Flight gRPC thread). The
         cooldown is keyed only by jwks_uri (not by kid, since kid is
         attacker-controlled pre-signature-check): only one forced refresh
         per jwks_uri is allowed within JWKS_MIN_REFRESH_INTERVAL_SECONDS,
         no matter how many distinct bogus kids are tried.
         """
-        import tabpy.tabpy_server.handlers.jwt_auth as jwt_auth_module
-
-        jwt_auth_module._jwks_clients.clear()
-        jwt_auth_module._jwks_last_failed_refresh.clear()
+        reset_jwks_state()
 
         token1 = self._make_token(headers={"kid": "unknown-kid-1"})
         token2 = self._make_token(headers={"kid": "unknown-kid-2"})
@@ -285,10 +282,7 @@ class TestJwtAuth(unittest.TestCase):
         varying the kid, which is a worse (unauthenticated DoS) outcome
         than briefly delaying visibility of a rotated key.
         """
-        import tabpy.tabpy_server.handlers.jwt_auth as jwt_auth_module
-
-        jwt_auth_module._jwks_clients.clear()
-        jwt_auth_module._jwks_last_failed_refresh.clear()
+        reset_jwks_state()
 
         bogus_token = self._make_token(headers={"kid": "unknown-kid"})
         with patch(
@@ -320,15 +314,12 @@ class TestJwtAuth(unittest.TestCase):
         """
         A down/unreachable IdP must not be hammered with a fresh blocking
         fetch (see JWKS_FETCH_TIMEOUT_SECONDS) on every single request --
-        that fetch runs directly on TabPy's single IO-loop thread. After
+        that fetch blocks the HTTP IO-loop or a Flight gRPC thread. After
         one failed fetch, subsequent requests within
         JWKS_MIN_REFRESH_INTERVAL_SECONDS must fail fast without calling
         get_signing_keys again.
         """
-        import tabpy.tabpy_server.handlers.jwt_auth as jwt_auth_module
-
-        jwt_auth_module._jwks_clients.clear()
-        jwt_auth_module._jwks_last_fetch_failure.clear()
+        reset_jwks_state()
 
         token = self._make_token()
         with patch(
@@ -374,6 +365,44 @@ class TestJwtAuth(unittest.TestCase):
             with self.assertRaises(JwtValidationError):
                 validate_jwt(forged_token, issuer=ISSUER, jwks_uri=JWKS_URI, audience=AUDIENCE)
 
+    def test_waiting_on_an_in_flight_jwks_fetch_fails_fast(self):
+        """
+        _jwks_lock is held across the blocking JWKS fetch, and Arrow Flight
+        (gRPC thread pool) shares it with HTTP (single IO-loop thread). A
+        caller that can't take the lock promptly must fail closed instead
+        of blocking for up to JWKS_FETCH_TIMEOUT_SECONDS, which would let
+        an unauthenticated Flight caller stall every concurrent HTTP
+        request behind the fetch it triggered.
+        """
+        import tabpy.tabpy_server.handlers.jwt_auth as jwt_auth_module
+
+        token = self._make_token()
+        acquired = threading.Event()
+        release = threading.Event()
+
+        def hold_lock():
+            with jwt_auth_module._jwks_lock:
+                acquired.set()
+                release.wait(10)
+
+        holder = threading.Thread(target=hold_lock)
+        holder.start()
+        try:
+            self.assertTrue(acquired.wait(5))
+            with patch.object(jwt_auth_module, "JWKS_LOCK_WAIT_SECONDS", 0.05):
+                with self._patched_jwks_client():
+                    started = time.monotonic()
+                    with self.assertRaises(JwtValidationError):
+                        validate_jwt(
+                            token, issuer=ISSUER, jwks_uri=JWKS_URI, audience=AUDIENCE
+                        )
+                    elapsed = time.monotonic() - started
+        finally:
+            release.set()
+            holder.join()
+
+        self.assertLess(elapsed, 1)
+
     def test_jwks_client_is_reused_for_same_uri(self):
         """
         _get_jwks_client must return the same PyJWKClient instance for
@@ -382,7 +411,7 @@ class TestJwtAuth(unittest.TestCase):
         """
         import tabpy.tabpy_server.handlers.jwt_auth as jwt_auth_module
 
-        jwt_auth_module._jwks_clients.clear()
+        reset_jwks_state()
         first = jwt_auth_module._get_jwks_client(JWKS_URI)
         second = jwt_auth_module._get_jwks_client(JWKS_URI)
         self.assertIs(first, second)
