@@ -1,4 +1,5 @@
 import base64
+import time
 import unittest
 from unittest.mock import patch
 
@@ -26,9 +27,10 @@ class TestBasicAuthServerMiddlewareFactory(unittest.TestCase):
         encoded = base64.b64encode(f"{username}:{password}".encode()).decode()
         return f"Basic {encoded}"
 
-    def _authenticate(self):
-        return self.factory.start_call(
-            None, self._headers(self._basic_header("user1", "P@ssw0rd"))
+    def _authenticate(self, username="user1", password="P@ssw0rd", factory=None):
+        target = factory or self.factory
+        return target.start_call(
+            None, self._headers(self._basic_header(username, password))
         )
 
     def test_valid_basic_is_accepted(self):
@@ -85,15 +87,51 @@ class TestBasicAuthServerMiddlewareFactory(unittest.TestCase):
         self._authenticate()
         self.assertNotIn(expired.token, self.factory.tokens)
 
-    def test_token_store_is_bounded(self):
-        with patch.object(mod, "MAX_FLIGHT_TOKENS", 4):
-            first = self._authenticate()
-            for _ in range(20):
-                latest = self._authenticate()
+    def test_repeated_basic_auth_reuses_one_unexpired_token_per_user(self):
+        first = self._authenticate()
+        first_expiry = self.factory.tokens[first.token][1]
+        for _ in range(20):
+            latest = self._authenticate()
 
-        self.assertLessEqual(len(self.factory.tokens), 4)
-        self.assertNotIn(first.token, self.factory.tokens)
-        self.assertTrue(self.factory.is_valid_token(latest.token))
+        self.assertEqual(latest.token, first.token)
+        self.assertEqual(self.factory.tokens[first.token][1], first_expiry)
+        self.assertEqual(len(self.factory.tokens), 1)
+        self.assertTrue(self.factory.is_valid_token(first.token))
+
+    def test_basic_auth_rotates_a_token_near_expiry(self):
+        first = self._authenticate()
+        username, _ = self.factory.tokens[first.token]
+        self.factory.tokens[first.token] = (
+            username,
+            time.monotonic() + mod.FLIGHT_TOKEN_RENEWAL_WINDOW_SECONDS - 1,
+        )
+
+        renewed = self._authenticate()
+
+        self.assertNotEqual(renewed.token, first.token)
+        self.assertFalse(self.factory.is_valid_token(first.token))
+        self.assertTrue(self.factory.is_valid_token(renewed.token))
+        remaining = self.factory.tokens[renewed.token][1] - time.monotonic()
+        self.assertGreater(remaining, mod.FLIGHT_TOKEN_TTL_SECONDS - 1)
+
+    def test_other_users_cannot_evict_an_unexpired_token(self):
+        creds = {
+            "user1": hash_password("user1", "P@ssw0rd"),
+            "user2": hash_password("user2", "OtherP@ssw0rd"),
+        }
+        factory = BasicAuthServerMiddlewareFactory(creds)
+        first = self._authenticate(factory=factory)
+
+        for _ in range(20):
+            second = self._authenticate(
+                username="user2",
+                password="OtherP@ssw0rd",
+                factory=factory,
+            )
+
+        self.assertEqual(len(factory.tokens), 2)
+        self.assertTrue(factory.is_valid_token(first.token))
+        self.assertTrue(factory.is_valid_token(second.token))
 
     def test_invalid_base64_is_unauthenticated(self):
         with self.assertRaises(FlightUnauthenticatedError) as err:

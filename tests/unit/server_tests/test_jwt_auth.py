@@ -332,6 +332,27 @@ class TestJwtAuth(unittest.TestCase):
                 validate_jwt(token, issuer=ISSUER, jwks_uri=JWKS_URI, audience=AUDIENCE)
         self.assertEqual(mock_get_signing_keys.call_count, 1)
 
+    def test_empty_cooldown_store_is_not_recent_just_after_host_boot(self):
+        """
+        time.monotonic() is host-uptime based. An absent entry must not use
+        zero as a timestamp or JWT auth fails during the first cooldown
+        interval after a host boot.
+        """
+        import tabpy.tabpy_server.handlers.jwt_auth as jwt_auth_module
+
+        store = {}
+        with patch(
+            "tabpy.tabpy_server.handlers.jwt_auth.time.monotonic",
+            return_value=12,
+        ):
+            self.assertFalse(
+                jwt_auth_module._recently_recorded(store, JWKS_URI)
+            )
+            jwt_auth_module._record_now(store, JWKS_URI)
+            self.assertTrue(
+                jwt_auth_module._recently_recorded(store, JWKS_URI)
+            )
+
     def test_hs256_substitution_using_public_key_is_rejected(self):
         """
         Guards against the classic RS256->HS256 confusion attack: an
@@ -561,79 +582,183 @@ class TestJwtAuth(unittest.TestCase):
         self.assertEqual(len(results), workers)
         self.assertEqual(call_count, [False])
 
-    def test_unknown_kid_cooldown_is_rechecked_under_fetch_lock(self):
+    def test_unknown_kid_refresh_and_cooldown_publication_are_atomic(self):
         """
-        Two unknown-kid callers can both pass the unlocked cooldown check.
-        The loser of the fetch lock must recheck _jwks_last_failed_refresh
-        and skip a second outbound refresh.
+        Pause the first caller after its refresh returns but before the
+        unknown-kid result is published. A second caller must not fetch in
+        that window, and the cooldown must be recorded before lock release.
         """
         import tabpy.tabpy_server.handlers.jwt_auth as jwt_auth_module
 
-        warm_token = self._make_token()
-        with self._patched_jwks_client():
+        cached_token = self._make_token(headers={"kid": "cached-kid"})
+        with self._patched_jwks_client(kid="cached-kid"):
             validate_jwt(
-                warm_token, issuer=ISSUER, jwks_uri=JWKS_URI, audience=AUDIENCE
+                cached_token, issuer=ISSUER, jwks_uri=JWKS_URI, audience=AUDIENCE
             )
 
         unknown = self._make_token(headers={"kid": "unknown-kid"})
-        signing_key = self._signing_key(kid="the-real-kid")
-        a_passed_outer = threading.Event()
-        b_finished = threading.Event()
-        thread_a_holder = []
-        original_recently = jwt_auth_module._recently_recorded
-        refresh_true_calls = []
-
-        def gated_recently(store, uri):
-            result = original_recently(store, uri)
-            if (
-                store is jwt_auth_module._jwks_last_failed_refresh
-                and thread_a_holder
-                and threading.current_thread() is thread_a_holder[0]
-                and not a_passed_outer.is_set()
-            ):
-                a_passed_outer.set()
-                self.assertFalse(result)
-                self.assertTrue(b_finished.wait(5))
-            return result
+        refreshed_key = self._signing_key(kid="the-real-kid")
+        fetch_returned = threading.Event()
+        first_matching = threading.Event()
+        release_first = threading.Event()
+        second_finished = threading.Event()
+        refresh_calls = []
+        outcomes = []
+        errors = []
+        record_lock_states = []
+        fetch_lock = jwt_auth_module._fetch_lock_for(JWKS_URI)
+        original_match_kid = jwt_auth_module.PyJWKClient.match_kid
+        original_record_now = jwt_auth_module._record_now
 
         def fake_get_signing_keys(refresh=False):
-            if refresh:
-                refresh_true_calls.append(1)
-            return [signing_key]
+            refresh_calls.append(refresh)
+            fetch_returned.set()
+            return [refreshed_key]
 
-        def run_a():
-            with self.assertRaises(JwtValidationError):
+        def gated_match_kid(signing_keys, kid):
+            if (
+                threading.current_thread() is first_thread
+                and fetch_returned.is_set()
+                and not first_matching.is_set()
+            ):
+                first_matching.set()
+                self.assertTrue(release_first.wait(5))
+            return original_match_kid(signing_keys, kid)
+
+        def checked_record_now(store, uri):
+            if store is jwt_auth_module._jwks_last_failed_refresh:
+                record_lock_states.append(fetch_lock.locked())
+            return original_record_now(store, uri)
+
+        def validate_unknown(label):
+            try:
                 validate_jwt(
                     unknown, issuer=ISSUER, jwks_uri=JWKS_URI, audience=AUDIENCE
                 )
+            except JwtValidationError:
+                outcomes.append(label)
+            except Exception as ex:
+                errors.append(ex)
 
-        def run_b():
-            self.assertTrue(a_passed_outer.wait(5))
-            with self.assertRaises(JwtValidationError):
+        first_thread = threading.Thread(
+            target=validate_unknown, args=("first",)
+        )
+
+        def run_second():
+            validate_unknown("second")
+            second_finished.set()
+
+        second_thread = threading.Thread(target=run_second)
+
+        with patch(
+            "tabpy.tabpy_server.handlers.jwt_auth.PyJWKClient.get_signing_keys",
+            side_effect=fake_get_signing_keys,
+        ), patch.object(
+            jwt_auth_module.PyJWKClient,
+            "match_kid",
+            side_effect=gated_match_kid,
+        ), patch(
+            "tabpy.tabpy_server.handlers.jwt_auth._record_now",
+            side_effect=checked_record_now,
+        ):
+            first_thread.start()
+            self.assertTrue(first_matching.wait(5))
+
+            second_thread.start()
+            self.assertTrue(second_finished.wait(5))
+            self.assertEqual(refresh_calls, [True])
+
+            release_first.set()
+            first_thread.join(5)
+            second_thread.join(5)
+
+            # Once the first caller releases the lock, a later unknown-kid
+            # request must observe the published cooldown without fetching.
+            validate_unknown("third")
+
+        self.assertFalse(first_thread.is_alive())
+        self.assertFalse(second_thread.is_alive())
+        self.assertEqual(errors, [])
+        self.assertCountEqual(outcomes, ["first", "second", "third"])
+        self.assertEqual(refresh_calls, [True])
+        self.assertEqual(record_lock_states, [True])
+
+    def test_unknown_kid_cooldown_is_rechecked_after_lock_handoff(self):
+        """
+        Pause one caller after its unlocked cooldown check but before lock
+        acquisition. Another caller publishes the cooldown and releases;
+        the paused caller must recheck under the lock without refetching.
+        """
+        import tabpy.tabpy_server.handlers.jwt_auth as jwt_auth_module
+
+        cached_token = self._make_token(headers={"kid": "cached-kid"})
+        with self._patched_jwks_client(kid="cached-kid"):
+            validate_jwt(
+                cached_token, issuer=ISSUER, jwks_uri=JWKS_URI, audience=AUDIENCE
+            )
+
+        unknown = self._make_token(headers={"kid": "unknown-kid"})
+        refreshed_key = self._signing_key(kid="the-real-kid")
+        waiting_before_acquire = threading.Event()
+        release_waiting = threading.Event()
+        refresh_calls = []
+        outcomes = []
+        errors = []
+        original_fetch_lock_for = jwt_auth_module._fetch_lock_for
+
+        def fake_get_signing_keys(refresh=False):
+            refresh_calls.append(refresh)
+            return [refreshed_key]
+
+        def gated_fetch_lock_for(uri):
+            lock = original_fetch_lock_for(uri)
+            if (
+                threading.current_thread() is waiting_thread
+                and not waiting_before_acquire.is_set()
+            ):
+                waiting_before_acquire.set()
+                self.assertTrue(release_waiting.wait(5))
+            return lock
+
+        def validate_unknown(label):
+            try:
                 validate_jwt(
                     unknown, issuer=ISSUER, jwks_uri=JWKS_URI, audience=AUDIENCE
                 )
-            b_finished.set()
+            except JwtValidationError:
+                outcomes.append(label)
+            except Exception as ex:
+                errors.append(ex)
 
-        thread_a = threading.Thread(target=run_a)
-        thread_a_holder.append(thread_a)
-        thread_b = threading.Thread(target=run_b)
+        waiting_thread = threading.Thread(
+            target=validate_unknown, args=("waiting",)
+        )
+        owner_thread = threading.Thread(
+            target=validate_unknown, args=("owner",)
+        )
 
         with patch(
             "tabpy.tabpy_server.handlers.jwt_auth.PyJWKClient.get_signing_keys",
             side_effect=fake_get_signing_keys,
         ), patch(
-            "tabpy.tabpy_server.handlers.jwt_auth._recently_recorded",
-            side_effect=gated_recently,
+            "tabpy.tabpy_server.handlers.jwt_auth._fetch_lock_for",
+            side_effect=gated_fetch_lock_for,
         ):
-            thread_a.start()
-            thread_b.start()
-            thread_a.join(10)
-            thread_b.join(10)
+            waiting_thread.start()
+            self.assertTrue(waiting_before_acquire.wait(5))
 
-        self.assertFalse(thread_a.is_alive())
-        self.assertFalse(thread_b.is_alive())
-        self.assertEqual(refresh_true_calls, [1])
+            owner_thread.start()
+            owner_thread.join(5)
+            self.assertFalse(owner_thread.is_alive())
+            self.assertEqual(refresh_calls, [True])
+
+            release_waiting.set()
+            waiting_thread.join(5)
+
+        self.assertFalse(waiting_thread.is_alive())
+        self.assertEqual(errors, [])
+        self.assertCountEqual(outcomes, ["owner", "waiting"])
+        self.assertEqual(refresh_calls, [True])
 
     def test_jwks_client_is_reused_for_same_uri(self):
         """

@@ -81,8 +81,11 @@ def _fetch_lock_for(jwks_uri: str) -> threading.Lock:
 
 def _recently_recorded(store: dict, jwks_uri: str) -> bool:
     with _jwks_state_lock:
-        last = store.get(jwks_uri, 0)
-    return time.monotonic() - last < JWKS_MIN_REFRESH_INTERVAL_SECONDS
+        last = store.get(jwks_uri)
+    return (
+        last is not None
+        and time.monotonic() - last < JWKS_MIN_REFRESH_INTERVAL_SECONDS
+    )
 
 
 def _record_now(store: dict, jwks_uri: str) -> None:
@@ -126,33 +129,38 @@ def _call_get_signing_keys(jwks_client: PyJWKClient, jwks_uri: str, refresh: boo
     return keys
 
 
-def _fetch_signing_keys(
-    jwks_client: PyJWKClient, jwks_uri: str, refresh: bool, kid=None
-):
-    if not refresh:
-        cached = _read_cached_keys(jwks_uri)
-        if cached is not None:
-            # Warm cache. Must not wait on another thread's refresh, or a
-            # forged unknown kid can reject valid tokens on HTTP and Flight.
-            return cached
+def _fetch_signing_keys(jwks_client: PyJWKClient, jwks_uri: str):
+    cached = _read_cached_keys(jwks_uri)
+    if cached is not None:
+        # Warm cache. Must not wait on another thread's refresh, or a
+        # forged unknown kid can reject valid tokens on HTTP and Flight.
+        return cached
 
-        # Cold or expired snapshot: single-flight one outbound fetch so
-        # concurrent Flight threads cannot each pay JWKS_FETCH_TIMEOUT.
-        if _recently_recorded(_jwks_last_fetch_failure, jwks_uri):
-            raise _fetch_failed_recently_error(jwks_uri)
-
-        fetch_lock = _fetch_lock_for(jwks_uri)
-        fetch_lock.acquire()
-        try:
-            cached = _read_cached_keys(jwks_uri)
-            if cached is not None:
-                return cached
-            return _call_get_signing_keys(jwks_client, jwks_uri, refresh=False)
-        finally:
-            fetch_lock.release()
-
+    # Cold or expired snapshot: single-flight one outbound fetch so
+    # concurrent Flight threads cannot each pay JWKS_FETCH_TIMEOUT.
     if _recently_recorded(_jwks_last_fetch_failure, jwks_uri):
         raise _fetch_failed_recently_error(jwks_uri)
+
+    fetch_lock = _fetch_lock_for(jwks_uri)
+    fetch_lock.acquire()
+    try:
+        cached = _read_cached_keys(jwks_uri)
+        if cached is not None:
+            return cached
+        return _call_get_signing_keys(jwks_client, jwks_uri, refresh=False)
+    finally:
+        fetch_lock.release()
+
+
+def _refresh_signing_key(
+    jwks_client: PyJWKClient, jwks_uri: str, kid
+):
+    if _recently_recorded(_jwks_last_fetch_failure, jwks_uri):
+        raise _fetch_failed_recently_error(jwks_uri)
+    if _recently_recorded(_jwks_last_failed_refresh, jwks_uri):
+        raise jwt.exceptions.PyJWKClientError(
+            f"Unable to find a signing key that matches: {kid!r}"
+        )
 
     fetch_lock = _fetch_lock_for(jwks_uri)
     if not fetch_lock.acquire(blocking=False):
@@ -160,16 +168,25 @@ def _fetch_signing_keys(
             f'JWKS refresh already in flight for "{jwks_uri}"'
         )
     try:
-        # Recheck both cooldowns under the lock. The unknown-kid cooldown
-        # is set by a sibling thread after this caller already passed the
-        # unlocked check in _get_signing_key.
+        # Refresh ownership includes key matching and cooldown publication.
+        # No sibling can fetch between a mismatch and recording its cooldown.
         if _recently_recorded(_jwks_last_fetch_failure, jwks_uri):
             raise _fetch_failed_recently_error(jwks_uri)
         if _recently_recorded(_jwks_last_failed_refresh, jwks_uri):
             raise jwt.exceptions.PyJWKClientError(
                 f"Unable to find a signing key that matches: {kid!r}"
             )
-        return _call_get_signing_keys(jwks_client, jwks_uri, refresh=True)
+
+        signing_keys = _call_get_signing_keys(
+            jwks_client, jwks_uri, refresh=True
+        )
+        signing_key = PyJWKClient.match_kid(signing_keys, kid)
+        if signing_key is None:
+            _record_now(_jwks_last_failed_refresh, jwks_uri)
+            raise jwt.exceptions.PyJWKClientError(
+                f"Unable to find a signing key that matches: {kid!r}"
+            )
+        return signing_key
     finally:
         fetch_lock.release()
 
@@ -184,24 +201,12 @@ def _get_signing_key(jwks_client: PyJWKClient, jwks_uri: str, token: str):
     header = jwt.get_unverified_header(token)
     kid = header.get("kid")
 
-    signing_keys = _fetch_signing_keys(jwks_client, jwks_uri, refresh=False, kid=kid)
+    signing_keys = _fetch_signing_keys(jwks_client, jwks_uri)
     signing_key = PyJWKClient.match_kid(signing_keys, kid)
     if signing_key is not None:
         return signing_key
 
-    if _recently_recorded(_jwks_last_failed_refresh, jwks_uri):
-        raise jwt.exceptions.PyJWKClientError(
-            f"Unable to find a signing key that matches: {kid!r}"
-        )
-
-    signing_keys = _fetch_signing_keys(jwks_client, jwks_uri, refresh=True, kid=kid)
-    signing_key = PyJWKClient.match_kid(signing_keys, kid)
-    if signing_key is None:
-        _record_now(_jwks_last_failed_refresh, jwks_uri)
-        raise jwt.exceptions.PyJWKClientError(
-            f"Unable to find a signing key that matches: {kid!r}"
-        )
-    return signing_key
+    return _refresh_signing_key(jwks_client, jwks_uri, kid)
 
 
 class JwtValidationError(Exception):

@@ -347,10 +347,14 @@ setting; TabPy does not require HTTPS for Flight auth alone.
 
 JWKS lookups are cached. On the HTTP path a cache-cold fetch runs on TabPy's
 single IO-loop thread. Arrow Flight auth runs on the gRPC thread pool.
-Forced JWKS refreshes are serialized per JWKS URI so concurrent Flight
-calls cannot bypass the refresh rate limit. A cached signing-key lookup
-does not wait on that refresh, so a forged unknown `kid` cannot reject
-unrelated valid tokens.
+Cold and expired-cache fetches are single-flighted per JWKS URI. Forced
+unknown-`kid` refreshes are mutually excluded; a concurrent refresh attempt
+fails authentication rather than waiting on the network request. A cached
+signing-key lookup does not wait on that refresh, so unrelated valid tokens
+continue to work. After a refresh still cannot find a requested `kid`, TabPy
+rate-limits another forced refresh for 30 seconds. This also means a legitimate
+new key may be rejected for up to 30 seconds after a bogus unknown-`kid`
+request.
 
 A request carrying two conflicting `Authorization` values is rejected,
 because which one wins would otherwise decide the caller's identity.
@@ -373,8 +377,13 @@ gRPC `UNAUTHENTICATED` rather than HTTP 401.
 After a successful Basic call, Flight also returns an opaque session token
 in the response `authorization` header. A client may send that token back as
 a Bearer credential instead of repeating its Basic credentials. The token is
-server-issued, is not a JWT, and expires an hour after it is issued, at
-which point the client authenticates with Basic again.
+server-issued, is not a JWT, and expires an hour after it is issued or when
+the server restarts. TabPy retains one active opaque token per username, so
+repeated Basic calls do not grow the token store or invalidate another user's
+unexpired token. A repeated Basic call normally returns the same token without
+extending its original expiry. During its final five minutes, Basic
+authentication rotates it to a fresh one-hour token. After expiry, the client
+authenticates with Basic again.
 
 **As of May 2023, the Arrow Flight feature can only be used by compatible
 versions of Tableau Prep. The Arrow Flight feature is not used by Tableau

@@ -17,6 +17,7 @@ from tests.unit.server_tests.jwt_test_helpers import (
     JWKS_URI,
     make_token,
     patched_jwks_client,
+    reset_jwks_state,
 )
 
 # The fake "idp.example.com" JWKS host used by these tests doesn't
@@ -29,6 +30,13 @@ _PUBLIC_JWKS_ADDRINFO = [
 
 
 class BaseTestOAuthHandler(AsyncHTTPTestCase):
+    def setUp(self):
+        # Each class generates a different signing key but intentionally
+        # reuses the same fake JWKS URI. Do not leak a cached key between
+        # otherwise-independent HTTP auth tests.
+        reset_jwks_state()
+        super().setUp()
+
     def get_app(self):
         with patch(
             "tabpy.tabpy_server.app.app.socket.getaddrinfo",

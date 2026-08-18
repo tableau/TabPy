@@ -19,10 +19,10 @@ from tabpy.tabpy_server.handlers.util import hash_password
 # that is how it obtained the token.
 FLIGHT_TOKEN_TTL_SECONDS = 3600
 
-# Expiry alone doesn't bound the store, since a client that ignores the
-# token still mints one per call. Cap it and drop the soonest-to-expire
-# entries once full.
-MAX_FLIGHT_TOKENS = 1024
+# Avoid handing a freshly authenticated client a token that is about to
+# expire. Rotation still happens under the per-factory lock and retains
+# only one active token for the username.
+FLIGHT_TOKEN_RENEWAL_WINDOW_SECONDS = 300
 
 
 class BasicAuthServerMiddleware(ServerMiddleware):
@@ -37,11 +37,11 @@ class BasicAuthServerMiddlewareFactory(ServerMiddlewareFactory):
     def __init__(self, creds):
         self.creds = creds
         # token -> (username, monotonic expiry). Read from the gRPC thread
-        # pool on every call; every mutation goes through _issue_token
-        # under _tokens_lock, so readers never see the store being
-        # resized and concurrent calls can't grow it past
-        # MAX_FLIGHT_TOKENS.
+        # pool on every call. One active token is retained per username,
+        # bounding request-driven growth without evicting another user's
+        # unexpired credential.
         self.tokens = {}
+        self._tokens_by_username = {}
         self._tokens_lock = threading.Lock()
 
     def is_valid_user(self, username, password):
@@ -51,23 +51,42 @@ class BasicAuthServerMiddlewareFactory(ServerMiddlewareFactory):
         return self.creds[username].lower() == hashed_pwd.lower()
 
     def is_valid_token(self, token):
-        entry = self.tokens.get(token)
-        return entry is not None and time.monotonic() < entry[1]
+        with self._tokens_lock:
+            entry = self.tokens.get(token)
+            if entry is None:
+                return False
+            username, expiry = entry
+            if time.monotonic() >= expiry:
+                self._remove_token(token, username)
+                return False
+            return True
 
     def _issue_token(self, username):
-        token = secrets.token_urlsafe(32)
         with self._tokens_lock:
-            self._evict_tokens()
-            self.tokens[token] = (username, time.monotonic() + FLIGHT_TOKEN_TTL_SECONDS)
-        return token
+            now = time.monotonic()
+            self._evict_expired_tokens(now)
 
-    def _evict_tokens(self):
-        now = time.monotonic()
+            existing = self._tokens_by_username.get(username)
+            if existing is not None:
+                _, expiry = self.tokens[existing]
+                if expiry - now > FLIGHT_TOKEN_RENEWAL_WINDOW_SECONDS:
+                    return existing
+                self._remove_token(existing, username)
+
+            token = secrets.token_urlsafe(32)
+            self.tokens[token] = (username, now + FLIGHT_TOKEN_TTL_SECONDS)
+            self._tokens_by_username[username] = token
+            return token
+
+    def _remove_token(self, token, username):
+        self.tokens.pop(token, None)
+        if self._tokens_by_username.get(username) == token:
+            self._tokens_by_username.pop(username, None)
+
+    def _evict_expired_tokens(self, now):
         for token in [t for t, (_, expiry) in self.tokens.items() if expiry <= now]:
-            self.tokens.pop(token, None)
-        while len(self.tokens) >= MAX_FLIGHT_TOKENS:
-            oldest = min(self.tokens, key=lambda t: self.tokens[t][1])
-            self.tokens.pop(oldest, None)
+            username, _ = self.tokens[token]
+            self._remove_token(token, username)
 
     def start_call(self, info, headers):
         auth_header = get_flight_authorization_header(headers)
