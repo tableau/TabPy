@@ -7,10 +7,10 @@ import time
 from pyarrow.flight import ServerMiddlewareFactory, ServerMiddleware
 from pyarrow.flight import FlightUnauthenticatedError
 
-from tabpy.tabpy_server.handlers.util import (
+from tabpy.tabpy_server.handlers.flight_headers import (
     get_flight_authorization_header,
-    hash_password,
 )
+from tabpy.tabpy_server.handlers.util import hash_password
 
 # A successful Basic call mints an opaque token and hands it back to the
 # client via sending_headers(). The client may replay it as a Bearer

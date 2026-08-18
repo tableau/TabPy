@@ -3,8 +3,10 @@ import logging
 from pyarrow.flight import FlightUnauthenticatedError
 from pyarrow.flight import ServerMiddleware, ServerMiddlewareFactory
 
+from tabpy.tabpy_server.handlers.flight_headers import (
+    get_flight_authorization_header,
+)
 from tabpy.tabpy_server.handlers.jwt_auth import JwtValidationError, validate_jwt
-from tabpy.tabpy_server.handlers.util import get_flight_authorization_header
 
 logger = logging.getLogger(__name__)
 
