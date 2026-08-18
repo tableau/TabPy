@@ -342,16 +342,15 @@ method based on the scheme of the `Authorization` header sent by the client
 (`Basic` or `Bearer`), so both can be used against the same server.
 
 With `TABPY_TRANSFER_PROTOCOL = http`, Flight uses `grpc+tcp` and the Bearer
-token is sent in cleartext, the same as HTTP Basic/Bearer on an unencrypted
-port.
+token is sent in cleartext. That matches HTTP Basic/Bearer on the same
+setting; TabPy does not require HTTPS for Flight auth alone.
 
 JWKS lookups are cached. On the HTTP path a cache-cold fetch runs on TabPy's
-single IO-loop thread. Arrow Flight auth runs on the gRPC thread pool. JWKS
-client creation and fetches are serialized with a shared lock so concurrent
-Flight calls cannot bypass the refresh rate limit. A JWT check that can't
-take that lock within one second is rejected rather than left waiting for
-the in-flight fetch, so a slow or unresponsive identity provider can't stall
-concurrent requests for the full fetch timeout.
+single IO-loop thread. Arrow Flight auth runs on the gRPC thread pool.
+Forced JWKS refreshes are serialized per JWKS URI so concurrent Flight
+calls cannot bypass the refresh rate limit. A cached signing-key lookup
+does not wait on that refresh, so a forged unknown `kid` cannot reject
+unrelated valid tokens.
 
 A request carrying two conflicting `Authorization` values is rejected,
 because which one wins would otherwise decide the caller's identity.

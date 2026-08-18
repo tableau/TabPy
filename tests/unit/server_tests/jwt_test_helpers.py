@@ -19,6 +19,7 @@ def reset_jwks_state():
     import tabpy.tabpy_server.handlers.jwt_auth as jwt_auth_module
 
     jwt_auth_module._jwks_clients.clear()
+    jwt_auth_module._jwks_fetch_locks.clear()
     jwt_auth_module._jwks_last_failed_refresh.clear()
     jwt_auth_module._jwks_last_fetch_failure.clear()
 

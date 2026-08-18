@@ -124,6 +124,9 @@ class TabPyApp:
     def _get_arrow_server(self, config):
         verify_client = None
         tls_certificates = None
+        # Same transport as the HTTP server: http -> grpc+tcp, https ->
+        # grpc+tls. Cleartext Flight is allowed because HTTP Basic/Bearer
+        # already travel in the clear when TABPY_TRANSFER_PROTOCOL=http.
         scheme = "grpc+tcp"
         if config[SettingsParameters.TransferProtocol] == "https":
             scheme = "grpc+tls"
