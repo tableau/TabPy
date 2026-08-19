@@ -175,6 +175,10 @@ class TestJwtAuth(unittest.TestCase):
         reset_jwks_state()
         client = jwt_auth_module._get_jwks_client(JWKS_URI)
         self.assertEqual(client.timeout, jwt_auth_module.JWKS_FETCH_TIMEOUT_SECONDS)
+        self.assertEqual(
+            client.jwk_set_cache.lifespan,
+            jwt_auth_module.JWKS_CACHE_LIFESPAN_SECONDS,
+        )
         self.assertLess(jwt_auth_module.JWKS_FETCH_TIMEOUT_SECONDS, 30)
 
     def test_algorithm_is_pinned_to_jwks_key_not_token_header(self):

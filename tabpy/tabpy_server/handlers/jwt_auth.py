@@ -64,7 +64,10 @@ def _get_jwks_client(jwks_uri: str) -> PyJWKClient:
         client = _jwks_clients.get(jwks_uri)
         if client is None:
             client = PyJWKClient(
-                jwks_uri, cache_jwk_set=True, timeout=JWKS_FETCH_TIMEOUT_SECONDS
+                jwks_uri,
+                cache_jwk_set=True,
+                lifespan=JWKS_CACHE_LIFESPAN_SECONDS,
+                timeout=JWKS_FETCH_TIMEOUT_SECONDS,
             )
             _jwks_clients[jwks_uri] = client
         return client

@@ -335,7 +335,7 @@ The same Bearer token is accepted on the Arrow Flight (gRPC) path when Arrow
 is enabled. Failed Flight authentication is rejected with gRPC
 `UNAUTHENTICATED` rather than HTTP 401. Using Basic on Flight while OAuth is
 enabled also requires `TABPY_PWD_FILE`. When `TABPY_OAUTH_ENABLED` is false,
-Flight continues to use basic-auth middleware unchanged.
+Flight continues to use Basic-only middleware rather than JWT middleware.
 
 When both basic access authentication and OAuth are enabled, TabPy picks the
 method based on the scheme of the `Authorization` header sent by the client
@@ -346,7 +346,9 @@ token is sent in cleartext. That matches HTTP Basic/Bearer on the same
 setting; TabPy does not require HTTPS for Flight auth alone.
 
 JWKS lookups are cached. On the HTTP path a cache-cold fetch runs on TabPy's
-single IO-loop thread. Arrow Flight auth runs on the gRPC thread pool.
+single IO-loop thread, so waiting on the IdP or an in-flight Flight fetch
+briefly stalls other HTTP requests. Arrow Flight auth runs on the gRPC thread
+pool.
 Cold and expired-cache fetches are single-flighted per JWKS URI. Forced
 unknown-`kid` refreshes are mutually excluded; a concurrent refresh attempt
 fails authentication rather than waiting on the network request. A cached
