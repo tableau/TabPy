@@ -497,7 +497,8 @@ class TestEvaluationPlaneHandlerMaxRequestSize(AsyncHTTPTestCase):
         response = self.fetch(
             "/evaluate",
             method="POST",
-            body=self.create_large_payload()
+            body=self.create_large_payload(),
+            headers={"Content-Type": "application/json"},
         )
         self.assertEqual(413, response.code)
 
@@ -506,7 +507,8 @@ class TestEvaluationPlaneHandlerMaxRequestSize(AsyncHTTPTestCase):
         response = self.fetch(
             "/evaluate",
             method="POST",
-            body=self.create_large_payload()
+            body=self.create_large_payload(),
+            headers={"Content-Type": "application/json"},
         )
         self.assertEqual(200, response.code)
         self.assertEqual(1, json.loads(response.body)[0])

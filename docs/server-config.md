@@ -331,14 +331,37 @@ To authenticate a request, send the JWT as a Bearer token:
 curl -H "Authorization: Bearer <token>" http://localhost:9004/info
 ```
 
+The same Bearer token is accepted on the Arrow Flight (gRPC) path when Arrow
+is enabled. Failed Flight authentication is rejected with gRPC
+`UNAUTHENTICATED` rather than HTTP 401. Using Basic on Flight while OAuth is
+enabled also requires `TABPY_PWD_FILE`. When `TABPY_OAUTH_ENABLED` is false,
+Flight continues to use Basic-only middleware rather than JWT middleware.
+
 When both basic access authentication and OAuth are enabled, TabPy picks the
 method based on the scheme of the `Authorization` header sent by the client
 (`Basic` or `Bearer`), so both can be used against the same server.
 
-JWKS lookups are cached, but because TabPy serves requests on a single
-thread, a slow or unresponsive IdP during a cache-cold fetch (startup, or a
-key rotation) will briefly stall all concurrent requests, not just the one
-that triggered the fetch.
+With `TABPY_TRANSFER_PROTOCOL = http`, Flight uses `grpc+tcp` and the Bearer
+token is sent in cleartext. That matches HTTP Basic/Bearer on the same
+setting; TabPy does not require HTTPS for Flight auth alone.
+
+JWKS lookups are cached. On the HTTP path a cache-cold fetch runs on TabPy's
+single IO-loop thread, so waiting on the IdP or an in-flight Flight fetch
+briefly stalls other HTTP requests. Arrow Flight auth runs on the gRPC thread
+pool. Cold and expired-cache fetches are single-flighted per JWKS URI.
+
+Forced unknown-`kid` refreshes are mutually excluded. Concurrent requests for
+the same `kid` wait up to one second for the refresh result; requests for a
+different unknown `kid` fail without starting another fetch. A cached
+signing-key lookup does not wait on that refresh, so unrelated valid tokens
+continue to work. After a refresh still cannot find a requested `kid`, TabPy
+rate-limits another forced refresh for 30 seconds. This also means a legitimate
+new key may be rejected for up to 30 seconds after a bogus unknown-`kid`
+request.
+
+On Flight, a request carrying two conflicting `Authorization` values is
+rejected, because which one wins would otherwise decide the caller's identity.
+Flight accepts repeated copies of the same value.
 
 ### Endpoint Security
 
@@ -349,6 +372,26 @@ All endpoints require authentication if it is enabled for the server.
 TabPy can be configured to enable Arrow Flight. This will cause a Flight
 server to start up alongside the HTTP server and will allow for handling
 incoming streamed data in the Arrow columnar format.
+
+When authentication is enabled, Flight accepts the same credentials as HTTP.
+See [Authentication](#authentication). Failed Flight auth is rejected with
+gRPC `UNAUTHENTICATED` rather than HTTP 401.
+
+After a successful Basic call, Flight also returns an opaque session token
+in the response `authorization` header. A client may send that token back as
+a Bearer credential instead of repeating its Basic credentials. The token is
+server-issued, is not a JWT, and expires an hour after it is issued or when
+the server restarts. TabPy normally retains one active opaque token per
+username. A repeated Basic call returns the same token without extending its
+original expiry. During its final five minutes, Basic authentication rotates
+it to a fresh one-hour token while the prior token remains valid until its
+original expiry. This overlap is bounded to two tokens per username.
+
+Opaque tokens are not rechecked against the password file after issuance.
+Changing a password or removing a user therefore does not revoke an existing
+token before its one-hour expiry. Restart TabPy to revoke all issued opaque
+tokens immediately, and use `grpc+tls` so Basic and Bearer credentials are
+encrypted in transit. After expiry, the client authenticates with Basic again.
 
 **As of May 2023, the Arrow Flight feature can only be used by compatible
 versions of Tableau Prep. The Arrow Flight feature is not used by Tableau
