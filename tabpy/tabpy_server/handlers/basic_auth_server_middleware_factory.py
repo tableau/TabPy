@@ -66,24 +66,19 @@ class BasicAuthServerMiddlewareFactory(ServerMiddlewareFactory):
             now = time.monotonic()
             self._evict_expired_tokens(now)
 
-            active_tokens = self._tokens_by_username.get(username, set())
+            active_tokens = self._tokens_by_username.get(username, [])
             if active_tokens:
-                existing = max(
-                    active_tokens, key=lambda active: self.tokens[active][1]
-                )
+                existing = active_tokens[-1]
                 _, expiry = self.tokens[existing]
                 if expiry - now > FLIGHT_TOKEN_RENEWAL_WINDOW_SECONDS:
                     return existing
 
             token = secrets.token_urlsafe(32)
             self.tokens[token] = (username, now + FLIGHT_TOKEN_TTL_SECONDS)
-            active_tokens = self._tokens_by_username.setdefault(username, set())
-            active_tokens.add(token)
-            while len(active_tokens) > MAX_ACTIVE_FLIGHT_TOKENS_PER_USER:
-                oldest = min(
-                    active_tokens, key=lambda active: self.tokens[active][1]
-                )
-                self._remove_token(oldest, username)
+            active_tokens = self._tokens_by_username.setdefault(username, [])
+            active_tokens.append(token)
+            if len(active_tokens) > MAX_ACTIVE_FLIGHT_TOKENS_PER_USER:
+                self._remove_token(active_tokens[0], username)
             return token
 
     def _remove_token(self, token, username):
@@ -91,7 +86,7 @@ class BasicAuthServerMiddlewareFactory(ServerMiddlewareFactory):
         active_tokens = self._tokens_by_username.get(username)
         if active_tokens is None:
             return
-        active_tokens.discard(token)
+        active_tokens.remove(token)
         if not active_tokens:
             self._tokens_by_username.pop(username, None)
 

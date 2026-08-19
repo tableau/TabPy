@@ -138,6 +138,23 @@ class TestBasicAuthServerMiddlewareFactory(unittest.TestCase):
         self.assertTrue(self.factory.is_valid_token(issued_tokens[-2]))
         self.assertTrue(self.factory.is_valid_token(issued_tokens[-1]))
 
+    def test_tied_expiries_evict_oldest_issued_token(self):
+        first = self._authenticate()
+        username, _ = self.factory.tokens[first.token]
+        near_expiry = (
+            time.monotonic() + mod.FLIGHT_TOKEN_RENEWAL_WINDOW_SECONDS - 1
+        )
+        self.factory.tokens[first.token] = (username, near_expiry)
+        second = self._authenticate()
+        self.factory.tokens[first.token] = (username, near_expiry)
+        self.factory.tokens[second.token] = (username, near_expiry)
+
+        third = self._authenticate()
+
+        self.assertNotIn(first.token, self.factory.tokens)
+        self.assertTrue(self.factory.is_valid_token(second.token))
+        self.assertTrue(self.factory.is_valid_token(third.token))
+
     def test_other_users_cannot_evict_an_unexpired_token(self):
         creds = {
             "user1": hash_password("user1", "P@ssw0rd"),
