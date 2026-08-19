@@ -20,6 +20,7 @@ def reset_jwks_state():
 
     jwt_auth_module._jwks_clients.clear()
     jwt_auth_module._jwks_fetch_locks.clear()
+    jwt_auth_module._jwks_in_flight_refreshes.clear()
     jwt_auth_module._jwks_cached_keys.clear()
     jwt_auth_module._jwks_last_failed_refresh.clear()
     jwt_auth_module._jwks_last_fetch_failure.clear()

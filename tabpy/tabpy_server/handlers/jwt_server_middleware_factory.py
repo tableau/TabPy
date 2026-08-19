@@ -65,7 +65,7 @@ class JwtAuthServerMiddlewareFactory(ServerMiddlewareFactory):
                 )
             except JwtValidationError as ex:
                 logger.log(
-                    logging.ERROR, f"Flight JWT authentication failed: {ex}"
+                    logging.WARNING, f"Flight JWT authentication failed: {ex}"
                 )
                 raise FlightUnauthenticatedError("Invalid credentials") from ex
             except Exception as ex:

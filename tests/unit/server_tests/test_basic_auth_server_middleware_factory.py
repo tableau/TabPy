@@ -46,6 +46,11 @@ class TestBasicAuthServerMiddlewareFactory(unittest.TestCase):
         username, _ = self.factory.tokens[middleware.token]
         self.assertEqual(username, "user1")
 
+    def test_basic_username_is_case_insensitive(self):
+        middleware = self._authenticate(username="UsEr1")
+        username, _ = self.factory.tokens[middleware.token]
+        self.assertEqual(username, "user1")
+
     def test_invalid_password_is_rejected(self):
         with self.assertRaises(FlightUnauthenticatedError):
             self.factory.start_call(
@@ -109,10 +114,29 @@ class TestBasicAuthServerMiddlewareFactory(unittest.TestCase):
         renewed = self._authenticate()
 
         self.assertNotEqual(renewed.token, first.token)
-        self.assertFalse(self.factory.is_valid_token(first.token))
+        self.assertTrue(self.factory.is_valid_token(first.token))
         self.assertTrue(self.factory.is_valid_token(renewed.token))
+        self.assertEqual(len(self.factory.tokens), 2)
         remaining = self.factory.tokens[renewed.token][1] - time.monotonic()
         self.assertGreater(remaining, mod.FLIGHT_TOKEN_TTL_SECONDS - 1)
+
+    def test_token_overlap_is_bounded_per_username(self):
+        latest = self._authenticate()
+        issued_tokens = [latest.token]
+
+        for _ in range(3):
+            username, _ = self.factory.tokens[latest.token]
+            self.factory.tokens[latest.token] = (
+                username,
+                time.monotonic() + mod.FLIGHT_TOKEN_RENEWAL_WINDOW_SECONDS - 1,
+            )
+            latest = self._authenticate()
+            issued_tokens.append(latest.token)
+
+        self.assertEqual(len(self.factory.tokens), 2)
+        self.assertNotIn(issued_tokens[0], self.factory.tokens)
+        self.assertTrue(self.factory.is_valid_token(issued_tokens[-2]))
+        self.assertTrue(self.factory.is_valid_token(issued_tokens[-1]))
 
     def test_other_users_cannot_evict_an_unexpired_token(self):
         creds = {

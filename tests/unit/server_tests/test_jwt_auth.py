@@ -314,6 +314,37 @@ class TestJwtAuth(unittest.TestCase):
         # to the cooldown armed by the bogus kid moments earlier.
         self.assertEqual(mock_get_signing_keys.call_count, 1)
 
+    def test_unknown_kid_refresh_recovers_after_cooldown_expires(self):
+        import tabpy.tabpy_server.handlers.jwt_auth as jwt_auth_module
+
+        cached_token = self._make_token(headers={"kid": "cached-kid"})
+        with self._patched_jwks_client(kid="cached-kid"):
+            validate_jwt(
+                cached_token, issuer=ISSUER, jwks_uri=JWKS_URI, audience=AUDIENCE
+            )
+
+        jwt_auth_module._jwks_last_failed_refresh[JWKS_URI] = (
+            time.monotonic()
+            - jwt_auth_module.JWKS_MIN_REFRESH_INTERVAL_SECONDS
+            - 1
+        )
+        rotated_token = self._make_token(headers={"kid": "rotated-kid"})
+        rotated_signing_key = self._signing_key(kid="rotated-kid")
+
+        with patch(
+            "tabpy.tabpy_server.handlers.jwt_auth.PyJWKClient.get_signing_keys",
+            return_value=[rotated_signing_key],
+        ) as mock_get_signing_keys:
+            claims = validate_jwt(
+                rotated_token,
+                issuer=ISSUER,
+                jwks_uri=JWKS_URI,
+                audience=AUDIENCE,
+            )
+
+        self.assertEqual(claims["sub"], "user1")
+        mock_get_signing_keys.assert_called_once_with(refresh=True)
+
     def test_failed_jwks_fetch_is_rate_limited(self):
         """
         A down/unreachable IdP must not be hammered with a fresh blocking
@@ -434,10 +465,10 @@ class TestJwtAuth(unittest.TestCase):
         self.assertEqual(claims["sub"], "user1")
         self.assertLess(elapsed, 1)
 
-    def test_in_flight_refresh_does_not_block_another_refresh_attempt(self):
+    def test_in_flight_fetch_only_blocks_refresh_for_bounded_time(self):
         """
-        A second forced refresh for the same jwks_uri must fail immediately
-        rather than wait for the in-flight fetch timeout.
+        A forced refresh may wait briefly for the per-URI fetch owner, but
+        must not wait for the full outbound JWKS timeout.
         """
         import tabpy.tabpy_server.handlers.jwt_auth as jwt_auth_module
 
@@ -462,10 +493,16 @@ class TestJwtAuth(unittest.TestCase):
         try:
             self.assertTrue(acquired.wait(5))
             started = time.monotonic()
-            with self.assertRaises(JwtValidationError):
-                validate_jwt(
-                    token, issuer=ISSUER, jwks_uri=JWKS_URI, audience=AUDIENCE
-                )
+            with patch.object(
+                jwt_auth_module, "JWKS_REFRESH_WAIT_SECONDS", 0.05
+            ):
+                with self.assertRaises(JwtValidationError):
+                    validate_jwt(
+                        token,
+                        issuer=ISSUER,
+                        jwks_uri=JWKS_URI,
+                        audience=AUDIENCE,
+                    )
             elapsed = time.monotonic() - started
         finally:
             release.set()
@@ -669,10 +706,11 @@ class TestJwtAuth(unittest.TestCase):
             self.assertTrue(first_matching.wait(5))
 
             second_thread.start()
-            self.assertTrue(second_finished.wait(5))
+            self.assertFalse(second_finished.wait(0.05))
             self.assertEqual(refresh_calls, [True])
 
             release_first.set()
+            self.assertTrue(second_finished.wait(5))
             first_thread.join(5)
             second_thread.join(5)
 
@@ -687,11 +725,10 @@ class TestJwtAuth(unittest.TestCase):
         self.assertEqual(refresh_calls, [True])
         self.assertEqual(record_lock_states, [True])
 
-    def test_unknown_kid_cooldown_is_rechecked_after_lock_handoff(self):
+    def test_concurrent_requests_for_new_kid_share_one_refresh(self):
         """
-        Pause one caller after its unlocked cooldown check but before lock
-        acquisition. Another caller publishes the cooldown and releases;
-        the paused caller must recheck under the lock without refetching.
+        Requests for the same newly rotated kid wait briefly for one
+        refresh owner, then all validate against the published snapshot.
         """
         import tabpy.tabpy_server.handlers.jwt_auth as jwt_auth_module
 
@@ -701,67 +738,71 @@ class TestJwtAuth(unittest.TestCase):
                 cached_token, issuer=ISSUER, jwks_uri=JWKS_URI, audience=AUDIENCE
             )
 
-        unknown = self._make_token(headers={"kid": "unknown-kid"})
-        refreshed_key = self._signing_key(kid="the-real-kid")
-        waiting_before_acquire = threading.Event()
-        release_waiting = threading.Event()
+        rotated_private_key = rsa.generate_private_key(
+            public_exponent=65537, key_size=2048
+        )
+        rotated_token = make_token(
+            rotated_private_key, headers={"kid": "rotated-kid"}
+        )
+        refreshed_key = type("SigningKey", (), {})()
+        refreshed_key.key = rotated_private_key.public_key()
+        refreshed_key.algorithm_name = "RS256"
+        refreshed_key.key_id = "rotated-kid"
+
+        workers = 8
+        barrier = threading.Barrier(workers)
+        all_refresh_callers_entered = threading.Event()
+        refresh_callers = 0
+        refresh_callers_lock = threading.Lock()
         refresh_calls = []
-        outcomes = []
+        results = []
         errors = []
-        original_fetch_lock_for = jwt_auth_module._fetch_lock_for
+        original_refresh = jwt_auth_module._refresh_signing_key
 
         def fake_get_signing_keys(refresh=False):
             refresh_calls.append(refresh)
+            self.assertTrue(all_refresh_callers_entered.wait(5))
             return [refreshed_key]
 
-        def gated_fetch_lock_for(uri):
-            lock = original_fetch_lock_for(uri)
-            if (
-                threading.current_thread() is waiting_thread
-                and not waiting_before_acquire.is_set()
-            ):
-                waiting_before_acquire.set()
-                self.assertTrue(release_waiting.wait(5))
-            return lock
+        def counted_refresh(*args):
+            nonlocal refresh_callers
+            with refresh_callers_lock:
+                refresh_callers += 1
+                if refresh_callers == workers:
+                    all_refresh_callers_entered.set()
+            return original_refresh(*args)
 
-        def validate_unknown(label):
+        def worker():
             try:
-                validate_jwt(
-                    unknown, issuer=ISSUER, jwks_uri=JWKS_URI, audience=AUDIENCE
+                barrier.wait(5)
+                claims = validate_jwt(
+                    rotated_token,
+                    issuer=ISSUER,
+                    jwks_uri=JWKS_URI,
+                    audience=AUDIENCE,
                 )
-            except JwtValidationError:
-                outcomes.append(label)
+                results.append(claims)
             except Exception as ex:
                 errors.append(ex)
-
-        waiting_thread = threading.Thread(
-            target=validate_unknown, args=("waiting",)
-        )
-        owner_thread = threading.Thread(
-            target=validate_unknown, args=("owner",)
-        )
 
         with patch(
             "tabpy.tabpy_server.handlers.jwt_auth.PyJWKClient.get_signing_keys",
             side_effect=fake_get_signing_keys,
-        ), patch(
-            "tabpy.tabpy_server.handlers.jwt_auth._fetch_lock_for",
-            side_effect=gated_fetch_lock_for,
+        ), patch.object(
+            jwt_auth_module,
+            "_refresh_signing_key",
+            side_effect=counted_refresh,
         ):
-            waiting_thread.start()
-            self.assertTrue(waiting_before_acquire.wait(5))
+            threads = [threading.Thread(target=worker) for _ in range(workers)]
+            for thread in threads:
+                thread.start()
+            for thread in threads:
+                thread.join(5)
 
-            owner_thread.start()
-            owner_thread.join(5)
-            self.assertFalse(owner_thread.is_alive())
-            self.assertEqual(refresh_calls, [True])
-
-            release_waiting.set()
-            waiting_thread.join(5)
-
-        self.assertFalse(waiting_thread.is_alive())
+        self.assertTrue(all(not thread.is_alive() for thread in threads))
         self.assertEqual(errors, [])
-        self.assertCountEqual(outcomes, ["owner", "waiting"])
+        self.assertEqual(len(results), workers)
+        self.assertTrue(all(claims["sub"] == "user1" for claims in results))
         self.assertEqual(refresh_calls, [True])
 
     def test_jwks_client_is_reused_for_same_uri(self):
@@ -777,16 +818,14 @@ class TestJwtAuth(unittest.TestCase):
         second = jwt_auth_module._get_jwks_client(JWKS_URI)
         self.assertIs(first, second)
 
-    def test_validation_failure_does_not_log_raw_token(self):
+    def test_validation_failure_does_not_expose_raw_token(self):
         token = self._make_token({"iss": "https://wrong-idp.example.com/"})
         with self._patched_jwks_client():
-            with self.assertLogs(
-                "tabpy.tabpy_server.handlers.jwt_auth", level="ERROR"
-            ) as log_ctx:
-                with self.assertRaises(JwtValidationError):
-                    validate_jwt(token, issuer=ISSUER, jwks_uri=JWKS_URI, audience=AUDIENCE)
-        logged_text = " ".join(log_ctx.output)
-        self.assertNotIn(token, logged_text)
+            with self.assertRaises(JwtValidationError) as error:
+                validate_jwt(
+                    token, issuer=ISSUER, jwks_uri=JWKS_URI, audience=AUDIENCE
+                )
+        self.assertNotIn(token, str(error.exception))
 
 
 if __name__ == "__main__":

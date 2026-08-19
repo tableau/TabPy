@@ -1,11 +1,8 @@
-import logging
 import threading
 import time
 
 import jwt
 from jwt import PyJWKClient
-
-logger = logging.getLogger(__name__)
 
 # PyJWKClient fetches JWKS synchronously (via requests). On the HTTP path
 # that call runs on TabPy's single Tornado IO-loop thread, so a
@@ -28,6 +25,12 @@ JWKS_MIN_REFRESH_INTERVAL_SECONDS = 30
 # next lookup treats the snapshot as expired and single-flights one fetch.
 JWKS_CACHE_LIFESPAN_SECONDS = 300
 
+# Concurrent requests for the same newly published kid may briefly wait for
+# the refresh owner instead of failing spuriously. Keep the wait short and
+# bounded so this synchronous helper cannot tie up an HTTP or Flight worker
+# for the full IdP fetch timeout.
+JWKS_REFRESH_WAIT_SECONDS = 1
+
 # One PyJWKClient per JWKS URI, reused so its JWK Set cache actually avoids
 # per-request fetches. Process-global. _jwks_state_lock only covers these
 # dicts. A per-URI fetch lock serializes cache-miss fetches and forced
@@ -36,6 +39,12 @@ JWKS_CACHE_LIFESPAN_SECONDS = 300
 _jwks_state_lock = threading.Lock()
 _jwks_fetch_locks = {}
 _jwks_clients = {}
+
+# jwks_uri -> (kid, completion event). Reserving refresh ownership under
+# _jwks_state_lock closes the race between taking the fetch lock and
+# publishing which kid is being refreshed. Same-kid callers may wait for
+# the owner; other unknown kids fail fast and cannot amplify JWKS traffic.
+_jwks_in_flight_refreshes = {}
 
 # jwks_uri -> (signing_keys, monotonic timestamp). Lets a warm cache
 # return keys without waiting on another thread's in-flight fetch.
@@ -145,7 +154,10 @@ def _fetch_signing_keys(jwks_client: PyJWKClient, jwks_uri: str):
         raise _fetch_failed_recently_error(jwks_uri)
 
     fetch_lock = _fetch_lock_for(jwks_uri)
-    fetch_lock.acquire()
+    if not fetch_lock.acquire(timeout=JWKS_REFRESH_WAIT_SECONDS):
+        raise jwt.exceptions.PyJWKClientError(
+            f'JWKS fetch already in flight for "{jwks_uri}"'
+        )
     try:
         cached = _read_cached_keys(jwks_uri)
         if cached is not None:
@@ -165,8 +177,45 @@ def _refresh_signing_key(
             f"Unable to find a signing key that matches: {kid!r}"
         )
 
+    with _jwks_state_lock:
+        in_flight = _jwks_in_flight_refreshes.get(jwks_uri)
+        if in_flight is None:
+            refresh_done = threading.Event()
+            _jwks_in_flight_refreshes[jwks_uri] = (kid, refresh_done)
+            owns_refresh = True
+        else:
+            in_flight_kid, refresh_done = in_flight
+            owns_refresh = False
+
+    if not owns_refresh:
+        if in_flight_kid != kid:
+            raise jwt.exceptions.PyJWKClientError(
+                f'JWKS refresh already in flight for "{jwks_uri}"'
+            )
+        if not refresh_done.wait(JWKS_REFRESH_WAIT_SECONDS):
+            raise jwt.exceptions.PyJWKClientError(
+                f'JWKS refresh timed out for "{jwks_uri}"'
+            )
+        signing_keys = _read_cached_keys(jwks_uri)
+        signing_key = (
+            PyJWKClient.match_kid(signing_keys, kid)
+            if signing_keys is not None
+            else None
+        )
+        if signing_key is not None:
+            return signing_key
+        raise jwt.exceptions.PyJWKClientError(
+            f"Unable to find a signing key that matches: {kid!r}"
+        )
+
     fetch_lock = _fetch_lock_for(jwks_uri)
-    if not fetch_lock.acquire(blocking=False):
+    acquired = fetch_lock.acquire(timeout=JWKS_REFRESH_WAIT_SECONDS)
+    if not acquired:
+        with _jwks_state_lock:
+            current = _jwks_in_flight_refreshes.get(jwks_uri)
+            if current is not None and current[1] is refresh_done:
+                _jwks_in_flight_refreshes.pop(jwks_uri)
+        refresh_done.set()
         raise jwt.exceptions.PyJWKClientError(
             f'JWKS refresh already in flight for "{jwks_uri}"'
         )
@@ -192,6 +241,11 @@ def _refresh_signing_key(
         return signing_key
     finally:
         fetch_lock.release()
+        with _jwks_state_lock:
+            current = _jwks_in_flight_refreshes.get(jwks_uri)
+            if current is not None and current[1] is refresh_done:
+                _jwks_in_flight_refreshes.pop(jwks_uri)
+        refresh_done.set()
 
 
 def _get_signing_key(jwks_client: PyJWKClient, jwks_uri: str, token: str):
@@ -259,11 +313,9 @@ def validate_jwt(
         jwks_client = _get_jwks_client(jwks_uri)
         signing_key = _get_signing_key(jwks_client, jwks_uri, token)
     except (jwt.exceptions.PyJWKClientError, jwt.exceptions.InvalidTokenError) as ex:
-        logger.log(logging.ERROR, f"Unable to resolve JWT signing key: {str(ex)}")
         raise JwtValidationError("Unable to resolve JWT signing key") from ex
     except Exception as ex:
         # Must still surface as a 401, not a 500 (e.g. malformed JWKS response).
-        logger.log(logging.ERROR, f"Unexpected error resolving JWT signing key: {str(ex)}")
         raise JwtValidationError("Unable to resolve JWT signing key") from ex
 
     try:
@@ -276,12 +328,10 @@ def validate_jwt(
             options={"require": ["exp", "iat"]},
         )
     except jwt.exceptions.InvalidTokenError as ex:
-        logger.log(logging.ERROR, f"JWT validation failed: {str(ex)}")
         raise JwtValidationError(f"JWT validation failed: {str(ex)}") from ex
     except Exception as ex:
         # Must still fail closed as a 401 / UNAUTHENTICATED, not a 500
         # or an ArrowInvalid traceback to an unauthenticated caller.
-        logger.log(logging.ERROR, f"Unexpected error decoding JWT: {str(ex)}")
         raise JwtValidationError("JWT validation failed") from ex
 
     if required_scopes:
@@ -292,7 +342,6 @@ def validate_jwt(
         except Exception as ex:
             # Must still fail closed as a 401 (e.g. a `scope` claim that
             # isn't a space-separated string), not an uncaught 500.
-            logger.log(logging.ERROR, f"Unable to evaluate JWT scopes: {str(ex)}")
             raise JwtValidationError("Unable to evaluate JWT scopes") from ex
 
     return claims

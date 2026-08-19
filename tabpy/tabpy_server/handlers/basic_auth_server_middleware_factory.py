@@ -20,9 +20,10 @@ from tabpy.tabpy_server.handlers.util import hash_password
 FLIGHT_TOKEN_TTL_SECONDS = 3600
 
 # Avoid handing a freshly authenticated client a token that is about to
-# expire. Rotation still happens under the per-factory lock and retains
-# only one active token for the username.
+# expire. Rotation keeps the prior token valid until its original expiry,
+# so another client using the same username is not disconnected.
 FLIGHT_TOKEN_RENEWAL_WINDOW_SECONDS = 300
+MAX_ACTIVE_FLIGHT_TOKENS_PER_USER = 2
 
 
 class BasicAuthServerMiddleware(ServerMiddleware):
@@ -37,9 +38,8 @@ class BasicAuthServerMiddlewareFactory(ServerMiddlewareFactory):
     def __init__(self, creds):
         self.creds = creds
         # token -> (username, monotonic expiry). Read from the gRPC thread
-        # pool on every call. One active token is retained per username,
-        # bounding request-driven growth without evicting another user's
-        # unexpired credential.
+        # pool on every call. Normally one token is retained per username;
+        # rotation briefly permits the old and new tokens to overlap.
         self.tokens = {}
         self._tokens_by_username = {}
         self._tokens_lock = threading.Lock()
@@ -66,21 +66,33 @@ class BasicAuthServerMiddlewareFactory(ServerMiddlewareFactory):
             now = time.monotonic()
             self._evict_expired_tokens(now)
 
-            existing = self._tokens_by_username.get(username)
-            if existing is not None:
+            active_tokens = self._tokens_by_username.get(username, set())
+            if active_tokens:
+                existing = max(
+                    active_tokens, key=lambda active: self.tokens[active][1]
+                )
                 _, expiry = self.tokens[existing]
                 if expiry - now > FLIGHT_TOKEN_RENEWAL_WINDOW_SECONDS:
                     return existing
-                self._remove_token(existing, username)
 
             token = secrets.token_urlsafe(32)
             self.tokens[token] = (username, now + FLIGHT_TOKEN_TTL_SECONDS)
-            self._tokens_by_username[username] = token
+            active_tokens = self._tokens_by_username.setdefault(username, set())
+            active_tokens.add(token)
+            while len(active_tokens) > MAX_ACTIVE_FLIGHT_TOKENS_PER_USER:
+                oldest = min(
+                    active_tokens, key=lambda active: self.tokens[active][1]
+                )
+                self._remove_token(oldest, username)
             return token
 
     def _remove_token(self, token, username):
         self.tokens.pop(token, None)
-        if self._tokens_by_username.get(username) == token:
+        active_tokens = self._tokens_by_username.get(username)
+        if active_tokens is None:
+            return
+        active_tokens.discard(token)
+        if not active_tokens:
             self._tokens_by_username.pop(username, None)
 
     def _evict_expired_tokens(self, now):
@@ -108,6 +120,7 @@ class BasicAuthServerMiddlewareFactory(ServerMiddlewareFactory):
             username, separator, password = decoded.partition(":")
             if not separator or not username:
                 raise FlightUnauthenticatedError("Invalid credentials")
+            username = username.lower()
             if not self.is_valid_user(username, password):
                 raise FlightUnauthenticatedError("Invalid credentials")
             return BasicAuthServerMiddleware(self._issue_token(username))
