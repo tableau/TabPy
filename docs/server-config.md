@@ -346,10 +346,9 @@ token is sent in cleartext. That matches HTTP Basic/Bearer on the same
 setting; TabPy does not require HTTPS for Flight auth alone.
 
 JWKS lookups are cached. On the HTTP path a cache-cold fetch runs on TabPy's
-single IO-loop thread, so waiting on the IdP briefly stalls other HTTP
-requests. Arrow Flight auth runs on the gRPC thread pool. Cold and
-expired-cache fetches are single-flighted per JWKS URI. A caller waits at most
-one second for another in-flight fetch before authentication fails.
+single IO-loop thread, so waiting on the IdP or an in-flight Flight fetch
+briefly stalls other HTTP requests. Arrow Flight auth runs on the gRPC thread
+pool. Cold and expired-cache fetches are single-flighted per JWKS URI.
 
 Forced unknown-`kid` refreshes are mutually excluded. Concurrent requests for
 the same `kid` wait up to one second for the refresh result; requests for a

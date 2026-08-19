@@ -154,10 +154,7 @@ def _fetch_signing_keys(jwks_client: PyJWKClient, jwks_uri: str):
         raise _fetch_failed_recently_error(jwks_uri)
 
     fetch_lock = _fetch_lock_for(jwks_uri)
-    if not fetch_lock.acquire(timeout=JWKS_REFRESH_WAIT_SECONDS):
-        raise jwt.exceptions.PyJWKClientError(
-            f'JWKS fetch already in flight for "{jwks_uri}"'
-        )
+    fetch_lock.acquire()
     try:
         cached = _read_cached_keys(jwks_uri)
         if cached is not None:
@@ -313,7 +310,9 @@ def validate_jwt(
         jwks_client = _get_jwks_client(jwks_uri)
         signing_key = _get_signing_key(jwks_client, jwks_uri, token)
     except (jwt.exceptions.PyJWKClientError, jwt.exceptions.InvalidTokenError) as ex:
-        raise JwtValidationError("Unable to resolve JWT signing key") from ex
+        raise JwtValidationError(
+            f"Unable to resolve JWT signing key: {str(ex)}"
+        ) from ex
     except Exception as ex:
         # Must still surface as a 401, not a 500 (e.g. malformed JWKS response).
         raise JwtValidationError("Unable to resolve JWT signing key") from ex

@@ -792,6 +792,10 @@ class TestJwtAuth(unittest.TestCase):
             jwt_auth_module,
             "_refresh_signing_key",
             side_effect=counted_refresh,
+        ), patch.object(
+            jwt_auth_module,
+            "JWKS_REFRESH_WAIT_SECONDS",
+            5,
         ):
             threads = [threading.Thread(target=worker) for _ in range(workers)]
             for thread in threads:
