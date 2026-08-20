@@ -1,5 +1,19 @@
 # Changelog
 
+## v2.15.0
+
+### Improvements
+
+- Add optional OAuth 2.0 / JWT Bearer token authentication on HTTP and
+  Arrow Flight. Configure it with `TABPY_OAUTH_ENABLED` plus issuer, JWKS
+  URI, and audience. Basic Auth is unchanged and can run alongside OAuth.
+- Add optional global JWT scope checks (`TABPY_OAUTH_REQUIRED_SCOPES`) and
+  opt-in per-endpoint scopes (`TABPY_OAUTH_ENFORCE_ENDPOINT_SCOPES`) for
+  `tabpy:query` on `/query`, `tabpy:evaluate` on `/evaluate`, and
+  `tabpy:deploy` on mutating `/endpoints` operations.
+- Add optional per-user logging of the JWT `sub` claim when
+  `TABPY_OAUTH_LOG_USER` is enabled (requires `TABPY_LOG_DETAILS`).
+
 ## v2.14.0
 
 ### Improvements
