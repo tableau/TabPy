@@ -354,3 +354,55 @@ def _check_scopes(claims: dict, required_scopes: str) -> None:
     ]
     if missing:
         raise JwtValidationError(f"JWT missing required scope(s): {', '.join(missing)}")
+
+
+# Well-known endpoint scopes. Bound to HTTP paths when
+# TABPY_OAUTH_ENFORCE_ENDPOINT_SCOPES is true. Not admin-defined.
+SCOPE_QUERY = "tabpy:query"
+SCOPE_EVALUATE = "tabpy:evaluate"
+SCOPE_DEPLOY = "tabpy:deploy"
+WELL_KNOWN_ENDPOINT_SCOPES = (SCOPE_QUERY, SCOPE_EVALUATE, SCOPE_DEPLOY)
+
+_MUTATING_METHODS = frozenset({"POST", "PUT", "DELETE", "PATCH"})
+
+
+def token_has_scope(claims: dict, scope: str) -> bool:
+    """True if `scope` is present in the token's space-separated `scope` claim."""
+    granted = claims.get("scope", "")
+    if not isinstance(granted, str):
+        return False
+    return scope in granted.split()
+
+
+def endpoint_scope_for_path(
+    path: str, subdirectory: str = "", method: str = "GET"
+) -> str | None:
+    """
+    Return the well-known scope required for `path` + HTTP `method`, or None.
+
+    `subdirectory` is TabPy's optional URL prefix (e.g. `/tabpy`).
+    OPTIONS is not mapped here; callers skip CORS preflight separately.
+    """
+    rel = path or "/"
+    if subdirectory:
+        prefix = subdirectory if subdirectory.startswith("/") else f"/{subdirectory}"
+        prefix = prefix.rstrip("/")
+        if rel == prefix:
+            rel = "/"
+        elif rel.startswith(prefix + "/"):
+            rel = rel[len(prefix):]
+    verb = (method or "GET").upper()
+    if rel == "/evaluate" or rel.startswith("/evaluate/"):
+        return SCOPE_EVALUATE
+    if rel == "/query" or rel.startswith("/query/"):
+        return SCOPE_QUERY
+    if (
+        rel == "/configurations/endpoint_upload_destination"
+        or rel.startswith("/configurations/endpoint_upload_destination/")
+    ):
+        return SCOPE_DEPLOY
+    if rel == "/endpoints" or rel.startswith("/endpoints/"):
+        if verb in _MUTATING_METHODS:
+            return SCOPE_DEPLOY
+        return None
+    return None

@@ -12,7 +12,15 @@ import jwt
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 
-from tabpy.tabpy_server.handlers.jwt_auth import JwtValidationError, validate_jwt
+from tabpy.tabpy_server.handlers.jwt_auth import (
+    SCOPE_DEPLOY,
+    SCOPE_EVALUATE,
+    SCOPE_QUERY,
+    JwtValidationError,
+    endpoint_scope_for_path,
+    token_has_scope,
+    validate_jwt,
+)
 from tests.unit.server_tests.jwt_test_helpers import (
     AUDIENCE,
     ISSUER,
@@ -830,6 +838,70 @@ class TestJwtAuth(unittest.TestCase):
                     token, issuer=ISSUER, jwks_uri=JWKS_URI, audience=AUDIENCE
                 )
         self.assertNotIn(token, str(error.exception))
+
+
+class TestEndpointScopeHelpers(unittest.TestCase):
+    def test_token_has_scope_reads_space_separated_claim(self):
+        claims = {"scope": "tabpy:query tabpy:evaluate"}
+        self.assertTrue(token_has_scope(claims, SCOPE_QUERY))
+        self.assertTrue(token_has_scope(claims, SCOPE_EVALUATE))
+        self.assertFalse(token_has_scope(claims, "tabpy:deploy"))
+
+    def test_token_has_scope_fails_closed_for_non_string_claim(self):
+        self.assertFalse(
+            token_has_scope({"scope": ["tabpy:query"]}, SCOPE_QUERY)
+        )
+
+    def test_endpoint_scope_for_path_maps_query_and_evaluate(self):
+        self.assertEqual(endpoint_scope_for_path("/query/add"), SCOPE_QUERY)
+        self.assertEqual(
+            endpoint_scope_for_path("/query/add", method="POST"), SCOPE_QUERY
+        )
+        self.assertEqual(endpoint_scope_for_path("/evaluate"), SCOPE_EVALUATE)
+        self.assertIsNone(endpoint_scope_for_path("/info"))
+        self.assertIsNone(endpoint_scope_for_path("/status"))
+        self.assertIsNone(endpoint_scope_for_path("/endpoints"))
+        self.assertIsNone(endpoint_scope_for_path("/endpoints/add"))
+
+    def test_endpoint_scope_for_path_maps_mutating_management_to_deploy(self):
+        self.assertEqual(
+            endpoint_scope_for_path("/endpoints", method="POST"), SCOPE_DEPLOY
+        )
+        self.assertEqual(
+            endpoint_scope_for_path("/endpoints/add", method="PUT"), SCOPE_DEPLOY
+        )
+        self.assertEqual(
+            endpoint_scope_for_path("/endpoints/add", method="DELETE"), SCOPE_DEPLOY
+        )
+        self.assertEqual(
+            endpoint_scope_for_path(
+                "/configurations/endpoint_upload_destination", method="GET"
+            ),
+            SCOPE_DEPLOY,
+        )
+        self.assertIsNone(
+            endpoint_scope_for_path("/endpoints/add", method="GET")
+        )
+
+    def test_endpoint_scope_for_path_honors_subdirectory(self):
+        self.assertEqual(
+            endpoint_scope_for_path("/tabpy/query/add", "/tabpy"), SCOPE_QUERY
+        )
+        self.assertEqual(
+            endpoint_scope_for_path("/tabpy/evaluate", "/tabpy"), SCOPE_EVALUATE
+        )
+        self.assertIsNone(endpoint_scope_for_path("/tabpy/info", "/tabpy"))
+        self.assertEqual(
+            endpoint_scope_for_path(
+                "/tabpy/endpoints/add", "/tabpy", method="DELETE"
+            ),
+            SCOPE_DEPLOY,
+        )
+        self.assertIsNone(
+            endpoint_scope_for_path(
+                "/tabpy/endpoints/add", "/tabpy", method="GET"
+            )
+        )
 
 
 if __name__ == "__main__":

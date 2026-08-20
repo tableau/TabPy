@@ -7,6 +7,7 @@ class AuthErrorStates(Enum):
     NONE = auto()
     NotAuthorized = auto()
     NotRequired = auto()
+    InsufficientScope = auto()
 
 def hash_password(username, pwd):
     """

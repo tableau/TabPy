@@ -23,6 +23,7 @@ from tabpy.tabpy_server.app.util import parse_pwd_file
 from tabpy.tabpy_server.handlers.basic_auth_server_middleware_factory import (
     BasicAuthServerMiddlewareFactory,
 )
+from tabpy.tabpy_server.handlers.jwt_auth import WELL_KNOWN_ENDPOINT_SCOPES
 from tabpy.tabpy_server.handlers.jwt_server_middleware_factory import (
     JwtAuthServerMiddlewareFactory,
 )
@@ -397,6 +398,8 @@ class TabPyApp:
             (SettingsParameters.OAuthAudience, ConfigParameters.TABPY_OAUTH_AUDIENCE, None, None),
             (SettingsParameters.OAuthRequiredScopes, ConfigParameters.TABPY_OAUTH_REQUIRED_SCOPES,
              None, None),
+            (SettingsParameters.OAuthEnforceEndpointScopes,
+             ConfigParameters.TABPY_OAUTH_ENFORCE_ENDPOINT_SCOPES, False, parser.getboolean),
             (SettingsParameters.OAuthLogUser, ConfigParameters.TABPY_OAUTH_LOG_USER, False, parser.getboolean),
         ]
 
@@ -638,7 +641,14 @@ class TabPyApp:
             if ConfigParameters.TABPY_PWD_FILE in self.settings:
                 methods["basic-auth"] = {}
             if self.settings[SettingsParameters.OAuthEnabled]:
-                methods["oauth-jwt"] = {}
+                methods["oauth-jwt"] = {
+                    "scopes": list(WELL_KNOWN_ENDPOINT_SCOPES),
+                    "endpoint_scopes_enforced": bool(
+                        self.settings.get(
+                            SettingsParameters.OAuthEnforceEndpointScopes, False
+                        )
+                    ),
+                }
             features["authentication"] = {
                 "required": True,
                 "methods": methods,
