@@ -14,6 +14,9 @@
   * [Adding an Account](#adding-an-account)
   * [Updating an Account](#updating-an-account)
   * [Deleting an Account](#deleting-an-account)
+  * [OAuth / JWT Bearer Token Authentication](#oauth--jwt-bearer-token-authentication)
+  * [Endpoint Security](#endpoint-security)
+- [Arrow Flight](#arrow-flight)
 - [Logging](#logging)
   * [Request Context Logging](#request-context-logging)
 
