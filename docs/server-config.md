@@ -311,7 +311,7 @@ service (e.g. a cloud metadata endpoint).
   the signing keys used to verify JWT signatures.
 - `TABPY_OAUTH_AUDIENCE` is the expected `aud` claim on incoming JWTs.
 
-Two additional parameters are optional:
+Three additional parameters are optional:
 
 ```sh
 TABPY_OAUTH_REQUIRED_SCOPES = tabpy
@@ -326,6 +326,18 @@ TABPY_OAUTH_LOG_USER = true
   `UNAUTHENTICATED`). Do not put `tabpy:query`, `tabpy:evaluate`, or
   `tabpy:deploy` here if you want them bound to specific paths; use
   `TABPY_OAUTH_ENFORCE_ENDPOINT_SCOPES` for that.
+
+  For example, an organization could restrict a finance team's TabPy
+  deployment with:
+
+  ```sh
+  TABPY_OAUTH_REQUIRED_SCOPES = org:finance
+  ```
+
+  A token whose `scope` claim is `openid org:finance` would pass the global
+  scope check, while one containing only `openid org:marketing` would be
+  rejected. If multiple scopes are configured, such as
+  `org:finance,tabpy`, the token must contain **all** of them.
 - `TABPY_OAUTH_ENFORCE_ENDPOINT_SCOPES` (default `false`) requires
   well-known scopes on specific HTTP paths after the JWT itself is valid:
   `/query` needs `tabpy:query`, `/evaluate` needs `tabpy:evaluate`, and
