@@ -537,7 +537,10 @@ class BaseHandler(tornado.web.RequestHandler):
         if self.request.method == "OPTIONS":
             return None
         required = endpoint_scope_for_path(
-            self.request.path, self.subdirectory, self.request.method
+            self.request.path,
+            self.subdirectory,
+            self.request.method,
+            self.settings.get(SettingsParameters.OAuthEndpointScopes),
         )
         if not required:
             return None

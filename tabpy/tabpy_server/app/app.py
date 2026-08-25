@@ -4,6 +4,7 @@ import ipaddress
 import logging
 import multiprocessing
 import os
+import re
 import shutil
 import signal
 import socket
@@ -23,7 +24,12 @@ from tabpy.tabpy_server.app.util import parse_pwd_file
 from tabpy.tabpy_server.handlers.basic_auth_server_middleware_factory import (
     BasicAuthServerMiddlewareFactory,
 )
-from tabpy.tabpy_server.handlers.jwt_auth import WELL_KNOWN_ENDPOINT_SCOPES
+from tabpy.tabpy_server.handlers.jwt_auth import (
+    SCOPE_DEPLOY,
+    SCOPE_EVALUATE,
+    SCOPE_QUERY,
+    endpoint_scope_names,
+)
 from tabpy.tabpy_server.handlers.jwt_server_middleware_factory import (
     JwtAuthServerMiddlewareFactory,
 )
@@ -400,11 +406,23 @@ class TabPyApp:
              None, None),
             (SettingsParameters.OAuthEnforceEndpointScopes,
              ConfigParameters.TABPY_OAUTH_ENFORCE_ENDPOINT_SCOPES, False, parser.getboolean),
+            (SettingsParameters.OAuthQueryScope,
+             ConfigParameters.TABPY_OAUTH_QUERY_SCOPE, SCOPE_QUERY, None),
+            (SettingsParameters.OAuthEvaluateScope,
+             ConfigParameters.TABPY_OAUTH_EVALUATE_SCOPE, SCOPE_EVALUATE, None),
+            (SettingsParameters.OAuthDeployScope,
+             ConfigParameters.TABPY_OAUTH_DEPLOY_SCOPE, SCOPE_DEPLOY, None),
             (SettingsParameters.OAuthLogUser, ConfigParameters.TABPY_OAUTH_LOG_USER, False, parser.getboolean),
         ]
 
         for setting, parameter, default_val, parse_function in settings_parameters:
             self._set_parameter(parser, setting, parameter, default_val, parse_function)
+
+        self.settings[SettingsParameters.OAuthEndpointScopes] = {
+            SCOPE_QUERY: self.settings[SettingsParameters.OAuthQueryScope],
+            SCOPE_EVALUATE: self.settings[SettingsParameters.OAuthEvaluateScope],
+            SCOPE_DEPLOY: self.settings[SettingsParameters.OAuthDeployScope],
+        }
 
         if not os.path.exists(self.settings[SettingsParameters.UploadDir]):
             os.makedirs(self.settings[SettingsParameters.UploadDir])
@@ -577,6 +595,44 @@ class TabPyApp:
             logger.critical(msg)
             raise RuntimeError(msg)
 
+        endpoint_scopes = [
+            (SettingsParameters.OAuthQueryScope,
+             ConfigParameters.TABPY_OAUTH_QUERY_SCOPE),
+            (SettingsParameters.OAuthEvaluateScope,
+             ConfigParameters.TABPY_OAUTH_EVALUATE_SCOPE),
+            (SettingsParameters.OAuthDeployScope,
+             ConfigParameters.TABPY_OAUTH_DEPLOY_SCOPE),
+        ]
+        invalid_scopes = [
+            config_key for setting, config_key in endpoint_scopes
+            if not re.fullmatch(
+                r"[\x21\x23-\x5B\x5D-\x7E]+", self.settings[setting]
+            )
+        ]
+        if invalid_scopes:
+            msg = (
+                f"{', '.join(invalid_scopes)} must be valid, non-empty OAuth "
+                "scope tokens"
+            )
+            logger.critical(msg)
+            raise RuntimeError(msg)
+
+        scope_counts = {}
+        for setting, _ in endpoint_scopes:
+            value = self.settings[setting]
+            scope_counts[value] = scope_counts.get(value, 0) + 1
+        duplicated = [
+            f"{config_key}={self.settings[setting]}"
+            for setting, config_key in endpoint_scopes
+            if scope_counts[self.settings[setting]] > 1
+        ]
+        if duplicated:
+            logger.warning(
+                "OAuth endpoint scope settings contain duplicate values "
+                f"({', '.join(duplicated)}); a token with a shared scope "
+                "can access multiple endpoint groups"
+            )
+
         # JWKS/issuer are the trust anchor for JWT verification, so both must
         # be fetched over https to prevent an on-path attacker from substituting
         # their own keys/issuer.
@@ -642,7 +698,11 @@ class TabPyApp:
                 methods["basic-auth"] = {}
             if self.settings[SettingsParameters.OAuthEnabled]:
                 methods["oauth-jwt"] = {
-                    "scopes": list(WELL_KNOWN_ENDPOINT_SCOPES),
+                    "scopes": list(
+                        endpoint_scope_names(
+                            self.settings[SettingsParameters.OAuthEndpointScopes]
+                        )
+                    ),
                     "endpoint_scopes_enforced": bool(
                         self.settings.get(
                             SettingsParameters.OAuthEnforceEndpointScopes, False

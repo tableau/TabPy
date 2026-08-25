@@ -18,6 +18,7 @@ from tabpy.tabpy_server.handlers.jwt_auth import (
     SCOPE_QUERY,
     JwtValidationError,
     endpoint_scope_for_path,
+    endpoint_scope_names,
     token_has_scope,
     validate_jwt,
 )
@@ -901,6 +902,35 @@ class TestEndpointScopeHelpers(unittest.TestCase):
             endpoint_scope_for_path(
                 "/tabpy/endpoints/add", "/tabpy", method="GET"
             )
+        )
+
+    def test_endpoint_scope_names_can_be_overridden(self):
+        overrides = {
+            SCOPE_QUERY: "tabpy/query",
+            SCOPE_EVALUATE: "tabpy/evaluate",
+            SCOPE_DEPLOY: "tabpy/deploy",
+        }
+        self.assertEqual(
+            endpoint_scope_names(overrides),
+            ("tabpy/query", "tabpy/evaluate", "tabpy/deploy"),
+        )
+        self.assertEqual(
+            endpoint_scope_for_path(
+                "/query/model", method="POST", scope_overrides=overrides
+            ),
+            "tabpy/query",
+        )
+        self.assertEqual(
+            endpoint_scope_for_path(
+                "/endpoints/model", method="DELETE", scope_overrides=overrides
+            ),
+            "tabpy/deploy",
+        )
+        self.assertEqual(
+            endpoint_scope_for_path(
+                "/query/model", scope_overrides={SCOPE_QUERY: ""}
+            ),
+            SCOPE_QUERY,
         )
 
 

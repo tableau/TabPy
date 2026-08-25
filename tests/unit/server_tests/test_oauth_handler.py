@@ -507,6 +507,77 @@ class TestEndpointScopesEnforced(BaseTestOAuthHandler):
         self.assertNotEqual(response.code, 403)
 
 
+class TestConfiguredEndpointScopes(BaseTestOAuthHandler):
+    @classmethod
+    def setUpClass(cls):
+        cls.prefix = "__TestConfiguredEndpointScopes_"
+        cls.tabpy_config = [
+            "TABPY_OAUTH_ENABLED = true\n",
+            f"TABPY_OAUTH_ISSUER = {ISSUER}\n",
+            f"TABPY_OAUTH_JWKS_URI = {JWKS_URI}\n",
+            f"TABPY_OAUTH_AUDIENCE = {AUDIENCE}\n",
+            "TABPY_OAUTH_ENFORCE_ENDPOINT_SCOPES = true\n",
+            "TABPY_OAUTH_QUERY_SCOPE = tabpy/query\n",
+            "TABPY_OAUTH_EVALUATE_SCOPE = tabpy/evaluate\n",
+            "TABPY_OAUTH_DEPLOY_SCOPE = tabpy/deploy\n",
+        ]
+        super().setUpClass()
+
+    def _bearer(self, scope):
+        token = self._make_token({"scope": scope})
+        return {"Authorization": f"Bearer {token}"}
+
+    def test_configured_query_scope_is_enforced_and_advertised(self):
+        with self._patched_jwks_client():
+            old_scope = self.fetch(
+                "/query/missing",
+                method="POST",
+                body="{}",
+                headers=self._bearer("tabpy:query"),
+            )
+            configured_scope = self.fetch(
+                "/query/missing",
+                method="POST",
+                body="{}",
+                headers=self._bearer("tabpy/query"),
+            )
+            old_evaluate_scope = self.fetch(
+                "/evaluate",
+                method="POST",
+                body=_EVALUATE_SCRIPT,
+                headers=self._bearer("tabpy:evaluate"),
+            )
+            configured_evaluate_scope = self.fetch(
+                "/evaluate",
+                method="POST",
+                body=_EVALUATE_SCRIPT,
+                headers=self._bearer("tabpy/evaluate"),
+            )
+            old_deploy_scope = self.fetch(
+                "/configurations/endpoint_upload_destination",
+                headers=self._bearer("tabpy:deploy"),
+            )
+            configured_deploy_scope = self.fetch(
+                "/configurations/endpoint_upload_destination",
+                headers=self._bearer("tabpy/deploy"),
+            )
+            info = self.fetch("/info", headers=self._bearer("tabpy/query"))
+
+        self.assertEqual(old_scope.code, 403)
+        self.assertNotEqual(configured_scope.code, 401)
+        self.assertNotEqual(configured_scope.code, 403)
+        self.assertEqual(old_evaluate_scope.code, 403)
+        self.assertEqual(configured_evaluate_scope.code, 200)
+        self.assertEqual(old_deploy_scope.code, 403)
+        self.assertEqual(configured_deploy_scope.code, 200)
+        oauth = json.loads(info.body)["versions"]["v1"]["features"][
+            "authentication"
+        ]["methods"]["oauth-jwt"]
+        self.assertEqual(
+            oauth["scopes"], ["tabpy/query", "tabpy/evaluate", "tabpy/deploy"]
+        )
+
+
 class TestEndpointScopesWithGlobalRequired(BaseTestOAuthHandler):
     @classmethod
     def setUpClass(cls):

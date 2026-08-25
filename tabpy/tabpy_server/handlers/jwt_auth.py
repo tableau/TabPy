@@ -372,10 +372,16 @@ _ENDPOINT_SCOPE_RULES = (
     ("/endpoints", _MUTATING_METHODS, SCOPE_DEPLOY),
 )
 
-# Derive advertised scopes from the enforced rules while preserving rule order.
-WELL_KNOWN_ENDPOINT_SCOPES = tuple(
-    dict.fromkeys(scope for _, _, scope in _ENDPOINT_SCOPE_RULES)
-)
+
+def endpoint_scope_names(scope_overrides: dict[str, str] | None = None) -> tuple[str, ...]:
+    """Return endpoint scope names in advertisement order."""
+    overrides = scope_overrides or {}
+    return tuple(
+        dict.fromkeys(
+            overrides.get(default_scope) or default_scope
+            for _, _, default_scope in _ENDPOINT_SCOPE_RULES
+        )
+    )
 
 
 def token_has_scope(claims: dict, scope: str) -> bool:
@@ -387,12 +393,16 @@ def token_has_scope(claims: dict, scope: str) -> bool:
 
 
 def endpoint_scope_for_path(
-    path: str, subdirectory: str = "", method: str = "GET"
+    path: str,
+    subdirectory: str = "",
+    method: str = "GET",
+    scope_overrides: dict[str, str] | None = None,
 ) -> str | None:
     """
     Return the well-known scope required for `path` + HTTP `method`, or None.
 
     `subdirectory` is TabPy's optional URL prefix (e.g. `/tabpy`).
+    `scope_overrides` maps default well-known scopes to configured names.
     OPTIONS is not mapped here; callers skip CORS preflight separately.
     """
     rel = path or "/"
@@ -404,8 +414,9 @@ def endpoint_scope_for_path(
         elif rel.startswith(prefix + "/"):
             rel = rel[len(prefix):]
     verb = (method or "GET").upper()
-    for path_prefix, methods, scope in _ENDPOINT_SCOPE_RULES:
+    overrides = scope_overrides or {}
+    for path_prefix, methods, default_scope in _ENDPOINT_SCOPE_RULES:
         if rel == path_prefix or rel.startswith(path_prefix + "/"):
             if methods is None or verb in methods:
-                return scope
+                return overrides.get(default_scope) or default_scope
     return None
