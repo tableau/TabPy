@@ -331,13 +331,13 @@ TABPY_OAUTH_LOG_USER = true
   deployment with:
 
   ```sh
-  TABPY_OAUTH_REQUIRED_SCOPES = org:finance
+  TABPY_OAUTH_REQUIRED_SCOPES = tabpy,org:finance
   ```
 
-  A token whose `scope` claim is `openid org:finance` would pass the global
-  scope check, while one containing only `openid org:marketing` would be
-  rejected. If multiple scopes are configured, such as
-  `org:finance,tabpy`, the token must contain **all** of them.
+  A token whose `scope` claim is `openid tabpy org:finance` would pass the
+  global scope check, while one containing `openid tabpy org:marketing`
+  would be rejected. When multiple scopes are configured, the token must
+  contain **all** of them.
 - `TABPY_OAUTH_ENFORCE_ENDPOINT_SCOPES` (default `false`) requires
   well-known scopes on specific HTTP paths after the JWT itself is valid:
   `/query` needs `tabpy:query`, `/evaluate` needs `tabpy:evaluate`, and
