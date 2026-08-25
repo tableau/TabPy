@@ -361,9 +361,21 @@ def _check_scopes(claims: dict, required_scopes: str) -> None:
 SCOPE_QUERY = "tabpy:query"
 SCOPE_EVALUATE = "tabpy:evaluate"
 SCOPE_DEPLOY = "tabpy:deploy"
-WELL_KNOWN_ENDPOINT_SCOPES = (SCOPE_QUERY, SCOPE_EVALUATE, SCOPE_DEPLOY)
 
 _MUTATING_METHODS = frozenset({"POST", "PUT", "DELETE", "PATCH"})
+
+# Path rules in advertised-scope order. A None method set applies to every method.
+_ENDPOINT_SCOPE_RULES = (
+    ("/query", None, SCOPE_QUERY),
+    ("/evaluate", None, SCOPE_EVALUATE),
+    ("/configurations/endpoint_upload_destination", None, SCOPE_DEPLOY),
+    ("/endpoints", _MUTATING_METHODS, SCOPE_DEPLOY),
+)
+
+# Derive advertised scopes from the enforced rules while preserving rule order.
+WELL_KNOWN_ENDPOINT_SCOPES = tuple(
+    dict.fromkeys(scope for _, _, scope in _ENDPOINT_SCOPE_RULES)
+)
 
 
 def token_has_scope(claims: dict, scope: str) -> bool:
@@ -392,17 +404,8 @@ def endpoint_scope_for_path(
         elif rel.startswith(prefix + "/"):
             rel = rel[len(prefix):]
     verb = (method or "GET").upper()
-    if rel == "/evaluate" or rel.startswith("/evaluate/"):
-        return SCOPE_EVALUATE
-    if rel == "/query" or rel.startswith("/query/"):
-        return SCOPE_QUERY
-    if (
-        rel == "/configurations/endpoint_upload_destination"
-        or rel.startswith("/configurations/endpoint_upload_destination/")
-    ):
-        return SCOPE_DEPLOY
-    if rel == "/endpoints" or rel.startswith("/endpoints/"):
-        if verb in _MUTATING_METHODS:
-            return SCOPE_DEPLOY
-        return None
+    for path_prefix, methods, scope in _ENDPOINT_SCOPE_RULES:
+        if rel == path_prefix or rel.startswith(path_prefix + "/"):
+            if methods is None or verb in methods:
+                return scope
     return None
