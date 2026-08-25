@@ -564,8 +564,7 @@ class TestConfiguredEndpointScopes(BaseTestOAuthHandler):
             info = self.fetch("/info", headers=self._bearer("tabpy/query"))
 
         self.assertEqual(old_scope.code, 403)
-        self.assertNotEqual(configured_scope.code, 401)
-        self.assertNotEqual(configured_scope.code, 403)
+        self.assertEqual(configured_scope.code, 400)
         self.assertEqual(old_evaluate_scope.code, 403)
         self.assertEqual(configured_evaluate_scope.code, 200)
         self.assertEqual(old_deploy_scope.code, 403)
