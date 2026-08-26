@@ -157,7 +157,9 @@ class TestOAuthOnlyHandler(BaseTestOAuthHandler):
             response = self.fetch("/info", headers=headers)
         body = json.loads(response.body)
         features = body["versions"]["v1"]["features"]
-        self.assertIn("oauth-jwt", features["authentication"]["methods"])
+        oauth = features["authentication"]["methods"]["oauth-jwt"]
+        self.assertEqual(oauth["scopes"], ["tabpy:query", "tabpy:evaluate", "tabpy:deploy"])
+        self.assertFalse(oauth["endpoint_scopes_enforced"])
 
     def test_malformed_bearer_header_is_rejected_without_logging_the_token(self):
         """
@@ -302,6 +304,346 @@ class TestOAuthLogUserDefault(BaseTestOAuthHandler):
         self.assertEqual(response.code, 200)
         logged_text = " ".join(log_ctx.output)
         self.assertNotIn("should-not-be-logged", logged_text)
+
+
+_EVALUATE_SCRIPT = (
+    '{"data":{"_arg1":[2,3],"_arg2":[3,-1]},'
+    '"script":"res=[]\\nfor i in range(len(_arg1)):\\n  '
+    'res.append(_arg1[i] * _arg2[i])\\nreturn res"}'
+)
+
+
+class TestEndpointScopesDefaultOff(BaseTestOAuthHandler):
+    @classmethod
+    def setUpClass(cls):
+        cls.prefix = "__TestEndpointScopesDefaultOff_"
+        cls.tabpy_config = [
+            "TABPY_OAUTH_ENABLED = true\n",
+            f"TABPY_OAUTH_ISSUER = {ISSUER}\n",
+            f"TABPY_OAUTH_JWKS_URI = {JWKS_URI}\n",
+            f"TABPY_OAUTH_AUDIENCE = {AUDIENCE}\n",
+        ]
+        super().setUpClass()
+
+    def test_query_without_scope_claim_is_not_forbidden(self):
+        token = self._make_token()
+        headers = {"Authorization": f"Bearer {token}"}
+        with self._patched_jwks_client():
+            response = self.fetch("/query/missing", headers=headers)
+        self.assertNotEqual(response.code, 403)
+        self.assertNotEqual(response.code, 401)
+
+    def test_evaluate_without_scope_claim_is_accepted(self):
+        token = self._make_token()
+        headers = {"Authorization": f"Bearer {token}"}
+        with self._patched_jwks_client():
+            response = self.fetch(
+                "/evaluate", method="POST", body=_EVALUATE_SCRIPT, headers=headers
+            )
+        self.assertEqual(response.code, 200)
+
+
+class TestEndpointScopesEnforced(BaseTestOAuthHandler):
+    @classmethod
+    def setUpClass(cls):
+        cls.prefix = "__TestEndpointScopesEnforced_"
+        cls.tabpy_config = [
+            "TABPY_OAUTH_ENABLED = true\n",
+            f"TABPY_OAUTH_ISSUER = {ISSUER}\n",
+            f"TABPY_OAUTH_JWKS_URI = {JWKS_URI}\n",
+            f"TABPY_OAUTH_AUDIENCE = {AUDIENCE}\n",
+            "TABPY_OAUTH_ENFORCE_ENDPOINT_SCOPES = true\n",
+        ]
+        super().setUpClass()
+
+    def _bearer(self, claims_override=None):
+        token = self._make_token(claims_override)
+        return {"Authorization": f"Bearer {token}"}
+
+    def test_query_without_tabpy_query_returns_403(self):
+        headers = self._bearer({"scope": "tabpy:evaluate"})
+        with self._patched_jwks_client():
+            response = self.fetch(
+                "/query/missing", method="POST", body="{}", headers=headers
+            )
+        self.assertEqual(response.code, 403)
+        self.assertIn(
+            'error="insufficient_scope"', response.headers.get("WWW-Authenticate", "")
+        )
+
+    def test_query_with_tabpy_query_is_authorized(self):
+        headers = self._bearer({"scope": "tabpy:query"})
+        with self._patched_jwks_client():
+            response = self.fetch(
+                "/query/missing", method="POST", body="{}", headers=headers
+            )
+        self.assertNotEqual(response.code, 401)
+        self.assertNotEqual(response.code, 403)
+
+    def test_evaluate_without_tabpy_evaluate_returns_403(self):
+        headers = self._bearer({"scope": "tabpy:query"})
+        with self._patched_jwks_client():
+            response = self.fetch(
+                "/evaluate", method="POST", body=_EVALUATE_SCRIPT, headers=headers
+            )
+        self.assertEqual(response.code, 403)
+        self.assertIn(
+            'error="insufficient_scope"', response.headers.get("WWW-Authenticate", "")
+        )
+
+    def test_evaluate_with_tabpy_evaluate_is_accepted(self):
+        headers = self._bearer({"scope": "tabpy:evaluate"})
+        with self._patched_jwks_client():
+            response = self.fetch(
+                "/evaluate", method="POST", body=_EVALUATE_SCRIPT, headers=headers
+            )
+        self.assertEqual(response.code, 200)
+
+    def test_get_endpoints_is_not_gated(self):
+        headers = self._bearer()
+        with self._patched_jwks_client():
+            info = self.fetch("/info", headers=headers)
+            status = self.fetch("/status", headers=headers)
+            endpoints = self.fetch("/endpoints", headers=headers)
+        self.assertEqual(info.code, 200)
+        self.assertEqual(status.code, 200)
+        self.assertEqual(endpoints.code, 200)
+        oauth = json.loads(info.body)["versions"]["v1"]["features"][
+            "authentication"
+        ]["methods"]["oauth-jwt"]
+        self.assertTrue(oauth["endpoint_scopes_enforced"])
+        self.assertEqual(
+            oauth["scopes"], ["tabpy:query", "tabpy:evaluate", "tabpy:deploy"]
+        )
+
+    def _assert_management_forbidden(self, headers, method, url, **kwargs):
+        with self._patched_jwks_client():
+            response = self.fetch(url, method=method, headers=headers, **kwargs)
+        self.assertEqual(response.code, 403)
+        self.assertIn(
+            'error="insufficient_scope"', response.headers.get("WWW-Authenticate", "")
+        )
+
+    def test_query_only_token_cannot_mutate_endpoints(self):
+        headers = self._bearer({"scope": "tabpy:query"})
+        self._assert_management_forbidden(
+            headers, "POST", "/endpoints", body="{}"
+        )
+        self._assert_management_forbidden(
+            headers, "PUT", "/endpoints/production-model", body="{}"
+        )
+        self._assert_management_forbidden(
+            headers,
+            "DELETE",
+            "/endpoints/production-model",
+            allow_nonstandard_methods=True,
+        )
+        self._assert_management_forbidden(
+            headers, "GET", "/configurations/endpoint_upload_destination"
+        )
+
+    def test_evaluate_only_token_cannot_mutate_endpoints(self):
+        headers = self._bearer({"scope": "tabpy:evaluate"})
+        self._assert_management_forbidden(
+            headers, "POST", "/endpoints", body="{}"
+        )
+        self._assert_management_forbidden(
+            headers, "DELETE", "/endpoints/production-model",
+            allow_nonstandard_methods=True,
+        )
+
+    def test_scopeless_token_cannot_mutate_endpoints(self):
+        headers = self._bearer()
+        self._assert_management_forbidden(
+            headers, "POST", "/endpoints", body="{}"
+        )
+        self._assert_management_forbidden(
+            headers, "PUT", "/endpoints/production-model", body="{}"
+        )
+        self._assert_management_forbidden(
+            headers,
+            "DELETE",
+            "/endpoints/production-model",
+            allow_nonstandard_methods=True,
+        )
+
+    def test_deploy_scope_is_authorized_for_management(self):
+        headers = self._bearer({"scope": "tabpy:deploy"})
+        with self._patched_jwks_client():
+            upload = self.fetch(
+                "/configurations/endpoint_upload_destination", headers=headers
+            )
+            create = self.fetch("/endpoints", method="POST", body="{}", headers=headers)
+            delete = self.fetch(
+                "/endpoints/production-model",
+                method="DELETE",
+                headers=headers,
+                allow_nonstandard_methods=True,
+            )
+        self.assertEqual(upload.code, 200)
+        self.assertNotEqual(create.code, 401)
+        self.assertNotEqual(create.code, 403)
+        self.assertNotEqual(delete.code, 401)
+        self.assertNotEqual(delete.code, 403)
+
+    def test_evaluate_only_token_fails_inner_query(self):
+        """RestrictedTabPy forwards the original JWT to nested /query."""
+        headers = self._bearer({"scope": "tabpy:evaluate"})
+        with self._patched_jwks_client():
+            response = self.fetch(
+                "/query/missing", method="POST", body="{}", headers=headers
+            )
+        self.assertEqual(response.code, 403)
+
+    def test_query_options_does_not_require_endpoint_scope(self):
+        headers = self._bearer({"scope": "tabpy:evaluate"})
+        with self._patched_jwks_client():
+            response = self.fetch(
+                "/query/missing",
+                method="OPTIONS",
+                headers=headers,
+                allow_nonstandard_methods=True,
+            )
+        self.assertNotEqual(response.code, 403)
+
+
+class TestConfiguredEndpointScopes(BaseTestOAuthHandler):
+    @classmethod
+    def setUpClass(cls):
+        cls.prefix = "__TestConfiguredEndpointScopes_"
+        cls.tabpy_config = [
+            "TABPY_OAUTH_ENABLED = true\n",
+            f"TABPY_OAUTH_ISSUER = {ISSUER}\n",
+            f"TABPY_OAUTH_JWKS_URI = {JWKS_URI}\n",
+            f"TABPY_OAUTH_AUDIENCE = {AUDIENCE}\n",
+            "TABPY_OAUTH_ENFORCE_ENDPOINT_SCOPES = true\n",
+            "TABPY_OAUTH_QUERY_SCOPE = tabpy/query\n",
+            "TABPY_OAUTH_EVALUATE_SCOPE = tabpy/evaluate\n",
+            "TABPY_OAUTH_DEPLOY_SCOPE = tabpy/deploy\n",
+        ]
+        super().setUpClass()
+
+    def _bearer(self, scope):
+        token = self._make_token({"scope": scope})
+        return {"Authorization": f"Bearer {token}"}
+
+    def test_configured_query_scope_is_enforced_and_advertised(self):
+        with self._patched_jwks_client():
+            old_scope = self.fetch(
+                "/query/missing",
+                method="POST",
+                body="{}",
+                headers=self._bearer("tabpy:query"),
+            )
+            configured_scope = self.fetch(
+                "/query/missing",
+                method="POST",
+                body="{}",
+                headers=self._bearer("tabpy/query"),
+            )
+            old_evaluate_scope = self.fetch(
+                "/evaluate",
+                method="POST",
+                body=_EVALUATE_SCRIPT,
+                headers=self._bearer("tabpy:evaluate"),
+            )
+            configured_evaluate_scope = self.fetch(
+                "/evaluate",
+                method="POST",
+                body=_EVALUATE_SCRIPT,
+                headers=self._bearer("tabpy/evaluate"),
+            )
+            old_deploy_scope = self.fetch(
+                "/configurations/endpoint_upload_destination",
+                headers=self._bearer("tabpy:deploy"),
+            )
+            configured_deploy_scope = self.fetch(
+                "/configurations/endpoint_upload_destination",
+                headers=self._bearer("tabpy/deploy"),
+            )
+            info = self.fetch("/info", headers=self._bearer("tabpy/query"))
+
+        self.assertEqual(old_scope.code, 403)
+        self.assertEqual(configured_scope.code, 400)
+        self.assertEqual(old_evaluate_scope.code, 403)
+        self.assertEqual(configured_evaluate_scope.code, 200)
+        self.assertEqual(old_deploy_scope.code, 403)
+        self.assertEqual(configured_deploy_scope.code, 200)
+        oauth = json.loads(info.body)["versions"]["v1"]["features"][
+            "authentication"
+        ]["methods"]["oauth-jwt"]
+        self.assertEqual(
+            oauth["scopes"], ["tabpy/query", "tabpy/evaluate", "tabpy/deploy"]
+        )
+
+
+class TestEndpointScopesWithGlobalRequired(BaseTestOAuthHandler):
+    @classmethod
+    def setUpClass(cls):
+        cls.prefix = "__TestEndpointScopesWithGlobalRequired_"
+        cls.tabpy_config = [
+            "TABPY_OAUTH_ENABLED = true\n",
+            f"TABPY_OAUTH_ISSUER = {ISSUER}\n",
+            f"TABPY_OAUTH_JWKS_URI = {JWKS_URI}\n",
+            f"TABPY_OAUTH_AUDIENCE = {AUDIENCE}\n",
+            "TABPY_OAUTH_REQUIRED_SCOPES = tabpy\n",
+            "TABPY_OAUTH_ENFORCE_ENDPOINT_SCOPES = true\n",
+        ]
+        super().setUpClass()
+
+    def test_missing_global_scope_is_401_on_info(self):
+        token = self._make_token({"scope": "tabpy:query"})
+        headers = {"Authorization": f"Bearer {token}"}
+        with self._patched_jwks_client():
+            response = self.fetch("/info", headers=headers)
+        self.assertEqual(response.code, 401)
+
+    def test_global_scope_without_query_scope_forbids_query_only(self):
+        token = self._make_token({"scope": "tabpy"})
+        headers = {"Authorization": f"Bearer {token}"}
+        with self._patched_jwks_client():
+            info = self.fetch("/info", headers=headers)
+            query = self.fetch(
+                "/query/missing", method="POST", body="{}", headers=headers
+            )
+        self.assertEqual(info.code, 200)
+        self.assertEqual(query.code, 403)
+
+
+class TestEndpointScopesBasicAuthUnaffected(BaseTestOAuthHandler):
+    @classmethod
+    def setUpClass(cls):
+        cls.prefix = "__TestEndpointScopesBasicAuthUnaffected_"
+        cls.tabpy_config = [
+            "TABPY_PWD_FILE = ./tests/integration/resources/pwdfile.txt\n",
+            "TABPY_OAUTH_ENABLED = true\n",
+            f"TABPY_OAUTH_ISSUER = {ISSUER}\n",
+            f"TABPY_OAUTH_JWKS_URI = {JWKS_URI}\n",
+            f"TABPY_OAUTH_AUDIENCE = {AUDIENCE}\n",
+            "TABPY_OAUTH_ENFORCE_ENDPOINT_SCOPES = true\n",
+        ]
+        super().setUpClass()
+
+    def test_basic_auth_evaluate_still_works(self):
+        headers = {
+            "Authorization": "Basic "
+            + base64.b64encode(b"user1:P@ssw0rd").decode("utf-8"),
+        }
+        response = self.fetch(
+            "/evaluate", method="POST", body=_EVALUATE_SCRIPT, headers=headers
+        )
+        self.assertEqual(response.code, 200)
+
+    def test_basic_auth_query_is_not_forbidden(self):
+        headers = {
+            "Authorization": "Basic "
+            + base64.b64encode(b"user1:P@ssw0rd").decode("utf-8"),
+        }
+        response = self.fetch(
+            "/query/missing", method="POST", body="{}", headers=headers
+        )
+        self.assertNotEqual(response.code, 403)
+        self.assertNotEqual(response.code, 401)
 
 
 if __name__ == "__main__":

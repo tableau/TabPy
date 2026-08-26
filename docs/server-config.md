@@ -14,6 +14,9 @@
   * [Adding an Account](#adding-an-account)
   * [Updating an Account](#updating-an-account)
   * [Deleting an Account](#deleting-an-account)
+  * [OAuth / JWT Bearer Token Authentication](#oauth--jwt-bearer-token-authentication)
+  * [Endpoint Security](#endpoint-security)
+- [Arrow Flight](#arrow-flight)
 - [Logging](#logging)
   * [Request Context Logging](#request-context-logging)
 
@@ -73,6 +76,8 @@ at [`logging.config` documentation page](https://docs.python.org/3.6/library/log
   section. Default value - not set.
 - `TABPY_OAUTH_ENABLED`, `TABPY_OAUTH_ISSUER`, `TABPY_OAUTH_JWKS_URI`,
   `TABPY_OAUTH_AUDIENCE`, `TABPY_OAUTH_REQUIRED_SCOPES`,
+  `TABPY_OAUTH_ENFORCE_ENDPOINT_SCOPES`, `TABPY_OAUTH_QUERY_SCOPE`,
+  `TABPY_OAUTH_EVALUATE_SCOPE`, `TABPY_OAUTH_DEPLOY_SCOPE`,
   `TABPY_OAUTH_LOG_USER` - configure OAuth/JWT Bearer token authentication.
   See [OAuth / JWT Bearer Token Authentication](#oauth--jwt-bearer-token-authentication).
 - `TABPY_TRANSFER_PROTOCOL` - transfer protocol. Default value - `http`. If
@@ -307,16 +312,70 @@ service (e.g. a cloud metadata endpoint).
   the signing keys used to verify JWT signatures.
 - `TABPY_OAUTH_AUDIENCE` is the expected `aud` claim on incoming JWTs.
 
-Two additional parameters are optional:
+Six additional parameters are optional:
 
 ```sh
-TABPY_OAUTH_REQUIRED_SCOPES = tabpy:query,tabpy:evaluate
+TABPY_OAUTH_REQUIRED_SCOPES = tabpy
+TABPY_OAUTH_ENFORCE_ENDPOINT_SCOPES = true
+TABPY_OAUTH_QUERY_SCOPE = tabpy:query
+TABPY_OAUTH_EVALUATE_SCOPE = tabpy:evaluate
+TABPY_OAUTH_DEPLOY_SCOPE = tabpy:deploy
 TABPY_OAUTH_LOG_USER = true
 ```
 
 - `TABPY_OAUTH_REQUIRED_SCOPES` is a comma-separated list of scopes that
-  must all be present in the JWT's `scope` claim for the request to be
-  accepted. If unset, no scope check is performed.
+  must all be present in the JWT's `scope` claim on **every** request,
+  including `/info`. If unset, no global scope check is performed. A
+  missing global scope is rejected with HTTP 401 (Flight:
+  `UNAUTHENTICATED`). Do not put the configured endpoint scope names here
+  if you want them bound only to their specific paths; use
+  `TABPY_OAUTH_ENFORCE_ENDPOINT_SCOPES` for that.
+
+  Scope names are IdP-defined and compared exactly. For example, Amazon
+  Cognito custom scopes use
+  `<resource-server-identifier>/<scope-name>`. A Cognito resource server
+  named `tabpy` with `access` and `finance` scopes could restrict a finance
+  team's TabPy deployment with:
+
+  ```sh
+  TABPY_OAUTH_REQUIRED_SCOPES = tabpy/access,tabpy/finance
+  ```
+
+  A token whose `scope` claim is `openid tabpy/access tabpy/finance` would
+  pass the global scope check, while one containing
+  `openid tabpy/access tabpy/marketing` would be rejected. When multiple
+  scopes are configured, the token must contain **all** of them.
+- `TABPY_OAUTH_ENFORCE_ENDPOINT_SCOPES` (default `false`) requires
+  scopes on specific HTTP paths after the JWT itself is valid: by default,
+  `/query` needs `tabpy:query`, `/evaluate` needs `tabpy:evaluate`, and
+  mutating management operations need `tabpy:deploy` (`POST /endpoints`,
+  `PUT`/`DELETE /endpoints/{name}`, and
+  `GET /configurations/endpoint_upload_destination`). Insufficient
+  endpoint scope is rejected with HTTP 403 and
+  `WWW-Authenticate: Bearer error="insufficient_scope"`. `/info`,
+  `/status`, and `GET /endpoints` are not gated by those scopes. A
+  `SCRIPT_*` that calls `tabpy.query()` from `/evaluate` needs **both**
+  `tabpy:evaluate` and `tabpy:query`, because the nested `/query` call
+  forwards the original token. Arrow Flight is not per-endpoint scoped;
+  it still uses only `TABPY_OAUTH_REQUIRED_SCOPES`. Basic Auth is
+  unaffected.
+- `TABPY_OAUTH_QUERY_SCOPE`, `TABPY_OAUTH_EVALUATE_SCOPE`, and
+  `TABPY_OAUTH_DEPLOY_SCOPE` configure the exact scope names used by
+  endpoint enforcement and advertised by `/info`. Their defaults are
+  `tabpy:query`, `tabpy:evaluate`, and `tabpy:deploy`. For an Amazon Cognito
+  resource server with identifier `tabpy`, configure its slash-form custom
+  scopes with:
+
+  ```sh
+  TABPY_OAUTH_QUERY_SCOPE = tabpy/query
+  TABPY_OAUTH_EVALUATE_SCOPE = tabpy/evaluate
+  TABPY_OAUTH_DEPLOY_SCOPE = tabpy/deploy
+  ```
+
+  Each configured value must be a valid, non-empty OAuth scope token.
+  Assigning the same value to multiple endpoint groups gives a token with
+  that scope access to all of those groups; TabPy logs a warning when it
+  detects this configuration.
 - `TABPY_OAUTH_LOG_USER` (default `false`) sets the JWT's `sub` claim as the
   authenticated user for logging purposes. The `sub` claim is often a
   user's email or SSO ID, so leave this disabled unless that's an
@@ -324,6 +383,12 @@ TABPY_OAUTH_LOG_USER = true
   effect unless [`TABPY_LOG_DETAILS`](#request-context-logging) is also
   enabled -- that's what actually logs the authenticated user, for both
   basic auth and OAuth.
+
+When OAuth is enabled, `/info` advertises the configured endpoint scopes
+(by default, `tabpy:query`, `tabpy:evaluate`, and `tabpy:deploy`) under
+`versions.v1.features.authentication.methods.oauth-jwt`
+so an IdP or Tableau connection can request those scopes even when
+endpoint enforcement is off.
 
 To authenticate a request, send the JWT as a Bearer token:
 

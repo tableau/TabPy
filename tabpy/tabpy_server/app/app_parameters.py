@@ -28,6 +28,10 @@ class ConfigParameters:
     TABPY_OAUTH_JWKS_URI = "TABPY_OAUTH_JWKS_URI"
     TABPY_OAUTH_AUDIENCE = "TABPY_OAUTH_AUDIENCE"
     TABPY_OAUTH_REQUIRED_SCOPES = "TABPY_OAUTH_REQUIRED_SCOPES"
+    TABPY_OAUTH_ENFORCE_ENDPOINT_SCOPES = "TABPY_OAUTH_ENFORCE_ENDPOINT_SCOPES"
+    TABPY_OAUTH_QUERY_SCOPE = "TABPY_OAUTH_QUERY_SCOPE"
+    TABPY_OAUTH_EVALUATE_SCOPE = "TABPY_OAUTH_EVALUATE_SCOPE"
+    TABPY_OAUTH_DEPLOY_SCOPE = "TABPY_OAUTH_DEPLOY_SCOPE"
     TABPY_OAUTH_LOG_USER = "TABPY_OAUTH_LOG_USER"
 
 
@@ -62,4 +66,9 @@ class SettingsParameters:
     OAuthJwksUri = "oauth_jwks_uri"
     OAuthAudience = "oauth_audience"
     OAuthRequiredScopes = "oauth_required_scopes"
+    OAuthEnforceEndpointScopes = "oauth_enforce_endpoint_scopes"
+    OAuthQueryScope = "oauth_query_scope"
+    OAuthEvaluateScope = "oauth_evaluate_scope"
+    OAuthDeployScope = "oauth_deploy_scope"
+    OAuthEndpointScopes = "oauth_endpoint_scopes"
     OAuthLogUser = "oauth_log_user"

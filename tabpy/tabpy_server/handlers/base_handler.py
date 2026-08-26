@@ -5,7 +5,12 @@ import json
 import logging
 import tornado.web
 from tabpy.tabpy_server.app.app_parameters import SettingsParameters
-from tabpy.tabpy_server.handlers.jwt_auth import JwtValidationError, validate_jwt
+from tabpy.tabpy_server.handlers.jwt_auth import (
+    JwtValidationError,
+    endpoint_scope_for_path,
+    token_has_scope,
+    validate_jwt,
+)
 from tabpy.tabpy_server.handlers.util import hash_password
 from tabpy.tabpy_server.handlers.util import AuthErrorStates
 import uuid
@@ -139,9 +144,11 @@ class BaseHandler(tornado.web.RequestHandler):
         self.username = None
         self.password = None
         self.jwt_token = None
+        self.jwt_claims = None
         self.auth_method = None
         self.eval_timeout = self.settings[SettingsParameters.EvaluateTimeout]
         self.max_request_size = app.max_request_size
+        self.subdirectory = getattr(app, "subdirectory", "") or ""
 
         self.logger = ContextLoggerWrapper(self.request)
         self.logger.enable_context_logging(
@@ -434,6 +441,8 @@ class BaseHandler(tornado.web.RequestHandler):
             self.logger.log(logging.ERROR, str(ex))
             return False
 
+        self.jwt_claims = claims
+
         if self.settings.get(SettingsParameters.OAuthLogUser, False):
             subject = claims.get("sub")
             if subject:
@@ -511,7 +520,33 @@ class BaseHandler(tornado.web.RequestHandler):
         if not self._validate_credentials(method):
             return AuthErrorStates.NotAuthorized
 
+        if method == "oauth-jwt":
+            scope_error = self._endpoint_scope_error()
+            if scope_error is not None:
+                return scope_error
+
         return AuthErrorStates.NONE
+
+    def _endpoint_scope_error(self):
+        """
+        After a valid JWT, optionally require well-known endpoint scopes
+        on the matching HTTP path and method. Returns InsufficientScope or None.
+        """
+        if not self.settings.get(SettingsParameters.OAuthEnforceEndpointScopes, False):
+            return None
+        if self.request.method == "OPTIONS":
+            return None
+        required = endpoint_scope_for_path(
+            self.request.path,
+            self.subdirectory,
+            self.request.method,
+            self.settings.get(SettingsParameters.OAuthEndpointScopes),
+        )
+        if not required:
+            return None
+        if token_has_scope(self.jwt_claims or {}, required):
+            return None
+        return AuthErrorStates.InsufficientScope
 
     def should_fail_with_auth_error(self):
         """
@@ -557,6 +592,19 @@ class BaseHandler(tornado.web.RequestHandler):
                 401,
                 info="Unauthorized request.",
                 log_message="Invalid credentials provided.",
+            )
+        elif self.auth_error == AuthErrorStates.InsufficientScope:
+            self.logger.log(logging.ERROR, "Failing with 403 for insufficient scope")
+            self.set_status(403)
+            self.set_header(
+                "WWW-Authenticate",
+                f'{scheme} realm="{self.tabpy_state.name}", '
+                'error="insufficient_scope"',
+            )
+            self.error_out(
+                403,
+                info="Forbidden request.",
+                log_message="Token is missing a required endpoint scope.",
             )
         else:
             self.logger.log(logging.ERROR, "Failing with 406 for Not Acceptable")

@@ -354,3 +354,69 @@ def _check_scopes(claims: dict, required_scopes: str) -> None:
     ]
     if missing:
         raise JwtValidationError(f"JWT missing required scope(s): {', '.join(missing)}")
+
+
+# Well-known endpoint scopes. Bound to HTTP paths when
+# TABPY_OAUTH_ENFORCE_ENDPOINT_SCOPES is true. Not admin-defined.
+SCOPE_QUERY = "tabpy:query"
+SCOPE_EVALUATE = "tabpy:evaluate"
+SCOPE_DEPLOY = "tabpy:deploy"
+
+_MUTATING_METHODS = frozenset({"POST", "PUT", "DELETE", "PATCH"})
+
+# Path rules in advertised-scope order. A None method set applies to every method.
+_ENDPOINT_SCOPE_RULES = (
+    ("/query", None, SCOPE_QUERY),
+    ("/evaluate", None, SCOPE_EVALUATE),
+    ("/configurations/endpoint_upload_destination", None, SCOPE_DEPLOY),
+    ("/endpoints", _MUTATING_METHODS, SCOPE_DEPLOY),
+)
+
+
+def endpoint_scope_names(scope_overrides: dict[str, str] | None = None) -> tuple[str, ...]:
+    """Return endpoint scope names in advertisement order."""
+    overrides = scope_overrides or {}
+    return tuple(
+        dict.fromkeys(
+            overrides.get(default_scope) or default_scope
+            for _, _, default_scope in _ENDPOINT_SCOPE_RULES
+        )
+    )
+
+
+def token_has_scope(claims: dict, scope: str) -> bool:
+    """True if `scope` is present in the token's space-separated `scope` claim."""
+    granted = claims.get("scope", "")
+    if not isinstance(granted, str):
+        return False
+    return scope in granted.split()
+
+
+def endpoint_scope_for_path(
+    path: str,
+    subdirectory: str = "",
+    method: str = "GET",
+    scope_overrides: dict[str, str] | None = None,
+) -> str | None:
+    """
+    Return the well-known scope required for `path` + HTTP `method`, or None.
+
+    `subdirectory` is TabPy's optional URL prefix (e.g. `/tabpy`).
+    `scope_overrides` maps default well-known scopes to configured names.
+    OPTIONS is not mapped here; callers skip CORS preflight separately.
+    """
+    rel = path or "/"
+    if subdirectory:
+        prefix = subdirectory if subdirectory.startswith("/") else f"/{subdirectory}"
+        prefix = prefix.rstrip("/")
+        if rel == prefix:
+            rel = "/"
+        elif rel.startswith(prefix + "/"):
+            rel = rel[len(prefix):]
+    verb = (method or "GET").upper()
+    overrides = scope_overrides or {}
+    for path_prefix, methods, default_scope in _ENDPOINT_SCOPE_RULES:
+        if rel == path_prefix or rel.startswith(path_prefix + "/"):
+            if methods is None or verb in methods:
+                return overrides.get(default_scope) or default_scope
+    return None

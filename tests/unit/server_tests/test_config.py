@@ -446,6 +446,97 @@ class TestOAuthConfigValidation(unittest.TestCase):
         self.assertTrue(app.settings["oauth_enabled"])
         methods = app._get_features()["authentication"]["methods"]
         self.assertIn("oauth-jwt", methods)
+        oauth = methods["oauth-jwt"]
+        self.assertEqual(oauth["scopes"], ["tabpy:query", "tabpy:evaluate", "tabpy:deploy"])
+        self.assertFalse(oauth["endpoint_scopes_enforced"])
+        self.assertFalse(app.settings["oauth_enforce_endpoint_scopes"])
+
+    @patch(
+        "tabpy.tabpy_server.app.app.socket.getaddrinfo",
+        return_value=PUBLIC_JWKS_ADDRINFO,
+    )
+    def test_oauth_enforce_endpoint_scopes_can_be_enabled(self, mock_getaddrinfo):
+        self.fp.write(
+            "[TabPy]\n"
+            "TABPY_OAUTH_ENABLED = true\n"
+            "TABPY_OAUTH_ISSUER = https://idp.example.com/\n"
+            "TABPY_OAUTH_JWKS_URI = https://idp.example.com/.well-known/jwks.json\n"
+            "TABPY_OAUTH_AUDIENCE = tabpy\n"
+            "TABPY_OAUTH_ENFORCE_ENDPOINT_SCOPES = true\n"
+        )
+        self.fp.close()
+
+        app = TabPyApp(self.fp.name)
+        self.assertTrue(app.settings["oauth_enforce_endpoint_scopes"])
+        oauth = app._get_features()["authentication"]["methods"]["oauth-jwt"]
+        self.assertTrue(oauth["endpoint_scopes_enforced"])
+        self.assertEqual(oauth["scopes"], ["tabpy:query", "tabpy:evaluate", "tabpy:deploy"])
+
+    @patch(
+        "tabpy.tabpy_server.app.app.socket.getaddrinfo",
+        return_value=PUBLIC_JWKS_ADDRINFO,
+    )
+    def test_oauth_endpoint_scope_names_can_be_configured(self, mock_getaddrinfo):
+        self.fp.write(
+            "[TabPy]\n"
+            "TABPY_OAUTH_ENABLED = true\n"
+            "TABPY_OAUTH_ISSUER = https://idp.example.com/\n"
+            "TABPY_OAUTH_JWKS_URI = https://idp.example.com/.well-known/jwks.json\n"
+            "TABPY_OAUTH_AUDIENCE = tabpy\n"
+            "TABPY_OAUTH_QUERY_SCOPE = tabpy/query\n"
+            "TABPY_OAUTH_EVALUATE_SCOPE = tabpy/evaluate\n"
+            "TABPY_OAUTH_DEPLOY_SCOPE = tabpy/deploy\n"
+        )
+        self.fp.close()
+
+        app = TabPyApp(self.fp.name)
+        oauth = app._get_features()["authentication"]["methods"]["oauth-jwt"]
+        self.assertEqual(
+            oauth["scopes"], ["tabpy/query", "tabpy/evaluate", "tabpy/deploy"]
+        )
+
+    @patch(
+        "tabpy.tabpy_server.app.app.socket.getaddrinfo",
+        return_value=PUBLIC_JWKS_ADDRINFO,
+    )
+    def test_oauth_endpoint_scope_names_reject_whitespace(self, mock_getaddrinfo):
+        self.fp.write(
+            "[TabPy]\n"
+            "TABPY_OAUTH_ENABLED = true\n"
+            "TABPY_OAUTH_ISSUER = https://idp.example.com/\n"
+            "TABPY_OAUTH_JWKS_URI = https://idp.example.com/.well-known/jwks.json\n"
+            "TABPY_OAUTH_AUDIENCE = tabpy\n"
+            "TABPY_OAUTH_QUERY_SCOPE = tabpy query\n"
+        )
+        self.fp.close()
+
+        with self.assertRaises(RuntimeError) as err:
+            TabPyApp(self.fp.name)
+        self.assertIn("TABPY_OAUTH_QUERY_SCOPE", err.exception.args[0])
+
+    @patch(
+        "tabpy.tabpy_server.app.app.socket.getaddrinfo",
+        return_value=PUBLIC_JWKS_ADDRINFO,
+    )
+    def test_oauth_duplicate_endpoint_scope_names_log_the_keys(self, mock_getaddrinfo):
+        self.fp.write(
+            "[TabPy]\n"
+            "TABPY_OAUTH_ENABLED = true\n"
+            "TABPY_OAUTH_ISSUER = https://idp.example.com/\n"
+            "TABPY_OAUTH_JWKS_URI = https://idp.example.com/.well-known/jwks.json\n"
+            "TABPY_OAUTH_AUDIENCE = tabpy\n"
+            "TABPY_OAUTH_QUERY_SCOPE = tabpy/access\n"
+            "TABPY_OAUTH_EVALUATE_SCOPE = tabpy/evaluate\n"
+            "TABPY_OAUTH_DEPLOY_SCOPE = tabpy/access\n"
+        )
+        self.fp.close()
+
+        with self.assertLogs("tabpy.tabpy_server.app.app", level="WARNING") as log_ctx:
+            TabPyApp(self.fp.name)
+        logged = " ".join(log_ctx.output)
+        self.assertIn("TABPY_OAUTH_QUERY_SCOPE=tabpy/access", logged)
+        self.assertIn("TABPY_OAUTH_DEPLOY_SCOPE=tabpy/access", logged)
+        self.assertNotIn("TABPY_OAUTH_EVALUATE_SCOPE=tabpy/evaluate", logged)
 
     def test_oauth_enabled_missing_issuer_raises(self):
         self.fp.write(
