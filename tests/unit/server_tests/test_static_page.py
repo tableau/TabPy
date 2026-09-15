@@ -1,5 +1,8 @@
+import base64
+import hashlib
 import json
 import os
+import re
 import tempfile
 
 from tabpy.tabpy_server.app.app import TabPyApp
@@ -69,7 +72,18 @@ class TestStaticPageWithSubdirectory(AsyncHTTPTestCase):
         self.assertIn(b"Content-Security-Policy", page)
         self.assertIn(b"default-src 'self'", page)
         self.assertIn(b"sha256-", page)
-        self.assertIn(
+        favicon_match = re.search(
+            rb'href="data:image/x-icon;base64,([^"]+)"',
+            page,
+        )
+        self.assertIsNotNone(favicon_match)
+        favicon = base64.b64decode(favicon_match.group(1))
+        self.assertEqual(10134, len(favicon))
+        self.assertEqual(
+            "26e7546a015a3299fb76d46030ee9202f6f428ba3505d25734858a279c3b2c54",
+            hashlib.sha256(favicon).hexdigest(),
+        )
+        self.assertNotIn(
             b"https://www.tableau.com/themes/custom/tableau_www/favicon.ico",
             page,
         )
