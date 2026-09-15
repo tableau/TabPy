@@ -1,71 +1,946 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<!doctype html>
 <html lang="en">
 <head>
-
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-
-<meta http-equiv="Content-Style-Type" content="text/css">
-
-<title>Tableau Python Server</title>
-
-<style type="text/css">
-body {
-  background: url("tableau.png") no-repeat center;
-  font-family: Merriweather,serif;
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-Mcz0L8kgLz3YJP12aklhrxzAmE985uS2A8GJteT76UE='; style-src 'sha256-ttIZSTlQQUo24UrqVfGs1Lz9XGZj+6XXLFbO5dhFfu4='; img-src 'self' data: https://www.tableau.com; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="description" content="TabPy server information and deployed model status.">
+  <title>TabPy Server</title>
+  <link rel="icon" type="image/x-icon" href="https://www.tableau.com/themes/custom/tableau_www/favicon.ico">
+  <style>
+:root {
+  color-scheme: light;
+  --canvas: #f4f6f8; --surface: #fff; --raised: #fff; --subtle: #eef2f6;
+  --hover: #e8edf3; --text: #172033; --soft: #45536a; --muted: #617083;
+  --border: #d9e0e8; --border-strong: #c5cfda; --navy: #173b64;
+  --accent: #2f6fed; --accent-text: #2864d6; --accent-soft: #e8f0ff; --teal: #168a83;
+  --success: #147a52; --success-soft: #ddf4e9; --danger: #b93845;
+  --danger-soft: #fdebed; --code-bg: #101722; --code-text: #e8eef7;
+  --shadow-sm: 0 1px 2px rgba(18,32,51,.06), 0 8px 24px rgba(18,32,51,.05);
+  --shadow-md: 0 20px 60px rgba(18,32,51,.1); --header: rgba(255,255,255,.82);
+  --grid: rgba(23,59,100,.07); --focus: #2f6fed;
 }
-img {
-  position: absolute;
-  top: 0; bottom:0; left: 0; right:0;
-  margin: auto;
-}
-</style>
 
-<script type="text/javascript">
-function displayResponse(method, controlId) {
-  var r;
-  if (window.XMLHttpRequest) {
-    r = new XMLHttpRequest();
-  } else {
-    // code for older browsers
-    r = new ActiveXObject("Microsoft.XMLHTTP");
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --canvas: #0e131a; --surface: #151c25; --raised: #19222d; --subtle: #1b2531;
+  --hover: #222e3c; --text: #f2f5f8; --soft: #c9d2dd; --muted: #a3afbf;
+  --border: #2a3645; --border-strong: #3b495b; --navy: #7fa8d8;
+  --accent: #7ea7ff; --accent-text: #7ea7ff; --accent-soft: #1d3155; --teal: #55c5bb;
+  --success: #6bd4a6; --success-soft: #173b30; --danger: #ff8d98;
+  --danger-soft: #4a222a; --code-bg: #090e14; --code-text: #eef4fc;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.22), 0 10px 30px rgba(0,0,0,.18);
+  --shadow-md: 0 24px 70px rgba(0,0,0,.3); --header: rgba(14,19,26,.84);
+  --grid: rgba(127,168,216,.07); --focus: #9abaff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    color-scheme: dark;
+    --canvas: #0e131a; --surface: #151c25; --raised: #19222d; --subtle: #1b2531;
+    --hover: #222e3c; --text: #f2f5f8; --soft: #c9d2dd; --muted: #a3afbf;
+    --border: #2a3645; --border-strong: #3b495b; --navy: #7fa8d8;
+    --accent: #7ea7ff; --accent-text: #7ea7ff; --accent-soft: #1d3155; --teal: #55c5bb;
+    --success: #6bd4a6; --success-soft: #173b30; --danger: #ff8d98;
+    --danger-soft: #4a222a; --code-bg: #090e14; --code-text: #eef4fc;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,.22), 0 10px 30px rgba(0,0,0,.18);
+    --shadow-md: 0 24px 70px rgba(0,0,0,.3); --header: rgba(14,19,26,.84);
+    --grid: rgba(127,168,216,.07); --focus: #9abaff;
   }
-  r.onreadystatechange = function() {
-    if (this.readyState == 4 && this.status == 200) {
-      document.getElementById(controlId).innerHTML =
-      "<pre>" +
-      JSON.stringify(JSON.parse(this.responseText), null, 4);
-    }
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { min-width: 320px; scroll-behavior: smooth; }
+body {
+  margin: 0; background: var(--canvas); color: var(--text);
+  font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 16px; line-height: 1.5; -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+button, input { font: inherit; }
+button, a { -webkit-tap-highlight-color: transparent; }
+a { color: inherit; }
+button:focus-visible, a:focus-visible, input:focus-visible, summary:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--focus) 45%, transparent); outline-offset: 3px;
+}
+.skip-link {
+  position: fixed; z-index: 100; top: 10px; left: 10px; padding: 10px 14px;
+  border-radius: 8px; background: var(--text); color: var(--surface); font-weight: 700;
+  transform: translateY(-150%); transition: transform .16s ease;
+}
+.skip-link:focus { transform: translateY(0); }
+.page-width, .header-inner { width: min(1200px, calc(100% - 48px)); margin-inline: auto; }
+
+.site-header {
+  position: sticky; z-index: 20; top: 0; border-bottom: 1px solid var(--border);
+  background: var(--header); backdrop-filter: blur(18px) saturate(150%);
+}
+.header-inner { min-height: 72px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+.brand { display: inline-flex; align-items: center; gap: 11px; color: var(--text); text-decoration: none; }
+.tableau-mark { position: relative; display: block; flex: 0 0 40px; width: 40px; height: 40px; overflow: hidden; border-radius: 10px; background: #fff; }
+.tableau-mark img { position: absolute; top: 0; left: -10px; display: block; width: auto; max-width: none; height: 40px; }
+.brand-divider { width: 1px; height: 30px; background: var(--border-strong); }
+:root[data-theme="dark"] .tableau-mark,
+:root[data-theme="dark"] .brand-divider { display: none; }
+.brand-copy { display: grid; line-height: 1.12; }
+.brand-copy strong { font-size: 1rem; letter-spacing: -.01em; }
+.brand-copy span { margin-top: 4px; color: var(--muted); font-size: .7rem; font-weight: 650; letter-spacing: .08em; text-transform: uppercase; }
+.header-actions { display: flex; align-items: center; gap: 8px; }
+.header-link, .theme-toggle {
+  height: 40px; border: 1px solid var(--border); border-radius: 11px;
+  background: var(--surface); box-shadow: 0 1px 1px rgba(0,0,0,.03);
+}
+.header-link {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding-inline: 13px; color: var(--soft); font-size: .85rem; font-weight: 680; text-decoration: none;
+}
+.header-link:hover, .theme-toggle:hover { border-color: var(--border-strong); background: var(--hover); }
+.theme-toggle { position: relative; width: 40px; padding: 0; cursor: pointer; color: var(--soft); }
+.theme-icon { position: absolute; inset: 0; display: grid; place-items: center; transition: opacity .18s ease, transform .18s ease; }
+.theme-icon-moon, :root[data-theme="dark"] .theme-icon-sun { opacity: 0; transform: rotate(-25deg) scale(.7); }
+:root[data-theme="dark"] .theme-icon-moon { opacity: 1; transform: rotate(0) scale(1); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) .tableau-mark,
+  :root:not([data-theme]) .brand-divider { display: none; }
+  :root:not([data-theme]) .theme-icon-sun { opacity: 0; transform: rotate(25deg) scale(.7); }
+  :root:not([data-theme]) .theme-icon-moon { opacity: 1; transform: rotate(0) scale(1); }
+}
+
+.hero {
+  position: relative; isolation: isolate; overflow: hidden; border-bottom: 1px solid var(--border);
+  background-color: var(--surface); background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 42px 42px;
+}
+.hero::after { position: absolute; z-index: -1; inset: 0; content: ""; background: linear-gradient(90deg, var(--surface), transparent 48%, var(--surface)); }
+.hero-content { position: relative; padding-block: 64px 60px; }
+.hero-glow { position: absolute; z-index: -1; border-radius: 999px; opacity: .4; }
+.hero-glow-one { width: 420px; height: 260px; top: -130px; right: 12%; background: radial-gradient(circle, color-mix(in srgb, var(--accent) 32%, transparent), transparent 68%); }
+.hero-glow-two { width: 300px; height: 240px; right: -60px; bottom: -160px; background: radial-gradient(circle, color-mix(in srgb, var(--teal) 28%, transparent), transparent 70%); }
+.eyebrow, .section-kicker { display: flex; align-items: center; gap: 9px; color: var(--navy); font-size: .72rem; font-weight: 760; letter-spacing: .12em; text-transform: uppercase; }
+.live-dot { width: 8px; height: 8px; border: 2px solid var(--surface); border-radius: 50%; background: var(--teal); box-shadow: 0 0 0 4px color-mix(in srgb, var(--teal) 12%, transparent); }
+.hero h1 { max-width: 850px; margin: 14px 0 10px; font-size: clamp(2.35rem, 5vw, 4.4rem); font-weight: 730; letter-spacing: -.055em; line-height: 1.02; }
+.hero p { max-width: 680px; margin: 0; color: var(--soft); font-size: clamp(1rem, 2vw, 1.16rem); }
+.hero-status { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; }
+.status-pill, .tag, .count-badge { display: inline-flex; align-items: center; min-height: 28px; border: 1px solid var(--border); border-radius: 999px; padding: 4px 10px; background: var(--surface); color: var(--soft); font-size: .75rem; font-weight: 680; }
+.status-pill-accent { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-text); }
+.status-pill-success, .tag-success { border-color: var(--success); background: var(--success-soft); color: var(--success); }
+.status-pill-danger { border-color: var(--danger); background: var(--danger-soft); color: var(--danger); }
+.status-pill-muted { color: var(--muted); }
+
+.content-stack { display: grid; gap: 32px; padding-block: 48px 72px; }
+.data-section { overflow: hidden; border: 1px solid var(--border); border-radius: 24px; background: var(--surface); box-shadow: var(--shadow-sm); }
+.section-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 32px; padding: 28px 30px 25px; border-bottom: 1px solid var(--border); }
+.section-kicker code { border-left: 1px solid var(--border-strong); padding-left: 9px; color: var(--muted); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .68rem; font-weight: 650; letter-spacing: 0; text-transform: none; }
+.section-header h2, .resources h2 { margin: 8px 0 5px; font-size: clamp(1.45rem, 3vw, 2rem); letter-spacing: -.035em; line-height: 1.15; }
+.section-header p { max-width: 650px; margin: 0; color: var(--muted); font-size: .93rem; }
+.view-switcher { flex: 0 0 auto; display: flex; gap: 3px; padding: 4px; border: 1px solid var(--border); border-radius: 12px; background: var(--subtle); }
+.view-button { min-height: 34px; border: 0; border-radius: 8px; padding: 6px 13px; background: transparent; color: var(--muted); cursor: pointer; font-size: .78rem; font-weight: 720; }
+.view-button:hover { color: var(--text); }
+.view-button.is-active { background: var(--raised); box-shadow: 0 1px 4px rgba(14,23,36,.12); color: var(--text); }
+.section-content { min-height: 180px; padding: 30px; }
+
+.skeleton-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.skeleton, .skeleton-row { display: block; min-height: 106px; overflow: hidden; border-radius: 16px; background: var(--subtle); }
+.skeleton::after { display: block; width: 45%; height: 100%; content: ""; background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--surface) 65%, transparent), transparent); animation: shimmer 1.25s ease-in-out infinite; }
+.skeleton-wide { grid-column: 1 / -1; min-height: 140px; }
+.skeleton-list { display: grid; gap: 10px; }
+.skeleton-row { min-height: 76px; }
+@keyframes shimmer { from { transform: translateX(-110%); } to { transform: translateX(250%); } }
+
+.info-overview { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(280px, .6fr); gap: 16px; }
+.identity-card, .auth-card, .detail-panel { border: 1px solid var(--border); border-radius: 16px; background: var(--raised); }
+.identity-card { position: relative; overflow: hidden; padding: 26px; background: linear-gradient(135deg, var(--raised), color-mix(in srgb, var(--accent-soft) 58%, var(--raised))); }
+.identity-card::after { position: absolute; width: 140px; height: 140px; right: -60px; bottom: -80px; border: 24px solid color-mix(in srgb, var(--accent) 8%, transparent); border-radius: 50%; content: ""; }
+.mini-label, .field-label { color: var(--muted); font-size: .7rem; font-weight: 760; letter-spacing: .08em; text-transform: uppercase; }
+.identity-card h3 { margin: 9px 0 5px; font-size: 1.55rem; letter-spacing: -.035em; }
+.identity-card p { max-width: 620px; margin: 0; color: var(--soft); }
+.auth-card { display: flex; flex-direction: column; justify-content: space-between; padding: 23px; }
+.auth-state { display: flex; align-items: center; gap: 10px; margin: 9px 0 14px; font-size: 1rem; font-weight: 730; }
+.auth-state-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--success); box-shadow: 0 0 0 5px var(--success-soft); }
+.auth-state.is-muted .auth-state-dot { background: var(--muted); box-shadow: 0 0 0 5px var(--subtle); }
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.metadata-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; overflow: hidden; margin-top: 16px; border: 1px solid var(--border); border-radius: 16px; background: var(--border); }
+.metadata-item { min-width: 0; padding: 18px 20px; background: var(--raised); }
+.field-value { display: block; margin-top: 6px; overflow-wrap: anywhere; color: var(--text); font-size: .92rem; font-weight: 610; }
+.field-raw { display: block; margin-top: 3px; color: var(--muted); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .7rem; font-weight: 500; }
+.detail-panel { margin-top: 16px; overflow: hidden; }
+.detail-panel-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 20px; border-bottom: 1px solid var(--border); }
+.detail-panel-header h3 { margin: 0; font-size: 1rem; }
+.feature-list, .recursive-object { display: grid; }
+.feature-row, .recursive-row { display: grid; grid-template-columns: minmax(160px, .38fr) minmax(0, 1fr); gap: 22px; padding: 15px 20px; border-bottom: 1px solid var(--border); }
+.feature-row:last-child, .recursive-row:last-child { border-bottom: 0; }
+.recursive-key { min-width: 0; overflow-wrap: anywhere; color: var(--soft); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .78rem; font-weight: 650; }
+.recursive-value { min-width: 0; overflow-wrap: anywhere; color: var(--text); font-size: .85rem; }
+.recursive-value > .recursive-object, .recursive-value > .recursive-array { margin: -8px 0; border: 1px solid var(--border); border-radius: 10px; background: var(--subtle); }
+.recursive-value .recursive-row { grid-template-columns: minmax(120px, .3fr) minmax(0, 1fr); padding: 10px 12px; }
+.recursive-array { display: flex; flex-wrap: wrap; gap: 6px; }
+.recursive-array.is-complex { display: grid; gap: 8px; padding: 8px; }
+.array-item { min-width: 0; padding: 8px 10px; border-radius: 8px; background: var(--surface); }
+.empty-value { color: var(--muted); font-style: italic; }
+.boolean-status { display: inline-flex; align-items: center; gap: 9px; color: var(--soft); font-size: .8rem; font-weight: 680; }
+.status-switch { position: relative; width: 34px; height: 19px; border: 1px solid var(--border-strong); border-radius: 999px; background: var(--subtle); }
+.status-switch::after { position: absolute; width: 13px; height: 13px; top: 2px; left: 3px; border-radius: 50%; background: var(--muted); content: ""; }
+.boolean-status.is-enabled .status-switch { border-color: var(--success); background: var(--success-soft); }
+.boolean-status.is-enabled .status-switch::after { left: 16px; background: var(--success); }
+
+.json-shell { overflow: hidden; border: 1px solid var(--border-strong); border-radius: 16px; background: var(--code-bg); box-shadow: var(--shadow-md); }
+.json-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 48px; padding: 8px 10px 8px 18px; border-bottom: 1px solid rgba(255,255,255,.1); color: #9fadc1; }
+.json-toolbar code { font-size: .74rem; }
+.copy-button { min-height: 32px; border: 1px solid rgba(255,255,255,.14); border-radius: 8px; padding: 5px 10px; background: rgba(255,255,255,.06); color: #d8e1ed; cursor: pointer; font-size: .72rem; font-weight: 700; }
+.copy-button:hover { background: rgba(255,255,255,.11); }
+.copy-button:disabled { cursor: default; opacity: .5; }
+.json-shell pre { max-height: 620px; margin: 0; overflow: auto; padding: 22px; color: var(--code-text); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .78rem; line-height: 1.7; tab-size: 2; }
+
+.models-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 16px; }
+.search-wrap { position: relative; flex: 1 1 430px; max-width: 520px; }
+.search-wrap svg { position: absolute; top: 50%; left: 14px; color: var(--muted); transform: translateY(-50%); pointer-events: none; }
+.model-search { width: 100%; min-height: 44px; border: 1px solid var(--border); border-radius: 12px; padding: 9px 14px 9px 42px; background: var(--subtle); color: var(--text); outline: none; }
+.model-search::placeholder { color: var(--muted); }
+.model-search:focus { border-color: var(--accent); background: var(--surface); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 13%, transparent); }
+.model-count { flex: 0 0 auto; color: var(--muted); font-size: .78rem; font-weight: 650; }
+.model-list { display: grid; gap: 10px; }
+.model-item { overflow: hidden; border: 1px solid var(--border); border-radius: 13px; background: var(--raised); transition: border-color .16s ease, box-shadow .16s ease, transform .16s ease; }
+.model-item:hover { border-color: var(--border-strong); box-shadow: var(--shadow-sm); }
+.model-summary { position: relative; display: grid; grid-template-columns: minmax(170px,1fr) minmax(220px,1.65fr) auto; align-items: center; gap: 20px; min-height: 78px; padding: 15px 54px 15px 18px; cursor: pointer; list-style: none; }
+.model-summary::-webkit-details-marker { display: none; }
+.model-summary::after { position: absolute; right: 20px; width: 8px; height: 8px; border-right: 1.5px solid var(--muted); border-bottom: 1.5px solid var(--muted); content: ""; transform: rotate(45deg) translateY(-2px); transition: transform .16s ease; }
+.model-item[open] .model-summary::after { transform: rotate(225deg) translate(-2px,-2px); }
+.model-title { min-width: 0; }
+.model-title strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .94rem; }
+.model-title small, .model-description { color: var(--muted); font-size: .76rem; }
+.model-title small { display: block; margin-top: 3px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.model-description { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.model-badges { display: flex; justify-content: flex-end; gap: 6px; }
+.model-details { border-top: 1px solid var(--border); background: var(--subtle); }
+.model-details .recursive-row { grid-template-columns: minmax(170px,.25fr) minmax(0,1fr); padding: 13px 18px; }
+.model-details pre { margin: 0; overflow: auto; white-space: pre-wrap; color: var(--soft); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .76rem; }
+
+.state-card { display: grid; place-items: center; min-height: 230px; padding: 34px; border: 1px dashed var(--border-strong); border-radius: 16px; background: var(--subtle); text-align: center; }
+.state-icon { display: grid; width: 48px; height: 48px; margin: 0 auto 14px; place-items: center; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); color: var(--accent-text); font-size: 1.25rem; font-weight: 760; }
+.state-card h3 { margin: 0 0 6px; font-size: 1.05rem; }
+.state-card p { max-width: 470px; margin: 0 auto; color: var(--muted); font-size: .85rem; }
+.retry-button { min-height: 38px; margin-top: 18px; border: 1px solid var(--accent); border-radius: 10px; padding: 7px 14px; background: var(--accent); color: #fff; cursor: pointer; font-size: .8rem; font-weight: 720; }
+
+.resources { padding-top: 16px; }
+.resources-heading { margin-bottom: 18px; }
+.resource-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 14px; }
+.resource-card { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 14px; min-height: 112px; border: 1px solid var(--border); border-radius: 16px; padding: 18px; background: var(--surface); box-shadow: var(--shadow-sm); text-decoration: none; transition: transform .16s ease, border-color .16s ease, box-shadow .16s ease; }
+.resource-card:hover { border-color: var(--accent); box-shadow: var(--shadow-md); transform: translateY(-2px); }
+.resource-icon { display: grid; width: 38px; height: 38px; place-items: center; border-radius: 11px; background: var(--accent-soft); color: var(--accent-text); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .7rem; font-weight: 760; }
+.resource-card strong, .resource-card small { display: block; }
+.resource-card strong { font-size: .9rem; }
+.resource-card small { margin-top: 3px; color: var(--muted); font-size: .73rem; line-height: 1.4; }
+.resource-arrow { color: var(--muted); font-size: 1rem; }
+
+.site-footer { border-top: 1px solid var(--border); background: var(--surface); }
+.footer-inner { min-height: 100px; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 18px; color: var(--muted); font-size: .78rem; }
+.footer-brand { display: flex; align-items: center; gap: 9px; color: var(--text); font-weight: 760; }
+.footer-inner a { color: var(--soft); font-weight: 650; text-decoration: none; }
+.toast { position: fixed; z-index: 50; right: 22px; bottom: 22px; max-width: min(360px,calc(100% - 44px)); border: 1px solid var(--border-strong); border-radius: 11px; padding: 11px 15px; background: var(--text); box-shadow: var(--shadow-md); color: var(--surface); font-size: .78rem; font-weight: 680; opacity: 0; pointer-events: none; transform: translateY(12px); transition: opacity .18s ease, transform .18s ease; }
+.toast.is-visible { opacity: 1; transform: translateY(0); }
+.visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+@media (max-width: 1024px) {
+  .info-overview { grid-template-columns: 1fr; }
+  .metadata-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .resource-grid { grid-template-columns: 1fr; }
+  .resource-card { min-height: 96px; }
+}
+@media (max-width: 700px) {
+  .page-width, .header-inner { width: min(100% - 28px,1200px); }
+  .header-inner { min-height: 64px; }
+  .brand-copy span, .github-link span, .tableau-help-link span { display: none; }
+  .tableau-mark { flex-basis: 38px; width: 38px; height: 38px; }
+  .tableau-mark img { left: -9.5px; height: 38px; }
+  .header-link { width: 40px; padding-inline: 0; }
+  .hero-content { padding-block: 48px 44px; }
+  .content-stack { gap: 22px; padding-block: 28px 50px; }
+  .data-section { border-radius: 18px; }
+  .section-header { display: grid; gap: 20px; padding: 22px 20px 20px; }
+  .view-switcher { width: 100%; }
+  .view-button { flex: 1; }
+  .section-content { padding: 20px; }
+  .skeleton-grid, .metadata-grid { grid-template-columns: 1fr; }
+  .skeleton-wide { grid-column: auto; }
+  .feature-row, .recursive-row, .model-details .recursive-row { grid-template-columns: 1fr; gap: 7px; }
+  .models-toolbar { align-items: stretch; flex-direction: column; gap: 9px; }
+  .search-wrap { flex-basis: auto; max-width: none; }
+  .model-summary { grid-template-columns: minmax(0,1fr) auto; gap: 9px; padding: 14px 45px 14px 15px; }
+  .model-description { grid-column: 1 / -1; grid-row: 2; }
+  .model-badges { grid-column: 2; grid-row: 1; }
+  .footer-inner { grid-template-columns: 1fr auto; gap: 10px; padding-block: 22px; }
+  .footer-inner p { display: none; }
+}
+@media (max-width: 420px) {
+  .header-actions { gap: 6px; }
+  .hero h1 { font-size: 2.25rem; }
+  .model-summary { grid-template-columns: 1fr; }
+  .model-badges { grid-column: 1; grid-row: 2; justify-content: flex-start; }
+  .model-description { grid-row: 3; }
+  .footer-inner { grid-template-columns: 1fr; }
+}
+  </style>
+  <script>
+(function () {
+  "use strict";
+
+  const scriptSource = document.currentScript && document.currentScript.src;
+  const resourceBase = scriptSource ? new URL(".", scriptSource) : new URL("./", window.location.href);
+  const themeMedia = window.matchMedia("(prefers-color-scheme: dark)");
+  const sectionState = {
+    info: { status: "loading", data: null, error: null, view: "formatted" },
+    models: { status: "loading", data: null, error: null, view: "formatted", query: "" }
   };
-  r.open("GET", method, true);
-  r.send();
-}
+  let toastTimer;
 
-function loadInfo() {
-  displayResponse("info", "info")
-}
+  function createElement(tagName, className, text) {
+    const node = document.createElement(tagName);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = String(text);
+    return node;
+  }
 
-function loadModels() {
-  displayResponse("endpoints", "models")
-}
+  function createSvgSearchIcon() {
+    const namespace = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(namespace, "svg");
+    const circle = document.createElementNS(namespace, "circle");
+    const path = document.createElementNS(namespace, "path");
+    svg.setAttribute("viewBox", "0 0 24 24");
+    svg.setAttribute("width", "18");
+    svg.setAttribute("height", "18");
+    svg.setAttribute("aria-hidden", "true");
+    circle.setAttribute("cx", "11");
+    circle.setAttribute("cy", "11");
+    circle.setAttribute("r", "6.5");
+    circle.setAttribute("fill", "none");
+    circle.setAttribute("stroke", "currentColor");
+    circle.setAttribute("stroke-width", "1.8");
+    path.setAttribute("d", "m16 16 4.2 4.2");
+    path.setAttribute("fill", "none");
+    path.setAttribute("stroke", "currentColor");
+    path.setAttribute("stroke-width", "1.8");
+    path.setAttribute("stroke-linecap", "round");
+    svg.append(circle, path);
+    return svg;
+  }
 
-loadInfo()
-loadModels()
-</script>
+  function getStoredTheme() {
+    try {
+      const value = window.localStorage.getItem("tabpy-theme");
+      return value === "light" || value === "dark" ? value : null;
+    } catch (_error) {
+      return null;
+    }
+  }
+
+  function currentTheme() {
+    return document.documentElement.dataset.theme || (themeMedia.matches ? "dark" : "light");
+  }
+
+  function updateThemeControl() {
+    const button = document.getElementById("theme-toggle");
+    const dark = currentTheme() === "dark";
+    button.setAttribute("aria-pressed", String(dark));
+    button.setAttribute("aria-label", dark ? "Switch to light theme" : "Switch to dark theme");
+  }
+
+  function initializeTheme() {
+    const stored = getStoredTheme();
+    if (stored) document.documentElement.dataset.theme = stored;
+    updateThemeControl();
+    document.getElementById("theme-toggle").addEventListener("click", function () {
+      const next = currentTheme() === "dark" ? "light" : "dark";
+      document.documentElement.dataset.theme = next;
+      try {
+        window.localStorage.setItem("tabpy-theme", next);
+      } catch (_error) {
+        // The selected theme still applies for this page view when storage is unavailable.
+      }
+      updateThemeControl();
+    });
+    themeMedia.addEventListener("change", function () {
+      if (!getStoredTheme()) updateThemeControl();
+    });
+  }
+
+  function formatLabel(key) {
+    return String(key)
+      .replace(/[_-]+/g, " ")
+      .replace(/\b\w/g, function (character) { return character.toUpperCase(); });
+  }
+
+  function isObject(value) {
+    return value !== null && typeof value === "object" && !Array.isArray(value);
+  }
+
+  function isTimestampKey(key) {
+    return /(^|_)time$/i.test(String(key));
+  }
+
+  function formatTimestamp(value) {
+    if (typeof value !== "number" || !Number.isFinite(value)) return null;
+    const milliseconds = Math.abs(value) < 100000000000 ? value * 1000 : value;
+    const date = new Date(milliseconds);
+    if (Number.isNaN(date.getTime())) return null;
+    return new Intl.DateTimeFormat(undefined, {
+      dateStyle: "medium",
+      timeStyle: "medium"
+    }).format(date);
+  }
+
+  function renderBoolean(value) {
+    const node = createElement("span", "boolean-status" + (value ? " is-enabled" : ""));
+    const visual = createElement("span", "status-switch");
+    visual.setAttribute("aria-hidden", "true");
+    node.append(visual, document.createTextNode(value ? "Enabled" : "Disabled"));
+    return node;
+  }
+
+  function renderValue(value, key) {
+    const wrapper = createElement("div", "recursive-value");
+    if (value === null) {
+      wrapper.append(createElement("span", "empty-value", "null"));
+      return wrapper;
+    }
+    if (typeof value === "boolean") {
+      wrapper.append(renderBoolean(value));
+      return wrapper;
+    }
+    if (typeof value === "number" && isTimestampKey(key)) {
+      const formatted = formatTimestamp(value);
+      if (formatted) {
+        wrapper.append(createElement("span", "field-value", formatted));
+        wrapper.append(createElement("span", "field-raw", "Raw: " + String(value)));
+        return wrapper;
+      }
+    }
+    if (Array.isArray(value)) {
+      const array = createElement("div", "recursive-array");
+      if (value.length === 0) {
+        array.append(createElement("span", "empty-value", "Empty array []"));
+      } else {
+        const complex = value.some(function (item) { return isObject(item) || Array.isArray(item); });
+        if (complex) array.classList.add("is-complex");
+        value.forEach(function (item, index) {
+          const itemNode = createElement("div", "array-item");
+          if (complex) itemNode.append(createElement("span", "field-raw", "Item " + (index + 1)));
+          itemNode.append(renderValue(item, index));
+          array.append(itemNode);
+        });
+      }
+      wrapper.append(array);
+      return wrapper;
+    }
+    if (isObject(value)) {
+      wrapper.append(renderObject(value));
+      return wrapper;
+    }
+    if (String(key).toLowerCase() === "docstring") {
+      const pre = createElement("pre", "", value === "" ? "Empty string \"\"" : value);
+      wrapper.append(pre);
+      return wrapper;
+    }
+    if (value === "") {
+      wrapper.append(createElement("span", "empty-value", "Empty string \"\""));
+      return wrapper;
+    }
+    wrapper.textContent = String(value);
+    return wrapper;
+  }
+
+  function renderObject(object, keys) {
+    const container = createElement("div", "recursive-object");
+    const entries = keys ? keys.map(function (key) { return [key, object[key]]; }) : Object.entries(object);
+    if (entries.length === 0) {
+      container.append(createElement("div", "recursive-row empty-value", "Empty object {}"));
+      return container;
+    }
+    entries.forEach(function (entry) {
+      const row = createElement("div", "recursive-row");
+      const key = createElement("div", "recursive-key", entry[0]);
+      row.append(key, renderValue(entry[1], entry[0]));
+      container.append(row);
+    });
+    return container;
+  }
+
+  function getAuthentication(info) {
+    const versions = isObject(info.versions) ? Object.values(info.versions) : [];
+    const configurations = versions
+      .map(function (version) { return isObject(version) && isObject(version.features) ? version.features.authentication : null; })
+      .filter(isObject);
+    const methods = new Set();
+    configurations.forEach(function (configuration) {
+      if (isObject(configuration.methods)) {
+        Object.keys(configuration.methods).forEach(function (method) { methods.add(method); });
+      }
+    });
+    return {
+      advertised: configurations.length > 0,
+      required: configurations.some(function (configuration) { return configuration.required === true; }),
+      methods: Array.from(methods).sort()
+    };
+  }
+
+  function friendlyAuthMethod(method) {
+    if (method === "basic-auth") return "Basic auth";
+    if (method === "oauth-jwt") return "OAuth / JWT";
+    return formatLabel(method);
+  }
+
+  function updateHero(info, error) {
+    const name = document.getElementById("server-name");
+    const description = document.getElementById("server-description");
+    const status = document.getElementById("hero-status");
+    status.replaceChildren();
+    if (error) {
+      name.textContent = "TabPy Server";
+      description.textContent = "The landing page is available, but server details could not be loaded.";
+      status.append(createElement("span", "status-pill status-pill-danger", "Server details unavailable"));
+      return;
+    }
+
+    name.textContent = info.name || "TabPy Server";
+    description.textContent = info.description || "Live server details and deployed Python models, all in one place.";
+    if (info.server_version !== undefined) {
+      status.append(createElement("span", "status-pill status-pill-accent", "Version " + String(info.server_version)));
+    }
+    const authentication = getAuthentication(info);
+    const authText = authentication.advertised
+      ? (authentication.required ? "Authentication required" : "Authentication available")
+      : "Authentication not advertised";
+    status.append(createElement("span", authentication.required ? "status-pill status-pill-success" : "status-pill", authText));
+    authentication.methods.forEach(function (method) {
+      status.append(createElement("span", "status-pill", friendlyAuthMethod(method)));
+    });
+  }
+
+  function createMetadataItem(label, value, key) {
+    const item = createElement("div", "metadata-item");
+    item.append(createElement("span", "field-label", label));
+    item.append(renderValue(value, key));
+    return item;
+  }
+
+  function createPanel(title, object) {
+    const panel = createElement("div", "detail-panel");
+    const header = createElement("div", "detail-panel-header");
+    header.append(createElement("h3", "", title));
+    panel.append(header, renderObject(object));
+    return panel;
+  }
+
+  function renderInfoFormatted(info) {
+    const fragment = document.createDocumentFragment();
+    const overview = createElement("div", "info-overview");
+    const identity = createElement("div", "identity-card");
+    identity.append(createElement("span", "mini-label", "Server identity"));
+    identity.append(createElement("h3", "", info.name || "Unnamed TabPy server"));
+    identity.append(createElement("p", "", info.description || "No server description provided."));
+
+    const authentication = getAuthentication(info);
+    const auth = createElement("div", "auth-card");
+    auth.append(createElement("span", "mini-label", "Authentication"));
+    const authState = createElement("div", "auth-state");
+    if (!authentication.advertised) authState.classList.add("is-muted");
+    authState.append(createElement("span", "auth-state-dot"));
+    authState.append(document.createTextNode(authentication.advertised
+      ? (authentication.required ? "Required" : "Available")
+      : "Not advertised"));
+    auth.append(authState);
+    const methods = createElement("div", "tag-row");
+    if (authentication.methods.length) {
+      authentication.methods.forEach(function (method) { methods.append(createElement("span", "tag tag-success", friendlyAuthMethod(method))); });
+    } else {
+      methods.append(createElement("span", "tag", "No methods listed"));
+    }
+    auth.append(methods);
+    overview.append(identity, auth);
+    fragment.append(overview);
+
+    const metadata = createElement("div", "metadata-grid");
+    [
+      ["Server version", info.server_version, "server_version"],
+      ["Created", info.creation_time, "creation_time"],
+      ["State path", info.state_path, "state_path"]
+    ].forEach(function (field) { metadata.append(createMetadataItem(field[0], field[1], field[2])); });
+    fragment.append(metadata);
+
+    if (Object.prototype.hasOwnProperty.call(info, "versions")) {
+      fragment.append(createPanel("API versions and features", { versions: info.versions }));
+    }
+    const promoted = new Set(["name", "description", "server_version", "creation_time", "state_path", "versions"]);
+    const additional = Object.fromEntries(Object.entries(info).filter(function (entry) { return !promoted.has(entry[0]); }));
+    if (Object.keys(additional).length) fragment.append(createPanel("Additional server fields", additional));
+    return fragment;
+  }
+
+  function createJsonView(data, route, failedResponse) {
+    const shell = createElement("div", "json-shell");
+    const toolbar = createElement("div", "json-toolbar");
+    const routeLabel = "GET " + route + (failedResponse && failedResponse.status ? "  ·  HTTP " + failedResponse.status : "");
+    toolbar.append(createElement("code", "", routeLabel));
+    let displayedResponse;
+    let copiedResponse;
+    if (failedResponse) {
+      copiedResponse = failedResponse.rawText || "";
+      if (failedResponse.isJson) {
+        displayedResponse = JSON.stringify(failedResponse.data, null, 2);
+      } else {
+        displayedResponse = failedResponse.rawText || "No response body was received.";
+      }
+    } else {
+      displayedResponse = JSON.stringify(data, null, 2);
+      copiedResponse = displayedResponse;
+    }
+    const copy = createElement("button", "copy-button", failedResponse ? "Copy response" : "Copy JSON");
+    copy.type = "button";
+    copy.disabled = failedResponse && !failedResponse.rawText;
+    copy.addEventListener("click", function () {
+      if (!navigator.clipboard || !navigator.clipboard.writeText) {
+        showToast("Clipboard access is unavailable in this browser.");
+        return;
+      }
+      navigator.clipboard.writeText(copiedResponse).then(function () {
+        copy.textContent = "Copied";
+        showToast(failedResponse ? "Response copied to clipboard." : "JSON copied to clipboard.");
+        window.setTimeout(function () { copy.textContent = failedResponse ? "Copy response" : "Copy JSON"; }, 1600);
+      }).catch(function () { showToast("Could not copy the response. Select the text and copy it manually."); });
+    });
+    toolbar.append(copy);
+    const pre = createElement("pre");
+    const code = createElement("code", "", displayedResponse);
+    pre.append(code);
+    shell.append(toolbar, pre);
+    return shell;
+  }
+
+  function flattenForSearch(name, value) {
+    try {
+      return (name + " " + JSON.stringify(value)).toLocaleLowerCase();
+    } catch (_error) {
+      return String(name).toLocaleLowerCase();
+    }
+  }
+
+  function renderModel(name, model) {
+    const details = createElement("details", "model-item");
+    const summary = createElement("summary", "model-summary");
+    const title = createElement("div", "model-title");
+    title.append(createElement("strong", "", name));
+    title.append(createElement("small", "", isObject(model) && model.target ? "Alias target: " + model.target : "Deployed endpoint"));
+    const description = createElement("div", "model-description", isObject(model) && model.description ? model.description : "No description provided.");
+    const badges = createElement("div", "model-badges");
+    if (isObject(model) && model.type !== undefined) badges.append(createElement("span", "tag", String(model.type)));
+    if (isObject(model) && model.version !== undefined) badges.append(createElement("span", "tag", "v" + String(model.version)));
+    summary.append(title, description, badges);
+    const body = createElement("div", "model-details");
+    body.append(isObject(model) ? renderObject(model) : renderObject({ value: model }));
+    details.append(summary, body);
+    return details;
+  }
+
+  function populateModelList(list, count, empty, entries, query) {
+    const normalized = query.trim().toLocaleLowerCase();
+    const filtered = entries.filter(function (entry) { return !normalized || flattenForSearch(entry[0], entry[1]).includes(normalized); });
+    list.replaceChildren();
+    filtered.forEach(function (entry) { list.append(renderModel(entry[0], entry[1])); });
+    count.textContent = normalized
+      ? filtered.length + " of " + entries.length + " models"
+      : entries.length + (entries.length === 1 ? " model" : " models");
+    empty.hidden = filtered.length !== 0;
+    list.hidden = filtered.length === 0;
+  }
+
+  function renderModelsFormatted(models) {
+    const wrapper = createElement("div");
+    const entries = Object.entries(models).sort(function (left, right) { return left[0].localeCompare(right[0], undefined, { sensitivity: "base" }); });
+    if (entries.length === 0) {
+      wrapper.append(createStateCard("0", "No models deployed", "This server is ready. Deploy a model and it will appear here."));
+      return wrapper;
+    }
+    const toolbar = createElement("div", "models-toolbar");
+    const searchWrap = createElement("label", "search-wrap");
+    searchWrap.append(createSvgSearchIcon());
+    const searchLabel = createElement("span", "visually-hidden", "Search deployed models");
+    const input = createElement("input", "model-search");
+    input.type = "search";
+    input.placeholder = "Search names, descriptions, types, and metadata";
+    input.value = sectionState.models.query;
+    input.autocomplete = "off";
+    const count = createElement("span", "model-count");
+    searchWrap.append(searchLabel, input);
+    toolbar.append(searchWrap, count);
+    const list = createElement("div", "model-list");
+    const noResults = createElement("div", "state-card");
+    noResults.append(createElement("div", "state-icon", "0"));
+    const noResultsCopy = createElement("div");
+    noResultsCopy.append(createElement("h3", "", "No matching models"));
+    noResultsCopy.append(createElement("p", "", "Try another search term. Names and all model metadata are searchable."));
+    noResults.append(noResultsCopy);
+    noResults.hidden = true;
+    input.addEventListener("input", function () {
+      sectionState.models.query = input.value;
+      populateModelList(list, count, noResults, entries, input.value);
+    });
+    populateModelList(list, count, noResults, entries, input.value);
+    wrapper.append(toolbar, list, noResults);
+    return wrapper;
+  }
+
+  function createStateCard(icon, title, message, retrySection) {
+    const state = createElement("div", "state-card");
+    const inner = createElement("div");
+    inner.append(createElement("div", "state-icon", icon));
+    inner.append(createElement("h3", "", title));
+    inner.append(createElement("p", "", message));
+    if (retrySection) {
+      const retry = createElement("button", "retry-button", "Try again");
+      retry.type = "button";
+      retry.addEventListener("click", function () { loadSection(retrySection); });
+      inner.append(retry);
+    }
+    state.append(inner);
+    return state;
+  }
+
+  function createSkeleton(section) {
+    const container = createElement("div", section === "info" ? "skeleton-grid" : "skeleton-list");
+    container.setAttribute("aria-label", section === "info" ? "Loading server information" : "Loading deployed models");
+    for (let index = 0; index < 3; index += 1) {
+      const classes = section === "info" ? "skeleton" + (index === 0 ? " skeleton-wide" : "") : "skeleton skeleton-row";
+      container.append(createElement("span", classes));
+    }
+    return container;
+  }
+
+  function errorContent(section, error) {
+    const noun = section === "info" ? "server information" : "deployed models";
+    if (error.status === 401) return createStateCard("!", "Authentication required", "Sign in through your configured TabPy authentication flow to view " + noun + ".", section);
+    if (error.status === 403) return createStateCard("!", "Access not permitted", "Your authenticated session does not have permission to view " + noun + ".", section);
+    if (error.kind === "malformed") return createStateCard("{ }", "Unexpected response", "The server responded, but its " + noun + " payload was not valid JSON in the expected shape.", section);
+    return createStateCard("!", "Unable to load data", "TabPy could not load " + noun + ". Check the server connection and try again.", section);
+  }
+
+  function renderSection(section) {
+    const state = sectionState[section];
+    const target = document.getElementById(section === "info" ? "info-content" : "models-content");
+    target.replaceChildren();
+    target.setAttribute("aria-busy", String(state.status === "loading"));
+    if (state.status === "loading") {
+      target.append(createSkeleton(section));
+    } else if (state.view === "json") {
+      const route = section === "info" ? "/info" : "/endpoints";
+      target.append(createJsonView(state.data, route, state.status === "error" ? (state.error.response || { status: state.error.status }) : null));
+    } else if (state.status === "error") {
+      target.append(errorContent(section, state.error));
+    } else {
+      target.append(section === "info" ? renderInfoFormatted(state.data) : renderModelsFormatted(state.data));
+    }
+  }
+
+  async function fetchJson(resource) {
+    let response;
+    try {
+      response = await fetch(new URL(resource, resourceBase), {
+        method: "GET",
+        credentials: "same-origin",
+        cache: "no-store",
+        headers: { Accept: "application/json" }
+      });
+    } catch (cause) {
+      throw { kind: "network", cause: cause };
+    }
+    let rawText;
+    try {
+      rawText = await response.text();
+    } catch (cause) {
+      throw { kind: "network", status: response.status, cause: cause };
+    }
+    let data = null;
+    let isJson = false;
+    try {
+      data = JSON.parse(rawText);
+      isJson = true;
+    } catch (_error) {
+      // Keep the exact response text available to the JSON view.
+    }
+    const responseBody = {
+      status: response.status,
+      rawText: rawText,
+      data: data,
+      isJson: isJson
+    };
+    if (!response.ok) throw { kind: "http", status: response.status, response: responseBody };
+    if (!isJson || !isObject(data)) throw { kind: "malformed", status: response.status, response: responseBody };
+    return data;
+  }
+
+  async function loadSection(section) {
+    const state = sectionState[section];
+    const announcer = document.getElementById(section + "-announcer");
+    state.status = "loading";
+    state.error = null;
+    announcer.textContent = section === "info" ? "Loading server information." : "Loading deployed models.";
+    renderSection(section);
+    try {
+      state.data = await fetchJson(section === "info" ? "info" : "endpoints");
+      state.status = "success";
+      announcer.textContent = section === "info"
+        ? "Server information loaded."
+        : Object.keys(state.data).length + " deployed models loaded.";
+      if (section === "info") updateHero(state.data, null);
+    } catch (error) {
+      state.status = "error";
+      state.error = error || { kind: "network" };
+      announcer.textContent = state.error.status === 401
+        ? "Authentication is required to load this section."
+        : "This section could not be loaded.";
+      if (section === "info") updateHero(null, state.error);
+    }
+    renderSection(section);
+  }
+
+  function initializeViewSwitchers() {
+    document.querySelectorAll(".view-button").forEach(function (button) {
+      button.addEventListener("click", function () {
+        const section = button.dataset.section;
+        const view = button.dataset.view;
+        sectionState[section].view = view;
+        document.querySelectorAll('.view-button[data-section="' + section + '"]').forEach(function (peer) {
+          const selected = peer === button;
+          peer.classList.toggle("is-active", selected);
+          peer.setAttribute("aria-pressed", String(selected));
+        });
+        renderSection(section);
+      });
+    });
+  }
+
+  function showToast(message) {
+    const toast = document.getElementById("toast");
+    window.clearTimeout(toastTimer);
+    toast.textContent = message;
+    toast.classList.add("is-visible");
+    toastTimer = window.setTimeout(function () { toast.classList.remove("is-visible"); }, 2600);
+  }
+
+  function initializeApp() {
+    initializeTheme();
+    initializeViewSwitchers();
+    loadSection("info");
+    loadSection("models");
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initializeApp, { once: true });
+  } else {
+    initializeApp();
+  }
+}());
+  </script>
 </head>
-
 <body>
-<h1>TabPy Server Info:</h1>
-<p id="info">
+  <a class="skip-link" href="#main-content">Skip to server content</a>
 
-<h1>Deployed Models:</h1>
-<p id="models">
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="brand" aria-label="Tableau TabPy">
+        <span class="tableau-mark" aria-hidden="true"><img src="tableau.png" alt="" width="191" height="40"></span>
+        <span class="brand-divider" aria-hidden="true"></span>
+        <span class="brand-copy"><strong>TabPy</strong><span>Python Server</span></span>
+      </div>
+      <nav class="header-actions" aria-label="Product links">
+        <a class="header-link github-link" href="https://github.com/tableau/TabPy" target="_blank" rel="noopener noreferrer">
+          <svg viewBox="0 0 16 16" width="19" height="19" aria-hidden="true" focusable="false" shape-rendering="geometricPrecision"><path fill="currentColor" d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38l-.01-1.49c-2.23.49-2.7-1.08-2.7-1.08-.36-.93-.89-1.17-.89-1.17-.73-.5.06-.49.06-.49.8.06 1.23.83 1.23.83.72 1.23 1.88.87 2.34.67.07-.52.28-.87.51-1.07-1.78-.2-3.65-.89-3.65-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82A7.62 7.62 0 0 1 8 3.74c.68 0 1.37.09 2.01.27 1.53-1.03 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.28.82 2.15 0 3.07-1.87 3.74-3.66 3.94.29.25.54.74.54 1.5l-.01 2.31c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg>
+          <span>GitHub</span>
+        </a>
+        <a class="header-link tableau-help-link" href="https://www.tableau.com/support/help" target="_blank" rel="noopener noreferrer" aria-label="Tableau Help">
+          <svg viewBox="0 0 16 16" width="19" height="19" aria-hidden="true" focusable="false" shape-rendering="geometricPrecision">
+            <circle cx="8" cy="8" r="7.2" fill="none" stroke="currentColor" stroke-width="1.6"/>
+            <path d="M5.85 5.75A2.3 2.3 0 0 1 8.1 4.2c1.45 0 2.45.92 2.45 2.18 0 1.68-2.3 1.84-2.3 3.12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            <circle cx="8.25" cy="12.05" r=".82" fill="currentColor"/>
+          </svg>
+          <span>Tableau Help</span>
+        </a>
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to dark theme" aria-pressed="false">
+          <span class="theme-icon theme-icon-sun" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" focusable="false"><path d="M12 3V1m0 22v-2M5.64 5.64 4.22 4.22m15.56 15.56-1.42-1.42M3 12H1m22 0h-2M5.64 18.36l-1.42 1.42M19.78 4.22l-1.42 1.42M17 12a5 5 0 1 1-10 0 5 5 0 0 1 10 0Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+          <span class="theme-icon theme-icon-moon" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" focusable="false"><path d="M20.5 15.3A8.5 8.5 0 0 1 8.7 3.5a8.5 8.5 0 1 0 11.8 11.8Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></span>
+        </button>
+      </nav>
+    </div>
+  </header>
 
-<h1>Useful links:</h1>
-<ul>
-<li><a href="https://tableau.github.io/TabPy/">TabPy Documentation</a></li>
-<li><a href="https://github.com/tableau/TabPy">TabPy Source Code</a></li>
-<li><a href="https://pypi.org/project/tabpy/">TabPy PyPi</a></li>
-</ul>
+  <main id="main-content">
+    <section class="hero" aria-labelledby="server-name">
+      <div class="hero-glow hero-glow-one" aria-hidden="true"></div>
+      <div class="hero-glow hero-glow-two" aria-hidden="true"></div>
+      <div class="hero-content page-width">
+        <div class="eyebrow"><span class="live-dot" aria-hidden="true"></span> TabPy workspace</div>
+        <h1 id="server-name">TabPy Server</h1>
+        <p id="server-description">Live server details and deployed Python models, all in one place.</p>
+        <div class="hero-status" id="hero-status" aria-live="polite"><span class="status-pill status-pill-muted">Connecting to server</span></div>
+      </div>
+    </section>
 
+    <div class="page-width content-stack">
+      <section class="data-section" aria-labelledby="info-heading">
+        <div class="section-header">
+          <div>
+            <div class="section-kicker"><span>Server</span><code>GET /info</code></div>
+            <h2 id="info-heading">Server information</h2>
+            <p>Identity, configuration, and runtime capabilities advertised by this server.</p>
+          </div>
+          <div class="view-switcher" aria-label="Server information view">
+            <button class="view-button is-active" type="button" data-section="info" data-view="formatted" aria-pressed="true">Formatted</button>
+            <button class="view-button" type="button" data-section="info" data-view="json" aria-pressed="false">JSON</button>
+          </div>
+        </div>
+        <div id="info-announcer" class="visually-hidden" role="status" aria-live="polite" aria-atomic="true">Loading server information.</div>
+        <div id="info-content" class="section-content" aria-busy="true">
+          <div class="skeleton-grid" aria-label="Loading server information"><span class="skeleton skeleton-wide"></span><span class="skeleton"></span><span class="skeleton"></span></div>
+        </div>
+      </section>
+
+      <section class="data-section" aria-labelledby="models-heading">
+        <div class="section-header">
+          <div>
+            <div class="section-kicker"><span>Models</span><code>GET /endpoints</code></div>
+            <h2 id="models-heading">Deployed models</h2>
+            <p>Search and inspect every Python model currently available to TabPy.</p>
+          </div>
+          <div class="view-switcher" aria-label="Deployed models view">
+            <button class="view-button is-active" type="button" data-section="models" data-view="formatted" aria-pressed="true">Formatted</button>
+            <button class="view-button" type="button" data-section="models" data-view="json" aria-pressed="false">JSON</button>
+          </div>
+        </div>
+        <div id="models-announcer" class="visually-hidden" role="status" aria-live="polite" aria-atomic="true">Loading deployed models.</div>
+        <div id="models-content" class="section-content" aria-busy="true">
+          <div class="skeleton-list" aria-label="Loading deployed models"><span class="skeleton skeleton-row"></span><span class="skeleton skeleton-row"></span><span class="skeleton skeleton-row"></span></div>
+        </div>
+      </section>
+
+      <section class="resources" aria-labelledby="resources-heading">
+        <div class="resources-heading"><div class="section-kicker"><span>Resources</span></div><h2 id="resources-heading">Keep exploring</h2></div>
+        <div class="resource-grid">
+          <a class="resource-card" href="https://tableau.github.io/TabPy/" target="_blank" rel="noopener noreferrer"><span class="resource-icon" aria-hidden="true">01</span><span><strong>Documentation</strong><small>Guides, configuration, and API reference</small></span><span class="resource-arrow" aria-hidden="true">&#8599;</span></a>
+          <a class="resource-card" href="https://github.com/tableau/TabPy" target="_blank" rel="noopener noreferrer"><span class="resource-icon" aria-hidden="true">02</span><span><strong>GitHub</strong><small>Source code, releases, and issues</small></span><span class="resource-arrow" aria-hidden="true">&#8599;</span></a>
+          <a class="resource-card" href="https://pypi.org/project/tabpy/" target="_blank" rel="noopener noreferrer"><span class="resource-icon" aria-hidden="true">03</span><span><strong>PyPI</strong><small>Package versions and installation details</small></span><span class="resource-arrow" aria-hidden="true">&#8599;</span></a>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="page-width footer-inner">
+      <div class="footer-brand"><span>TabPy Server</span></div>
+      <p>Python analytics, connected to Tableau.</p>
+      <a href="https://www.tableau.com/" target="_blank" rel="noopener noreferrer">Tableau <span aria-hidden="true">&#8599;</span></a>
+    </div>
+  </footer>
+  <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 </body>
-</html> 
+</html>
