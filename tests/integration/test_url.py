@@ -22,5 +22,12 @@ class TestURL(integ_test_base.IntegTestBase):
         conn = self._get_connection()
         conn.request("GET", "/")
         res = conn.getresponse()
+        page = res.read()
 
         self.assertEqual(200, res.status)
+        self.assertIn("text/html", res.getheader("Content-Type"))
+        self.assertIn(b"<style>", page)
+        self.assertIn(b"<script>", page)
+        self.assertNotIn(b'href="styles.css"', page)
+        self.assertNotIn(b'src="app.js"', page)
+        conn.close()

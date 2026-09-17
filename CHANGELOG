@@ -1,5 +1,13 @@
 # Changelog
 
+## v2.15.1
+
+### Improvements
+
+- Redesign the TabPy server landing page with responsive light and dark
+  themes, formatted and JSON views for server information and deployed
+  models, model search, accessible controls, and self-hosted assets.
+
 ## v2.15.0
 
 ### Improvements
