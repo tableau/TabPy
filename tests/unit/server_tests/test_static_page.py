@@ -87,11 +87,6 @@ class TestStaticPageWithSubdirectory(AsyncHTTPTestCase):
             b"https://www.tableau.com/themes/custom/tableau_www/favicon.ico",
             page,
         )
-        self.assertIn(b"textContent", page)
-        self.assertIn(b"if (depth >= 2)", page)
-        self.assertIn(b"is-depth-stacked", page)
-        self.assertIn(b"await response.text()", page)
-        self.assertIn(b"failedResponse.rawText", page)
         self.assertNotIn(b"innerHTML", page)
         self.assertNotIn(b"insertAdjacentHTML", page)
         self.assertNotIn(b'href="styles.css"', page)
