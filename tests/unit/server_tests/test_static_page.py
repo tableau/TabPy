@@ -74,8 +74,9 @@ class TestStaticPageWithSubdirectory(AsyncHTTPTestCase):
         self.assertIn(b"sha256-", page)
         script_match = re.search(rb"<script>(.*?)</script>", page, re.DOTALL)
         self.assertIsNotNone(script_match)
+        script = script_match.group(1).replace(b"\r\n", b"\n").replace(b"\r", b"\n")
         script_hash = base64.b64encode(
-            hashlib.sha256(script_match.group(1)).digest()
+            hashlib.sha256(script).digest()
         )
         self.assertIn(b"script-src 'sha256-" + script_hash + b"'", page)
         favicon_match = re.search(
