@@ -386,8 +386,10 @@ TABPY_OAUTH_LOG_USER = true
   `SCRIPT_*` that calls `tabpy.query()` from `/evaluate` needs **both**
   `tabpy:evaluate` and `tabpy:query`, because the nested `/query` call
   forwards the original token. Arrow Flight is not per-endpoint scoped;
-  it still uses only `TABPY_OAUTH_REQUIRED_SCOPES`. Basic Auth is
-  unaffected.
+  it still uses only `TABPY_OAUTH_AUDIENCE` and
+  `TABPY_OAUTH_REQUIRED_SCOPES`. When Arrow is enabled, at least one of those
+  global boundaries is required; endpoint enforcement alone is rejected at
+  startup. Basic Auth is unaffected.
 - `TABPY_OAUTH_QUERY_SCOPE`, `TABPY_OAUTH_EVALUATE_SCOPE`, and
   `TABPY_OAUTH_DEPLOY_SCOPE` configure the exact scope names used by
   endpoint enforcement and advertised by `/info`. Their defaults are

@@ -601,9 +601,12 @@ class TabPyApp:
         has_required_scopes = any(
             scope.strip() for scope in (required_scopes or "").split(",")
         )
-        has_resource_boundary = (
+        has_global_resource_boundary = (
             bool(self.settings.get(SettingsParameters.OAuthAudience))
             or has_required_scopes
+        )
+        has_resource_boundary = (
+            has_global_resource_boundary
             or bool(self.settings.get(SettingsParameters.OAuthEnforceEndpointScopes))
         )
         if not has_resource_boundary:
@@ -612,6 +615,20 @@ class TabPyApp:
                 f"{ConfigParameters.TABPY_OAUTH_AUDIENCE}, "
                 f"{ConfigParameters.TABPY_OAUTH_REQUIRED_SCOPES}, or enable "
                 f"{ConfigParameters.TABPY_OAUTH_ENFORCE_ENDPOINT_SCOPES}"
+            )
+            logger.critical(msg)
+            raise RuntimeError(msg)
+
+        if (
+            self.settings.get(SettingsParameters.ArrowEnabled)
+            and not has_global_resource_boundary
+        ):
+            msg = (
+                "OAuth with Arrow Flight requires a global resource authorization "
+                f"boundary: configure {ConfigParameters.TABPY_OAUTH_AUDIENCE} or "
+                f"{ConfigParameters.TABPY_OAUTH_REQUIRED_SCOPES}. "
+                f"{ConfigParameters.TABPY_OAUTH_ENFORCE_ENDPOINT_SCOPES} protects "
+                "HTTP endpoints only"
             )
             logger.critical(msg)
             raise RuntimeError(msg)
