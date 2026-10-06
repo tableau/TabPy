@@ -27,7 +27,7 @@ class JwtAuthServerMiddlewareFactory(ServerMiddlewareFactory):
         self,
         issuer,
         jwks_uri,
-        audience,
+        audience=None,
         required_scopes=None,
         basic_factory=None,
     ):

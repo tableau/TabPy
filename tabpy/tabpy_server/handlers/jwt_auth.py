@@ -271,12 +271,12 @@ def validate_jwt(
     token: str,
     issuer: str,
     jwks_uri: str,
-    audience: str,
+    audience: str = None,
     required_scopes: str = None,
 ) -> dict:
     """
-    Validates a JWT Bearer token's signature, issuer, audience, expiry,
-    and not-before claims, plus optional required scopes.
+    Validates a JWT Bearer token's signature, issuer, expiry, and not-before
+    claims, plus optional audience and required scopes.
 
     Parameters
     ----------
@@ -286,8 +286,8 @@ def validate_jwt(
         Expected `iss` claim.
     jwks_uri : str
         JWKS endpoint used to resolve the token's signing key.
-    audience : str
-        Expected `aud` claim.
+    audience : str, optional
+        Expected `aud` claim. Audience validation is disabled when unset.
     required_scopes : str, optional
         Comma-separated scopes that must all be present in the token's
         `scope` claim. Skipped if None or empty.
@@ -301,7 +301,7 @@ def validate_jwt(
     ------
     JwtValidationError
         If the token is missing, malformed, expired, or fails any of
-        the signature/issuer/audience/scope checks.
+        the signature/issuer/optional-audience/scope checks.
     """
     if not token:
         raise JwtValidationError("Missing JWT")
@@ -324,7 +324,10 @@ def validate_jwt(
             algorithms=[signing_key.algorithm_name],
             issuer=issuer,
             audience=audience,
-            options={"require": ["exp", "iat"]},
+            options={
+                "require": ["exp", "iat"],
+                "verify_aud": bool(audience),
+            },
         )
     except jwt.exceptions.InvalidTokenError as ex:
         raise JwtValidationError(f"JWT validation failed: {str(ex)}") from ex

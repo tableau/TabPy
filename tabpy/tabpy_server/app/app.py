@@ -159,7 +159,7 @@ class TabPyApp:
                     "jwt": JwtAuthServerMiddlewareFactory(
                         issuer=config[SettingsParameters.OAuthIssuer],
                         jwks_uri=config[SettingsParameters.OAuthJwksUri],
-                        audience=config[SettingsParameters.OAuthAudience],
+                        audience=config.get(SettingsParameters.OAuthAudience),
                         required_scopes=config.get(
                             SettingsParameters.OAuthRequiredScopes
                         ),
@@ -401,6 +401,9 @@ class TabPyApp:
             (SettingsParameters.OAuthEnabled, ConfigParameters.TABPY_OAUTH_ENABLED, False, parser.getboolean),
             (SettingsParameters.OAuthIssuer, ConfigParameters.TABPY_OAUTH_ISSUER, None, None),
             (SettingsParameters.OAuthJwksUri, ConfigParameters.TABPY_OAUTH_JWKS_URI, None, None),
+            (SettingsParameters.OAuthAllowNonpublicJwks,
+             ConfigParameters.TABPY_OAUTH_ALLOW_NONPUBLIC_JWKS, False,
+             parser.getboolean),
             (SettingsParameters.OAuthAudience, ConfigParameters.TABPY_OAUTH_AUDIENCE, None, None),
             (SettingsParameters.OAuthRequiredScopes, ConfigParameters.TABPY_OAUTH_REQUIRED_SCOPES,
              None, None),
@@ -581,7 +584,6 @@ class TabPyApp:
         required = [
             (SettingsParameters.OAuthIssuer, ConfigParameters.TABPY_OAUTH_ISSUER),
             (SettingsParameters.OAuthJwksUri, ConfigParameters.TABPY_OAUTH_JWKS_URI),
-            (SettingsParameters.OAuthAudience, ConfigParameters.TABPY_OAUTH_AUDIENCE),
         ]
         missing = [
             config_key for setting, config_key in required
@@ -591,6 +593,25 @@ class TabPyApp:
             msg = (
                 f"{ConfigParameters.TABPY_OAUTH_ENABLED} is true but missing required "
                 f"setting(s): {', '.join(missing)}"
+            )
+            logger.critical(msg)
+            raise RuntimeError(msg)
+
+        required_scopes = self.settings.get(SettingsParameters.OAuthRequiredScopes)
+        has_required_scopes = any(
+            scope.strip() for scope in (required_scopes or "").split(",")
+        )
+        has_resource_boundary = (
+            bool(self.settings.get(SettingsParameters.OAuthAudience))
+            or has_required_scopes
+            or bool(self.settings.get(SettingsParameters.OAuthEnforceEndpointScopes))
+        )
+        if not has_resource_boundary:
+            msg = (
+                "OAuth requires a resource authorization boundary: configure "
+                f"{ConfigParameters.TABPY_OAUTH_AUDIENCE}, "
+                f"{ConfigParameters.TABPY_OAUTH_REQUIRED_SCOPES}, or enable "
+                f"{ConfigParameters.TABPY_OAUTH_ENFORCE_ENDPOINT_SCOPES}"
             )
             logger.critical(msg)
             raise RuntimeError(msg)
@@ -671,19 +692,33 @@ class TabPyApp:
         # is_private/is_loopback/is_link_local/is_reserved misses ranges
         # like IPv4-mapped IPv6 (::ffff:169.254.169.254) and CGNAT
         # (100.64.0.0/10), which is_global correctly excludes.
-        unsafe_addresses = [
+        unsafe_addresses = sorted(
             address for address in jwks_addresses
             if not ipaddress.ip_address(address).is_global
-        ]
-        if unsafe_addresses:
+        )
+        if unsafe_addresses and not self.settings[
+            SettingsParameters.OAuthAllowNonpublicJwks
+        ]:
             msg = (
                 f"{ConfigParameters.TABPY_OAUTH_JWKS_URI} host \"{jwks_host}\" "
                 f"resolves to a non-public address "
                 f"({', '.join(unsafe_addresses)}): refusing to use it as the "
-                "JWKS endpoint"
+                "JWKS endpoint. Set "
+                f"{ConfigParameters.TABPY_OAUTH_ALLOW_NONPUBLIC_JWKS}=true only "
+                "when this exact endpoint is trusted and intentionally routed "
+                "through a private network or enterprise proxy"
             )
             logger.critical(msg)
             raise RuntimeError(msg)
+        if unsafe_addresses:
+            logger.warning(
+                f"{ConfigParameters.TABPY_OAUTH_JWKS_URI} host \"{jwks_host}\" "
+                f"resolves to a non-public address "
+                f"({', '.join(unsafe_addresses)}), but "
+                f"{ConfigParameters.TABPY_OAUTH_ALLOW_NONPUBLIC_JWKS} is enabled. "
+                "Only use this override for a trusted JWKS endpoint on a "
+                "controlled network"
+            )
 
     def _get_features(self):
         features = {}
@@ -697,8 +732,16 @@ class TabPyApp:
             if ConfigParameters.TABPY_PWD_FILE in self.settings:
                 methods["basic-auth"] = {}
             if self.settings[SettingsParameters.OAuthEnabled]:
+                required_scopes = [
+                    scope.strip()
+                    for scope in (
+                        self.settings.get(SettingsParameters.OAuthRequiredScopes) or ""
+                    ).split(",")
+                    if scope.strip()
+                ]
                 methods["oauth-jwt"] = {
-                    "scopes": list(
+                    "required_scopes": required_scopes,
+                    "endpoint_scopes": list(
                         endpoint_scope_names(
                             self.settings[SettingsParameters.OAuthEndpointScopes]
                         )
