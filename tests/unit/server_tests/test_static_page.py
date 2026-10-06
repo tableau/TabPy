@@ -72,6 +72,12 @@ class TestStaticPageWithSubdirectory(AsyncHTTPTestCase):
         self.assertIn(b"Content-Security-Policy", page)
         self.assertIn(b"default-src 'self'", page)
         self.assertIn(b"sha256-", page)
+        script_match = re.search(rb"<script>(.*?)</script>", page, re.DOTALL)
+        self.assertIsNotNone(script_match)
+        script_hash = base64.b64encode(
+            hashlib.sha256(script_match.group(1)).digest()
+        )
+        self.assertIn(b"script-src 'sha256-" + script_hash + b"'", page)
         favicon_match = re.search(
             rb'href="data:image/x-icon;base64,([^"]+)"',
             page,
@@ -91,3 +97,5 @@ class TestStaticPageWithSubdirectory(AsyncHTTPTestCase):
         self.assertNotIn(b"insertAdjacentHTML", page)
         self.assertNotIn(b'href="styles.css"', page)
         self.assertNotIn(b'src="app.js"', page)
+        self.assertNotIn(b"status-switch", page)
+        self.assertIn(b"status-dot", page)
