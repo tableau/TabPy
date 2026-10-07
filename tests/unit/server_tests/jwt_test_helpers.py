@@ -26,7 +26,7 @@ def reset_jwks_state():
     jwt_auth_module._jwks_last_fetch_failure.clear()
 
 
-def make_token(private_key, claims_override=None, headers=None):
+def make_token(private_key, claims_override=None, headers=None, claims_to_remove=None):
     now = datetime.datetime.now(datetime.timezone.utc)
     claims = {
         "iss": ISSUER,
@@ -37,6 +37,8 @@ def make_token(private_key, claims_override=None, headers=None):
     }
     if claims_override:
         claims.update(claims_override)
+    for claim in claims_to_remove or ():
+        claims.pop(claim, None)
     return jwt.encode(claims, private_key, algorithm="RS256", headers=headers)
 
 

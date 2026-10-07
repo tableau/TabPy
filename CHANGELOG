@@ -1,5 +1,20 @@
 # Changelog
 
+## v2.16.0
+
+### Improvements
+
+- Accept OAuth access tokens without an `aud` claim when required scopes
+  provide the global resource authorization boundary. Audience validation
+  remains enforced when `TABPY_OAUTH_AUDIENCE` is configured. Endpoint scopes
+  provide optional, additional authorization for specific HTTP operations.
+- Add a default-off `TABPY_OAUTH_ALLOW_NONPUBLIC_JWKS` override for trusted
+  JWKS endpoints routed through internal networks, split DNS, or enterprise
+  proxies. HTTPS and certificate validation remain required.
+- Improve OAuth discovery on `/info` and the landing page by separating global
+  `required_scopes` from `endpoint_scopes`, showing endpoint enforcement state,
+  and presenting read-only boolean values as status badges.
+
 ## v2.15.1
 
 ### Improvements

@@ -75,6 +75,7 @@ at [`logging.config` documentation page](https://docs.python.org/3.6/library/log
   authentication can be found in [Authentication](#authentication)
   section. Default value - not set.
 - `TABPY_OAUTH_ENABLED`, `TABPY_OAUTH_ISSUER`, `TABPY_OAUTH_JWKS_URI`,
+  `TABPY_OAUTH_ALLOW_NONPUBLIC_JWKS`,
   `TABPY_OAUTH_AUDIENCE`, `TABPY_OAUTH_REQUIRED_SCOPES`,
   `TABPY_OAUTH_ENFORCE_ENDPOINT_SCOPES`, `TABPY_OAUTH_QUERY_SCOPE`,
   `TABPY_OAUTH_EVALUATE_SCOPE`, `TABPY_OAUTH_DEPLOY_SCOPE`,
@@ -293,28 +294,44 @@ file:
 TABPY_OAUTH_ENABLED = true
 TABPY_OAUTH_ISSUER = https://idp.example.com/
 TABPY_OAUTH_JWKS_URI = https://idp.example.com/.well-known/jwks.json
-TABPY_OAUTH_AUDIENCE = tabpy
+TABPY_OAUTH_AUDIENCE = api://tabpy
 ```
 
-`TABPY_OAUTH_ISSUER`, `TABPY_OAUTH_JWKS_URI`, and `TABPY_OAUTH_AUDIENCE` are
-all required when `TABPY_OAUTH_ENABLED` is `true`; TabPy will fail to start
-if any are missing. `TABPY_OAUTH_ISSUER` and `TABPY_OAUTH_JWKS_URI` must use
+`TABPY_OAUTH_ISSUER` and `TABPY_OAUTH_JWKS_URI` are required when
+`TABPY_OAUTH_ENABLED` is `true`. You must also configure a global resource
+authorization boundary: `TABPY_OAUTH_AUDIENCE` or
+`TABPY_OAUTH_REQUIRED_SCOPES`. Endpoint scope enforcement provides additional
+authorization for specific HTTP operations and is not sufficient by itself.
+Audience validation is the preferred interoperable configuration when the
+authorization server includes an `aud` claim. TabPy fails to start if no
+boundary is configured. The issuer and JWKS URI must use
 `https://` -- the JWKS response is the trust anchor for verifying JWT
 signatures, so fetching it over plain HTTP would let anyone on the network
 path substitute their own keys. `TABPY_OAUTH_JWKS_URI` is also resolved at
-startup, and TabPy will fail to start if it resolves to a private,
-loopback, or link-local address, since that endpoint is fetched over the
-network on TabPy's behalf and could otherwise be pointed at an internal
-service (e.g. a cloud metadata endpoint).
+startup, and TabPy will fail to start if it resolves to a non-public address,
+including private, loopback, link-local, or shared CGNAT space. The endpoint
+is fetched over the network on TabPy's behalf and could otherwise be pointed
+at an internal service (e.g. a cloud metadata endpoint). For trusted
+deployments using split DNS, an internal IdP, or an enterprise proxy, the
+default-off `TABPY_OAUTH_ALLOW_NONPUBLIC_JWKS` override permits the configured JWKS
+hostname to resolve to a non-public address. HTTPS remains required.
 
 - `TABPY_OAUTH_ISSUER` is the expected `iss` claim on incoming JWTs.
 - `TABPY_OAUTH_JWKS_URI` is the IdP's JWKS endpoint, used to fetch and cache
   the signing keys used to verify JWT signatures.
-- `TABPY_OAUTH_AUDIENCE` is the expected `aud` claim on incoming JWTs.
+- `TABPY_OAUTH_AUDIENCE` is an optional expected `aud` claim. When configured,
+  tokens with a missing or different audience are rejected. Prefer this mode
+  when the IdP supports a configurable API audience. For example, configure
+  the authorization server with audience `api://tabpy`, then use that exact
+  value here. When unset, audience validation is disabled so access tokens
+  without `aud` can authenticate; required scopes must then provide the global
+  resource authorization boundary.
 
-Six additional parameters are optional:
+Eight authorization, networking, and logging parameters are optional:
 
 ```sh
+TABPY_OAUTH_AUDIENCE = api://tabpy
+TABPY_OAUTH_ALLOW_NONPUBLIC_JWKS = true
 TABPY_OAUTH_REQUIRED_SCOPES = tabpy
 TABPY_OAUTH_ENFORCE_ENDPOINT_SCOPES = true
 TABPY_OAUTH_QUERY_SCOPE = tabpy:query
@@ -322,6 +339,14 @@ TABPY_OAUTH_EVALUATE_SCOPE = tabpy:evaluate
 TABPY_OAUTH_DEPLOY_SCOPE = tabpy:deploy
 TABPY_OAUTH_LOG_USER = true
 ```
+
+- `TABPY_OAUTH_ALLOW_NONPUBLIC_JWKS` (default `false`) permits only the
+  explicitly configured `TABPY_OAUTH_JWKS_URI` hostname to resolve to a
+  non-public IP address. Use it only when that exact HTTPS endpoint is trusted
+  and intentionally routed through a controlled internal network, split-DNS
+  setup, or enterprise proxy. TabPy logs a warning whenever the override is
+  exercised. It does not permit plain HTTP or disable TLS certificate and
+  hostname validation.
 
 - `TABPY_OAUTH_REQUIRED_SCOPES` is a comma-separated list of scopes that
   must all be present in the JWT's `scope` claim on **every** request,
@@ -335,11 +360,16 @@ TABPY_OAUTH_LOG_USER = true
   Cognito custom scopes use
   `<resource-server-identifier>/<scope-name>`. A Cognito resource server
   named `tabpy` with `access` and `finance` scopes could restrict a finance
-  team's TabPy deployment with:
+  team's TabPy deployment when its access tokens do not contain `aud` with:
 
   ```sh
   TABPY_OAUTH_REQUIRED_SCOPES = tabpy/access,tabpy/finance
   ```
+
+  Configure the same resource-server scope values in Tableau's OAuth
+  configuration **Scopes** field. Tableau Desktop then requests them during
+  the authorization-code plus PKCE flow and sends the resulting access token
+  to TabPy; no ID-token fallback is needed.
 
   A token whose `scope` claim is `openid tabpy/access tabpy/finance` would
   pass the global scope check, while one containing
@@ -354,11 +384,14 @@ TABPY_OAUTH_LOG_USER = true
   endpoint scope is rejected with HTTP 403 and
   `WWW-Authenticate: Bearer error="insufficient_scope"`. `/info`,
   `/status`, and `GET /endpoints` are not gated by those scopes. A
+  configured audience or global required scope is therefore always required;
+  endpoint scopes provide additional fine-grained authorization and never act
+  as the resource boundary by themselves. A
   `SCRIPT_*` that calls `tabpy.query()` from `/evaluate` needs **both**
   `tabpy:evaluate` and `tabpy:query`, because the nested `/query` call
   forwards the original token. Arrow Flight is not per-endpoint scoped;
-  it still uses only `TABPY_OAUTH_REQUIRED_SCOPES`. Basic Auth is
-  unaffected.
+  it still uses only `TABPY_OAUTH_AUDIENCE` and
+  `TABPY_OAUTH_REQUIRED_SCOPES`. Basic Auth is unaffected.
 - `TABPY_OAUTH_QUERY_SCOPE`, `TABPY_OAUTH_EVALUATE_SCOPE`, and
   `TABPY_OAUTH_DEPLOY_SCOPE` configure the exact scope names used by
   endpoint enforcement and advertised by `/info`. Their defaults are
@@ -384,11 +417,14 @@ TABPY_OAUTH_LOG_USER = true
   enabled -- that's what actually logs the authenticated user, for both
   basic auth and OAuth.
 
-When OAuth is enabled, `/info` advertises the configured endpoint scopes
-(by default, `tabpy:query`, `tabpy:evaluate`, and `tabpy:deploy`) under
-`versions.v1.features.authentication.methods.oauth-jwt`
-so an IdP or Tableau connection can request those scopes even when
-endpoint enforcement is off.
+When OAuth is enabled, `/info` advertises global required scopes under
+`versions.v1.features.authentication.methods.oauth-jwt.required_scopes` and
+the configured endpoint scopes (by default, `tabpy:query`, `tabpy:evaluate`,
+and `tabpy:deploy`) under the sibling `endpoint_scopes` field. The landing page
+displays global `required_scopes` first, followed by `endpoint_scopes` and its
+adjacent `endpoint_scopes_enforced` setting. The latter controls whether those
+endpoint-specific scopes are enforced per route; the scopes remain advertised
+when enforcement is off so an IdP or Tableau connection can still request them.
 
 To authenticate a request, send the JWT as a Bearer token:
 

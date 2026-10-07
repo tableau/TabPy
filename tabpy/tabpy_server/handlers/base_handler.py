@@ -420,8 +420,8 @@ class BaseHandler(tornado.web.RequestHandler):
     def _validate_jwt_credentials(self) -> bool:
         """
         Validates the Bearer token found by _get_bearer_token against the
-        configured IdP: signature (via JWKS), issuer, audience, expiry,
-        nbf, and optionally required scopes.
+        configured IdP: signature (via JWKS), issuer, expiry, nbf, and
+        optionally audience and required scopes.
 
         Returns
         -------
@@ -434,7 +434,7 @@ class BaseHandler(tornado.web.RequestHandler):
                 self.jwt_token,
                 issuer=self.settings[SettingsParameters.OAuthIssuer],
                 jwks_uri=self.settings[SettingsParameters.OAuthJwksUri],
-                audience=self.settings[SettingsParameters.OAuthAudience],
+                audience=self.settings.get(SettingsParameters.OAuthAudience),
                 required_scopes=self.settings.get(SettingsParameters.OAuthRequiredScopes),
             )
         except JwtValidationError as ex:

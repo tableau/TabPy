@@ -44,9 +44,12 @@ class TestJwtAuth(unittest.TestCase):
     def setUp(self):
         reset_jwks_state()
 
-    def _make_token(self, claims_override=None, headers=None):
+    def _make_token(self, claims_override=None, headers=None, claims_to_remove=None):
         return make_token(
-            self.private_key, claims_override=claims_override, headers=headers
+            self.private_key,
+            claims_override=claims_override,
+            headers=headers,
+            claims_to_remove=claims_to_remove,
         )
 
     def _patched_jwks_client(self, kid=None):
@@ -80,6 +83,32 @@ class TestJwtAuth(unittest.TestCase):
         with self._patched_jwks_client():
             with self.assertRaises(JwtValidationError):
                 validate_jwt(token, issuer=ISSUER, jwks_uri=JWKS_URI, audience=AUDIENCE)
+
+    def test_missing_audience_is_accepted_when_scope_is_required(self):
+        token = self._make_token(
+            {"scope": "openid tabpy/access"}, claims_to_remove={"aud"}
+        )
+        with self._patched_jwks_client():
+            claims = validate_jwt(
+                token,
+                issuer=ISSUER,
+                jwks_uri=JWKS_URI,
+                audience=None,
+                required_scopes="tabpy/access",
+            )
+        self.assertNotIn("aud", claims)
+
+    def test_missing_audience_and_required_scope_is_rejected(self):
+        token = self._make_token(claims_to_remove={"aud"})
+        with self._patched_jwks_client():
+            with self.assertRaises(JwtValidationError):
+                validate_jwt(
+                    token,
+                    issuer=ISSUER,
+                    jwks_uri=JWKS_URI,
+                    audience=None,
+                    required_scopes="tabpy/access",
+                )
 
     def test_missing_required_scope_is_rejected(self):
         token = self._make_token({"scope": "tabpy:query"})

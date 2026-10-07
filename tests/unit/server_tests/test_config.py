@@ -444,10 +444,18 @@ class TestOAuthConfigValidation(unittest.TestCase):
 
         app = TabPyApp(self.fp.name)
         self.assertTrue(app.settings["oauth_enabled"])
+        self.assertFalse(app.settings["oauth_allow_nonpublic_jwks"])
         methods = app._get_features()["authentication"]["methods"]
         self.assertIn("oauth-jwt", methods)
         oauth = methods["oauth-jwt"]
-        self.assertEqual(oauth["scopes"], ["tabpy:query", "tabpy:evaluate", "tabpy:deploy"])
+        self.assertEqual(
+            list(oauth),
+            ["required_scopes", "endpoint_scopes", "endpoint_scopes_enforced"],
+        )
+        self.assertEqual(
+            oauth["endpoint_scopes"],
+            ["tabpy:query", "tabpy:evaluate", "tabpy:deploy"],
+        )
         self.assertFalse(oauth["endpoint_scopes_enforced"])
         self.assertFalse(app.settings["oauth_enforce_endpoint_scopes"])
 
@@ -470,7 +478,10 @@ class TestOAuthConfigValidation(unittest.TestCase):
         self.assertTrue(app.settings["oauth_enforce_endpoint_scopes"])
         oauth = app._get_features()["authentication"]["methods"]["oauth-jwt"]
         self.assertTrue(oauth["endpoint_scopes_enforced"])
-        self.assertEqual(oauth["scopes"], ["tabpy:query", "tabpy:evaluate", "tabpy:deploy"])
+        self.assertEqual(
+            oauth["endpoint_scopes"],
+            ["tabpy:query", "tabpy:evaluate", "tabpy:deploy"],
+        )
 
     @patch(
         "tabpy.tabpy_server.app.app.socket.getaddrinfo",
@@ -492,7 +503,8 @@ class TestOAuthConfigValidation(unittest.TestCase):
         app = TabPyApp(self.fp.name)
         oauth = app._get_features()["authentication"]["methods"]["oauth-jwt"]
         self.assertEqual(
-            oauth["scopes"], ["tabpy/query", "tabpy/evaluate", "tabpy/deploy"]
+            oauth["endpoint_scopes"],
+            ["tabpy/query", "tabpy/evaluate", "tabpy/deploy"],
         )
 
     @patch(
@@ -564,7 +576,7 @@ class TestOAuthConfigValidation(unittest.TestCase):
             TabPyApp(self.fp.name)
         self.assertIn("TABPY_OAUTH_JWKS_URI", err.exception.args[0])
 
-    def test_oauth_enabled_missing_audience_raises(self):
+    def test_oauth_enabled_without_resource_boundary_raises(self):
         self.fp.write(
             "[TabPy]\n"
             "TABPY_OAUTH_ENABLED = true\n"
@@ -576,6 +588,46 @@ class TestOAuthConfigValidation(unittest.TestCase):
         with self.assertRaises(RuntimeError) as err:
             TabPyApp(self.fp.name)
         self.assertIn("TABPY_OAUTH_AUDIENCE", err.exception.args[0])
+        self.assertIn("TABPY_OAUTH_REQUIRED_SCOPES", err.exception.args[0])
+        self.assertIn("TABPY_OAUTH_ENFORCE_ENDPOINT_SCOPES", err.exception.args[0])
+
+    @patch(
+        "tabpy.tabpy_server.app.app.socket.getaddrinfo",
+        return_value=PUBLIC_JWKS_ADDRINFO,
+    )
+    def test_oauth_enabled_without_audience_with_required_scope_succeeds(
+        self, mock_getaddrinfo
+    ):
+        self.fp.write(
+            "[TabPy]\n"
+            "TABPY_OAUTH_ENABLED = true\n"
+            "TABPY_OAUTH_ISSUER = https://idp.example.com/\n"
+            "TABPY_OAUTH_JWKS_URI = https://idp.example.com/.well-known/jwks.json\n"
+            "TABPY_OAUTH_REQUIRED_SCOPES = tabpy/access\n"
+        )
+        self.fp.close()
+
+        app = TabPyApp(self.fp.name)
+        self.assertIsNone(app.settings.get("oauth_audience"))
+        self.assertEqual(app.settings["oauth_required_scopes"], "tabpy/access")
+        oauth = app._get_features()["authentication"]["methods"]["oauth-jwt"]
+        self.assertEqual(oauth["required_scopes"], ["tabpy/access"])
+
+    def test_oauth_endpoint_scopes_without_global_boundary_raises(self):
+        self.fp.write(
+            "[TabPy]\n"
+            "TABPY_OAUTH_ENABLED = true\n"
+            "TABPY_OAUTH_ISSUER = https://idp.example.com/\n"
+            "TABPY_OAUTH_JWKS_URI = https://idp.example.com/.well-known/jwks.json\n"
+            "TABPY_OAUTH_ENFORCE_ENDPOINT_SCOPES = true\n"
+        )
+        self.fp.close()
+
+        with self.assertRaises(RuntimeError) as err:
+            TabPyApp(self.fp.name)
+        self.assertIn("TABPY_OAUTH_AUDIENCE", err.exception.args[0])
+        self.assertIn("TABPY_OAUTH_REQUIRED_SCOPES", err.exception.args[0])
+        self.assertIn("additional per-endpoint authorization", err.exception.args[0])
 
     def test_oauth_enabled_with_http_jwks_uri_raises(self):
         self.fp.write(
@@ -583,6 +635,7 @@ class TestOAuthConfigValidation(unittest.TestCase):
             "TABPY_OAUTH_ENABLED = true\n"
             "TABPY_OAUTH_ISSUER = https://idp.example.com/\n"
             "TABPY_OAUTH_JWKS_URI = http://idp.example.com/.well-known/jwks.json\n"
+            "TABPY_OAUTH_ALLOW_NONPUBLIC_JWKS = true\n"
             "TABPY_OAUTH_AUDIENCE = tabpy\n"
         )
         self.fp.close()
@@ -650,6 +703,34 @@ class TestOAuthConfigValidation(unittest.TestCase):
             with self.assertRaises(RuntimeError) as err:
                 TabPyApp(self.fp.name)
         self.assertIn("TABPY_OAUTH_JWKS_URI", err.exception.args[0])
+        self.assertIn("TABPY_OAUTH_ALLOW_NONPUBLIC_JWKS", err.exception.args[0])
+
+    def test_oauth_can_allow_trusted_nonpublic_jwks_address(self):
+        self.fp.write(
+            "[TabPy]\n"
+            "TABPY_OAUTH_ENABLED = true\n"
+            "TABPY_OAUTH_ISSUER = https://idp.example.com/\n"
+            "TABPY_OAUTH_JWKS_URI = https://idp.example.com/.well-known/jwks.json\n"
+            "TABPY_OAUTH_ALLOW_NONPUBLIC_JWKS = true\n"
+            "TABPY_OAUTH_AUDIENCE = tabpy\n"
+        )
+        self.fp.close()
+
+        with patch(
+            "tabpy.tabpy_server.app.app.socket.getaddrinfo",
+            return_value=[
+                (socket.AF_INET, socket.SOCK_STREAM, 6, "", ("100.64.1.102", 443)),
+            ],
+        ):
+            with self.assertLogs(
+                "tabpy.tabpy_server.app.app", level="WARNING"
+            ) as log_ctx:
+                app = TabPyApp(self.fp.name)
+
+        self.assertTrue(app.settings["oauth_allow_nonpublic_jwks"])
+        logged = " ".join(log_ctx.output)
+        self.assertIn("100.64.1.102", logged)
+        self.assertIn("TABPY_OAUTH_ALLOW_NONPUBLIC_JWKS", logged)
 
     def test_oauth_enabled_with_unresolvable_jwks_uri_raises(self):
         self.fp.write(
@@ -685,7 +766,7 @@ class TestOAuthConfigValidation(unittest.TestCase):
             "TABPY_OAUTH_ENABLED = true\n"
             "TABPY_OAUTH_ISSUER = https://idp.example.com/\n"
             "TABPY_OAUTH_JWKS_URI = https://idp.example.com/.well-known/jwks.json\n"
-            "TABPY_OAUTH_AUDIENCE = tabpy\n"
+            "TABPY_OAUTH_REQUIRED_SCOPES = tabpy/access\n"
         )
         self.fp.close()
 
@@ -702,8 +783,8 @@ class TestOAuthConfigValidation(unittest.TestCase):
         self.assertEqual(
             jwt_mw.jwks_uri, "https://idp.example.com/.well-known/jwks.json"
         )
-        self.assertEqual(jwt_mw.audience, "tabpy")
-        self.assertIsNone(jwt_mw.required_scopes)
+        self.assertIsNone(jwt_mw.audience)
+        self.assertEqual(jwt_mw.required_scopes, "tabpy/access")
         self.assertIsNone(jwt_mw.basic_factory)
 
     @patch(

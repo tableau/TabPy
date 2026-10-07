@@ -20,7 +20,7 @@ class TestStaticPageWithSubdirectory(AsyncHTTPTestCase):
                 "Name = Subdirectory TabPy\n"
                 "Description = Static page test\n"
                 "Creation Time = 0\n"
-                "Subdirectory = analytics\n"
+                "Subdirectory = analytics.v1\n"
                 "Access-Control-Allow-Origin = \n"
                 "Access-Control-Allow-Headers = \n"
                 "Access-Control-Allow-Methods = \n"
@@ -55,23 +55,33 @@ class TestStaticPageWithSubdirectory(AsyncHTTPTestCase):
         return self.tabpy_app._create_tornado_web_app()
 
     def test_assets_and_api_routes_use_configured_subdirectory(self):
-        page = self.fetch("/analytics/")
+        page = self.fetch("/analytics.v1/")
         self.assertEqual(200, page.code)
         self.assertIn("text/html", page.headers["Content-Type"])
         self.assertIn(b"<style>", page.body)
         self.assertIn(b"<script>", page.body)
 
-        info = self.fetch("/analytics/info")
-        endpoints = self.fetch("/analytics/endpoints")
+        info = self.fetch("/analytics.v1/info")
+        endpoints = self.fetch("/analytics.v1/endpoints")
         self.assertEqual("Subdirectory TabPy", json.loads(info.body)["name"])
         self.assertDictEqual({}, json.loads(endpoints.body))
 
+    def test_subdirectory_is_literal_not_a_route_regex(self):
+        self.assertEqual(404, self.fetch("/analyticsXv1/info").code)
+
     def test_default_page_keeps_remote_content_out_of_executable_html(self):
-        page = self.fetch("/analytics/").body
+        page = self.fetch("/analytics.v1/").body
 
         self.assertIn(b"Content-Security-Policy", page)
         self.assertIn(b"default-src 'self'", page)
         self.assertIn(b"sha256-", page)
+        script_match = re.search(rb"<script>(.*?)</script>", page, re.DOTALL)
+        self.assertIsNotNone(script_match)
+        script = script_match.group(1).replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+        script_hash = base64.b64encode(
+            hashlib.sha256(script).digest()
+        )
+        self.assertIn(b"script-src 'sha256-" + script_hash + b"'", page)
         favicon_match = re.search(
             rb'href="data:image/x-icon;base64,([^"]+)"',
             page,
@@ -91,3 +101,5 @@ class TestStaticPageWithSubdirectory(AsyncHTTPTestCase):
         self.assertNotIn(b"insertAdjacentHTML", page)
         self.assertNotIn(b'href="styles.css"', page)
         self.assertNotIn(b'src="app.js"', page)
+        self.assertNotIn(b"status-switch", page)
+        self.assertIn(b"status-dot", page)

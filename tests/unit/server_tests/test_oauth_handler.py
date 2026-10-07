@@ -83,8 +83,12 @@ class BaseTestOAuthHandler(AsyncHTTPTestCase):
             cls.config_file.write(line)
         cls.config_file.close()
 
-    def _make_token(self, claims_override=None):
-        return make_token(self.private_key, claims_override=claims_override)
+    def _make_token(self, claims_override=None, claims_to_remove=None):
+        return make_token(
+            self.private_key,
+            claims_override=claims_override,
+            claims_to_remove=claims_to_remove,
+        )
 
     def _patched_jwks_client(self):
         return patched_jwks_client(self.private_key)
@@ -158,7 +162,11 @@ class TestOAuthOnlyHandler(BaseTestOAuthHandler):
         body = json.loads(response.body)
         features = body["versions"]["v1"]["features"]
         oauth = features["authentication"]["methods"]["oauth-jwt"]
-        self.assertEqual(oauth["scopes"], ["tabpy:query", "tabpy:evaluate", "tabpy:deploy"])
+        self.assertEqual(
+            oauth["endpoint_scopes"],
+            ["tabpy:query", "tabpy:evaluate", "tabpy:deploy"],
+        )
+        self.assertEqual(oauth["required_scopes"], [])
         self.assertFalse(oauth["endpoint_scopes_enforced"])
 
     def test_malformed_bearer_header_is_rejected_without_logging_the_token(self):
@@ -176,6 +184,41 @@ class TestOAuthOnlyHandler(BaseTestOAuthHandler):
         self.assertEqual(response.code, 401)
         logged_text = " ".join(log_ctx.output)
         self.assertNotIn(token, logged_text)
+
+
+class TestOAuthScopesWithoutAudience(BaseTestOAuthHandler):
+    @classmethod
+    def setUpClass(cls):
+        cls.prefix = "__TestOAuthScopesWithoutAudience_"
+        cls.tabpy_config = [
+            "TABPY_OAUTH_ENABLED = true\n",
+            f"TABPY_OAUTH_ISSUER = {ISSUER}\n",
+            f"TABPY_OAUTH_JWKS_URI = {JWKS_URI}\n",
+            "TABPY_OAUTH_REQUIRED_SCOPES = tabpy/access\n",
+        ]
+        super().setUpClass()
+
+    def test_access_token_without_audience_is_accepted(self):
+        token = self._make_token(
+            {"scope": "openid tabpy/access"}, claims_to_remove={"aud"}
+        )
+        with self._patched_jwks_client():
+            response = self.fetch(
+                "/info", headers={"Authorization": f"Bearer {token}"}
+            )
+        self.assertEqual(response.code, 200)
+        oauth = json.loads(response.body)["versions"]["v1"]["features"][
+            "authentication"
+        ]["methods"]["oauth-jwt"]
+        self.assertEqual(oauth["required_scopes"], ["tabpy/access"])
+
+    def test_token_without_required_scope_is_rejected(self):
+        token = self._make_token(claims_to_remove={"aud"})
+        with self._patched_jwks_client():
+            response = self.fetch(
+                "/info", headers={"Authorization": f"Bearer {token}"}
+            )
+        self.assertEqual(response.code, 401)
 
 
 class TestOAuthAndBasicAuthCoexist(BaseTestOAuthHandler):
@@ -413,7 +456,8 @@ class TestEndpointScopesEnforced(BaseTestOAuthHandler):
         ]["methods"]["oauth-jwt"]
         self.assertTrue(oauth["endpoint_scopes_enforced"])
         self.assertEqual(
-            oauth["scopes"], ["tabpy:query", "tabpy:evaluate", "tabpy:deploy"]
+            oauth["endpoint_scopes"],
+            ["tabpy:query", "tabpy:evaluate", "tabpy:deploy"],
         )
 
     def _assert_management_forbidden(self, headers, method, url, **kwargs):
@@ -573,7 +617,8 @@ class TestConfiguredEndpointScopes(BaseTestOAuthHandler):
             "authentication"
         ]["methods"]["oauth-jwt"]
         self.assertEqual(
-            oauth["scopes"], ["tabpy/query", "tabpy/evaluate", "tabpy/deploy"]
+            oauth["endpoint_scopes"],
+            ["tabpy/query", "tabpy/evaluate", "tabpy/deploy"],
         )
 
 
