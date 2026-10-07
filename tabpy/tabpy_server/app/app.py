@@ -245,34 +245,35 @@ class TabPyApp:
 
         # initialize Tornado application
         _init_asyncio_patch()
+        route_prefix = re.escape(self.subdirectory)
         application = TabPyTornadoApp(
             [
                 (
-                    self.subdirectory + r"/query/([^/]+)",
+                    route_prefix + r"/query/([^/]+)",
                     QueryPlaneHandler,
                     dict(app=self),
                 ),
-                (self.subdirectory + r"/status", StatusHandler, dict(app=self)),
-                (self.subdirectory + r"/info", ServiceInfoHandler, dict(app=self)),
-                (self.subdirectory + r"/endpoints", EndpointsHandler, dict(app=self)),
+                (route_prefix + r"/status", StatusHandler, dict(app=self)),
+                (route_prefix + r"/info", ServiceInfoHandler, dict(app=self)),
+                (route_prefix + r"/endpoints", EndpointsHandler, dict(app=self)),
                 (
-                    self.subdirectory + r"/endpoints/([^/]+)?",
+                    route_prefix + r"/endpoints/([^/]+)?",
                     EndpointHandler,
                     dict(app=self),
                 ),
                 (
-                    self.subdirectory + r"/evaluate",
+                    route_prefix + r"/evaluate",
                     EvaluationPlaneHandler if self.settings[SettingsParameters.EvaluateEnabled]
                     else EvaluationPlaneDisabledHandler,
                     dict(executor=executor, app=self),
                 ),
                 (
-                    self.subdirectory + r"/configurations/endpoint_upload_destination",
+                    route_prefix + r"/configurations/endpoint_upload_destination",
                     UploadDestinationHandler,
                     dict(app=self),
                 ),
                 (
-                    self.subdirectory + r"/(.*)",
+                    route_prefix + r"/(.*)",
                     tornado.web.StaticFileHandler,
                     dict(
                         path=self.settings[SettingsParameters.StaticPath],
@@ -601,34 +602,17 @@ class TabPyApp:
         has_required_scopes = any(
             scope.strip() for scope in (required_scopes or "").split(",")
         )
-        has_global_resource_boundary = (
+        has_resource_boundary = (
             bool(self.settings.get(SettingsParameters.OAuthAudience))
             or has_required_scopes
         )
-        has_resource_boundary = (
-            has_global_resource_boundary
-            or bool(self.settings.get(SettingsParameters.OAuthEnforceEndpointScopes))
-        )
         if not has_resource_boundary:
             msg = (
-                "OAuth requires a resource authorization boundary: configure "
+                "OAuth requires a global resource authorization boundary: configure "
                 f"{ConfigParameters.TABPY_OAUTH_AUDIENCE}, "
-                f"{ConfigParameters.TABPY_OAUTH_REQUIRED_SCOPES}, or enable "
-                f"{ConfigParameters.TABPY_OAUTH_ENFORCE_ENDPOINT_SCOPES}"
-            )
-            logger.critical(msg)
-            raise RuntimeError(msg)
-
-        if (
-            self.settings.get(SettingsParameters.ArrowEnabled)
-            and not has_global_resource_boundary
-        ):
-            msg = (
-                "OAuth with Arrow Flight requires a global resource authorization "
-                f"boundary: configure {ConfigParameters.TABPY_OAUTH_AUDIENCE} or "
-                f"{ConfigParameters.TABPY_OAUTH_REQUIRED_SCOPES}. "
-                f"{ConfigParameters.TABPY_OAUTH_ENFORCE_ENDPOINT_SCOPES} protects "
-                "HTTP endpoints only"
+                f"or {ConfigParameters.TABPY_OAUTH_REQUIRED_SCOPES}. "
+                f"{ConfigParameters.TABPY_OAUTH_ENFORCE_ENDPOINT_SCOPES} provides "
+                "additional per-endpoint authorization only"
             )
             logger.critical(msg)
             raise RuntimeError(msg)

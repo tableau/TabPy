@@ -613,30 +613,9 @@ class TestOAuthConfigValidation(unittest.TestCase):
         oauth = app._get_features()["authentication"]["methods"]["oauth-jwt"]
         self.assertEqual(oauth["required_scopes"], ["tabpy/access"])
 
-    @patch(
-        "tabpy.tabpy_server.app.app.socket.getaddrinfo",
-        return_value=PUBLIC_JWKS_ADDRINFO,
-    )
-    def test_oauth_enabled_without_audience_with_endpoint_scopes_succeeds(
-        self, mock_getaddrinfo
-    ):
+    def test_oauth_endpoint_scopes_without_global_boundary_raises(self):
         self.fp.write(
             "[TabPy]\n"
-            "TABPY_OAUTH_ENABLED = true\n"
-            "TABPY_OAUTH_ISSUER = https://idp.example.com/\n"
-            "TABPY_OAUTH_JWKS_URI = https://idp.example.com/.well-known/jwks.json\n"
-            "TABPY_OAUTH_ENFORCE_ENDPOINT_SCOPES = true\n"
-        )
-        self.fp.close()
-
-        app = TabPyApp(self.fp.name)
-        self.assertIsNone(app.settings.get("oauth_audience"))
-        self.assertTrue(app.settings["oauth_enforce_endpoint_scopes"])
-
-    def test_oauth_with_arrow_rejects_endpoint_scope_only_boundary(self):
-        self.fp.write(
-            "[TabPy]\n"
-            "TABPY_ARROW_ENABLE = true\n"
             "TABPY_OAUTH_ENABLED = true\n"
             "TABPY_OAUTH_ISSUER = https://idp.example.com/\n"
             "TABPY_OAUTH_JWKS_URI = https://idp.example.com/.well-known/jwks.json\n"
@@ -646,9 +625,9 @@ class TestOAuthConfigValidation(unittest.TestCase):
 
         with self.assertRaises(RuntimeError) as err:
             TabPyApp(self.fp.name)
-        self.assertIn("Arrow Flight", err.exception.args[0])
         self.assertIn("TABPY_OAUTH_AUDIENCE", err.exception.args[0])
         self.assertIn("TABPY_OAUTH_REQUIRED_SCOPES", err.exception.args[0])
+        self.assertIn("additional per-endpoint authorization", err.exception.args[0])
 
     def test_oauth_enabled_with_http_jwks_uri_raises(self):
         self.fp.write(
