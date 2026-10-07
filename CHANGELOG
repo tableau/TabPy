@@ -4,9 +4,10 @@
 
 ### Improvements
 
-- Accept OAuth access tokens without an `aud` claim when required or
-  endpoint scopes provide the resource authorization boundary. Audience
-  validation remains enforced when `TABPY_OAUTH_AUDIENCE` is configured.
+- Accept OAuth access tokens without an `aud` claim when required scopes
+  provide the global resource authorization boundary. Audience validation
+  remains enforced when `TABPY_OAUTH_AUDIENCE` is configured. Endpoint scopes
+  provide optional, additional authorization for specific HTTP operations.
 - Add a default-off `TABPY_OAUTH_ALLOW_NONPUBLIC_JWKS` override for trusted
   JWKS endpoints routed through internal networks, split DNS, or enterprise
   proxies. HTTPS and certificate validation remain required.

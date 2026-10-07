@@ -298,9 +298,10 @@ TABPY_OAUTH_AUDIENCE = api://tabpy
 ```
 
 `TABPY_OAUTH_ISSUER` and `TABPY_OAUTH_JWKS_URI` are required when
-`TABPY_OAUTH_ENABLED` is `true`. You must also configure at least one resource
-authorization boundary: `TABPY_OAUTH_AUDIENCE`,
-`TABPY_OAUTH_REQUIRED_SCOPES`, or `TABPY_OAUTH_ENFORCE_ENDPOINT_SCOPES`.
+`TABPY_OAUTH_ENABLED` is `true`. You must also configure a global resource
+authorization boundary: `TABPY_OAUTH_AUDIENCE` or
+`TABPY_OAUTH_REQUIRED_SCOPES`. Endpoint scope enforcement provides additional
+authorization for specific HTTP operations and is not sufficient by itself.
 Audience validation is the preferred interoperable configuration when the
 authorization server includes an `aud` claim. TabPy fails to start if no
 boundary is configured. The issuer and JWKS URI must use
@@ -323,8 +324,8 @@ hostname to resolve to a non-public address. HTTPS remains required.
   when the IdP supports a configurable API audience. For example, configure
   the authorization server with audience `api://tabpy`, then use that exact
   value here. When unset, audience validation is disabled so access tokens
-  without `aud` can authenticate; required or endpoint scopes must then provide
-  the resource authorization boundary.
+  without `aud` can authenticate; required scopes must then provide the global
+  resource authorization boundary.
 
 Eight authorization, networking, and logging parameters are optional:
 
@@ -383,13 +384,14 @@ TABPY_OAUTH_LOG_USER = true
   endpoint scope is rejected with HTTP 403 and
   `WWW-Authenticate: Bearer error="insufficient_scope"`. `/info`,
   `/status`, and `GET /endpoints` are not gated by those scopes. A
+  configured audience or global required scope is therefore always required;
+  endpoint scopes provide additional fine-grained authorization and never act
+  as the resource boundary by themselves. A
   `SCRIPT_*` that calls `tabpy.query()` from `/evaluate` needs **both**
   `tabpy:evaluate` and `tabpy:query`, because the nested `/query` call
   forwards the original token. Arrow Flight is not per-endpoint scoped;
   it still uses only `TABPY_OAUTH_AUDIENCE` and
-  `TABPY_OAUTH_REQUIRED_SCOPES`. When Arrow is enabled, at least one of those
-  global boundaries is required; endpoint enforcement alone is rejected at
-  startup. Basic Auth is unaffected.
+  `TABPY_OAUTH_REQUIRED_SCOPES`. Basic Auth is unaffected.
 - `TABPY_OAUTH_QUERY_SCOPE`, `TABPY_OAUTH_EVALUATE_SCOPE`, and
   `TABPY_OAUTH_DEPLOY_SCOPE` configure the exact scope names used by
   endpoint enforcement and advertised by `/info`. Their defaults are
